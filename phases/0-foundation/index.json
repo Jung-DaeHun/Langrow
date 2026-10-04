@@ -1,0 +1,10 @@
+{
+  "project": "Langrow",
+  "phase": "0-foundation",
+  "steps": [
+    { "step": 0, "name": "project-setup", "status": "pending" },
+    { "step": 1, "name": "lib-rules", "status": "pending" },
+    { "step": 2, "name": "lib-content", "status": "pending" },
+    { "step": 3, "name": "services", "status": "pending" }
+  ]
+}

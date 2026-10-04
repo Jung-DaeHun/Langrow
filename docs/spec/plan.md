@@ -1,6 +1,6 @@
 # Langrow MVP 상세 설계 (spec)
 
-> 상태: 구현 기준 (8장 "제품"의 미정 항목: 서비스 이름, 상황 20개 제목·설명) · 작성일 2026-10-04 · 리뷰 반영: 동시성·종료 복구·지표·학습 완료 흐름 보완 · 2차: 지표 정의(유효한 세션·목표 완료·Pro 관심), 방문 기록 제거, 경로·레이어·TDD 규칙 정리
+> 상태: 구현 기준 (8장 "제품"의 미정 항목: 서비스 이름) · 작성일 2026-10-04 · 리뷰 반영: 동시성·종료 복구·지표·학습 완료 흐름 보완 · 2차: 지표 정의(유효한 세션·목표 완료·Pro 관심), 방문 기록 제거, 경로·레이어·TDD 규칙 정리
 > 요약 규칙은 `CLAUDE.md`와 `docs/PRD.md`, `ARCHITECTURE.md`, `ADR.md`, `UI_GUIDE.md`에 있다. 이 문서는 상세 동작의 기준이다. 요약 문서와 다르면 이 문서를 따르고 요약 문서를 고친다.
 > `docs/spec/`에 두는 이유: `scripts/execute.py`는 `docs/*.md`(하위 폴더 제외)만 매 step 프롬프트에 넣는다. 이 문서는 길어서 자동으로 넣지 않고, step 파일의 "읽어야 할 파일"로 지정한다.
 >
@@ -515,8 +515,9 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 - guard는 경로에 `test`가 들어간 파일을 검사하지 않는다. 그래서 레벨업 테스트의 경로는 `/level-up`, `/api/level-up`으로 둔다. `src/test/fakes.ts` 같은 테스트 보조 파일은 이 규칙 덕분에 통과한다.
 - DB 접근 파일의 `server/db/*.test.ts`는 실제 DB 통합 테스트로 작성한다. Vitest 기본 실행에서 이 경로를 제외하고 `test:db`에서 포함한다. Supabase 쿼리 체인을 mock하거나 hook 통과만을 위한 빈 테스트를 만들지 않는다.
 - 정적 UI는 `page.tsx`/`layout.tsx`에 둔다 (hook이 검사하지 않음). 컴포넌트는 꼭 필요한 것만 만든다.
-  - 화면 단위: `ChatRoom`, `WordSession`, `LevelTestRunner`, `KanaDeck`
-  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`
+  - 화면 단위: `OnboardingFlow`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`
+  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `GoogleLoginButton`, `AccountActions`(체험 시작·Pro 모달·로그아웃)
+  - 입력·API 호출이 있는 부분만 Client Component로 만든다. 페이지의 분기 규칙은 테스트할 수 있게 `lib/`(예: `today`, `readiness`)에 둔다.
 - Vitest 설정에서 `server-only`를 빈 모듈로 alias한다.
 
 ### 6-10. 에러 코드
@@ -554,6 +555,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
   - text: 글자 수
   - wordBatch: 회차 크기(남은 단어 0/1~9 포함), known/review 결정, 신규분 계산
   - levelTest: 20개 검증, 16/20 경계
+  - levels: 후리가나·번역·한국어 입력·레벨업·가나 표시 경계 / today: 목표 진행·소진·남은 할 일 수 / readiness: 요구 수준별 동의·레벨 판정 / errors: 코드별 HTTP 상태
   - metrics: D1/D7 한국 날짜, 관찰 완료 분모, 운영 계정 제외, 최소 표본 미달 판단 보류, 유효한 세션(성공 턴 3개 이상, 종료 여부 무관), 한도 도달 `feature`별 분리, Pro 관심은 경로 무관 체험 시작자
 - **services**: 프롬프트 빌더, 응답 스키마, 재시도 1번과 호출 예산, refusal과 `max_tokens`는 실패로 처리
 - **use-case** (가짜 db와 ai 주입; 실제 경합 증명은 아래 DB 통합 테스트)
@@ -650,7 +652,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 **제품**
 - 서비스 이름 (현재 "Langrow" 가칭)
 - (확정) UI 디자인 방향: 크림·초록 팔레트, Pretendard + Noto Sans JP, 라이트 모드만. `docs/UI_GUIDE.md`에 작성했다. 금지 패턴은 지킨다
-- 상황 20개 목록, 레벨별 설명 문구. (확정) 영어와 일본어가 같은 목록을 쓴다. 제목 20개는 상황 데이터 step 전에 정한다
+- (확정) 상황 20개(제목·목표·언어별 역할·배경)는 `phases/0-foundation/step2.md`, 레벨별 설명 문구는 `step1.md`에 정했다. 영어와 일본어가 같은 목록을 쓴다. 첫 마디 40개는 AI 초안이므로 출시 전에 사람이 검수한다
 - (확정) Pro 가격 월 9,900원, 한도 Free 20턴/10개, Pro 150턴/30개
   - **결제 실험 전에 재검토**: Pro 한도를 끝까지 쓰면 비용(150턴 × 약 $0.004 ≈ 하루 $0.6, 월 약 $18)이 표시 가격 9,900원보다 크다 (종료 피드백 비용 제외)
 - (확정) 유효한 대화 세션 기준: 성공 턴 3개 이상
@@ -660,4 +662,5 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 1. 위 "제품" 항목을 확정한다. 하네스 요약 문서(`docs/*.md`, `CLAUDE.md`)와 `docs/UI_GUIDE.md`는 작성했다.
 2. (완료) `scripts/execute.py` 수정: 파일·git·claude 입출력을 utf-8로 처리하고(Windows 기본 cp949에서 실패), 프롬프트를 명령줄 인자 대신 stdin으로 넘긴다(Windows 명령줄 약 32,767자 상한).
-3. 구현 계획을 작성한다 (writing-plans 또는 하네스 `phases/` step). DB 상태·RPC·동시성 통합 테스트를 먼저 구현하고, API와 UI를 그 계약에 맞춘다.
+3. (진행 중) 구현 계획은 하네스 `phases/`에 4개 phase, 16개 step으로 나눴다: `0-foundation`(셋업·lib·services) → `1-data`(DB·RPC·스크립트) → `2-api` → `3-ui`. DB 상태·RPC·동시성 통합 테스트를 먼저 구현하고, API와 UI를 그 계약에 맞춘다.
+   - step 파일(`stepN.md`)은 앞 phase가 끝난 뒤 실제 코드를 보고 작성한다. phase가 끝나면 main에 병합하고 다음 phase를 실행한다.

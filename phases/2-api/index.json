@@ -1,0 +1,9 @@
+{
+  "project": "Langrow",
+  "phase": "2-api",
+  "steps": [
+    { "step": 0, "name": "api-foundation", "status": "pending" },
+    { "step": 1, "name": "chat-api", "status": "pending" },
+    { "step": 2, "name": "learning-api", "status": "pending" }
+  ]
+}

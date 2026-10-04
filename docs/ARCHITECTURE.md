@@ -12,7 +12,7 @@ src/
 │   └── db/               # DB 접근 함수(트랜잭션 단위 RPC 호출). 모두 userId를 받는다
 ├── services/             # 외부 I/O: supabase/{browser,server,admin}, claude/{client,prompts,schemas}, env, apiClient
 ├── lib/                  # 순수 규칙 (I/O·환경변수·fetch 없음)
-├── components/           # 화면 단위: ChatRoom, WordSession, LevelTestRunner, KanaDeck / 공용: Flashcard, BlankQuiz, Furigana
+├── components/           # 화면 단위: OnboardingFlow, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck / 공용: Flashcard, BlankQuiz, Furigana, LanguageSheet, GoogleLoginButton, AccountActions
 ├── types/                # database.ts (supabase gen types)
 └── test/                 # fakes.ts (가짜 db·ai)
 supabase/migrations/      # 스키마·제약·인덱스·RLS·RPC·실행 권한

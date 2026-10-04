@@ -1,0 +1,10 @@
+{
+  "project": "Langrow",
+  "phase": "1-data",
+  "steps": [
+    { "step": 0, "name": "db-schema", "status": "pending" },
+    { "step": 1, "name": "db-chat", "status": "pending" },
+    { "step": 2, "name": "db-learning", "status": "pending" },
+    { "step": 3, "name": "scripts", "status": "pending" }
+  ]
+}

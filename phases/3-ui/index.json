@@ -1,0 +1,11 @@
+{
+  "project": "Langrow",
+  "phase": "3-ui",
+  "steps": [
+    { "step": 0, "name": "ui-shell", "status": "pending" },
+    { "step": 1, "name": "onboarding-home", "status": "pending" },
+    { "step": 2, "name": "chat-ui", "status": "pending" },
+    { "step": 3, "name": "study-ui", "status": "pending" },
+    { "step": 4, "name": "account-ui", "status": "pending" }
+  ]
+}
