@@ -3,6 +3,7 @@
 한국인 학습자를 위한 AI 언어 학습 웹 서비스(영어·일본어). MVP의 목적은 수요 검증이다.
 - 요약 규칙: `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ADR.md`, `docs/UI_GUIDE.md`
 - 상세 동작(상태 전이, RPC 단계, 에러 코드, 테스트 목록): `docs/spec/plan.md`. 요약 문서와 다르면 spec이 기준이며, 요약 문서를 고친다.
+- UI 상세 규격(토큰 값, 컴포넌트 클래스, 화면별 구성): `docs/spec/ui.md`. 화면·컴포넌트 step에서 읽는다.
 
 ## 기술 스택
 - Next.js (App Router), TypeScript strict mode, Tailwind CSS
