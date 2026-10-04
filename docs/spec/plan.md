@@ -659,5 +659,5 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 ## 9. 다음 단계
 
 1. 위 "제품" 항목을 확정한다. 하네스 요약 문서(`docs/*.md`, `CLAUDE.md`)는 작성했고, `docs/UI_GUIDE.md`는 사용자 가이드라인을 받아 작성한다.
-2. `scripts/execute.py`를 고친다: 문서를 utf-8로 읽고(Windows 기본 cp949에서 실패), 프롬프트를 명령줄 인자 대신 stdin으로 넘긴다(Windows 명령줄 약 32,767자 상한).
+2. (완료) `scripts/execute.py` 수정: 파일·git·claude 입출력을 utf-8로 처리하고(Windows 기본 cp949에서 실패), 프롬프트를 명령줄 인자 대신 stdin으로 넘긴다(Windows 명령줄 약 32,767자 상한).
 3. 구현 계획을 작성한다 (writing-plans 또는 하네스 `phases/` step). DB 상태·RPC·동시성 통합 테스트를 먼저 구현하고, API와 UI를 그 계약에 맞춘다.
