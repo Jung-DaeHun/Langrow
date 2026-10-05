@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "lib-content",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-05T21:10:17+0900",
+      "summary": "src/lib 콘텐츠 모듈 4개(+ 같은 폴더 *.test.ts, 59 tests, 전체 156): furigana(FuriganaSegment·parseFurigana 온전한 [본문|읽기]만 ruby segment, 깨진 표기는 [·]·|만 지운 일반 텍스트, throw 없음·stripFurigana), blank(BlankParts·parseBlank {{}} 정확히 1개·buildOptions Fisher–Yates random 주입·isCorrectChoice === 비교), kana(KanaScript·Kana·KANA_ROWS 청음 10행+탁음·반탁음 5행·KANA 히라가나/가타카나 각 71자, 요음 없음), scenarios(ScenarioLine·Scenario·SCENARIOS 20개 레벨당 4개·scenariosForLevel·findScenario, 일본어 첫 마디 모든 한자 [漢字|かな] 표기). 상황 첫 마디 40개는 AI 초안이라 출시 전 사람 검수 필요",
+      "completed_at": "2026-10-05T21:17:57+0900"
     },
     {
       "step": 3,
