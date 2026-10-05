@@ -10,7 +10,7 @@
 - `docs/spec/ui.md` "토큰" 절의 첫 줄 (Tailwind v4 기준)
 - `scripts/hooks/tdd-guard.sh`: `package.json`이 생기는 순간부터 모든 `.ts(x)` 편집에 같은 폴더의 테스트 파일을 요구한다
 - `.claude/settings.json`: Stop hook이 `npm run lint && npm run build && npm run test`를 돌린다
-- `.gitignore`, `.env.local` (키 목록만 확인하고 수정하지 않는다)
+- `.gitignore`, `.env.local`: 값이 출력되지 않게 `sed 's/=.*//' .env.local`로 키 목록과 주석만 본다. 파일을 통째로 읽거나 수정하지 않는다
 
 이 step은 저장소의 첫 코드 step이다. 아직 `package.json`이 없다.
 
@@ -68,7 +68,7 @@ git check-ignore -q .env.local && ! git check-ignore -q .env.example   # .env.lo
 
 1. 위 AC 커맨드를 실행한다.
 2. 아키텍처 체크리스트를 확인한다:
-   - ARCHITECTURE.md 디렉토리 구조를 따르는가? (`src/app`만 있고 나머지 폴더는 아직 만들지 않는다)
+   - ARCHITECTURE.md 디렉토리 구조를 따르는가? (`src/app`과 `src/test`만 있고 나머지 폴더는 아직 만들지 않는다)
    - ADR 기술 스택을 벗어나지 않았는가?
    - CLAUDE.md CRITICAL 규칙을 위반하지 않았는가?
 3. 결과에 따라 `phases/0-foundation/index.json`의 해당 step을 업데이트한다:

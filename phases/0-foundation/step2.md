@@ -49,7 +49,7 @@ export const KANA: Record<KanaScript, readonly Kana[]>
 - 문자마다 각 71자: 청음 46자(`group: 'basic'`) + 탁음·반탁음 25자(`group: 'voiced'`). 요음은 넣지 않는다.
 - 행 key: basic은 `a, ka, sa, ta, na, ha, ma, ya, ra, wa`(わ행에 わ·を·ん), voiced는 `ga, za, da, ba, pa`.
 - romaji는 헵번식이다. 헷갈리는 글자는 이렇게 둔다: し shi 시, ち chi 치, つ tsu 츠, ふ fu 후, を wo 오, ん n 응, じ ji 지, ぢ ji 지, ず zu 즈, づ zu 즈. 가타카나도 같은 romaji·ko를 쓴다.
-- 데이터 검증 테스트: 문자별 71자, 문자 안 중복 없음, basic 46·voiced 25, 히라가나와 가타카나의 romaji 순서가 같음, 모든 글자의 `row`가 `KANA_ROWS`에 있음.
+- 데이터 검증 테스트: 문자별 71자, 문자 안 `char` 중복 없음(romaji는 じ·ぢ=ji, ず·づ=zu처럼 겹쳐도 된다), basic 46·voiced 25, 히라가나와 가타카나의 romaji 순서가 같음, 모든 글자의 `row`가 `KANA_ROWS`에 있음.
 
 ### `scenarios.ts`
 ```ts
@@ -97,7 +97,7 @@ export function findScenario(id: string): Scenario | undefined
 - `opening.ko`: 자연스러운 한국어 번역.
 - 실존 회사·브랜드·인물 이름을 쓰지 않는다.
 
-데이터 검증 테스트: 20개, 레벨마다 4개, id 중복 없음, 모든 상황에 en·ja의 `role`·`opening.text`·`opening.ko`가 비어 있지 않음, 일본어 `opening.text`에 깨진 후리가나 표기가 없음(`parseFurigana` 결과의 일반 텍스트에 `[`, `]`, `|`가 남지 않고, 한자가 있으면 읽기 segment가 1개 이상), `findScenario`·`scenariosForLevel` 동작.
+데이터 검증 테스트: 20개, 레벨마다 4개, id 중복 없음, 모든 상황에 en·ja의 `role`·`opening.text`·`opening.ko`가 비어 있지 않음, 일본어 `opening.text`의 후리가나 표기가 온전함(`parseFurigana` 결과의 일반 텍스트 segment에 `[`, `]`, `|`도 한자(`/\p{Script=Han}/u`)도 남지 않음. 즉 모든 한자에 읽기가 달려 있음), `findScenario`·`scenariosForLevel` 동작.
 
 ## Acceptance Criteria
 
