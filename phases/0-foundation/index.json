@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-10-05T20:55:09+0900",
       "summary": "src/lib 순수 규칙 10개(+ 같은 폴더 *.test.ts, 97 tests): levels(LANGUAGES·Language·LANGUAGE_NAMES·LEVELS·Level·LEVEL_INFO·isLevel·showsFurigana·opensTranslationByDefault·allowsKoreanInput·canTakeLevelTest·showsKana), plan(Plan·PLAN_LIMITS free 20/10·pro 150/30·PRO_PRICE_KRW·TRIAL_DAYS·planAt·TrialState·trialState), usage(kstDate·kstDayStart·addDays·remaining, UTC+9 고정), streak(StreakState·nextStreak·displayStreak), text(CHAT_INPUT_MAX·countChars 코드 포인트·isValidChatInput), wordBatch(BATCH_MAX·batchSize·wordStatus·newWordIds·hasValidBatchIds), levelTest(LEVEL_TEST_SIZE·PASS_SCORE·hasValidTestIds·scoreAnswers·isPassed), today(DAILY_WORD_GOAL·VALID_SESSION_TURNS·isValidSession·WordGoal·wordGoal·remainingGoalCount), errors(ErrorCode·ERRORS status+message·isErrorCode), readiness(ReadinessState·Requirement·checkReadiness 동의→레벨 순)",
-      "completed_at": "2026-10-05T21:09:45+0900"
+      "completed_at": "2026-10-05T21:10:17+0900"
     },
     {
       "step": 2,
