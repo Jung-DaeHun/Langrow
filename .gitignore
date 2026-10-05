@@ -4,7 +4,14 @@ out/
 next-env.d.ts
 tsconfig.tsbuildinfo
 .env*
+!.env.example
 __pycache__/
+/coverage
+/build
+.vercel
+.DS_Store
+*.pem
+npm-debug.log*
 
 # phase execution outputs
 phases/**/phase*-output.json

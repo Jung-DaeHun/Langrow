@@ -10,7 +10,8 @@
 - Supabase: Auth(구글), Postgres, RLS, RPC(DB 함수)
 - Anthropic SDK: 기본 모델 `claude-haiku-4-5-20251001` (환경변수 `CLAUDE_MODEL`로 변경)
 - zod, Vitest, Vercel(icn1)
-- 버전은 프로젝트 셋업 때 고정하고 여기에 적는다: Next.js {버전}, @supabase/supabase-js {버전}, @anthropic-ai/sdk {버전}
+- 버전은 프로젝트 셋업 때 고정하고 여기에 적는다: Next.js 16.3.8, @supabase/supabase-js 2.117.2, @anthropic-ai/sdk 0.131.0
+- 미들웨어 파일은 `src/proxy.ts`, `params`·`cookies()`는 async
 
 ## 아키텍처 규칙
 - CRITICAL: 쓰기와 Claude 호출은 `src/app/api/**/route.ts` → `src/server/` use-case에서만 한다. 페이지(Server Components)는 읽기만 하고, 브라우저는 로그인·로그아웃에만 Supabase를 직접 쓴다.
