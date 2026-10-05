@@ -7,12 +7,14 @@
       "name": "project-setup",
       "status": "completed",
       "started_at": "2026-10-05T20:49:37+0900",
-      "summary": "Next.js 16.3.8(App Router·Tailwind v4·ESLint, src/) 스캐폴딩과 최소 page/layout(lang=ko)/globals.css, 정확한 버전 고정(.npmrc save-exact; supabase-js 2.117.2, @supabase/ssr 0.12.7, @anthropic-ai/sdk 0.131.0, zod 4.6.5, vitest 5.0.3, supabase CLI 2.119.0, @types/node 24.19.1), vitest.config.ts(projects: node=*.test.ts·scripts, jsdom=*.test.tsx + src/test/setup.ts, server-only→src/test/server-only.ts, src/server/db 제외)·vitest.db.config.ts(src/server/db만, 직렬), test/test:db 스크립트, .env.example(+ .gitignore 예외), CLAUDE.md 버전 기록"
+      "summary": "Next.js 16.3.8(App Router·Tailwind v4·ESLint, src/) 스캐폴딩과 최소 page/layout(lang=ko)/globals.css, 정확한 버전 고정(.npmrc save-exact; supabase-js 2.117.2, @supabase/ssr 0.12.7, @anthropic-ai/sdk 0.131.0, zod 4.6.5, vitest 5.0.3, supabase CLI 2.119.0, @types/node 24.19.1), vitest.config.ts(projects: node=*.test.ts·scripts, jsdom=*.test.tsx + src/test/setup.ts, server-only→src/test/server-only.ts, src/server/db 제외)·vitest.db.config.ts(src/server/db만, 직렬), test/test:db 스크립트, .env.example(+ .gitignore 예외), CLAUDE.md 버전 기록",
+      "completed_at": "2026-10-05T20:55:09+0900"
     },
     {
       "step": 1,
       "name": "lib-rules",
-      "status": "pending"
+      "status": "pending",
+      "started_at": "2026-10-05T20:55:09+0900"
     },
     {
       "step": 2,

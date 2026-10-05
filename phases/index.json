@@ -1,8 +1,20 @@
 {
   "phases": [
-    { "dir": "0-foundation", "status": "pending" },
-    { "dir": "1-data", "status": "pending" },
-    { "dir": "2-api", "status": "pending" },
-    { "dir": "3-ui", "status": "pending" }
+    {
+      "dir": "0-foundation",
+      "status": "pending"
+    },
+    {
+      "dir": "1-data",
+      "status": "pending"
+    },
+    {
+      "dir": "2-api",
+      "status": "pending"
+    },
+    {
+      "dir": "3-ui",
+      "status": "pending"
+    }
   ]
 }
