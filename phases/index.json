@@ -2,7 +2,8 @@
   "phases": [
     {
       "dir": "0-foundation",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-10-05T21:27:44+0900"
     },
     {
       "dir": "1-data",
