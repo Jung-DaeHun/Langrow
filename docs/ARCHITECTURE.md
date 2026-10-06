@@ -6,7 +6,7 @@
 ```
 src/
 ├── app/                  # 페이지(읽기) + API 라우트(쓰기)
-│   └── api/**/route.ts   # 얇게: route() 래퍼 → use-case 호출
+│   └── api/**/route.ts   # 얇게: route() 래퍼 → use-case 호출 (판단 없는 단일 RPC는 server/db 직접)
 ├── server/               # use-case: (deps, userId, input) → 결과 | 에러 코드
 │   ├── http.ts           # route() 래퍼
 │   └── db/               # DB 접근 함수(트랜잭션 단위 RPC 호출). 모두 userId를 받는다
@@ -23,9 +23,9 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 
 ## 패턴
 - Server Components가 기본이다. 입력·진행 상태가 필요한 화면 단위 컴포넌트만 Client Component로 만든다. 정적 UI는 `page.tsx`/`layout.tsx`에 둔다.
-- use-case는 `{ db, ai, now }`를 주입받는다. 기본 테스트는 `src/test/fakes.ts`로 분기와 호출 순서를 검증하고, 잠금·RLS·원자성은 `test:db`로 검증한다.
+- use-case는 `{ db, ai }`를 주입받는다. 기본 테스트는 `src/test/fakes.ts`(함수별 결과를 정하는 가짜)로 분기와 호출 순서를 검증하고, 잠금·RLS·원자성은 `test:db`로 검증한다.
 - DB 인터페이스는 트랜잭션 단위로 둔다: `beginChatTurn`, `finishChatTurn`, `beginEnd`, `finishEnd`, `saveWordBatch` 등.
-- `now`는 순수 규칙·표시용이다. 저장·한도·작업 기한의 실제 판정은 RPC 안의 DB 시각을 쓴다.
+- 현재 시각은 페이지가 표시용으로만 `lib` 함수에 넘긴다. 저장·한도·작업 기한의 실제 판정은 RPC 안의 DB 시각을 쓴다.
 - `route()` 래퍼 하나가 로그인(401, `getUser()`), JSON Content-Type 검사, zod 검증(400), 준비 상태(403), 에러 코드 → HTTP 변환, 예외 → 500을 처리한다. `/end`의 처리 중 응답(202)은 에러가 아니다.
 
 ## 데이터 흐름

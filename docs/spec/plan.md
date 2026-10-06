@@ -88,7 +88,7 @@
 | 레벨 1~4의 단어를 모두 학습함 | 새 단어 완료 화면에서 레벨업 테스트와 오답 복습으로 안내한다 |
 | 레벨 5의 단어를 모두 학습함 | "고수 단계의 새 단어를 모두 학습했어요"와 오답 복습·AI 대화 버튼을 보여 준다. 오답이 없으면 대화만 안내한다 |
 | 일본어 입문자가 가나를 못 읽음 | 온보딩의 일본어 입문 카드에서 가나 익히기를 안내하고, 홈의 가나 익히기 카드로 시작한다 |
-| 구글 로그인 취소·실패 | `/`로 돌아와 "로그인을 완료하지 못했어요"를 보여 준다 |
+| 구글 로그인 취소·실패 | `/?login=failed`로 돌아와 "로그인을 완료하지 못했어요"를 보여 준다 |
 | 온보딩 도중 이탈 | 다음 방문 때 온보딩의 해당 단계부터 다시 시작한다 |
 | 두 탭에서 같은 세션에 동시 전송 | 진행 중인 턴이 있으면 두 번째 요청은 409. 턴 처리 중 종료도 409이며 전송 완료 후 다시 종료할 수 있다 |
 | 종료 요청 중 재요청·새로고침 | 처리 중이면 202와 재확인 간격, 완료됐으면 저장한 동일 결과를 반환한다 |
@@ -350,7 +350,7 @@
 ### 6-2. 레이어
 
 ```
-src/app/api/**/route.ts   얇게: route() 래퍼 → use-case 호출
+src/app/api/**/route.ts   얇게: route() 래퍼 → use-case 호출 (판단 없는 단일 RPC는 server/db 직접)
 src/server/*.ts           use-case: (deps, userId, input) → 결과 | 에러 코드   ← 비즈니스 테스트의 중심
 src/server/db/*.ts        DB 접근 함수: 모두 userId를 받는다
 src/services/             supabase/{browser,server,admin}.ts, claude/{client,prompts,schemas}.ts, env.ts, apiClient.ts(브라우저 → /api)
@@ -359,8 +359,8 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 - 앱 코드는 모두 `src/` 아래에 둔다. 이 문서에서 `src/`를 생략한 `app/`, `server/`, `services/`, `lib/`, `components/`, `types/`, `test/` 경로도 `src/` 기준이다. `scripts/`, `data/`, `supabase/`는 저장소 루트에 둔다.
 - 의존 방향은 app → server → services, lib다. `lib`는 프로젝트 안의 다른 모듈을 import하지 않는다.
-- use-case는 `{ db, ai, now }`를 주입받고, 메모리 가짜 구현(`src/test/fakes.ts`)으로 분기와 호출 순서를 테스트한다. DB 인터페이스는 `beginChatTurn`, `finishChatTurn`, `beginEnd`, `finishEnd`, `saveWordBatch` 같은 트랜잭션 단위로 둔다. 잠금·RLS·원자성은 로컬 DB 통합 테스트로 따로 확인한다.
-- `now`는 순수 규칙·표시 테스트용이며, 저장·한도·작업 기한의 실제 판정은 RPC 내부 DB 시각을 사용한다.
+- use-case는 `{ db, ai }`를 주입받고, 함수별 결과를 정하는 가짜 구현(`src/test/fakes.ts`)으로 분기와 호출 순서를 테스트한다. RPC 규칙(잠금·한도·상태 전이)을 가짜에 다시 구현하지 않는다. DB 인터페이스는 `beginChatTurn`, `finishChatTurn`, `beginEnd`, `finishEnd`, `saveWordBatch` 같은 트랜잭션 단위로 둔다. 잠금·RLS·원자성은 로컬 DB 통합 테스트로 따로 확인한다.
+- 현재 시각은 페이지가 표시용으로만 `lib` 함수에 넘기며, 저장·한도·작업 기한의 실제 판정은 RPC 내부 DB 시각을 사용한다.
 - `route()` 래퍼(`server/http.ts`) 하나가 다음을 처리한다: 로그인 확인(401), JSON Content-Type 검사, zod 검증(400), 경로별 동의·온보딩 검사(403), 에러 코드 → HTTP 변환, 예외 → 500. `/end`의 처리 중 응답(202)은 에러로 변환하지 않는다.
 
 ### 6-3. 데이터 접근과 보안 (CRITICAL)

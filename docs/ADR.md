@@ -11,7 +11,7 @@
 **트레이드오프**: Supabase 무료 플랜은 7일 무요청 시 일시정지되고 백업이 제한적이다. 배포 전 `supabase db dump`로 대비한다.
 
 ### ADR-002: use-case 레이어(`src/server/`)와 의존성 주입
-**결정**: route는 얇게 두고, 비즈니스 규칙은 `{ db, ai, now }`를 주입받는 use-case에 둔다. DB 인터페이스는 트랜잭션 단위다.
+**결정**: route는 얇게 두고, 비즈니스 규칙은 `{ db, ai }`를 주입받는 use-case에 둔다. 판단 없이 RPC 하나만 부르는 API는 route가 `server/db`를 바로 부른다. DB 인터페이스는 트랜잭션 단위다.
 **이유**: 분기·호출 순서를 Docker 없이 가짜 구현으로 빠르게 테스트하고, Stop hook(lint·build·test)을 통과시킨다.
 **트레이드오프**: 잠금·RLS·원자성은 가짜로 증명할 수 없어서 `test:db`(로컬 Supabase) 통합 테스트를 따로 유지한다.
 
