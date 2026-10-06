@@ -56,7 +56,7 @@
 **홈 구조** (위에서부터)
 1. **상단**: 현재 언어·레벨, 🔥 연속 n일째. 체험 중이면 "체험 n일 남음", 체험이 끝났으면 "체험이 끝났어요"
    - 언어·레벨을 누르면 언어 전환과 레벨 내리기 메뉴가 열린다. 레벨이 있는 언어는 바로 전환하고, 처음 배우는 언어는 `/onboarding?language=ja`처럼 언어를 정한 채 레벨 단계로 보낸다.
-2. **오늘 할 일** (진행률 포함. 처음 온 사용자에게는 "여기서 시작하세요"를 강조)
+2. **오늘 할 일** (진행률 포함. 학습 기록이 없는 사용자(`last_study_date` 없음)에게는 대화 카드를 "여기서 시작하세요"로 강조한다. 저니 ④와 첫 세션 완료율에 맞춘 것이며 카드 순서는 아래 그대로다)
    - ① 오늘의 단어 `min(x, 10)/10`. `x`는 오늘 처음 학습한 단어 수이며 언어를 합산한다.
    - 현재 레벨에 새 단어가 없으면 분모 10인 미완료 목표 대신 "이 레벨의 새 단어를 모두 학습했어요"를 보여 준다. 레벨 1~4는 테스트와 복습, 레벨 5는 복습과 대화로 안내한다. 그날 이미 10개를 채웠으면 오늘 목표 완료 표시도 유지한다.
    - ② 대화 1세션 (오늘 성공한 턴이 3개 이상인 세션이 있으면 완료). **유효한 대화 세션**은 성공한 턴이 3개 이상인 세션이며, [대화 끝내기]를 눌렀는지와 무관하다. 목표와 첫 세션 완료율 모두 이 기준을 쓴다.
@@ -352,7 +352,8 @@
 ```
 src/app/api/**/route.ts   얇게: route() 래퍼 → use-case 호출 (판단 없는 단일 RPC는 server/db 직접)
 src/server/*.ts           use-case: (deps, userId, input) → 결과 | 에러 코드   ← 비즈니스 테스트의 중심
-src/server/db/*.ts        DB 접근 함수: 모두 userId를 받는다
+src/server/page.ts        보호 페이지 가드(requireUser·requireReady, React cache)
+src/server/db/*.ts        DB 접근 함수: 모두 userId를 받는다. reads.ts는 페이지 읽기(쿠키 client를 인자로, RLS)
 src/services/             supabase/{browser,server,admin}.ts, claude/{client,prompts,schemas}.ts, env.ts, apiClient.ts(브라우저 → /api)
 src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetch도 하지 않는다)
 ```
@@ -515,9 +516,10 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 - guard는 경로에 `test`가 들어간 파일을 검사하지 않는다. 그래서 레벨업 테스트의 경로는 `/level-up`, `/api/level-up`으로 둔다. `src/test/fakes.ts` 같은 테스트 보조 파일은 이 규칙 덕분에 통과한다.
 - DB 접근 파일의 `server/db/*.test.ts`는 실제 DB 통합 테스트로 작성한다. Vitest 기본 실행에서 이 경로를 제외하고 `test:db`에서 포함한다. Supabase 쿼리 체인을 mock하거나 hook 통과만을 위한 빈 테스트를 만들지 않는다.
 - 정적 UI는 `page.tsx`/`layout.tsx`에 둔다 (hook이 검사하지 않음). 컴포넌트는 꼭 필요한 것만 만든다.
-  - 화면 단위: `OnboardingFlow`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`
-  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `GoogleLoginButton`, `AccountActions`(체험 시작·Pro 모달·로그아웃)
-  - 입력·API 호출이 있는 부분만 Client Component로 만든다. 페이지의 분기 규칙은 테스트할 수 있게 `lib/`(예: `today`, `readiness`)에 둔다.
+  - 화면 단위: `OnboardingFlow`, `ScenarioPicker`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`
+  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `AppNav`, `UsageCard`, `Dialog`, `Toast`, `WaitingDots`, `GoogleLoginButton`, `TrialButton`(체험 시작), `ProButton`(Pro 클릭·준비 중 모달), `LimitNotice`(한도 도달 안내), `LogoutButton`. 만든 이유는 `docs/spec/ui.md` "공용 React 컴포넌트와 이유"에 있다
+  - 입력·API 호출이 있는 부분만 Client Component로 만든다. 페이지의 분기 규칙은 테스트할 수 있게 `lib/`(예: `today`, `readiness`, `onboarding`)에 둔다.
+  - 페이지 읽기는 `server/db/reads.ts`에 두고 `test:db`로 실제 RLS와 함께 검증한다. 운영자 정보는 설정 파일 `src/site.config.ts`에 둔다.
 - Vitest 설정에서 `server-only`를 빈 모듈로 alias한다.
 
 ### 6-10. 에러 코드
@@ -539,6 +541,8 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | `INTERNAL` | 500 | 예상하지 못한 예외 (로그 남김) | "잠시 후 다시 시도" |
 
 - 클라이언트는 fetch 래퍼 하나(`services/apiClient`)에서 처리한다. `/end`의 202는 성공한 처리 중 응답으로 구분해 `retryAfterSeconds` 이후 다시 확인한다.
+  - 401은 `/`로, 403(`CONSENT_REQUIRED`·`ONBOARDING_REQUIRED`)은 `/onboarding`으로 래퍼가 이동시킨다.
+  - `fetch` 자체가 실패하면(네트워크 끊김) 클라이언트 전용 코드 `NETWORK`로 돌려준다. 503 문구("턴은 차감되지 않았어요")를 네트워크 오류에 쓰지 않기 위해서다. JSON이 아닌 응답은 `INTERNAL`로 본다.
 - 네트워크 오류는 해당 작업의 입력·결과를 보존한다. 메시지는 수동 재전송, 단어 저장과 `/end`는 재시도 버튼으로 확인한다. 단어 중복 저장은 200이며 활동일·사용량을 다시 늘리지 않는다.
 - 페이지에는 `error.tsx`와 `not-found.tsx`를 둔다. Supabase 장애는 페이지 에러로 보여 준다.
 - Anthropic이 장애여도 단어, 가나, 레벨업 테스트는 계속 쓸 수 있다.
@@ -662,5 +666,5 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 1. 위 "제품" 항목을 확정한다. 하네스 요약 문서(`docs/*.md`, `CLAUDE.md`)와 `docs/UI_GUIDE.md`는 작성했다.
 2. (완료) `scripts/execute.py` 수정: 파일·git·claude 입출력을 utf-8로 처리하고(Windows 기본 cp949에서 실패), 프롬프트를 명령줄 인자 대신 stdin으로 넘긴다(Windows 명령줄 약 32,767자 상한).
-3. (진행 중) 구현 계획은 하네스 `phases/`에 4개 phase, 16개 step으로 나눴다: `0-foundation`(셋업·lib·services) → `1-data`(DB·RPC·스크립트) → `2-api` → `3-ui`. DB 상태·RPC·동시성 통합 테스트를 먼저 구현하고, API와 UI를 그 계약에 맞춘다.
+3. (진행 중) 구현 계획은 하네스 `phases/`에 4개 phase, 17개 step으로 나눴다: `0-foundation`(셋업·lib·services) → `1-data`(DB·RPC·스크립트) → `2-api` → `3-ui`(페이지 읽기 step을 더해 6개). DB 상태·RPC·동시성 통합 테스트를 먼저 구현하고, API와 UI를 그 계약에 맞춘다.
    - step 파일(`stepN.md`)은 앞 phase가 끝난 뒤 실제 코드를 보고 작성한다. phase가 끝나면 main에 병합하고 다음 phase를 실행한다.

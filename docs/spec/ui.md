@@ -126,6 +126,7 @@ rt { font-size: 0.5em; }
 | 본문 | `pb-24`(탭바 공간) | `pb-16` |
 
 - **집중 모드**(대화방, 종료 피드백, 단어 회차, 레벨업 진행, 가나 카드): 탭바를 숨기고 왼쪽 위에 뒤로 pill을 둔다. 라벨은 [상황 목록]·[그만하기]·[행 선택]처럼 돌아갈 곳이나 하는 일을 적는다. 회차 중 나가면 저장하지 않는다(spec 3장). 회차 시작 카드에 미리 알리고, 나갈 때 확인 대화상자는 띄우지 않는다.
+  - 구현 계약: 집중 화면은 루트 요소에 `data-focus-mode`를 단다. 셸 요소(상단바·탭바·사이드바)에는 `data-app-chrome`을 단다. `globals.css`의 `body:has([data-focus-mode]) [data-app-chrome] { display: none }`이 숨긴다. 서버 HTML에 속성이 들어 있어서 하이드레이션 전에도 깜빡이지 않는다.
 - 화면을 바꿀 때는 본문 스크롤을 맨 위로 올린다.
 
 ### 공개 페이지 (`/`, `/privacy`, `/terms`)
@@ -147,6 +148,21 @@ rt { font-size: 0.5em; }
 
 ## 컴포넌트
 같은 역할에는 아래 컴포넌트만 쓴다. 공용 React 컴포넌트로 만들 것(`Flashcard`, `BlankQuiz`, `Furigana` 등)은 ARCHITECTURE를 따르고, 나머지는 같은 클래스 조합을 반복해 쓴다.
+
+### 공용 React 컴포넌트와 이유
+동작(포커스·타이머·API 호출)이 있거나 여러 화면에서 같은 규칙을 지켜야 하는 것만 컴포넌트로 만든다. 버튼·카드·Notice는 래퍼 없이 클래스 조합을 쓴다.
+
+| 컴포넌트 | 이유 |
+|---|---|
+| `Dialog` | 모달·바텀시트의 포커스 가두기·Esc·포커스 복귀를 한 곳에서 지킨다. jsdom에 `<dialog>.showModal()`이 없어서 직접 구현하고 테스트한다 |
+| `Toast` (`ToastHost` + `showToast`) | 셸에 한 번 두고 어디서든 부른다. 체험 시작처럼 호출한 버튼이 곧바로 사라져도 토스트가 남는다 |
+| `WaitingDots` | 대기 표시(점 3개)를 하나로 통일한다 |
+| `UsageCard` | 홈과 사이드바가 같은 사용량 표시(0이면 danger)를 쓴다 |
+| `AppNav` | 탭바·사이드바의 현재 위치(`aria-current`)에 `usePathname`이 필요하다 |
+| `TrialButton`, `ProButton` | 체험 시작(`/api/trial`)과 Pro 클릭(`pro_clicked` + 준비 중 모달)을 한도 안내·계정 화면이 같이 쓴다 |
+| `LimitNotice` | 한도 도달 안내 3상태를 홈·대화방·단어 화면이 같이 쓴다 |
+| `LogoutButton` | 브라우저 Supabase로 로그아웃한다(브라우저가 Supabase를 쓰는 두 곳 중 하나) |
+| `ScenarioPicker` | 상황 타일이 열린 세션을 열거나 새 세션을 만든다(API 호출) |
 
 ### 버튼
 ```
@@ -226,6 +242,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 
 ### 토스트
 - 하단 가운데(탭바 위 `bottom-24`)에 `rounded-full bg-house text-white text-sm font-semibold px-4.5 py-2.5 shadow-overlay`로 띄우고 2.4초 뒤 사라진다. `role="status"`를 단다.
+- `(app)` 레이아웃에 `ToastHost`를 한 번 두고, Client Component는 `showToast(message)`로 띄운다.
 - 짧은 성공 확인에만 쓴다(예: "7일 Pro 체험을 시작했어요", "레벨을 내렸어요"). 에러는 토스트로 띄우지 않고 그 자리에 오류 안내로 보여 준다.
 
 ### 입력
@@ -316,7 +333,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 | AI 대기·채점 중 | 점 3개 하나로 통일한다. 스피너·스켈레톤은 쓰지 않는다 |
 | 저장 중 | 해당 버튼을 비활성화하고 라벨을 "저장 중…"으로 바꾼다 |
 | 빈 상태 | 정보 Notice(Inbox): 한 줄 이유 + 다음 행동. 예: "아직 틀린 단어가 없어요 / 오늘의 학습에서 틀린 단어가 여기에 모여요" |
-| 첫날 | 성공 Notice "첫날이에요"를 두고, 첫 할 일 카드에 `ring-2 ring-accent`와 "여기서 시작하세요" 태그를 단다 |
+| 첫날 | 학습 기록이 없는 사용자(`last_study_date` 없음)다. 성공 Notice "첫날이에요"를 두고, **대화** 할 일 카드에 `ring-2 ring-accent`와 "여기서 시작하세요" 태그를 단다(저니 ④, 첫 세션 완료율). 카드 순서는 단어 → 대화 그대로다 |
 | 목표 완료 | 할 일 카드 버튼 자리에 "완료" 태그를 달고, 링 안에 Check를 넣는다 |
 | 새 단어 소진 | 할 일 카드 자리에 "이 레벨의 새 단어를 모두 학습했어요"와 안내 버튼(레벨 1~4: 레벨업 테스트·오답 복습 / 5: 오답 복습·대화)을 둔다 |
 | 인라인 오류 | 해당 영역에 오류 Notice로 서버 `message`를 보여 준다. 입력·결과를 보존하고 [다시 시도] 버튼을 둔다. 자동으로 반복하지 않는다(`CONFLICT` 포함) |

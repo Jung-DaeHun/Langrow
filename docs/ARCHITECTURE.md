@@ -9,11 +9,16 @@ src/
 │   └── api/**/route.ts   # 얇게: route() 래퍼 → use-case 호출 (판단 없는 단일 RPC는 server/db 직접)
 ├── server/               # use-case: (deps, userId, input) → 결과 | 에러 코드
 │   ├── http.ts           # route() 래퍼
+│   ├── page.ts           # 보호 페이지 가드: requireUser·requireReady(→ / 또는 /onboarding), React cache
 │   └── db/               # DB 접근 함수(트랜잭션 단위 RPC 호출). 모두 userId를 받는다
+│       └── reads.ts      # 페이지 읽기: 쿠키 client(RLS)를 인자로 받는다
 ├── services/             # 외부 I/O: supabase/{browser,server,admin}, claude/{client,prompts,schemas}, env, apiClient
 ├── lib/                  # 순수 규칙 (I/O·환경변수·fetch 없음)
-├── components/           # 화면 단위: OnboardingFlow, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck / 공용: Flashcard, BlankQuiz, Furigana, LanguageSheet, GoogleLoginButton, AccountActions
-├── types/                # database.ts (supabase gen types)
+├── components/           # 화면 단위: OnboardingFlow, ScenarioPicker, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck
+│                         # 공용: Flashcard, BlankQuiz, Furigana, LanguageSheet, AppNav, UsageCard, Dialog, Toast, WaitingDots,
+│                         #       GoogleLoginButton, TrialButton, ProButton, LimitNotice, LogoutButton
+├── site.config.ts        # 운영자 이름·문의 이메일·약관 시행일 (출시 전에 채운다)
+├── types/                # database.ts (supabase gen types), api.ts (API 응답 타입)
 └── test/                 # fakes.ts (가짜 db·ai)
 supabase/migrations/      # 스키마·제약·인덱스·RLS·RPC·실행 권한
 scripts/                  # generate-words, seed-words, metrics-report (각각 main(deps)를 export)
@@ -30,8 +35,9 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 
 ## 데이터 흐름
 ```
-읽기: 페이지(Server Component) → 쿠키 기반 server client(RLS: 자기 행 읽기) → 렌더
+읽기: 페이지(Server Component) → server/page.ts 가드 → server/db/reads.ts(쿠키 기반 server client, RLS: 자기 행 읽기) → 렌더
 쓰기: Client Component → services/apiClient → /api route → server use-case → server/db → RPC(admin client)
+     성공 뒤 화면 갱신은 router.refresh()로 페이지를 다시 읽는다
 
 대화 1턴: 예약 RPC(계정 잠금, 만료 작업 복구, 한도·상태 확인, pending 행 + 작업 토큰 90초) → 커밋
         → Claude 호출(잠금 밖, 호출당 20초, 직접 재시도 1번)
@@ -47,7 +53,7 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 
 ## 페이지 접근
 - 공개: `/`, `/privacy`, `/terms`, `/auth/callback`. 보호: `/onboarding`, `/home`, `/chat/**`, `/words`, `/level-up`, `/kana`, `/account` (비로그인 → `/`).
-- `/onboarding`을 뺀 보호 페이지는 동의와 현재 언어의 레벨이 없으면 `/onboarding`으로 보낸다.
+- `/onboarding`을 뺀 보호 페이지는 동의와 현재 언어의 레벨이 없으면 `/onboarding`으로 보낸다(`(app)` route group의 레이아웃과 페이지가 `requireReady()`를 부른다).
 - `/api/**`는 리디렉션하지 않고 JSON 401/403을 반환한다. `/_next/**`와 정적 파일은 인증 가드에서 제외한다.
 
 ## API
