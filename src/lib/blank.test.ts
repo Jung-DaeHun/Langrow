@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildOptions, isCorrectChoice, parseBlank } from "./blank";
+import { buildOptions, isCorrectChoice, parseBlank, toBlankQuestion } from "./blank";
 
 describe("parseBlank", () => {
   it("{{ }} 앞·안·뒤로 나눈다", () => {
@@ -76,5 +76,40 @@ describe("isCorrectChoice", () => {
     expect(isCorrectChoice("Went", "went")).toBe(false);
     expect(isCorrectChoice(" went", "went")).toBe(false);
     expect(isCorrectChoice("行った", "[行|い]った")).toBe(false);
+  });
+});
+
+describe("toBlankQuestion", () => {
+  const word = {
+    id: "en-1-001",
+    example: "I {{went}} to school.",
+    exampleKo: "나는 학교에 갔다.",
+    distractors: ["goes", "gone", "going"],
+  };
+
+  it("빈칸 앞뒤 문장, 번역, 섞은 보기 4개를 만든다", () => {
+    expect(toBlankQuestion(word, () => 0.999)).toEqual({
+      wordId: "en-1-001",
+      before: "I ",
+      after: " to school.",
+      exampleKo: "나는 학교에 갔다.",
+      options: ["went", "goes", "gone", "going"],
+    });
+  });
+
+  it("결과에 정답 필드가 없고, 보기에는 정답이 들어 있다", () => {
+    const question = toBlankQuestion(word, () => 0);
+    expect(question).not.toHaveProperty("answer");
+    expect(question?.options).toHaveLength(4);
+    expect(question?.options).toContain("went");
+  });
+
+  it("buildOptions와 같은 순서로 섞는다", () => {
+    expect(toBlankQuestion(word, () => 0)?.options).toEqual(buildOptions("went", word.distractors, () => 0));
+  });
+
+  it("예문이 깨져 있으면 null이다", () => {
+    expect(toBlankQuestion({ ...word, example: "I went to school." })).toBeNull();
+    expect(toBlankQuestion({ ...word, example: "I {{went}} {{to}} school." })).toBeNull();
   });
 });

@@ -17,3 +17,14 @@ export function scoreAnswers(
 export function isPassed(score: number): boolean {
   return score >= PASS_SCORE;
 }
+
+// 앞 LEVEL_TEST_SIZE칸만 섞는 Fisher–Yates로 중복 없이 고른다. 테스트는 random을 주입한다
+export function pickTestWords<T>(words: readonly T[], random: () => number = Math.random): T[] | null {
+  if (words.length < LEVEL_TEST_SIZE) return null;
+  const pool = [...words];
+  for (let i = 0; i < LEVEL_TEST_SIZE; i++) {
+    const j = i + Math.floor(random() * (pool.length - i));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, LEVEL_TEST_SIZE);
+}

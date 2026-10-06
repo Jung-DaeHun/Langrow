@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LEVEL_TEST_SIZE, PASS_SCORE, hasValidTestIds, isPassed, scoreAnswers } from "./levelTest";
+import { LEVEL_TEST_SIZE, PASS_SCORE, hasValidTestIds, isPassed, pickTestWords, scoreAnswers } from "./levelTest";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `en-2-${String(i + 1).padStart(3, "0")}`);
 
@@ -63,5 +63,36 @@ describe("isPassed", () => {
     expect(isPassed(15)).toBe(false);
     expect(isPassed(16)).toBe(true);
     expect(isPassed(20)).toBe(true);
+  });
+});
+
+describe("pickTestWords", () => {
+  const words = ids(30);
+
+  it("서로 다른 20개를 고른다", () => {
+    const picked = pickTestWords(words);
+    expect(picked).toHaveLength(LEVEL_TEST_SIZE);
+    expect(new Set(picked).size).toBe(LEVEL_TEST_SIZE);
+    picked?.forEach((id) => expect(words).toContain(id));
+  });
+
+  it("20개 미만이면 null이다", () => {
+    expect(pickTestWords(ids(19))).toBeNull();
+    expect(pickTestWords([])).toBeNull();
+  });
+
+  it("딱 20개면 20개 모두 쓴다", () => {
+    expect([...(pickTestWords(ids(20)) ?? [])].sort()).toEqual(ids(20));
+  });
+
+  it("random을 주입하면 결과가 정해진다", () => {
+    expect(pickTestWords(words, () => 0)).toEqual(pickTestWords(words, () => 0));
+    expect(pickTestWords(words, () => 0)).not.toEqual(pickTestWords(words, () => 0.999));
+  });
+
+  it("넘겨받은 배열을 바꾸지 않는다", () => {
+    const input = ids(25);
+    pickTestWords(input, () => 0);
+    expect(input).toEqual(ids(25));
   });
 });
