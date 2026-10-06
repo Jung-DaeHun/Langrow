@@ -12,6 +12,8 @@ import {
   signedInClient,
 } from "@/test/db";
 import { agreeTerms, setFirstLevel, switchLanguage } from "./account";
+import { beginChatTurn, beginEnd, createChatSession, finishChatTurn } from "./chat";
+import type { DbResult } from "./types";
 
 // 구현 파일이 없는 보안·스키마·SQL helper 테스트 (spec 7장, 보안 체크리스트 5·11·13)
 
@@ -215,6 +217,80 @@ describe("함수 실행 권한", () => {
       }
     }
     expect(await snapshot(ids)).toEqual(before);
+  });
+
+  it("anon·authenticated는 대화 함수와 helper를 부르지 못하고 상태도 바뀌지 않는다", async () => {
+    const valueOf = <T>(result: DbResult<T>): T => {
+      if (!result.ok) throw new Error(result.code);
+      return result.value;
+    };
+    const user = await createReadyUser("en", 1);
+    const newSession = async () =>
+      valueOf(await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" })).sessionId;
+
+    const idle = await newSession(); // 예약 없음
+    const turning = await newSession(); // 턴 예약 중
+    const turn = valueOf(await beginChatTurn(user.id, turning, "hi"));
+    const ending = await newSession(); // 종료 예약 중
+    const done = valueOf(await beginChatTurn(user.id, ending, "hi"));
+    valueOf(await finishChatTurn(user.id, ending, done.token, { reply: "hello", reply_ko: "안녕하세요", correction: null }));
+    const end = valueOf(await beginEnd(user.id, ending));
+    if (end.state !== "reserved") throw new Error(end.state);
+    const expired = await newSession(); // 기한이 지난 턴 예약
+    await beginChatTurn(user.id, expired, "hi");
+    must(
+      await getAdminSupabase()
+        .from("chat_sessions")
+        .update({ operation_expires_at: new Date(Date.now() - 60 * 60_000).toISOString() })
+        .eq("id", expired),
+    );
+
+    const calls: [string, Record<string, unknown>][] = [
+      ["kst_today_start", {}],
+      ["current_plan", { p_user_id: user.id }],
+      ["chat_turn_limit", { p_user_id: user.id }],
+      ["chat_failure_limit_reached", { p_user_id: user.id }],
+      ["record_limit_reached", { p_user_id: user.id, p_feature: "chat" }],
+      [
+        "record_chat_failed",
+        { p_user_id: user.id, p_operation_token: turn.token, p_kind: "turn", p_reason: "timeout" },
+      ],
+      ["end_chat_with_fallback", { p_user_id: user.id, p_session_id: idle }],
+      ["recover_expired_operations", { p_user_id: user.id }],
+      ["create_chat_session", { p_user_id: user.id, p_language: "en", p_level: 1, p_scenario_id: "l1-cafe" }],
+      ["begin_chat_turn", { p_user_id: user.id, p_session_id: idle, p_user_text: "hi" }],
+      [
+        "finish_chat_turn",
+        {
+          p_user_id: user.id,
+          p_session_id: turning,
+          p_token: turn.token,
+          p_reply: "hello",
+          p_reply_ko: "안녕하세요",
+          p_correction: null,
+        },
+      ],
+      ["fail_chat_turn", { p_user_id: user.id, p_session_id: turning, p_token: turn.token, p_reason: "timeout" }],
+      ["begin_end", { p_user_id: user.id, p_session_id: idle }],
+      [
+        "finish_end",
+        { p_user_id: user.id, p_session_id: ending, p_token: end.token, p_feedback: { good: "", improve: [] } },
+      ],
+      ["fail_end", { p_user_id: user.id, p_session_id: ending, p_token: end.token, p_reason: "timeout" }],
+    ];
+    const before = await snapshot([user.id]);
+    const clients: [string, SupabaseClient][] = [
+      ["anon", untyped(anonClient())],
+      ["authenticated", untyped(await signedInClient(user))],
+    ];
+
+    for (const [role, client] of clients) {
+      for (const [fn, args] of calls) {
+        const { error } = await client.rpc(fn, args);
+        expectDenied(error, `function ${fn}`, `${role} ${fn}`);
+      }
+    }
+    expect(await snapshot([user.id])).toEqual(before);
   });
 });
 

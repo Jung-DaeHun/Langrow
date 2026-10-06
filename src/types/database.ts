@@ -148,19 +148,64 @@ isOneToOne: false
             "agree_terms":
 { Args: { "p_user_id": string }; Returns: Json
                            },
+"begin_chat_turn":
+{ Args: { "p_session_id": string,"p_user_id": string,"p_user_text": string }; Returns: Json
+                           },
+"begin_end":
+{ Args: { "p_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"chat_failure_limit_reached":
+{ Args: { "p_user_id": string }; Returns: boolean
+                           },
+"chat_turn_limit":
+{ Args: { "p_user_id": string }; Returns: number
+                           },
 "check_readiness":
 { Args: { "p_language"?: string,"p_requirement": string,"p_user_id": string }; Returns: string
+                           },
+"create_chat_session":
+{ Args: { "p_language": string,"p_level": number,"p_scenario_id": string,"p_user_id": string }; Returns: Json
+                           },
+"current_plan":
+{ Args: { "p_user_id": string }; Returns: string
+                           },
+"end_chat_with_fallback":
+{ Args: { "p_session_id": string,"p_user_id": string }; Returns: Json
                            },
 "ensure_profile":
 { Args: { "p_user_id": string }; Returns: Json
                            },
+"fail_chat_turn":
+{ Args: { "p_reason": string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+                           },
+"fail_end":
+{ Args: { "p_reason": string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+                           },
+"finish_chat_turn":
+{ Args: { "p_correction": Json,"p_reply": string,"p_reply_ko": string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+                           },
+"finish_end":
+{ Args: { "p_feedback": Json,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+                           },
 "kst_today":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"kst_today_start":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
 "lower_level":
 { Args: { "p_language": string,"p_level": number,"p_user_id": string }; Returns: Json
                            },
 "record_activity":
+{ Args: { "p_user_id": string }; Returns: undefined
+                           },
+"record_chat_failed":
+{ Args: { "p_kind": string,"p_operation_token": string,"p_reason": string,"p_user_id": string }; Returns: undefined
+                           },
+"record_limit_reached":
+{ Args: { "p_feature": string,"p_user_id": string }; Returns: undefined
+                           },
+"recover_expired_operations":
 { Args: { "p_user_id": string }; Returns: undefined
                            },
 "set_first_level":
