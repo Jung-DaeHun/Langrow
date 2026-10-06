@@ -2,12 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getPublicEnv } from "@/services/env";
+import type { Database } from "@/types/database";
 
 // Server Component·route에서 쿠키 기반으로 읽기와 getUser()를 한다. 요청마다 새로 만든다
-export async function getServerSupabase(): Promise<SupabaseClient> {
+export async function getServerSupabase(): Promise<SupabaseClient<Database>> {
   const { supabaseUrl, supabasePublishableKey } = getPublicEnv();
   const cookieStore = await cookies();
-  return createServerClient(supabaseUrl, supabasePublishableKey, {
+  return createServerClient<Database>(supabaseUrl, supabasePublishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

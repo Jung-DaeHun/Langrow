@@ -2,9 +2,28 @@
   "project": "Langrow",
   "phase": "1-data",
   "steps": [
-    { "step": 0, "name": "db-schema", "status": "pending" },
-    { "step": 1, "name": "db-chat", "status": "pending" },
-    { "step": 2, "name": "db-learning", "status": "pending" },
-    { "step": 3, "name": "scripts", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "db-schema",
+      "status": "completed",
+      "started_at": "2026-10-06T17:16:16+0900",
+      "summary": "supabase/migrations/20261006081704_schema.sql: 테이블 8개·상태 제약·인덱스·RLS(자기 행 SELECT, words 전체)·권한(anon 없음, authenticated SELECT만, 테이블·함수 기본 권한 포함), helper kst_today()·check_readiness(p_user_id, p_requirement 'consent'|'ready', p_language default null)→null|코드·record_activity(p_user_id)(profiles 직접 잠금), 계정 RPC ensure_profile(p_user_id)·agree_terms(p_user_id)·set_first_level(p_user_id, p_language, p_level int)·switch_language(p_user_id, p_language)·lower_level(p_user_id, p_language, p_level int)→level·start_trial(p_user_id)→pro_until (모두 INVOKER, search_path '', service_role만 EXECUTE, jsonb {ok,...}/{ok:false,code}). src/server/db: types.ts(DbErrorCode, DbResult), rpc.ts(callRpc(fn, args) → DbResult<RpcValue>(snake_case 값), SQL 오류·알 수 없는 code는 throw; toDbResult(fn, data)), account.ts(ensureProfile·agreeTerms·setFirstLevel·switchLanguage·lowerLevel·startTrial·getReadiness). 클라이언트 3종에 SupabaseClient<Database>, src/types/database.ts 생성. test:db: dbGlobalSetup이 `npx supabase status -o env`의 API_URL·PUBLISHABLE_KEY·SECRET_KEY를 process.env(NEXT_PUBLIC_SUPABASE_URL·NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY·SUPABASE_SECRET_KEY)에 넣음, src/test/db.ts: createTestUser·createReadyUser(language, level)·deleteTestUser(id)·deleteTestUsers(afterEach용)·anonClient·signedInClient(user). 권한 거부는 code 42501 + 메시지 'permission denied for table|function X'로 확인. 테스트 42개(rpc·account·security) 통과"
+    },
+    {
+      "step": 1,
+      "name": "db-chat",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "db-learning",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "scripts",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-06T17:16:16+0900"
 }

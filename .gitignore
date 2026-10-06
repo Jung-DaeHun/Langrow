@@ -16,3 +16,7 @@ npm-debug.log*
 # phase execution outputs
 phases/**/phase*-output.json
 phases/**/step*-output.json
+
+# supabase CLI
+supabase/.temp/
+supabase/.branches/

@@ -1,15 +1,16 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getAdminEnv } from "@/services/env";
+import type { Database } from "@/types/database";
 
-let client: SupabaseClient | undefined;
+let client: SupabaseClient<Database> | undefined;
 
 // secret key 클라이언트는 RLS를 우회한다. 모든 조회·변경에 user_id를 건다.
 // env 없이도 next build가 통과하도록 첫 호출 때 만든다
-export function getAdminSupabase(): SupabaseClient {
+export function getAdminSupabase(): SupabaseClient<Database> {
   if (!client) {
     const { supabaseUrl, supabaseSecretKey } = getAdminEnv();
-    client = createClient(supabaseUrl, supabaseSecretKey, {
+    client = createClient<Database>(supabaseUrl, supabaseSecretKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }
