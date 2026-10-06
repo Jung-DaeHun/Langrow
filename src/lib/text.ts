@@ -9,3 +9,8 @@ export function isValidChatInput(s: string): boolean {
   const n = countChars(s);
   return n >= 1 && n <= CHAT_INPUT_MAX;
 }
+
+// 교정 라벨을 고른다: 한국어로 입력했으면 "이렇게 말하면 돼요"
+export function hasHangul(s: string): boolean {
+  return /\p{Script=Hangul}/u.test(s);
+}

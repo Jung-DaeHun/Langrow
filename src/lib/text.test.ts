@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHAT_INPUT_MAX, countChars, isValidChatInput } from "./text";
+import { CHAT_INPUT_MAX, countChars, hasHangul, isValidChatInput } from "./text";
 
 describe("countChars", () => {
   it("앞뒤 공백을 지운 뒤 센다", () => {
@@ -50,5 +50,24 @@ describe("isValidChatInput", () => {
   it("이모지 300개는 UTF-16 길이가 600이어도 허용한다", () => {
     expect(isValidChatInput("😀".repeat(300))).toBe(true);
     expect(isValidChatInput("😀".repeat(301))).toBe(false);
+  });
+});
+
+describe("hasHangul", () => {
+  it("한글 음절이 하나라도 있으면 true다", () => {
+    expect(hasHangul("안녕하세요")).toBe(true);
+    expect(hasHangul("I want 커피 please")).toBe(true);
+  });
+
+  it("자모만 있어도 true다", () => {
+    expect(hasHangul("ㅋㅋ")).toBe(true);
+    expect(hasHangul("ㅏ")).toBe(true);
+  });
+
+  it("영어·일본어·한자·빈 문자열은 false다", () => {
+    expect(hasHangul("Hello, how are you?")).toBe(false);
+    expect(hasHangul("こんにちは、カタカナ")).toBe(false);
+    expect(hasHangul("漢字")).toBe(false);
+    expect(hasHangul("")).toBe(false);
   });
 });
