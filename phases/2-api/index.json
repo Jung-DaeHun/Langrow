@@ -13,7 +13,9 @@
     {
       "step": 1,
       "name": "chat-api",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-06T21:03:34+0900",
+      "summary": "src/server/chat.ts(server-only): END_RETRY_AFTER_SECONDS = 2, startChatSession(deps, userId, { language, level, scenarioId })(findScenario 없음·레벨 다름 → INVALID_INPUT, DB 미호출 / 그 밖엔 db.createChatSession 결과 그대로), sendChatMessage(deps, userId, sessionId, text)(text.trim() → beginChatTurn 거부 코드 그대로·AI 미호출 → 예약 결과 session의 language·level·scenario와 history로 ai.generateTurn → 성공 finishChatTurn(token, reply) / 실패 failChatTurn(token, reason) 후 AI_UNAVAILABLE, 확정 RPC 거부 코드는 그대로 반환하고 AI 응답 폐기), endChatSession(deps, userId, sessionId)(beginEnd 거부 코드 그대로 / ended → 저장 결과 / ending → status 202 / reserved → generateFeedback → finishEnd 또는 failEnd, throw는 그대로 전파하고 재호출 없음, 상황 상수에 없으면 throw). API(모두 requirement ready, JSON Content-Type 필수, 실패 body는 ApiError { code, message }): POST /api/chat/sessions body { language: 'en'|'ja', level: 1~5 정수 리터럴, scenario_id: 1~50자 } → 200 ChatSessionCreated { sessionId } / 400 INVALID_INPUT(다른 레벨 상황 포함) / 409 CONFLICT(실제 레벨과 다름). POST /api/chat/sessions/[id]/messages(uuid 아니면 404, maxDuration = 60) body { text }(isValidChatInput: trim 후 1~300자) → 200 ChatMessageResponse { turnNo, turnsLeft, reply: TurnReply(reply, reply_ko, correction: { corrected, explanation_ko } | null) } / 404 NOT_FOUND / 409 CONFLICT·SESSION_FULL / 429 LIMIT_REACHED·AI_FAILURE_LIMIT / 503 AI_UNAVAILABLE. POST /api/chat/sessions/[id]/end(body 없음, maxDuration = 60) → 200 ChatEndResponse { status: 'ended', feedbackStatus: 'ready', feedback: { good, improve[] } } | { status: 'ended', feedbackStatus: 'fallback', feedback: { message } } | { status: 'ended', feedbackStatus: 'skipped', feedback: null } / 202 { status: 'ending', retryAfterSeconds: 2 } / 404 / 409 CONFLICT(턴 처리 중). 응답 타입은 src/types/api.ts(ChatSessionCreated, ChatMessageResponse, ChatEndResponse; TurnReply·EndResult는 import type). 공통 403 CONSENT_REQUIRED/ONBOARDING_REQUIRED, 401 UNAUTHORIZED. 테스트 68개 추가(전체 473개 통과)"
     },
     {
       "step": 2,
