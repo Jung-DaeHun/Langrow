@@ -1,1 +1,109 @@
 @import "tailwindcss";
+
+@theme {
+  --color-page: #f2f0eb;
+  --color-card: #ffffff;
+  --color-zone: #edebe9;
+  --color-hover: #f9f9f9;
+  --color-house: #1e3932;
+  --color-uplift: #2b5148;
+  --color-mint: #d4e9e2;
+  --color-ok-wash: hsl(160 32% 87% / 33%);
+  --color-danger-wash: hsl(4 82% 43% / 5%);
+  --color-brand: #006241;
+  --color-accent: #00754a;
+  --color-ink: rgb(0 0 0 / 0.87);
+  --color-ink-muted: rgb(0 0 0 / 0.58);
+  --color-line: #e7e7e7;
+  --color-line-input: #d6dbde;
+  --color-danger: #c82014;
+  --color-gold: #cba258;
+  --color-gold-light: #dfc49d;
+  --color-gold-wash: #faf6ee;
+  --color-on-gold: #33433d;
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  --text-display: 2rem;          --text-display--line-height: 1.2;
+  --text-display-lg: 2.8125rem;  --text-display-lg--line-height: 1.2;
+  --text-h1: 1.5rem;             --text-h1--line-height: 2.25rem;
+  --text-h3: 1.1875rem;          --text-h3--line-height: 1.35;
+  --text-lead: 1.0625rem;        --text-lead--line-height: 1.4;
+  --text-micro: 0.8125rem;       --text-micro--line-height: 1.5;
+  --text-quiz: 1.375rem;         --text-quiz--line-height: 1.5;
+  --text-word: 2.5rem;           --text-word--line-height: 1.2;
+  --text-kana: 6rem;             --text-kana--line-height: 1;
+
+  --radius-bubble: 18px;
+
+  --shadow-card: 0 0 0.5px 0 rgb(0 0 0 / 0.14), 0 1px 1px 0 rgb(0 0 0 / 0.24);
+  --shadow-raised: 0 2px 6px rgb(0 0 0 / 0.12), 0 0 1px rgb(0 0 0 / 0.2);
+  --shadow-nav: 0 1px 3px rgb(0 0 0 / 0.1), 0 2px 2px rgb(0 0 0 / 0.06), 0 0 2px rgb(0 0 0 / 0.07);
+  --shadow-overlay: 0 0 6px rgb(0 0 0 / 0.24), 0 8px 12px rgb(0 0 0 / 0.14);
+
+  --container-app: 45rem;        /* 720 */
+  --container-public: 65rem;     /* 1040 */
+  --container-form: 32.5rem;     /* 520 */
+  --container-prose-doc: 42.5rem; /* 680 */
+
+  --ease-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring: cubic-bezier(0.32, 2.32, 0.61, 0.27);
+
+  /* 허용된 애니메이션만 둔다(ui.md "애니메이션"). 반복은 animate-dot 하나뿐이다 */
+  --animate-enter: enter 250ms ease both;
+  --animate-sheet: sheet 300ms var(--ease-soft) both;
+  --animate-dot: dot 1s ease-in-out infinite;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  @keyframes sheet {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes dot {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+/* --font-noto-sans-jp는 next/font가 만든다. 그 className을 <html>에 단다 */
+:lang(ja) { font-family: var(--font-noto-sans-jp), "Hiragino Sans", "Yu Gothic", sans-serif; line-height: 1.8; }
+rt { font-size: 0.5em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/* 집중 모드: 집중 화면이 루트에 data-focus-mode를 달면 셸(상단바·탭바·사이드바)을 숨기고 탭바 공간도 없앤다.
+   레이어 밖 규칙이라 Tailwind 유틸리티(lg:flex, pb-24)보다 우선한다 */
+body:has([data-focus-mode]) [data-app-chrome] {
+  display: none;
+}
+body:has([data-focus-mode]) main {
+  padding-bottom: 0;
+}
