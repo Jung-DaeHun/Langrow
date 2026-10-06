@@ -36,4 +36,6 @@ npm run build       # 프로덕션 빌드
 npm run lint        # ESLint
 npm run test        # 테스트 (가짜 db, Docker 불필요)
 npm run test:db     # DB 통합 테스트 (로컬 Supabase 필요: supabase start)
+npm run words:generate -- --language ja --level 1 [--model <id>]  # 단어 생성 (Anthropic API, 새 파일만 씀. 검수 후 커밋)
 npm run seed:words  # 단어 seed (data/words/*.json → Supabase)
+npm run metrics [-- --launch 2026-11-01]  # 수요 검증 지표 (분자/분모, METRICS_EXCLUDED_USER_IDS 제외)

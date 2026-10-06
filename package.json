@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:db": "vitest run -c vitest.db.config.ts"
+    "test:db": "vitest run -c vitest.db.config.ts",
+    "words:generate": "tsx --env-file-if-exists=.env.local scripts/generate-words.ts",
+    "seed:words": "tsx --env-file-if-exists=.env.local scripts/seed-words.ts",
+    "metrics": "tsx --env-file-if-exists=.env.local scripts/metrics-report.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.131.0",
@@ -35,6 +38,7 @@
     "jsdom": "30.1.2",
     "supabase": "2.119.0",
     "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vitest": "5.0.3"
   }
