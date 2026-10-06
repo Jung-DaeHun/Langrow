@@ -1,4 +1,5 @@
 import type { ErrorCode } from "@/lib/errors";
+import type { Level } from "@/lib/levels";
 import type { EndResult } from "@/server/db/chat";
 import type { TurnReply } from "@/services/claude/schemas";
 
@@ -15,3 +16,21 @@ export type ChatMessageResponse = { turnNo: number; turnsLeft: number; reply: Tu
 export type ChatEndResponse =
   | ({ status: "ended" } & EndResult)
   | { status: "ending"; retryAfterSeconds: number };
+
+// 동의(POST /api/me/consent), 언어 전환(PUT /api/me/language), 첫 레벨(POST /api/levels),
+// 이벤트(POST /api/events)는 성공하면 {}다
+
+// POST /api/words/batch. 기존 단어는 세지 않는다
+export type WordBatchResponse = { insertedCount: number };
+
+// POST /api/words/review
+export type WordReviewResponse = { reviewedCount: number };
+
+// POST /api/level-up. passed·level은 RPC 결과다. wrong은 틀린 순서대로이고 answer는 정답 표기다
+export type LevelUpResponse = { passed: boolean; level: Level; score: number; wrong: { wordId: string; answer: string }[] };
+
+// PATCH /api/levels/[language]
+export type LevelResponse = { level: Level };
+
+// POST /api/trial. ISO 문자열
+export type TrialResponse = { proUntil: string };
