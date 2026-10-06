@@ -2,8 +2,23 @@
   "project": "Langrow",
   "phase": "2-api",
   "steps": [
-    { "step": 0, "name": "api-foundation", "status": "pending" },
-    { "step": 1, "name": "chat-api", "status": "pending" },
-    { "step": 2, "name": "learning-api", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "api-foundation",
+      "status": "completed",
+      "started_at": "2026-10-06T20:54:03+0900",
+      "summary": "src/server/http.ts(server-only): route<B, P>({ requirement: \"login\"|\"consent\"|\"ready\", params?: zod, body?: zod, handler: ({ userId, params, body }) => Promise<Outcome<unknown>> })가 (request: Request, context: { params: Promise<unknown> }) => Promise<Response>를 돌려줌. 정적·동적 [id] route 모두 `export const POST = route({...})` 형태로 export(임시 [id] route로 next build 타입 검사 통과 확인). 처리 순서는 getUser 401 → JSON Content-Type 400(body 없는 API 포함, charset·대소문자 허용) → params 실패 404 → JSON 파싱·zod 실패 400 → requirement가 login이 아니면 checkReadiness(getDeps().db.getReadiness(userId)) 403 → handler, 예외는 500 INTERNAL. 응답은 성공 Response.json(value ?? {}, status ?? 200), 실패 { code, message: ERRORS[code].message }. 실패만 JSON 한 줄 로그 { code, userId, method, path, ms } (+INTERNAL은 error), 4xx는 console.warn, 5xx는 console.error. export type Outcome<T> = { ok: true; value: T; status?: 202 } | { ok: false; code: ErrorCode }이고 DbResult<T>를 그대로 반환 가능(handler: ({ userId, body }) => getDeps().db.switchLanguage(userId, body.language)). src/server/deps.ts(server-only): Db = typeof account & typeof chat & typeof learning, Deps = { db: Db; ai: Ai }, getDeps()(ai는 createAi() 1회 생성, env는 첫 호출 때 검증). src/test/fakes.ts: createFakeDb(overrides?)·createFakeAi(overrides?)·createFakeDeps({ db?, ai? }) → { db, ai } 모두 Mocked(vi.fn), 기본값은 준비된 계정(동의, current en, levels { en: 1 }), beginChatTurn·beginEnd(reserved)는 l1-greeting 세션, AI 성공 응답. 결과는 overrides나 deps.db.x.mockResolvedValue(Once)로 바꿈. route 테스트 방식: vi.mock(\"@/services/supabase/server\", () => ({ getServerSupabase: async () => ({ auth: { getUser } }) }))와 vi.mock(\"@/server/deps\", () => ({ getDeps: () => deps }))(beforeEach에서 deps = createFakeDeps())만 mock하고, new Request(url, { method: \"POST\", headers: { \"content-type\": \"application/json\" }, body: JSON.stringify(...) })와 { params: Promise.resolve({ id }) }로 호출. src/types/api.ts: ApiError = { code: ErrorCode; message: string } (API별 응답 타입은 여기 추가). src/lib/paths.ts: PROTECTED_PAGES·isProtectedPage(세그먼트 기준). src/proxy.ts: createServerClient로 세션 갱신(setAll 쿠키는 request·응답 양쪽, setAll의 캐시 금지 헤더도 응답에), 비로그인 보호 페이지만 /로 redirect, matcher는 api·_next/static·_next/image·favicon.ico·이미지 확장자 제외(Next 16.3.8에 unstable_doesProxyMatch가 없어 테스트는 unstable_doesMiddlewareMatch 사용). src/app/auth/callback/route.ts: code 없음·교환 에러 → /?login=failed, 성공 → ensureProfile(user.id) 후 /home(next 등 query 무시). 테스트 98개 추가(전체 405개 통과)"
+    },
+    {
+      "step": 1,
+      "name": "chat-api",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "learning-api",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-06T20:54:03+0900"
 }
