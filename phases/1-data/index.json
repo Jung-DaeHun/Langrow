@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "db-learning",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-06T17:42:29+0900",
+      "summary": "supabase/migrations/20261006084708_learning.sql: helper new_word_limit(p_user_id)(10/30), RPC save_word_batch(p_user_id, p_language, p_items jsonb [{word_id,status}])→inserted_count(검증 1~10개·중복 없음·status·그 언어 단어, 레벨 미검사 → 기존 단어 제외 → 신규 0개면 무변경 성공 → 오늘 first_seen_at 계정 합산 + 신규 > 한도면 전부 거부·limit_reached(words) → 삽입·record_activity, 한도를 채우면 limit_reached)·save_review(p_user_id, p_language, p_items jsonb [{word_id,knew}])→reviewed_count(아직 review인 단어만 유효, knew면 known+updated_at, 유효 1개 이상이면 record_activity)·submit_level_test(p_user_id, p_language, p_from_level, p_score, p_passed)→passed·level(level_test_submitted 이벤트, 합격 시 where level = from_level로 +1, record_activity)·record_event(p_user_id, p_name)(pro_clicked·kana_studied만, kana는 record_activity) (모두 profiles 잠금 먼저, INVOKER, service_role만 EXECUTE). src/server/db/learning.ts(server-only) 함수와 에러 코드: saveWordBatch(userId, language, [{wordId, status}])→{insertedCount} [CONSENT_REQUIRED, ONBOARDING_REQUIRED, INVALID_INPUT, LIMIT_REACHED]; saveReview(userId, language, [{wordId, knew}])→{reviewedCount} [CONSENT_REQUIRED, ONBOARDING_REQUIRED, INVALID_INPUT(남의·학습 기록 없는·다른 언어 단어)]; submitLevelTest(userId, {language, fromLevel, score, passed})→{passed, level} [CONSENT_REQUIRED, ONBOARDING_REQUIRED, INVALID_INPUT(from_level 1~4·점수 0~20 밖), CONFLICT(실제 레벨 ≠ fromLevel, 재제출 포함)]; recordEvent(userId, 'pro_clicked'|'kana_studied')→null [CONSENT_REQUIRED, ONBOARDING_REQUIRED, INVALID_INPUT]; getWordsByIds(ids)→{id, language, level, example}[](유일한 user_id 없는 admin 조회, 없는 id 제외, SQL 오류는 throw). src/types/database.ts 재생성. 테스트: learning.test.ts 26개(테스트 단어 rank 9101+ admin upsert/삭제, 신규 저장·기존 재전송·다음 날 무변경·혼합·한도 초과·한도 채움·Pro·어제·INVALID_INPUT·준비 상태·동시 저장 4종·복습·레벨업·동시 합격·이벤트·getWordsByIds) + security.test.ts 학습 함수 5개 anon/authenticated 거부, test:db 96개 통과",
+      "completed_at": "2026-10-06T17:51:05+0900"
     },
     {
       "step": 3,

@@ -196,11 +196,17 @@ isOneToOne: false
 "lower_level":
 { Args: { "p_language": string,"p_level": number,"p_user_id": string }; Returns: Json
                            },
+"new_word_limit":
+{ Args: { "p_user_id": string }; Returns: number
+                           },
 "record_activity":
 { Args: { "p_user_id": string }; Returns: undefined
                            },
 "record_chat_failed":
 { Args: { "p_kind": string,"p_operation_token": string,"p_reason": string,"p_user_id": string }; Returns: undefined
+                           },
+"record_event":
+{ Args: { "p_name": string,"p_user_id": string }; Returns: Json
                            },
 "record_limit_reached":
 { Args: { "p_feature": string,"p_user_id": string }; Returns: undefined
@@ -208,11 +214,20 @@ isOneToOne: false
 "recover_expired_operations":
 { Args: { "p_user_id": string }; Returns: undefined
                            },
+"save_review":
+{ Args: { "p_items": Json,"p_language": string,"p_user_id": string }; Returns: Json
+                           },
+"save_word_batch":
+{ Args: { "p_items": Json,"p_language": string,"p_user_id": string }; Returns: Json
+                           },
 "set_first_level":
 { Args: { "p_language": string,"p_level": number,"p_user_id": string }; Returns: Json
                            },
 "start_trial":
 { Args: { "p_user_id": string }; Returns: Json
+                           },
+"submit_level_test":
+{ Args: { "p_from_level": number,"p_language": string,"p_passed": boolean,"p_score": number,"p_user_id": string }; Returns: Json
                            },
 "switch_language":
 { Args: { "p_language": string,"p_user_id": string }; Returns: Json

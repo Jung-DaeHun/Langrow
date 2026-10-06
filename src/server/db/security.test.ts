@@ -292,6 +292,38 @@ describe("함수 실행 권한", () => {
     }
     expect(await snapshot([user.id])).toEqual(before);
   });
+
+  it("anon·authenticated는 학습 함수와 helper를 부르지 못하고 상태도 바뀌지 않는다", async () => {
+    const user = await createReadyUser("en", 1); // 학습 기록 없음
+    const reviewer = await createReadyUser("en", 1); // 복습할 단어가 있음
+    must(await getAdminSupabase().from("user_words").insert({ user_id: reviewer.id, word_id: WORD.id, status: "review" }));
+
+    // service_role이면 모두 상태를 바꾸는 호출이다
+    const calls: [string, Record<string, unknown>][] = [
+      ["new_word_limit", { p_user_id: user.id }],
+      ["save_word_batch", { p_user_id: user.id, p_language: "en", p_items: [{ word_id: WORD.id, status: "known" }] }],
+      ["save_review", { p_user_id: reviewer.id, p_language: "en", p_items: [{ word_id: WORD.id, knew: true }] }],
+      [
+        "submit_level_test",
+        { p_user_id: user.id, p_language: "en", p_from_level: 1, p_score: 20, p_passed: true },
+      ],
+      ["record_event", { p_user_id: user.id, p_name: "kana_studied" }],
+    ];
+    const ids = [user.id, reviewer.id];
+    const before = await snapshot(ids);
+    const clients: [string, SupabaseClient][] = [
+      ["anon", untyped(anonClient())],
+      ["authenticated", untyped(await signedInClient(user))],
+    ];
+
+    for (const [role, client] of clients) {
+      for (const [fn, args] of calls) {
+        const { error } = await client.rpc(fn, args);
+        expectDenied(error, `function ${fn}`, `${role} ${fn}`);
+      }
+    }
+    expect(await snapshot(ids)).toEqual(before);
+  });
 });
 
 describe("계정 삭제", () => {
