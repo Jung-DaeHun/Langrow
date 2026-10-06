@@ -24,6 +24,16 @@ describe("getServerSupabase", () => {
     await expect(getServerSupabase()).rejects.toThrow("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
   });
 
+  // 빌드의 정적 렌더링에서 cookies()가 먼저 불려야 보호 페이지가 동적 페이지로 판정된다(env 없는 next build)
+  it("env 검증보다 쿠키를 먼저 읽는다", async () => {
+    const { cookies } = await import("next/headers");
+    vi.mocked(cookies).mockClear();
+    const { getServerSupabase } = await import("./server");
+
+    await expect(getServerSupabase()).rejects.toThrow("NEXT_PUBLIC_SUPABASE_URL");
+    expect(cookies).toHaveBeenCalledTimes(1);
+  });
+
   it("env가 있으면 요청 쿠키로 클라이언트를 만든다", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_x");

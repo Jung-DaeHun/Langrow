@@ -5,9 +5,10 @@ import { getPublicEnv } from "@/services/env";
 import type { Database } from "@/types/database";
 
 // Server Component·route에서 쿠키 기반으로 읽기와 getUser()를 한다. 요청마다 새로 만든다
+// 쿠키를 env 검증보다 먼저 읽는다. 그래야 env 없는 next build에서도 보호 페이지가 동적 페이지로 판정된다
 export async function getServerSupabase(): Promise<SupabaseClient<Database>> {
-  const { supabaseUrl, supabasePublishableKey } = getPublicEnv();
   const cookieStore = await cookies();
+  const { supabaseUrl, supabasePublishableKey } = getPublicEnv();
   return createServerClient<Database>(supabaseUrl, supabasePublishableKey, {
     cookies: {
       getAll() {
