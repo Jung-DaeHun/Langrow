@@ -3,11 +3,13 @@ execute.py 리팩터링 안전망 테스트.
 리팩터링 전후 동작이 동일한지 검증한다.
 """
 
+import contextlib
 import json
 import os
 import subprocess
 import sys
 import textwrap
+import types
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -343,6 +345,13 @@ class TestRunGit:
         assert mock_run.call_args[0][0] == ["git", "status"]
         assert mock_run.call_args[1]["encoding"] == "utf-8"
 
+    def test_spawn_failure_exits(self, executor):
+        # 띄운 Claude Code 세션이 닫히면 새 프로세스가 0xC0000142로 죽는다. 커밋 실패를 WARN으로 넘기지 않는다
+        with patch("subprocess.run", return_value=MagicMock(returncode=0xC0000142, stdout="", stderr="")):
+            with pytest.raises(SystemExit) as exc_info:
+                executor._run_git("add", "-A")
+        assert exc_info.value.code == 1
+
 
 class TestCheckoutBranch:
     def _mock_git(self, executor, responses):
@@ -509,6 +518,52 @@ class TestInvokeClaude:
             executor._invoke_claude(step, "preamble")
 
         assert mock_run.call_args[1]["timeout"] == 1800
+
+    def test_spawn_failure_exits(self, executor):
+        mock_result = MagicMock(returncode=0xC0000142, stdout="", stderr="")
+
+        with patch("subprocess.run", return_value=mock_result):
+            with pytest.raises(SystemExit) as exc_info:
+                executor._invoke_claude({"step": 2, "name": "ui"}, "preamble")
+        assert exc_info.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# _execute_single_step (mocked)
+# ---------------------------------------------------------------------------
+
+class TestExecuteSingleStep:
+    def test_reports_elapsed_seconds(self, executor, capsys):
+        @contextlib.contextmanager
+        def fake_indicator(label):
+            info = types.SimpleNamespace(elapsed=0.0)
+            yield info
+            info.elapsed = 42.7
+
+        def complete_step(step, preamble):
+            index = json.loads(executor._index_file.read_text(encoding="utf-8"))
+            index["steps"][2]["status"] = "completed"
+            executor._index_file.write_text(json.dumps(index), encoding="utf-8")
+
+        executor._invoke_claude = complete_step
+        executor._commit_step = MagicMock()
+        with patch.object(ex, "progress_indicator", fake_indicator):
+            executor._execute_single_step({"step": 2, "name": "ui"}, "guardrails")
+
+        assert "✓ Step 2: ui [42s]" in capsys.readouterr().out
+
+    def test_spawn_failure_stops_without_retry_or_error_status(self, executor):
+        executor._commit_step = MagicMock()
+        mock_result = MagicMock(returncode=0xC0000142, stdout="", stderr="")
+
+        with patch("subprocess.run", return_value=mock_result) as mock_run:
+            with pytest.raises(SystemExit):
+                executor._execute_single_step({"step": 2, "name": "ui"}, "guardrails")
+
+        assert mock_run.call_count == 1
+        step = json.loads(executor._index_file.read_text(encoding="utf-8"))["steps"][2]
+        assert step["status"] == "pending"
+        assert "error_message" not in step
 
 
 # ---------------------------------------------------------------------------

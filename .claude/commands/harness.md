@@ -149,3 +149,4 @@ execute.py가 자동으로 처리하는 것:
 
 - **error 발생 시**: `phases/{task-name}/index.json`에서 해당 step의 `status`를 `"pending"`으로 바꾸고 `error_message`를 삭제한 뒤 재실행한다.
 - **blocked 발생 시**: `blocked_reason`에 적힌 사유를 해결한 뒤, `status`를 `"pending"`으로 바꾸고 `blocked_reason`을 삭제한 뒤 재실행한다.
+- **"프로세스를 시작하지 못했습니다 (0xC0000142)"로 멈췄을 때**: execute.py를 띄운 Claude Code 세션이 닫혀서 생긴다(Windows). step 상태는 바뀌지 않았으니 그대로 재실행한다. 예방하려면 일반 터미널에서 실행하거나, Claude Code 세션 안에서 백그라운드로 띄웠다면 phase가 끝날 때까지 그 세션을 닫지 않는다. 새 세션을 같은 터미널에서 열어도 막지 못한다.

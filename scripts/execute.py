@@ -57,6 +57,8 @@ class StepExecutor:
     FEAT_MSG = "feat({phase}): step {num} — {name}"
     CHORE_MSG = "chore({phase}): step {num} output"
     TZ = timezone(timedelta(hours=9))
+    # Windows STATUS_DLL_INIT_FAILED. execute.py를 띄운 Claude Code 세션이 닫히면 새 프로세스가 이 코드로 죽는다
+    SPAWN_FAILED = 0xC0000142
 
     def __init__(self, phase_dir_name: str, *, auto_push: bool = False):
         self._root = str(ROOT)
@@ -108,7 +110,17 @@ class StepExecutor:
 
     def _run_git(self, *args) -> subprocess.CompletedProcess:
         cmd = ["git"] + list(args)
-        return subprocess.run(cmd, cwd=self._root, capture_output=True, encoding="utf-8")
+        r = subprocess.run(cmd, cwd=self._root, capture_output=True, encoding="utf-8")
+        self._exit_if_spawn_failed(r.returncode, "git")
+        return r
+
+    def _exit_if_spawn_failed(self, returncode: int, what: str):
+        """재시도해도 같은 이유로 죽으므로 step 상태를 건드리지 않고 멈춘다."""
+        if returncode != self.SPAWN_FAILED:
+            return
+        print(f"\n  ERROR: {what} 프로세스를 시작하지 못했습니다 (0xC0000142).")
+        print(f"  execute.py를 띄운 Claude Code 세션이 닫히면 생깁니다. step 상태는 그대로 두었으니 다시 실행하세요.")
+        sys.exit(1)
 
     def _checkout_branch(self):
         branch = f"feat-{self._phase_name}"
@@ -240,6 +252,7 @@ class StepExecutor:
             ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json"],
             input=prompt, cwd=self._root, capture_output=True, encoding="utf-8", timeout=1800,
         )
+        self._exit_if_spawn_failed(result.returncode, "claude")
 
         if result.returncode != 0:
             print(f"\n  WARN: Claude가 비정상 종료됨 (code {result.returncode})")
@@ -308,7 +321,7 @@ class StepExecutor:
 
             with progress_indicator(tag) as pi:
                 self._invoke_claude(step, preamble)
-                elapsed = int(pi.elapsed)
+            elapsed = int(pi.elapsed)  # elapsed는 with를 나갈 때 채워진다
 
             index = self._read_json(self._index_file)
             status = next((s.get("status", "pending") for s in index["steps"] if s["step"] == step_num), "pending")
