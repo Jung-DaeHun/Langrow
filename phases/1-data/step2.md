@@ -114,7 +114,7 @@ export async function getWordsByIds(ids: string[]): Promise<{ id: string; langua
 
 ```bash
 npx supabase db reset
-npx supabase gen types typescript --local | diff -q - src/types/database.ts   # 생성 타입이 최신
+npx supabase gen types typescript --local | diff -q --strip-trailing-cr - src/types/database.ts   # 생성 타입이 최신
 npm run lint
 npm run build
 npm run test
