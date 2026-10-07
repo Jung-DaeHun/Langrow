@@ -18,6 +18,7 @@ function fakeDeps(
   options: {
     args?: string[];
     existing?: string[];
+    files?: Record<string, string>; // 읽을 수 있는 파일 (낮은 레벨 단어 파일)
     generate?: (request: GenerateRequest, call: number) => unknown[];
   } = {},
 ) {
@@ -32,7 +33,12 @@ function fakeDeps(
       if (options.generate) return options.generate(request, requests.length);
       return Array.from({ length: request.count }, () => aiWord(next++));
     },
-    fileExists: async (path) => (options.existing ?? []).includes(path),
+    fileExists: async (path) => (options.existing ?? []).includes(path) || path in (options.files ?? {}),
+    readFile: async (path) => {
+      const content = options.files?.[path];
+      if (content === undefined) throw new Error(`없는 파일: ${path}`);
+      return content;
+    },
     writeFile: async (path, content) => {
       written.set(path, content);
     },
@@ -59,7 +65,11 @@ describe("generate-words main", () => {
   });
 
   it("이미 받은 단어 목록을 다음 요청에 넘긴다", async () => {
-    const { deps, requests } = fakeDeps({ args: ["--language", "ja", "--level", "3"], generate: () => [] });
+    const { deps, requests } = fakeDeps({
+      args: ["--language", "ja", "--level", "3"],
+      files: { "data/words/ja-1.json": "[]", "data/words/ja-2.json": "[]" },
+      generate: () => [],
+    });
     await main(deps);
     expect(requests[0]).toMatchObject({ language: "ja", level: 3, exclude: [] });
 
@@ -95,6 +105,46 @@ describe("generate-words main", () => {
     expect(texts).not.toContain("go9003");
     expect(texts.filter((t: string) => t === "go6")).toHaveLength(1);
     expect(requests.reduce((sum, r) => sum + r.count, 0)).toBe(WORDS_PER_LEVEL + 5);
+  });
+
+  it("같은 언어의 낮은 레벨 단어를 요청에 넘기고, 돌아와도 버린다", async () => {
+    const { deps, requests, written } = fakeDeps({
+      args: ["--language", "en", "--level", "3"],
+      files: {
+        "data/words/en-1.json": JSON.stringify([{ word: "go1" }, { word: "go2" }]),
+        "data/words/en-2.json": JSON.stringify([{ word: "go3" }]),
+        "data/words/ja-1.json": JSON.stringify([{ word: "go4" }]),
+      },
+    });
+
+    expect(await main(deps)).toBe(0);
+
+    for (const request of requests) expect(request.lowerLevelWords).toEqual(["go1", "go2", "go3"]);
+    const texts = JSON.parse(written.get("data/words/en-3.json")!).map((w: { word: string }) => w.word);
+    expect(texts).not.toContain("go1");
+    expect(texts).not.toContain("go2");
+    expect(texts).not.toContain("go3");
+    expect(texts).toContain("go4");
+    expect(requests.reduce((sum, r) => sum + r.count, 0)).toBe(WORDS_PER_LEVEL + 3);
+  });
+
+  it("레벨 1은 낮은 레벨 단어 없이 요청한다", async () => {
+    const { deps, requests } = fakeDeps();
+    expect(await main(deps)).toBe(0);
+    expect(requests.every((r) => r.lowerLevelWords.length === 0)).toBe(true);
+  });
+
+  it("낮은 레벨 파일이 하나라도 없으면 요청하지 않고 실패한다", async () => {
+    const { deps, requests, written, logs } = fakeDeps({
+      args: ["--language", "en", "--level", "3"],
+      files: { "data/words/en-1.json": "[]" },
+    });
+
+    expect(await main(deps)).toBe(1);
+
+    expect(requests).toHaveLength(0);
+    expect(written.size).toBe(0);
+    expect(logs.join("\n")).toContain("data/words/en-2.json");
   });
 
   it("호출 상한을 넘으면 파일을 쓰지 않고 실패한다", async () => {

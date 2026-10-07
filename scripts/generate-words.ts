@@ -20,12 +20,14 @@ export type GenerateRequest = {
   level: Level;
   count: number;
   exclude: string[]; // 이미 받은 단어. 빈도가 더 높아 앞 rank에 들어갔다
+  lowerLevelWords: string[]; // 같은 언어의 낮은 레벨에서 배운 단어
 };
 
 export type GenerateWordsDeps = {
   args: string[];
   generate: (request: GenerateRequest) => Promise<unknown[]>;
   fileExists: (path: string) => Promise<boolean>;
+  readFile: (path: string) => Promise<string>;
   writeFile: (path: string, content: string) => Promise<void>;
   log: (line: string) => void;
 };
@@ -78,11 +80,24 @@ export async function main(deps: GenerateWordsDeps): Promise<number> {
     return 1;
   }
 
+  // 레벨이 올라가도 같은 단어를 다시 배우지 않게 낮은 레벨 단어를 뺀다. 그래서 레벨 1부터 순서대로 만든다
+  const lowerLevelWords: string[] = [];
+  for (let lower = 1; lower < level; lower++) {
+    const lowerPath = `data/words/${language}-${lower}.json`;
+    if (!(await deps.fileExists(lowerPath))) {
+      deps.log(`${lowerPath} 파일이 없어서 만들지 않았습니다. 레벨 1부터 순서대로 만드세요`);
+      return 1;
+    }
+    const lowerWords = JSON.parse(await deps.readFile(lowerPath)) as { word: string }[];
+    lowerLevelWords.push(...lowerWords.map((w) => w.word));
+  }
+
   const words: WordEntry[] = [];
-  const seen = new Set<string>();
+  const seen = new Set<string>(lowerLevelWords);
   for (let call = 1; call <= MAX_GENERATE_CALLS && words.length < WORDS_PER_LEVEL; call++) {
     const count = Math.min(BATCH_SIZE, WORDS_PER_LEVEL - words.length);
-    const items = await deps.generate({ model, language, level, count, exclude: words.map((w) => w.word) });
+    const exclude = words.map((w) => w.word);
+    const items = await deps.generate({ model, language, level, count, exclude, lowerLevelWords });
     let accepted = 0;
     for (const item of items) {
       if (words.length === WORDS_PER_LEVEL) break;
@@ -129,7 +144,7 @@ const wordBatchSchema = z.object({
   ),
 });
 
-function buildPrompt({ language, level, count, exclude }: GenerateRequest): { system: string; user: string } {
+function buildPrompt({ language, level, count, exclude, lowerLevelWords }: GenerateRequest): { system: string; user: string } {
   const name = LANGUAGE_NAMES[language];
   const info = LEVEL_INFO[level];
   const lines = [
@@ -152,6 +167,9 @@ function buildPrompt({ language, level, count, exclude }: GenerateRequest): { sy
       "일본어는 example, {{ }} 안의 정답, distractors의 모든 한자에 [漢字|かな] 형식으로 읽기를 단다.",
       "예: word 行く, reading いく, example `[学校|がっこう]に{{[行|い]った}}。`, distractors `[行|い]く`, `[行|い]って`, `[行|い]かない`",
     );
+  }
+  if (lowerLevelWords.length > 0) {
+    lines.push("", `낮은 레벨에서 이미 배운 단어(넣지 않는다): ${lowerLevelWords.join(", ")}`);
   }
   lines.push("", `이미 고른 단어: ${exclude.length > 0 ? exclude.join(", ") : "(없음)"}`);
   return { system: `너는 한국인 학습자를 위한 ${name} 단어장을 만드는 편집자다.`, user: lines.join("\n") };
@@ -190,6 +208,7 @@ function realDeps(): GenerateWordsDeps {
       () => true,
       () => false,
     ),
+    readFile: (path) => fs.readFile(path, "utf8"),
     writeFile: async (path, content) => {
       await fs.mkdir(dirname(path), { recursive: true });
       await fs.writeFile(path, content, { flag: "wx" }); // 그사이 파일이 생겼어도 덮어쓰지 않는다
