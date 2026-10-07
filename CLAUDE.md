@@ -39,3 +39,13 @@ npm run test:db     # DB 통합 테스트 (로컬 Supabase 필요: supabase star
 npm run words:generate -- --language ja --level 1 [--model <id>]  # 단어 생성 (Anthropic API, 새 파일만 씀. 검수 후 커밋)
 npm run seed:words  # 단어 seed (data/words/*.json → Supabase)
 npm run metrics [-- --launch 2026-11-01]  # 수요 검증 지표 (분자/분모, METRICS_EXCLUDED_USER_IDS 제외)
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
