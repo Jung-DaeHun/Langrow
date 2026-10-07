@@ -162,6 +162,7 @@ function buildPrompt({ language, level, count, exclude, lowerLevelWords }: Gener
     "- distractors: 그 문장에 넣으면 틀리는 보기 3개. 서로 다르고 {{ }} 안의 정답과도 다르다",
     "  - 정답과 다른 형태를 3개 만들 수 있는 단어(동사 등)는 같은 단어의 다른 형태를 쓴다",
     "  - 만들 수 없는 단어(명사·부사 등)는 example_ko의 뜻과 맞지 않는 같은 품사의 다른 단어를 쓴다. 학습자는 한국어 문장을 보고 고른다",
+    "  - 보기는 활용 어미를 자르지 않은 완전한 형태로 쓴다. 어간만 남긴 조각은 보기로 쓰지 않는다",
     "",
     "예: word go, example `I {{went}} to school.`, distractors goes, gone, going",
     "예: word book, example `I read a {{book}} before bed.`, example_ko 나는 자기 전에 책을 읽는다., distractors chair, river, window",
@@ -169,6 +170,7 @@ function buildPrompt({ language, level, count, exclude, lowerLevelWords }: Gener
   if (language === "ja") {
     lines.push(
       "일본어는 example, {{ }} 안의 정답, distractors의 모든 한자에 [漢字|かな] 형식으로 읽기를 단다.",
+      "보기는 `[違|ちが]わない`, `[重|おも]ければ`처럼 완전한 형태로 쓴다. `[違|ちが]わ`, `[重|おも]けれ`, `[古|ふる]かっ` 같은 조각은 쓰지 않는다.",
       "예: word 行く, reading いく, example `[学校|がっこう]に{{[行|い]った}}。`, distractors `[行|い]く`, `[行|い]って`, `[行|い]かない`",
       "예: word 水, reading みず, example `{{[水|みず]}}を[飲|の]みたいです。`, example_ko 물을 마시고 싶어요., distractors `[本|ほん]`, `[駅|えき]`, `[先生|せんせい]`",
     );
