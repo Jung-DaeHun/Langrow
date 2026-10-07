@@ -25,6 +25,7 @@
 5. **AC는 실행 가능한 커맨드** — "~가 동작해야 한다" 같은 추상적 서술이 아닌 `npm run build && npm test` 같은 실제 실행 가능한 검증 커맨드를 포함한다.
 6. **주의사항은 구체적으로** — "조심해라" 대신 "X를 하지 마라. 이유: Y" 형식으로 적는다.
 7. **네이밍** — step name은 kebab-case slug로, 해당 step의 핵심 모듈/작업을 한두 단어로 표현한다 (예: `project-setup`, `api-layer`, `auth-flow`).
+8. **spec과 어긋나지 않기** — 상세 spec(`docs/spec/`)이 있으면 step 지시는 그 동작과 같아야 한다. 예외 흐름과 에러 코드별 동작도 빠뜨리지 않는다. spec과 다르게 하려면 spec을 먼저 고치고 그 결정을 step에 적는다. 이유: step 세션은 step 파일을 그대로 따르므로, step이 spec과 다르면 구현도 spec과 달라진다(예: "pending 턴을 그리지 마라"라는 지시가 spec의 "전송 중이면 완료를 기다린다"를 빠뜨리게 했다).
 
 ### D. 파일 생성
 
@@ -118,7 +119,8 @@ npm test        # 테스트 통과
    - ARCHITECTURE.md 디렉토리 구조를 따르는가?
    - ADR 기술 스택을 벗어나지 않았는가?
    - CLAUDE.md CRITICAL 규칙을 위반하지 않았는가?
-3. 결과에 따라 `phases/{task-name}/index.json`의 해당 step을 업데이트한다:
+3. 이 step이 구현한 spec 절을 문장 단위로 대조한다(예외 흐름·에러 코드별 동작 포함). step 지시와 spec이 다르면 step 지시를 따르고, 그 차이를 summary에 적는다.
+4. 결과에 따라 `phases/{task-name}/index.json`의 해당 step을 업데이트한다:
    - 성공 → `"status": "completed"`, `"summary": "산출물 한 줄 요약"`
    - 수정 3회 시도 후에도 실패 → `"status": "error"`, `"error_message": "구체적 에러 내용"`
    - 사용자 개입 필요 (API 키, 외부 인증, 수동 설정 등) → `"status": "blocked"`, `"blocked_reason": "구체적 사유"` 후 즉시 중단
@@ -144,6 +146,8 @@ execute.py가 자동으로 처리하는 것:
 - 자가 교정 — 실패 시 최대 3회 재시도하며, 이전 에러 메시지를 프롬프트에 피드백
 - 2단계 커밋 — 코드 변경(`feat`)과 메타데이터(`chore`)를 분리 커밋
 - 타임스탬프 — started_at, completed_at, failed_at, blocked_at 자동 기록
+
+phase가 끝나면 main에 병합하기 전에 spec 대조 점검을 한다. 영역별 읽기 전용 에이전트가 spec 문장과 코드를 대조하고, step summary에 적힌 spec과의 차이도 함께 본다. 고칠 항목은 테스트를 먼저 써서 고친 뒤 병합한다.
 
 에러 복구:
 
