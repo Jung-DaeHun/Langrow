@@ -297,6 +297,8 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 | Free, 체험 사용함 | 보상 Notice + [Pro 시작하기](primary sm) → "정식 출시 준비 중" 모달 |
 | 체험 중 | 정보 Notice(Moon): 자정에 다시 채워진다는 안내와 복습·레벨업 테스트는 계속 할 수 있다는 안내. 버튼 없음 |
 
+홈에서 대화·단어 한도에 모두 닿으면 안내는 하나만 둔다. 제목은 "오늘 AI 대화 턴과 새 단어를 모두 썼어요"이다(primary는 화면에 하나).
+
 ## 아이콘
 - `lucide-react`를 쓴다. 기본 크기는 20px(인라인 16, 탭바 22, 랜딩 기능 24)이고 `strokeWidth` 2다.
 - 색: 밝은 면 위에서는 `accent`, 어두운 면 위에서는 흰색, 꺾쇠·닫기는 `ink-muted`/`ink`이다.

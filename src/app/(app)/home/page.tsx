@@ -82,11 +82,10 @@ export default async function HomePage() {
   const focus = firstDay ? "chat" : wordOpen ? "words" : chatDone ? null : "chat";
 
   const chatLimit = remaining(usage.chatTurns, PLAN_LIMITS[plan].chatTurns) === 0;
-  // 소진이면 새 단어를 약속하는 체험 안내를 하지 않는다(spec 3장). 체험 중 안내는 기능과 무관하게 같은 문구라 한 번만 둔다
-  const wordsLimit =
-    remaining(usage.newWords, PLAN_LIMITS[plan].newWords) === 0 &&
-    !goal.exhausted &&
-    !(chatLimit && trial.kind === "active");
+  // 소진이면 새 단어를 약속하는 체험 안내를 하지 않는다(spec 3장)
+  const wordsLimit = remaining(usage.newWords, PLAN_LIMITS[plan].newWords) === 0 && !goal.exhausted;
+  // 두 한도에 모두 닿아도 안내는 하나다(primary는 화면에 하나)
+  const limitFeature = chatLimit && wordsLimit ? "both" : chatLimit ? "chat" : wordsLimit ? "words" : null;
 
   const active = sessions.find((s) => s.status === "active");
   const ending = sessions.find((s) => s.status === "ending");
@@ -174,8 +173,7 @@ export default async function HomePage() {
           </TodoCard>
         </div>
 
-        {chatLimit && <LimitNotice feature="chat" trial={trial} />}
-        {wordsLimit && <LimitNotice feature="words" trial={trial} />}
+        {limitFeature !== null && <LimitNotice feature={limitFeature} trial={trial} />}
       </section>
 
       {(activeScenario !== undefined || endingScenario !== undefined) && (

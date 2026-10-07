@@ -8,13 +8,18 @@ import { TrialButton } from "./TrialButton";
 
 // 한도 도달 안내 3상태(ui.md "한도 도달 안내"). 홈·대화방·단어 화면이 같이 쓴다. trial은 페이지가 서버 시각으로 계산한 값이다
 
-const TITLES = { chat: "오늘 AI 대화 턴을 모두 썼어요", words: "오늘 새 단어를 모두 썼어요" };
+// both: 홈에서 두 한도에 모두 닿았을 때 안내를 하나로 합친다(primary는 화면에 하나)
+const TITLES = {
+  chat: "오늘 AI 대화 턴을 모두 썼어요",
+  words: "오늘 새 단어를 모두 썼어요",
+  both: "오늘 AI 대화 턴과 새 단어를 모두 썼어요",
+};
 const NOTICE = "flex items-start gap-3 rounded-xl p-4";
 const OUTLINE_SM =
   "inline-flex h-9 items-center justify-center gap-2 rounded-full border border-accent bg-transparent px-4 text-sm font-semibold text-accent transition duration-200 hover:bg-black/5 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 type Props = {
-  feature: "chat" | "words";
+  feature: keyof typeof TITLES;
   trial: TrialState;
   onLater?: () => void;
   onTrialStarted?: () => void;

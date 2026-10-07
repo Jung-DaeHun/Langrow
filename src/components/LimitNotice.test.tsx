@@ -36,6 +36,13 @@ describe("LimitNotice 체험 가능", () => {
     expect(screen.getByText("오늘 새 단어를 모두 썼어요")).toBeInTheDocument();
   });
 
+  it("두 한도에 모두 닿았으면 안내 하나에 두 기능을 함께 적는다 (primary는 화면에 하나)", () => {
+    render(<LimitNotice feature="both" trial={{ kind: "available" }} />);
+
+    expect(screen.getByText("오늘 AI 대화 턴과 새 단어를 모두 썼어요")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "7일 무료 체험" })).toHaveLength(1);
+  });
+
   it("체험을 시작하면 onTrialStarted를 부른다", async () => {
     apiMock.mockResolvedValue({ ok: true, status: 200, data: { proUntil: "2026-10-13T13:00:00.000Z" } });
     const onTrialStarted = vi.fn();
