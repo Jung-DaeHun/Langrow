@@ -45,7 +45,9 @@ const PLAN_ROWS = [
     free: `하루 ${PLAN_LIMITS.free.newWords}개`,
     pro: `하루 ${PLAN_LIMITS.pro.newWords}개`,
   },
-  { label: "복습·레벨업 테스트·가나", free: "제한 없음", pro: "제한 없음" },
+  { label: "복습", free: "제한 없음", pro: "제한 없음" },
+  { label: "레벨업 테스트", free: "제한 없음", pro: "제한 없음" },
+  { label: "가나", free: "제한 없음", pro: "제한 없음" },
   { label: "가격", free: "무료", pro: `월 ${won(PRO_PRICE_KRW)}` },
 ];
 
