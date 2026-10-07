@@ -195,11 +195,15 @@ function createGenerate(): GenerateWordsDeps["generate"] {
         output_config: { format: zodOutputFormat(wordBatchSchema) },
       });
       // 거절되거나 잘린 응답은 빈 묶음으로 보고 main이 다시 요청한다
-      if (message.stop_reason !== "end_turn" || message.parsed_output === null) return [];
+      if (message.stop_reason !== "end_turn" || message.parsed_output === null) {
+        console.error(`빈 묶음: stop_reason ${message.stop_reason}, 출력 ${message.usage.output_tokens}토큰`);
+        return [];
+      }
       return message.parsed_output.words;
     } catch (error) {
       // 인증·사용량 같은 API 오류는 멈춘다. JSON 파싱·스키마 검증 실패만 빈 묶음으로 본다
       if (error instanceof Anthropic.APIError) throw error;
+      console.error(`빈 묶음: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   };
