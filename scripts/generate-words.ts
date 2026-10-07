@@ -127,8 +127,8 @@ export async function main(deps: GenerateWordsDeps): Promise<number> {
 
 // ---- 실제 deps (Anthropic API, 파일). 테스트는 가짜 deps만 쓴다 ----
 
-// SDK의 non-streaming 상한(약 21,000 토큰)보다 작게 둔다
-const MAX_TOKENS = 16_000;
+// thinking이 한도를 먼저 써서 단어 목록이 잘리지 않게 넉넉히 둔다. 이만큼 크면 SDK가 스트리밍을 요구한다
+const MAX_TOKENS = 64_000;
 
 // 길이·개수 제약은 넣지 않는다. 어긋난 항목은 main이 버리고 더 요청한다
 const wordBatchSchema = z.object({
@@ -187,13 +187,15 @@ function createGenerate(): GenerateWordsDeps["generate"] {
     client ??= new Anthropic({ apiKey: env.apiKey });
     const { system, user } = buildPrompt(request);
     try {
-      const message = await client.messages.parse({
-        model: request.model ?? env.model,
-        max_tokens: MAX_TOKENS,
-        system,
-        messages: [{ role: "user", content: user }],
-        output_config: { format: zodOutputFormat(wordBatchSchema) },
-      });
+      const message = await client.messages
+        .stream({
+          model: request.model ?? env.model,
+          max_tokens: MAX_TOKENS,
+          system,
+          messages: [{ role: "user", content: user }],
+          output_config: { format: zodOutputFormat(wordBatchSchema) },
+        })
+        .finalMessage();
       // 거절되거나 잘린 응답은 빈 묶음으로 보고 main이 다시 요청한다
       if (message.stop_reason !== "end_turn" || message.parsed_output === null) {
         console.error(`빈 묶음: stop_reason ${message.stop_reason}, 출력 ${message.usage.output_tokens}토큰`);
