@@ -37,6 +37,7 @@ type Props = {
   level: Level;
   words: Word[];
   todayCount?: number;
+  remainingToday?: number; // 오늘 남은 새 단어 한도. 목표를 넘겨 더 할 수 있는 Pro에게 알린다
   trial: TrialState;
 };
 type Phase = "start" | "cards" | "quiz" | "result";
@@ -54,7 +55,7 @@ function blankOf(word: Word): BlankParts {
   return blank;
 }
 
-export function WordSession({ mode, language, level, words, todayCount = 0, trial }: Props) {
+export function WordSession({ mode, language, level, words, todayCount = 0, remainingToday = 0, trial }: Props) {
   const router = useRouter();
   const startTitleId = useId();
   const reviewTitleId = useId();
@@ -163,7 +164,9 @@ export function WordSession({ mode, language, level, words, todayCount = 0, tria
             {LANGUAGE_NAMES[language]} · {LEVEL_INFO[level].name}
           </p>
           <p className="text-micro text-ink-muted tabular-nums">
-            오늘 {Math.min(todayCount, DAILY_WORD_GOAL)} / {DAILY_WORD_GOAL}
+            {todayCount >= DAILY_WORD_GOAL && remainingToday > 0
+              ? `오늘 목표 완료 · ${remainingToday}개 더 할 수 있어요`
+              : `오늘 ${Math.min(todayCount, DAILY_WORD_GOAL)} / ${DAILY_WORD_GOAL}`}
           </p>
         </div>
         <h2 id={startTitleId} className="text-[28px] leading-tight font-bold tracking-[-0.02em]">

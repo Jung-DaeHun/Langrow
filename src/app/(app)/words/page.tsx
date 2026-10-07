@@ -101,6 +101,7 @@ export default async function WordsPage({ searchParams }: { searchParams: Promis
         level={level}
         words={unseen.words.slice(0, size)}
         todayCount={usage.newWords}
+        remainingToday={rem}
         trial={trial}
       />
     );

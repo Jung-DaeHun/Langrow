@@ -122,6 +122,19 @@ describe("WordSession 오늘의 학습 시작 카드", () => {
 
     expect(screen.getByText("오늘 10 / 10")).toBeInTheDocument();
   });
+
+  it("오늘 목표를 채웠고 남은 한도가 있으면 더 할 수 있는 개수를 보여 준다", () => {
+    setup({ todayCount: 10, remainingToday: 20 });
+
+    expect(screen.getByText("오늘 목표 완료 · 20개 더 할 수 있어요")).toBeInTheDocument();
+    expect(screen.queryByText("오늘 10 / 10")).toBeNull();
+  });
+
+  it("목표 전이면 남은 한도가 있어도 n / 10을 보여 준다", () => {
+    setup({ todayCount: 3, remainingToday: 27 });
+
+    expect(screen.getByText("오늘 3 / 10")).toBeInTheDocument();
+  });
 });
 
 describe("WordSession 오늘의 학습 회차", () => {
