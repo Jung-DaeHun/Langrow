@@ -125,6 +125,22 @@ describe("OnboardingFlow 언어 단계", () => {
     expect(scrollTo).toHaveBeenCalledWith(0, 0);
   });
 
+  it("[이전]으로 동의 단계에 돌아가고, 다시 동의하면 언어 단계로 온다 (동의는 최초 시각을 유지한다)", async () => {
+    apiMock.mockResolvedValue(ok);
+    const user = setup({ kind: "language" });
+
+    await user.click(screen.getByRole("button", { name: "이전" }));
+
+    expect(screen.getByRole("heading", { name: "시작하기 전에 동의해 주세요" })).toBeInTheDocument();
+    expect(screen.getByText("1 / 3")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("button", { name: "동의하고 계속" }));
+
+    expect(apiMock).toHaveBeenCalledWith("POST", "/api/me/consent");
+    expect(screen.getByRole("heading", { name: "어떤 언어를 배울까요?" })).toBeInTheDocument();
+  });
+
   it("레벨 단계의 [이전]으로 언어 단계에 돌아가면 고른 언어가 선택돼 있다", async () => {
     const user = setup({ kind: "language" });
 

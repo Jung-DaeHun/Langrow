@@ -85,15 +85,17 @@ export function OnboardingFlow({ start }: Props) {
         취소
       </Link>
     );
-  } else if (step === "level") {
+  } else if (step === "consent") {
+    back = <p className="text-h3 font-extrabold tracking-[-0.03em] text-brand">Langrow</p>;
+  } else {
+    // 동의 단계로 돌아가 다시 동의해도 agree_terms는 최초 동의 시각을 유지한다
+    const previous = step === "level" ? "language" : "consent";
     back = (
-      <button type="button" onClick={() => go("language")} className={PILL}>
+      <button type="button" onClick={() => go(previous)} className={PILL}>
         <ChevronLeft size={16} aria-hidden="true" />
         이전
       </button>
     );
-  } else {
-    back = <p className="text-h3 font-extrabold tracking-[-0.03em] text-brand">Langrow</p>;
   }
 
   const errorNotice = error !== null && (
