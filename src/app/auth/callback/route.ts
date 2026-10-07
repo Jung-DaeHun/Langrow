@@ -13,6 +13,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const { data, error } = await (await getServerSupabase()).auth.exchangeCodeForSession(code);
   if (error) return NextResponse.redirect(failed);
 
-  await getDeps().db.ensureProfile(data.user.id);
+  try {
+    await getDeps().db.ensureProfile(data.user.id);
+  } catch (error) {
+    // 로그인은 됐지만 profiles 행을 못 만들었다. 다시 로그인하면 다시 만들고, 온보딩의 동의(agree_terms)도 행을 만든다
+    console.error(
+      JSON.stringify({
+        path: "/auth/callback",
+        userId: data.user.id,
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
+    return NextResponse.redirect(failed);
+  }
   return NextResponse.redirect(new URL("/home", request.url));
 }

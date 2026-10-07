@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeDeps } from "@/test/fakes";
 import { GET } from "./route";
 
@@ -21,6 +21,10 @@ function callback(query: string) {
 beforeEach(() => {
   deps = createFakeDeps();
   exchangeCodeForSession.mockReset().mockResolvedValue({ data: { user: { id: USER_ID }, session: {} }, error: null });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("GET /auth/callback", () => {
@@ -51,6 +55,17 @@ describe("GET /auth/callback", () => {
     expect(exchangeCodeForSession).toHaveBeenCalledWith("ok");
     expect(deps.db.ensureProfile).toHaveBeenCalledWith(USER_ID);
     expect(response.headers.get("location")).toBe(`${ORIGIN}/home`);
+  });
+
+  it("profile 생성이 throw하면 /?login=failed로 보내고 원인을 에러 로그로 남긴다", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    deps.db.ensureProfile = vi.fn().mockRejectedValue(new Error("RPC ensure_profile 실패: 57P01"));
+
+    const response = await callback("?code=ok");
+
+    expect(response.headers.get("location")).toBe(`${ORIGIN}/?login=failed`);
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(String(log.mock.calls[0][0])).toContain("RPC ensure_profile 실패: 57P01");
   });
 
   it.each(["next=https://evil.example", "redirect_to=https://evil.example", "next=//evil.example/home"])(
