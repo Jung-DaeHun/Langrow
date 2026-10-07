@@ -469,8 +469,8 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 ### 6-6. Claude 연동
 
-- **구조화 출력**: SDK의 구조화 출력을 쓴다 (`client.messages.parse()` + zod 스키마, `output_config.format`). Haiku 4.5가 지원한다. deprecated된 `output_format`은 쓰지 않는다. 스키마 검증 실패는 실패로 처리한다.
-- **실패로 처리하는 경우**: 파싱 실패, refusal, `max_tokens` 도달
+- **구조화 출력**: SDK의 구조화 출력을 쓴다 (`client.messages.create()` + zod 스키마, `output_config.format`). Haiku 4.5가 지원한다. deprecated된 `output_format`은 쓰지 않는다. `stop_reason`을 먼저 본 뒤 첫 text 블록을 zod로 파싱한다. `messages.parse()`는 `stop_reason`을 보기 전에 파싱하다 throw해서 실패 사유를 구분하지 못하므로 쓰지 않는다.
+- **실패로 처리하는 경우**(`chat_failed`의 실패 사유): refusal, `max_tokens` 도달, 파싱·스키마 검증 실패(`invalid_output`), 타임아웃, API 오류. env가 없거나 비어 있으면 API를 부르지 않고 재시도 없이 `config`로 실패하며, 키 이름만 에러 로그로 남긴다
 - **타임아웃과 재시도**: 호출당 타임아웃 20초. SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 메시지와 종료 라우트 모두 `maxDuration = 60`이며, 재시도 포함 AI 호출 전체 예산은 최대 약 40초다. 두 호출 모두 같은 작업 토큰을 사용한다. 중복 HTTP 요청이나 DB 확정 재시도 때문에 AI 호출을 새로 시작하지 않는다.
 - **토큰 상한**: `max_tokens`는 약 1024로 둔다.
 - **프롬프트**: 빌더는 순수 함수(`services/claude/prompts.ts`)로 단위 테스트하고, 스키마는 `schemas.ts`에 둔다.

@@ -5,14 +5,14 @@ import { createAi, type AiClient } from "./client";
 import { buildFeedbackPrompt, buildTurnPrompt, type FeedbackPromptInput, type TurnPromptInput } from "./prompts";
 import type { Feedback, TurnReply } from "./schemas";
 
-type FakeResponse = { stop_reason: Anthropic.StopReason | null; parsed_output: unknown };
+type FakeResponse = { stop_reason: Anthropic.StopReason | null; content: { type: string; text?: string }[] };
 
 // 준비한 응답을 순서대로 돌려주고, 받은 요청을 기록한다
 function fakeClient(...responses: (FakeResponse | Error)[]) {
   const requests: Record<string, unknown>[] = [];
   const client = {
     messages: {
-      async parse(params: Record<string, unknown>) {
+      async create(params: Record<string, unknown>) {
         requests.push(params);
         const next = responses.shift();
         if (next === undefined) throw new Error("준비한 응답이 없다");
@@ -24,7 +24,11 @@ function fakeClient(...responses: (FakeResponse | Error)[]) {
   return { client, requests };
 }
 
-const done = (parsed_output: unknown): FakeResponse => ({ stop_reason: "end_turn", parsed_output });
+const text = (stop_reason: Anthropic.StopReason, body: string): FakeResponse => ({
+  stop_reason,
+  content: [{ type: "text", text: body }],
+});
+const done = (value: unknown): FakeResponse => text("end_turn", JSON.stringify(value));
 
 const scenario = scenariosForLevel(1)[1];
 const turnInput: TurnPromptInput = { language: "en", level: 1, scenario, history: [], userText: "I want latte." };
@@ -50,6 +54,7 @@ function setup(...responses: (FakeResponse | Error)[]) {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.restoreAllMocks();
 });
 
 describe("createAi", () => {
@@ -85,23 +90,25 @@ describe("generateTurn", () => {
   });
 
   it("두 번 모두 실패하면 정확히 두 번 부르고 마지막 실패를 돌려준다", async () => {
-    const { ai, requests } = setup(new Anthropic.APIConnectionTimeoutError(), { stop_reason: "refusal", parsed_output: null });
+    const { ai, requests } = setup(new Anthropic.APIConnectionTimeoutError(), text("refusal", "I can't help with that."));
     expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason: "refusal" });
     expect(requests).toHaveLength(2);
   });
 
   it.each([
-    ["refusal", { stop_reason: "refusal", parsed_output: null }],
-    ["max_tokens", { stop_reason: "max_tokens", parsed_output: null }],
-    ["invalid_output", { stop_reason: "end_turn", parsed_output: null }],
-  ] as const)("%s 응답은 실패로 처리한다", async (reason, response) => {
+    ["거절 응답은 JSON이 아니어도 refusal", text("refusal", "I can't help with that."), "refusal"],
+    ["잘린 JSON은 max_tokens", text("max_tokens", '{"reply": "Sure! What'), "max_tokens"],
+    ["JSON이 아니면 invalid_output", text("end_turn", "Sure! What size?"), "invalid_output"],
+    ["스키마에 맞지 않으면 invalid_output", done({ reply: "Sure!" }), "invalid_output"],
+    ["text 블록이 없으면 invalid_output", { stop_reason: "end_turn", content: [] } as FakeResponse, "invalid_output"],
+  ] as const)("%s", async (_, response, reason) => {
     const { ai, requests } = setup(response, response);
     expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason });
     expect(requests).toHaveLength(2);
   });
 
-  it("stop_reason을 parsed_output보다 먼저 본다", async () => {
-    const truncated: FakeResponse = { stop_reason: "max_tokens", parsed_output: reply };
+  it("stop_reason을 응답 내용보다 먼저 본다", async () => {
+    const truncated = text("max_tokens", JSON.stringify(reply));
     const { ai } = setup(truncated, truncated);
     expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason: "max_tokens" });
   });
@@ -116,12 +123,22 @@ describe("generateTurn", () => {
     ["타임아웃 에러는 timeout", new Anthropic.APIConnectionTimeoutError(), "timeout"],
     ["연결 오류는 api_error", new Anthropic.APIConnectionError({ message: "connection failed" }), "api_error"],
     ["HTTP 상태 오류는 api_error", new Anthropic.InternalServerError(529, undefined, "overloaded", new Headers()), "api_error"],
-    ["SDK의 파싱·검증 실패는 invalid_output", new Anthropic.AnthropicError("Failed to parse structured output"), "invalid_output"],
     ["그 밖의 예외는 invalid_output", new TypeError("unexpected"), "invalid_output"],
   ] as const)("%s", async (_, error, reason) => {
     const { ai, requests } = setup(error, error);
     expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason });
     expect(requests).toHaveLength(2);
+  });
+
+  it("env가 없으면 API를 부르지 않고 다시 시도하지 않으며, 키 이름만 로그로 남기고 config로 실패한다", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "");
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fake = fakeClient(done(reply));
+    const ai = createAi({ client: fake.client });
+    expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason: "config" });
+    expect(fake.requests).toHaveLength(0);
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(String(log.mock.calls[0][0])).toContain("ANTHROPIC_API_KEY");
   });
 });
 

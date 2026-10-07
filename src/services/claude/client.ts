@@ -1,7 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import type { AutoParseableOutputFormat } from "@anthropic-ai/sdk/lib/parser";
 import type { z } from "zod";
 import { getClaudeEnv } from "@/services/env";
 import { buildFeedbackPrompt, buildTurnPrompt, type FeedbackPromptInput, type TurnPromptInput } from "./prompts";
@@ -11,7 +10,8 @@ const MAX_TOKENS = 1024;
 const TIMEOUT_MS = 20_000;
 const IMPROVE_MAX = 3;
 
-export type AiFailureReason = "timeout" | "api_error" | "refusal" | "max_tokens" | "invalid_output";
+// config: env가 없거나 비어 있음(배포 설정 오류). API를 부르지 않는다
+export type AiFailureReason = "timeout" | "api_error" | "refusal" | "max_tokens" | "invalid_output" | "config";
 export type AiResult<T> = { ok: true; value: T } | { ok: false; reason: AiFailureReason };
 export type Ai = {
   generateTurn(input: TurnPromptInput): Promise<AiResult<TurnReply>>;
@@ -21,18 +21,18 @@ export type Ai = {
 // 실제 SDK 클라이언트와 테스트의 가짜가 함께 맞추는 최소 타입
 export type AiClient = {
   messages: {
-    parse<T>(
-      params: Anthropic.MessageCreateParamsNonStreaming & { output_config: { format: AutoParseableOutputFormat<T> } },
-    ): PromiseLike<{ stop_reason: Anthropic.StopReason | null; parsed_output: T | null }>;
+    create(
+      params: Anthropic.MessageCreateParamsNonStreaming,
+    ): PromiseLike<{ stop_reason: Anthropic.StopReason | null; content: Anthropic.ContentBlock[] }>;
   };
 };
 
 type Prompt = { system: string; messages: Anthropic.MessageParam[] };
 
-// 실패하면 딱 한 번 다시 부른다. 두 번 모두 실패하면 마지막 실패를 돌려준다
+// 실패하면 딱 한 번 다시 부른다. 두 번 모두 실패하면 마지막 실패를 돌려준다. 설정 오류는 다시 불러도 같다
 async function withRetry<T>(call: () => Promise<AiResult<T>>): Promise<AiResult<T>> {
   const first = await call();
-  return first.ok ? first : call();
+  return first.ok || first.reason === "config" ? first : call();
 }
 
 export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
@@ -61,26 +61,37 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
     buildPrompt: () => Prompt,
     accept: (value: T) => T | null,
   ): Promise<AiResult<T>> {
+    let config: { client: AiClient; model: string };
     try {
-      const { client, model } = resolve();
+      config = resolve();
+    } catch (error) {
+      // env 에러 메시지에는 키 이름만 있고 값은 없다(services/env.ts)
+      console.error(JSON.stringify({ ai: "config", error: error instanceof Error ? error.message : String(error) }));
+      return { ok: false, reason: "config" };
+    }
+
+    try {
       const { system, messages } = buildPrompt();
-      const message = await client.messages.parse({
-        model,
+      const format = zodOutputFormat(schema);
+      // messages.parse()는 stop_reason을 보기 전에 파싱하다 throw해서, 잘리거나 거절된 응답이 파싱 실패로 보인다.
+      // 그래서 create()로 받아 stop_reason을 먼저 보고 직접 파싱한다
+      const message = await config.client.messages.create({
+        model: config.model,
         max_tokens: MAX_TOKENS,
         system,
         messages,
-        output_config: { format: zodOutputFormat(schema) },
+        output_config: { format },
       });
-      // 거절되거나 잘린 응답은 parsed_output이 있어도 실패다
       if (message.stop_reason === "refusal") return { ok: false, reason: "refusal" };
       if (message.stop_reason === "max_tokens") return { ok: false, reason: "max_tokens" };
-      const value = message.parsed_output === null ? null : accept(message.parsed_output);
-      return value === null ? { ok: false, reason: "invalid_output" } : { ok: true, value };
+      const text = message.content.find((block) => block.type === "text")?.text;
+      const value = text === undefined ? null : parseOutput(format, text);
+      const accepted = value === null ? null : accept(value);
+      return accepted === null ? { ok: false, reason: "invalid_output" } : { ok: true, value: accepted };
     } catch (error) {
       // 타임아웃 에러는 APIError의 하위 클래스라 먼저 확인한다
       if (error instanceof Anthropic.APIConnectionTimeoutError) return { ok: false, reason: "timeout" };
       if (error instanceof Anthropic.APIError) return { ok: false, reason: "api_error" };
-      // SDK는 JSON 파싱·zod 검증 실패를 APIError가 아닌 AnthropicError로 throw한다
       return { ok: false, reason: "invalid_output" };
     }
   }
@@ -98,4 +109,13 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
         })),
       ),
   };
+}
+
+// JSON이 아니거나 스키마에 맞지 않으면 null
+function parseOutput<T>(format: { parse(content: string): T }, text: string): T | null {
+  try {
+    return format.parse(text);
+  } catch {
+    return null;
+  }
 }

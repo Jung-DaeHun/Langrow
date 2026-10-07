@@ -31,7 +31,7 @@
 **트레이드오프**: 202 재확인 처리가 클라이언트와 래퍼에 들어간다. 대체 결과 확정 후 피드백 재생성은 하지 않는다.
 
 ### ADR-006: Claude Haiku 4.5 + 구조화 출력, 스트리밍·캐싱 없음
-**결정**: 기본 모델은 `claude-haiku-4-5-20251001`(환경변수로 변경). `client.messages.parse()` + zod로 `{ reply, reply_ko, correction }`을 받는다. SDK 재시도는 끄고 직접 1번 재시도한다.
+**결정**: 기본 모델은 `claude-haiku-4-5-20251001`(환경변수로 변경). `client.messages.create()` + 구조화 출력(`output_config.format`)으로 받고, `stop_reason`을 먼저 본 뒤 zod로 `{ reply, reply_ko, correction }`을 파싱한다. SDK 재시도는 끄고 직접 1번 재시도한다.
 **이유**: 대화 1회 약 $0.004로 비용이 낮다. 프롬프트가 Haiku 4.5의 캐시 최소 길이(4096토큰)에 못 미칠 가능성이 크다.
 **트레이드오프**: 응답을 한 번에 받아 체감 대기 시간이 있다. 일본어 교정 품질은 출시 전에 샘플로 확인한다.
 
