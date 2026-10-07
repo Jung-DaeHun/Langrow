@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { stripFurigana } from "@/lib/furigana";
-import { LANGUAGES, LEVELS, type Language, type Level } from "@/lib/levels";
+import { LANGUAGE_NAMES, LANGUAGES, LEVELS, type Language, type Level } from "@/lib/levels";
 import { scenariosForLevel } from "@/lib/scenarios";
 import { buildFeedbackPrompt, buildTurnPrompt, type TurnPromptInput } from "./prompts";
 
@@ -85,6 +85,51 @@ describe("buildTurnPrompt", () => {
       expect(system.includes("한국어로 말해도 된다")).toBe(level <= 2);
     },
   );
+
+  it.each(LANGUAGES.flatMap((language) => ([1, 2] as const).map((level) => [language, level] as const)))(
+    "%s 레벨 %i: 한국어 입력이면 자연스러워도 correction을 비우지 않고, 한국어 문장 자체는 고치지 않는다",
+    (language, level) => {
+      const { system } = buildTurnPrompt(turnInput(language, level));
+      expect(system).toContain("한국어가 들어 있으면 자연스러운 문장이어도 correction을 null로 두지 않는다");
+      expect(system).toContain("한국어 문장 자체의 맞춤법·표현은 고치거나 평가하지 않는다");
+    },
+  );
+
+  it.each([
+    ["ja", "[韓国|かんこく]から[来|き]ました。"],
+    ["en", "I'm from Korea."],
+  ] as const)("%s 레벨 1~2: 한국어 입력을 학습 언어로 옮기는 예시를 든다", (language, example) => {
+    expect(buildTurnPrompt(turnInput(language, 1)).system).toContain(example);
+  });
+
+  it.each([
+    ["ja", "가타카나", "チョン・デフン"],
+    ["en", "로마자", "Jeong Daehun"],
+  ] as const)("%s: 한국 사람 이름·지명은 %s로 쓰라고 한다", (language, script, example) => {
+    for (const level of LEVELS) {
+      const { system } = buildTurnPrompt(turnInput(language, level));
+      expect(system).toContain(`한국 사람 이름·지명은 ${script}로 쓴다`);
+      expect(system).toContain(example);
+    }
+  });
+
+  it.each([1, 2, 3] as const)("일본어 레벨 %i: 읽기 표기는 한자에만 달라고 한다", (level) => {
+    expect(buildTurnPrompt(turnInput("ja", level)).system).toContain("읽기 표기는 한자에만 단다");
+  });
+
+  it.each(LANGUAGES)("%s: corrected는 학습 언어로만 쓰라고 한다", (language) => {
+    expect(buildTurnPrompt(turnInput(language, 3)).system).toContain(`corrected: 고친 ${LANGUAGE_NAMES[language]} 문장. ${LANGUAGE_NAMES[language]}로만 쓴다`);
+  });
+
+  it.each([
+    [1, "대구에서 왔어요", true],
+    [2, "コーヒー 좋아해요", true],
+    [1, "I'm from Daegu.", false],
+    [3, "대구에서 왔어요", false],
+  ] as const)("레벨 %i 입력 %s: 이번 말에 한국어가 있다는 안내를 붙이는가 %s", (level, userText, expected) => {
+    const { system } = buildTurnPrompt(turnInput("ja", level, { userText }));
+    expect(system.includes("이번 사용자의 말에는 한국어가 들어 있다")).toBe(expected);
+  });
 
   it("역할 변경·지시 무시·시스템 프롬프트 공개 요구에도 역할과 형식을 유지하라고 한다", () => {
     const { system } = buildTurnPrompt(turnInput("en", 1));
