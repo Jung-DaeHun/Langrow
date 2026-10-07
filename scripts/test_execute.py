@@ -144,66 +144,6 @@ class TestJsonHelpers:
 
 
 # ---------------------------------------------------------------------------
-# _load_guardrails
-# ---------------------------------------------------------------------------
-
-class TestLoadGuardrails:
-    def test_loads_claude_md_and_docs(self, executor, tmp_project):
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "# Rules" in result
-        assert "rule one" in result
-        assert "# Architecture" in result
-        assert "# Guide" in result
-
-    def test_sections_separated_by_divider(self, executor, tmp_project):
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "---" in result
-
-    def test_docs_sorted_alphabetically(self, executor, tmp_project):
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        arch_pos = result.index("arch")
-        guide_pos = result.index("guide")
-        assert arch_pos < guide_pos
-
-    def test_reads_korean_docs_as_utf8(self, executor, tmp_project):
-        (tmp_project / "CLAUDE.md").write_text("# 규칙\n- 한국어 규칙", encoding="utf-8")
-        (tmp_project / "docs" / "arch.md").write_text("# 아키텍처 ✓", encoding="utf-8")
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "한국어 규칙" in result
-        assert "# 아키텍처 ✓" in result
-
-    def test_no_claude_md(self, executor, tmp_project):
-        (tmp_project / "CLAUDE.md").unlink()
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "CLAUDE.md" not in result
-        assert "Architecture" in result
-
-    def test_no_docs_dir(self, executor, tmp_project):
-        import shutil
-        shutil.rmtree(tmp_project / "docs")
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "Rules" in result
-        assert "Architecture" not in result
-
-    def test_empty_project(self, tmp_path):
-        with patch.object(ex, "ROOT", tmp_path):
-            # executor가 필요 없는 static-like 동작이므로 임시 인스턴스
-            phases_dir = tmp_path / "phases" / "dummy"
-            phases_dir.mkdir(parents=True)
-            idx = {"project": "T", "phase": "t", "steps": []}
-            (phases_dir / "index.json").write_text(json.dumps(idx), encoding="utf-8")
-            inst = ex.StepExecutor.__new__(ex.StepExecutor)
-            result = inst._load_guardrails()
-        assert result == ""
-
-
-# ---------------------------------------------------------------------------
 # _build_step_context
 # ---------------------------------------------------------------------------
 
@@ -243,43 +183,49 @@ class TestBuildStepContext:
 
 class TestBuildPreamble:
     def test_includes_project_name(self, executor):
-        result = executor._build_preamble("", "")
+        result = executor._build_preamble(2, "")
         assert "TestProject" in result
-
-    def test_includes_guardrails(self, executor):
-        result = executor._build_preamble("GUARD_CONTENT", "")
-        assert "GUARD_CONTENT" in result
 
     def test_includes_step_context(self, executor):
         ctx = "## 이전 Step 산출물\n\n- Step 0: done"
-        result = executor._build_preamble("", ctx)
+        result = executor._build_preamble(2, ctx)
         assert "이전 Step 산출물" in result
 
     def test_includes_commit_example(self, executor):
-        result = executor._build_preamble("", "")
+        result = executor._build_preamble(2, "")
         assert "feat(mvp):" in result
 
     def test_includes_rules(self, executor):
-        result = executor._build_preamble("", "")
+        result = executor._build_preamble(2, "")
         assert "작업 규칙" in result
         assert "AC" in result
 
     def test_no_retry_section_by_default(self, executor):
-        result = executor._build_preamble("", "")
+        result = executor._build_preamble(2, "")
         assert "이전 시도 실패" not in result
 
     def test_retry_section_with_prev_error(self, executor):
-        result = executor._build_preamble("", "", prev_error="타입 에러 발생")
+        result = executor._build_preamble(2, "", prev_error="타입 에러 발생")
         assert "이전 시도 실패" in result
         assert "타입 에러 발생" in result
 
     def test_includes_max_retries(self, executor):
-        result = executor._build_preamble("", "")
+        result = executor._build_preamble(2, "")
         assert str(ex.StepExecutor.MAX_RETRIES) in result
 
-    def test_includes_index_path(self, executor):
-        result = executor._build_preamble("", "")
-        assert "/phases/0-mvp/index.json" in result
+    def test_asks_for_result_file_instead_of_index(self, executor):
+        # index.json을 통째로 읽고 고치면 앞 step summary가 전부 컨텍스트에 들어온다
+        result = executor._build_preamble(2, "")
+        assert "/phases/0-mvp/step2-result.json" in result
+        assert "index.json은 읽거나 고치지 마라" in result
+
+    def test_states_summary_limit(self, executor):
+        result = executor._build_preamble(2, "")
+        assert f"{ex.StepExecutor.SUMMARY_LIMIT}자" in result
+
+    def test_mentions_spec_diff_field(self, executor):
+        result = executor._build_preamble(2, "")
+        assert "spec_diff" in result
 
 
 # ---------------------------------------------------------------------------
@@ -445,6 +391,20 @@ class TestCommitStep:
         assert len(commit_msgs) == 1
         assert "chore" in commit_msgs[0]
 
+    def test_result_file_kept_out_of_feat_commit(self, executor):
+        calls = []
+        def fake_git(*args):
+            calls.append(args)
+            if args[:2] == ("diff", "--cached"):
+                return MagicMock(returncode=1)
+            return MagicMock(returncode=0, stdout="", stderr="")
+        executor._run_git = fake_git
+
+        executor._commit_step(2, "ui")
+
+        first_commit = next(i for i, c in enumerate(calls) if c[0] == "commit")
+        assert ("reset", "HEAD", "--", "phases/0-mvp/step2-result.json") in calls[:first_commit]
+
 
 # ---------------------------------------------------------------------------
 # _invoke_claude (mocked)
@@ -533,6 +493,26 @@ class TestInvokeClaude:
 # ---------------------------------------------------------------------------
 
 class TestExecuteSingleStep:
+    STEP = {"step": 2, "name": "ui"}
+
+    def _fake_claude(self, executor, results):
+        """시도마다 results의 다음 값을 step2-result.json에 쓴다. None이면 아무것도 쓰지 않고, str이면 그대로 쓴다."""
+        preambles = []
+        result_file = executor._phase_dir / "step2-result.json"
+        def fake(step, preamble):
+            preambles.append(preamble)
+            r = results[len(preambles) - 1]
+            if isinstance(r, dict):
+                result_file.write_text(json.dumps(r, ensure_ascii=False), encoding="utf-8")
+            elif isinstance(r, str):
+                result_file.write_text(r, encoding="utf-8")
+        executor._invoke_claude = fake
+        executor._commit_step = MagicMock()
+        return preambles
+
+    def _step_entry(self, executor):
+        return json.loads(executor._index_file.read_text(encoding="utf-8"))["steps"][2]
+
     def test_reports_elapsed_seconds(self, executor, capsys):
         @contextlib.contextmanager
         def fake_indicator(label):
@@ -540,17 +520,108 @@ class TestExecuteSingleStep:
             yield info
             info.elapsed = 42.7
 
-        def complete_step(step, preamble):
-            index = json.loads(executor._index_file.read_text(encoding="utf-8"))
-            index["steps"][2]["status"] = "completed"
-            executor._index_file.write_text(json.dumps(index), encoding="utf-8")
-
-        executor._invoke_claude = complete_step
-        executor._commit_step = MagicMock()
+        self._fake_claude(executor, [{"status": "completed", "summary": "UI 구현"}])
         with patch.object(ex, "progress_indicator", fake_indicator):
-            executor._execute_single_step({"step": 2, "name": "ui"}, "guardrails")
+            executor._execute_single_step(self.STEP)
 
         assert "✓ Step 2: ui [42s]" in capsys.readouterr().out
+
+    def test_prompt_does_not_include_claude_md_or_docs(self, executor):
+        # CLAUDE.md는 claude -p가 자동으로 읽고, docs는 step 파일이 필요한 것만 읽게 한다
+        preambles = self._fake_claude(executor, [{"status": "completed", "summary": "UI 구현"}])
+
+        executor._execute_single_step(self.STEP)
+
+        assert "rule one" not in preambles[0]
+        assert "# Architecture" not in preambles[0]
+        assert "# Guide" not in preambles[0]
+
+    def test_completed_result_is_copied_to_index(self, executor):
+        self._fake_claude(executor, [{"status": "completed", "summary": "UI 구현", "spec_diff": "버튼 문구가 spec과 다름"}])
+
+        assert executor._execute_single_step(self.STEP) is True
+
+        entry = self._step_entry(executor)
+        assert entry["status"] == "completed"
+        assert entry["summary"] == "UI 구현"
+        assert "completed_at" in entry
+        # spec_diff는 다음 step 프롬프트로 가지 않게 결과 파일에만 남긴다
+        assert "spec_diff" not in entry
+        executor._commit_step.assert_called_once_with(2, "ui")
+
+    def test_long_summary_is_clipped_in_index(self, executor):
+        limit = ex.StepExecutor.SUMMARY_LIMIT
+        self._fake_claude(executor, [{"status": "completed", "summary": "가" * (limit + 100)}])
+
+        executor._execute_single_step(self.STEP)
+
+        assert self._step_entry(executor)["summary"] == "가" * limit + "…"
+        # 원문은 결과 파일에 남는다
+        result = json.loads((executor._phase_dir / "step2-result.json").read_text(encoding="utf-8"))
+        assert len(result["summary"]) == limit + 100
+
+    def test_stale_result_file_is_removed_before_each_attempt(self, executor):
+        # 이전 실행이 남긴 결과 파일을 이번 시도의 결과로 읽으면 안 된다
+        result_file = executor._phase_dir / "step2-result.json"
+        result_file.write_text(json.dumps({"status": "completed", "summary": "옛 결과"}), encoding="utf-8")
+        seen = []
+        def fake(step, preamble):
+            seen.append(result_file.exists())
+            result_file.write_text(json.dumps({"status": "completed", "summary": "새 결과"}), encoding="utf-8")
+        executor._invoke_claude = fake
+        executor._commit_step = MagicMock()
+
+        executor._execute_single_step(self.STEP)
+
+        assert seen == [False]
+        assert self._step_entry(executor)["summary"] == "새 결과"
+
+    def test_blocked_result_marks_index_and_exits_2(self, executor):
+        self._fake_claude(executor, [{"status": "blocked", "blocked_reason": "API 키 필요"}])
+
+        with pytest.raises(SystemExit) as exc_info:
+            executor._execute_single_step(self.STEP)
+
+        assert exc_info.value.code == 2
+        entry = self._step_entry(executor)
+        assert entry["status"] == "blocked"
+        assert entry["blocked_reason"] == "API 키 필요"
+        assert "blocked_at" in entry
+
+    def test_error_result_is_retried_with_message(self, executor):
+        preambles = self._fake_claude(executor, [
+            {"status": "error", "error_message": "타입 에러 발생"},
+            {"status": "completed", "summary": "UI 구현"},
+        ])
+
+        executor._execute_single_step(self.STEP)
+
+        assert len(preambles) == 2
+        assert "타입 에러 발생" in preambles[1]
+        entry = self._step_entry(executor)
+        assert entry["status"] == "completed"
+        assert "error_message" not in entry
+
+    def test_invalid_result_json_is_retried_as_error(self, executor):
+        preambles = self._fake_claude(executor, ['{"status": "completed", "summary": "따옴표 "깨짐""}', {"status": "completed", "summary": "UI 구현"}])
+
+        executor._execute_single_step(self.STEP)
+
+        assert "step2-result.json" in preambles[1]
+        assert self._step_entry(executor)["status"] == "completed"
+
+    def test_missing_result_after_max_retries_marks_error(self, executor):
+        preambles = self._fake_claude(executor, [None] * ex.StepExecutor.MAX_RETRIES)
+
+        with pytest.raises(SystemExit) as exc_info:
+            executor._execute_single_step(self.STEP)
+
+        assert exc_info.value.code == 1
+        assert len(preambles) == ex.StepExecutor.MAX_RETRIES
+        entry = self._step_entry(executor)
+        assert entry["status"] == "error"
+        assert "Step did not update status" in entry["error_message"]
+        assert "failed_at" in entry
 
     def test_spawn_failure_stops_without_retry_or_error_status(self, executor):
         executor._commit_step = MagicMock()
@@ -558,7 +629,7 @@ class TestExecuteSingleStep:
 
         with patch("subprocess.run", return_value=mock_result) as mock_run:
             with pytest.raises(SystemExit):
-                executor._execute_single_step({"step": 2, "name": "ui"}, "guardrails")
+                executor._execute_single_step(self.STEP)
 
         assert mock_run.call_count == 1
         step = json.loads(executor._index_file.read_text(encoding="utf-8"))["steps"][2]

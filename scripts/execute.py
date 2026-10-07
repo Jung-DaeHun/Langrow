@@ -54,6 +54,8 @@ class StepExecutor:
     """Phase 디렉토리 안의 step들을 순차 실행하는 하네스."""
 
     MAX_RETRIES = 3
+    # summary는 다음 step 프롬프트마다 누적되므로 길이를 묶는다
+    SUMMARY_LIMIT = 500
     FEAT_MSG = "feat({phase}): step {num} — {name}"
     CHORE_MSG = "chore({phase}): step {num} output"
     TZ = timezone(timedelta(hours=9))
@@ -86,9 +88,8 @@ class StepExecutor:
         self._print_header()
         self._check_blockers()
         self._checkout_branch()
-        guardrails = self._load_guardrails()
         self._ensure_created_at()
-        self._execute_all_steps(guardrails)
+        self._execute_all_steps()
         self._finalize()
 
     # --- timestamps ---
@@ -147,10 +148,12 @@ class StepExecutor:
 
     def _commit_step(self, step_num: int, step_name: str):
         output_rel = f"phases/{self._phase_dir_name}/step{step_num}-output.json"
+        result_rel = f"phases/{self._phase_dir_name}/step{step_num}-result.json"
         index_rel = f"phases/{self._phase_dir_name}/index.json"
 
         self._run_git("add", "-A")
         self._run_git("reset", "HEAD", "--", output_rel)
+        self._run_git("reset", "HEAD", "--", result_rel)
         self._run_git("reset", "HEAD", "--", index_rel)
 
         if self._run_git("diff", "--cached", "--quiet").returncode != 0:
@@ -184,18 +187,9 @@ class StepExecutor:
                 break
         self._write_json(self._top_index_file, top)
 
-    # --- guardrails & context ---
-
-    def _load_guardrails(self) -> str:
-        sections = []
-        claude_md = ROOT / "CLAUDE.md"
-        if claude_md.exists():
-            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text(encoding='utf-8')}")
-        docs_dir = ROOT / "docs"
-        if docs_dir.is_dir():
-            for doc in sorted(docs_dir.glob("*.md")):
-                sections.append(f"## {doc.stem}\n\n{doc.read_text(encoding='utf-8')}")
-        return "\n\n---\n\n".join(sections) if sections else ""
+    # --- context ---
+    # CLAUDE.md는 claude -p가 자동으로 읽고, docs는 step 파일의 "읽어야 할 파일"이 필요한 것만 고른다.
+    # 그래서 프롬프트에 문서를 붙이지 않는다
 
     @staticmethod
     def _build_step_context(index: dict) -> str:
@@ -208,11 +202,12 @@ class StepExecutor:
             return ""
         return "## 이전 Step 산출물\n\n" + "\n".join(lines) + "\n\n"
 
-    def _build_preamble(self, guardrails: str, step_context: str,
+    def _build_preamble(self, step_num: int, step_context: str,
                         prev_error: Optional[str] = None) -> str:
         commit_example = self.FEAT_MSG.format(
             phase=self._phase_name, num="N", name="<step-name>"
         )
+        result_path = f"/phases/{self._phase_dir_name}/step{step_num}-result.json"
         retry_section = ""
         if prev_error:
             retry_section = (
@@ -221,17 +216,19 @@ class StepExecutor:
             )
         return (
             f"당신은 {self._project} 프로젝트의 개발자입니다. 아래 step을 수행하세요.\n\n"
-            f"{guardrails}\n\n---\n\n"
             f"{step_context}{retry_section}"
             f"## 작업 규칙\n\n"
             f"1. 이전 step에서 작성된 코드를 확인하고 일관성을 유지하라.\n"
             f"2. 이 step에 명시된 작업만 수행하라. 추가 기능이나 파일을 만들지 마라.\n"
             f"3. 기존 테스트를 깨뜨리지 마라.\n"
             f"4. AC(Acceptance Criteria) 검증을 직접 실행하라.\n"
-            f"5. /phases/{self._phase_dir_name}/index.json의 해당 step status를 업데이트하라:\n"
-            f"   - AC 통과 → \"completed\" + \"summary\" 필드에 이 step의 산출물을 한 줄로 요약\n"
-            f"   - {self.MAX_RETRIES}회 수정 시도 후에도 실패 → \"error\" + \"error_message\" 기록\n"
-            f"   - 사용자 개입이 필요한 경우 (API 키, 인증, 수동 설정 등) → \"blocked\" + \"blocked_reason\" 기록 후 즉시 중단\n"
+            f"5. 결과를 {result_path}에 JSON으로 써라. index.json은 읽거나 고치지 마라"
+            f"(step 파일에 index.json을 고치라고 적혀 있어도 이 파일에 쓴다. execute.py가 index.json에 옮긴다):\n"
+            f"   - AC 통과 → {{\"status\": \"completed\", \"summary\": \"...\"}}. summary는 {self.SUMMARY_LIMIT}자 이내로, "
+            f"만들거나 바꾼 파일과 다음 step이 알아야 할 결정만 적는다. 넘으면 잘려서 다음 step에 전달된다\n"
+            f"   - spec과 다르게 구현한 점이 있으면 \"spec_diff\" 필드에 적는다. 다음 step에는 전달되지 않고 phase 끝 spec 대조 점검에서 읽는다\n"
+            f"   - {self.MAX_RETRIES}회 수정 시도 후에도 실패 → {{\"status\": \"error\", \"error_message\": \"...\"}}\n"
+            f"   - 사용자 개입이 필요한 경우 (API 키, 인증, 수동 설정 등) → {{\"status\": \"blocked\", \"blocked_reason\": \"...\"}} 후 즉시 중단\n"
             f"6. 모든 변경사항을 커밋하라:\n"
             f"   {commit_example}\n\n---\n\n"
         )
@@ -304,68 +301,78 @@ class StepExecutor:
 
     # --- 실행 루프 ---
 
-    def _execute_single_step(self, step: dict, guardrails: str) -> bool:
+    def _read_result(self, result_file: Path) -> dict:
+        """step 세션이 쓴 결과 파일. 없거나 JSON이 아니면 실패로 다룰 error_message를 돌려준다."""
+        if not result_file.exists():
+            return {"error_message": "Step did not update status"}
+        try:
+            return self._read_json(result_file)
+        except json.JSONDecodeError as e:
+            return {"error_message": f"{result_file.name}을 JSON으로 읽지 못했다: {e}"}
+
+    def _clip_summary(self, summary: str) -> str:
+        if len(summary) <= self.SUMMARY_LIMIT:
+            return summary
+        return summary[:self.SUMMARY_LIMIT] + "…"
+
+    def _execute_single_step(self, step: dict) -> bool:
         """단일 step 실행 (재시도 포함). 완료되면 True, 실패/차단이면 False."""
         step_num, step_name = step["step"], step["name"]
+        result_file = self._phase_dir / f"step{step_num}-result.json"
         done = sum(1 for s in self._read_json(self._index_file)["steps"] if s["status"] == "completed")
         prev_error = None
 
         for attempt in range(1, self.MAX_RETRIES + 1):
             index = self._read_json(self._index_file)
             step_context = self._build_step_context(index)
-            preamble = self._build_preamble(guardrails, step_context, prev_error)
+            preamble = self._build_preamble(step_num, step_context, prev_error)
 
             tag = f"Step {step_num}/{self._total - 1} ({done} done): {step_name}"
             if attempt > 1:
                 tag += f" [retry {attempt}/{self.MAX_RETRIES}]"
 
+            # 이전 시도·실행이 남긴 결과를 이번 결과로 읽지 않게 지운다
+            result_file.unlink(missing_ok=True)
             with progress_indicator(tag) as pi:
                 self._invoke_claude(step, preamble)
             elapsed = int(pi.elapsed)  # elapsed는 with를 나갈 때 채워진다
 
-            index = self._read_json(self._index_file)
-            status = next((s.get("status", "pending") for s in index["steps"] if s["step"] == step_num), "pending")
+            result = self._read_result(result_file)
+            status = result.get("status")
             ts = self._stamp()
+            index = self._read_json(self._index_file)
+            entry = next(s for s in index["steps"] if s["step"] == step_num)
 
             if status == "completed":
-                for s in index["steps"]:
-                    if s["step"] == step_num:
-                        s["completed_at"] = ts
+                # spec_diff는 다음 step 프롬프트에 가지 않게 결과 파일에만 둔다
+                entry["status"] = "completed"
+                entry["summary"] = self._clip_summary(result.get("summary", ""))
+                entry["completed_at"] = ts
                 self._write_json(self._index_file, index)
                 self._commit_step(step_num, step_name)
                 print(f"  ✓ Step {step_num}: {step_name} [{elapsed}s]")
                 return True
 
             if status == "blocked":
-                for s in index["steps"]:
-                    if s["step"] == step_num:
-                        s["blocked_at"] = ts
+                reason = result.get("blocked_reason", "")
+                entry["status"] = "blocked"
+                entry["blocked_reason"] = reason
+                entry["blocked_at"] = ts
                 self._write_json(self._index_file, index)
-                reason = next((s.get("blocked_reason", "") for s in index["steps"] if s["step"] == step_num), "")
                 print(f"  ⏸ Step {step_num}: {step_name} blocked [{elapsed}s]")
                 print(f"    Reason: {reason}")
                 self._update_top_index("blocked")
                 sys.exit(2)
 
-            err_msg = next(
-                (s.get("error_message", "Step did not update status") for s in index["steps"] if s["step"] == step_num),
-                "Step did not update status",
-            )
+            err_msg = result.get("error_message", "Step did not update status")
 
             if attempt < self.MAX_RETRIES:
-                for s in index["steps"]:
-                    if s["step"] == step_num:
-                        s["status"] = "pending"
-                        s.pop("error_message", None)
-                self._write_json(self._index_file, index)
                 prev_error = err_msg
                 print(f"  ↻ Step {step_num}: retry {attempt}/{self.MAX_RETRIES} — {err_msg}")
             else:
-                for s in index["steps"]:
-                    if s["step"] == step_num:
-                        s["status"] = "error"
-                        s["error_message"] = f"[{self.MAX_RETRIES}회 시도 후 실패] {err_msg}"
-                        s["failed_at"] = ts
+                entry["status"] = "error"
+                entry["error_message"] = f"[{self.MAX_RETRIES}회 시도 후 실패] {err_msg}"
+                entry["failed_at"] = ts
                 self._write_json(self._index_file, index)
                 self._commit_step(step_num, step_name)
                 print(f"  ✗ Step {step_num}: {step_name} failed after {self.MAX_RETRIES} attempts [{elapsed}s]")
@@ -375,7 +382,7 @@ class StepExecutor:
 
         return False  # unreachable
 
-    def _execute_all_steps(self, guardrails: str):
+    def _execute_all_steps(self):
         while True:
             index = self._read_json(self._index_file)
             pending = next((s for s in index["steps"] if s["status"] == "pending"), None)
@@ -390,7 +397,7 @@ class StepExecutor:
                     self._write_json(self._index_file, index)
                     break
 
-            self._execute_single_step(pending, guardrails)
+            self._execute_single_step(pending)
 
     def _finalize(self):
         index = self._read_json(self._index_file)
