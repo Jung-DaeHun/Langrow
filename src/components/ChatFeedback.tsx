@@ -219,7 +219,9 @@ function Corrections({ turns, language, level }: { turns: ChatTurnView[]; langua
               <p lang={language} className="font-bold text-brand">
                 <Furigana text={t.correction?.corrected ?? ""} show={furigana} />
               </p>
-              <p className="text-sm">{t.correction?.explanation_ko}</p>
+              <p className="text-sm">
+                <Furigana text={t.correction?.explanation_ko ?? ""} show={furigana} />
+              </p>
             </li>
           ))}
         </ul>

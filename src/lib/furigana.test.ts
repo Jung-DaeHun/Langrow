@@ -24,6 +24,23 @@ describe("parseFurigana", () => {
     expect(parseFurigana("")).toEqual([]);
   });
 
+  it("본문에 한자가 없으면 읽기를 버리고 이웃한 일반 텍스트와 합친다", () => {
+    expect(parseFurigana("[コーヒー|こーひー]が[好|す]き")).toEqual([
+      { text: "コーヒーが" },
+      { text: "好", reading: "す" },
+      { text: "き" },
+    ]);
+    expect(parseFurigana("[私|わたし]は[チョン|ちょん]・デフン")).toEqual([
+      { text: "私", reading: "わたし" },
+      { text: "はチョン・デフン" },
+    ]);
+    expect(parseFurigana("[정대훈|ていだいくん]さん")).toEqual([{ text: "정대훈さん" }]);
+  });
+
+  it("々가 든 본문은 한자로 보고 읽기를 단다", () => {
+    expect(parseFurigana("[人々|ひとびと]")).toEqual([{ text: "人々", reading: "ひとびと" }]);
+  });
+
   it("읽기가 달린 segment끼리 붙어 있으면 따로 둔다", () => {
     expect(parseFurigana("[今日|きょう][学校|がっこう]")).toEqual([
       { text: "今日", reading: "きょう" },

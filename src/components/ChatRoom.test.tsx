@@ -200,6 +200,18 @@ describe("ChatRoom 표시", () => {
     expect(container.querySelector("rt")).toHaveTextContent("べんとう");
   });
 
+  it("교정 설명의 후리가나 표기도 말풍선과 같은 규칙으로 그린다", () => {
+    const ja = { title: "인사", opening: { text: "はじめまして！", ko: "처음 뵙겠습니다!" } };
+    const correction = { corrected: "[来|き]ました。", explanation_ko: "'왔어요'는 '[来|き]ました'예요" };
+    const shown = setup(room({ language: "ja", level: 1, turns: [turn(1, { correction })] }), { kind: "available" }, ja);
+
+    expect(shown.container.textContent).not.toContain("[来|き]");
+    expect(shown.container.querySelectorAll("rt")).toHaveLength(2);
+
+    shown.rerender(room({ language: "ja", level: 4, turns: [turn(1, { correction })] }));
+    expect(screen.getByText("'왔어요'는 '来ました'예요")).toBeInTheDocument();
+  });
+
   it("일본어 레벨 4는 후리가나 없이 본문만 그린다", () => {
     const ja = { title: "편의점", opening: { text: "お[弁当|べんとう]、[温|あたた]めますか？", ko: "도시락 데워 드릴까요?" } };
     const { container } = setup(room({ language: "ja", level: 4 }), { kind: "available" }, ja);

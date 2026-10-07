@@ -230,7 +230,9 @@ export function ChatRoom({ room, scenario, trial }: Props) {
                 <p lang={room.language} className="font-bold text-brand">
                   <Furigana text={t.correction.corrected} show={furigana} />
                 </p>
-                <p className="text-sm">{t.correction.explanation_ko}</p>
+                <p className="text-sm">
+                  <Furigana text={t.correction.explanation_ko} show={furigana} />
+                </p>
               </div>
             )}
             <AiBubble line={{ text: t.reply, ko: t.replyKo }} language={room.language} level={room.level} />

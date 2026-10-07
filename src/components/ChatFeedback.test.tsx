@@ -177,6 +177,18 @@ describe("ChatFeedback fallback", () => {
     expect(screen.queryByText("잘한 점")).toBeNull();
   });
 
+  it("교정 목록의 설명도 후리가나 표기를 ruby로 그린다", () => {
+    const { container } = renderFeedback({
+      language: "ja",
+      level: 1,
+      turns: [turn(1, { corrected: "[来|き]ました。", explanation_ko: "'왔어요'는 '[来|き]ました'예요" })],
+      result: { feedbackStatus: "fallback", feedback: { message: FALLBACK_MESSAGE } },
+    });
+
+    expect(container.textContent).not.toContain("[来|き]");
+    expect(container.querySelectorAll("rt")).toHaveLength(2);
+  });
+
   it("교정이 하나도 없으면 교정할 문장이 없었다고 알린다", () => {
     renderFeedback({ result: { feedbackStatus: "fallback", feedback: { message: FALLBACK_MESSAGE } } });
 
