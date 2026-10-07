@@ -105,14 +105,33 @@ describe("ChatFeedback ready", () => {
     expect(screen.queryByText("넷")).toBeNull();
   });
 
-  it("피드백의 대괄호 표기는 ruby로 바꾸지 않고 텍스트 그대로 둔다", () => {
+  it("후리가나를 보여 주는 레벨이면 피드백의 표기를 ruby로 그린다", () => {
     const { container } = renderFeedback({
       language: "ja",
       level: 1,
-      result: { feedbackStatus: "ready", feedback: { good: "[漢字|かんじ]를 잘 썼어요", improve: [] } },
+      result: {
+        feedbackStatus: "ready",
+        feedback: { good: "[注文|ちゅうもん]을 잘 했어요", improve: ["[水|みず]をください가 더 자연스러워요"] },
+      },
     });
 
-    expect(screen.getByText("[漢字|かんじ]를 잘 썼어요")).toBeInTheDocument();
+    const rubies = [...container.querySelectorAll("ruby")];
+    expect(rubies.map((r) => r.querySelector("rt")?.textContent)).toEqual(["ちゅうもん", "みず"]);
+    expect(container.textContent).not.toMatch(/[[\]|]/);
+  });
+
+  it("후리가나를 숨기는 레벨이면 표기의 본문만 남기고, 깨진 표기는 기호를 지운다", () => {
+    const { container } = renderFeedback({
+      language: "ja",
+      level: 4,
+      result: {
+        feedbackStatus: "ready",
+        feedback: { good: "[注文|ちゅうもん]을 잘 했어요", improve: ["[水|みず をください"] },
+      },
+    });
+
+    expect(screen.getByText("注文을 잘 했어요")).toBeInTheDocument();
+    expect(screen.getByText("水みず をください")).toBeInTheDocument();
     expect(container.querySelector("ruby")).toBeNull();
   });
 });
