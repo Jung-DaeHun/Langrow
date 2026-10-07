@@ -1,4 +1,5 @@
 import { act, render, screen, within } from "@testing-library/react";
+import { useRouter } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChatTurnView } from "@/server/db/reads";
 import { api, type ApiResult } from "@/services/apiClient";
@@ -6,12 +7,16 @@ import type { ChatEndResponse } from "@/types/api";
 import { ChatFeedback } from "./ChatFeedback";
 
 vi.mock("@/services/apiClient", () => ({ api: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: vi.fn() }));
 
 const apiMock = vi.mocked(api);
+const push = vi.fn();
 let visibility: DocumentVisibilityState = "visible";
 
 beforeEach(() => {
   apiMock.mockReset();
+  push.mockReset();
+  vi.mocked(useRouter).mockReturnValue({ push } as unknown as ReturnType<typeof useRouter>);
   visibility = "visible";
   Object.defineProperty(document, "visibilityState", { configurable: true, get: () => visibility });
 });
@@ -37,6 +42,7 @@ function renderFeedback(overrides: Partial<Props> = {}) {
     language: "en",
     level: 3,
     turns: THREE_TURNS,
+    doneTurnsToday: 3,
     result: { feedbackStatus: "ready", feedback: { good: "잘했어요", improve: ["관사를 챙겨요"] } },
     ...overrides,
   };
@@ -88,12 +94,21 @@ describe("ChatFeedback ready", () => {
   it("3턴 미만이면 목표 안내를 하고, 고칠 점이 비면 그 카드를 생략한다", () => {
     renderFeedback({
       turns: [turn(1), turn(2)],
+      doneTurnsToday: 2,
       result: { feedbackStatus: "ready", feedback: { good: "좋아요", improve: [] } },
     });
 
     expect(screen.getByText("3턴 이상 대화하면 오늘 목표가 채워져요")).toBeInTheDocument();
     expect(screen.queryByText("오늘 대화 목표를 채웠어요")).toBeNull();
     expect(screen.queryByText("고칠 점")).toBeNull();
+  });
+
+  it("세션의 턴이 3개여도 오늘 확정된 턴이 3개 미만이면 목표 안내를 한다 (홈과 같은 기준)", () => {
+    renderFeedback({ turns: THREE_TURNS, doneTurnsToday: 2 });
+
+    expect(screen.getByText("카페에서 주문하기 · 3턴")).toBeInTheDocument();
+    expect(screen.getByText("3턴 이상 대화하면 오늘 목표가 채워져요")).toBeInTheDocument();
+    expect(screen.queryByText("오늘 대화 목표를 채웠어요")).toBeNull();
   });
 
   it("고칠 점은 최대 3개만 보여 준다", () => {
@@ -216,6 +231,17 @@ describe("ChatFeedback 처리 중", () => {
 
     await advance(10_000);
     expect(apiMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("다시 확인한 /end가 404면 홈으로 이동한다", async () => {
+    vi.useFakeTimers();
+    apiMock.mockResolvedValueOnce({ ok: false, status: 404, code: "NOT_FOUND", message: "찾을 수 없어요." });
+    renderFeedback({ result: null });
+
+    await advance(2000);
+
+    expect(push).toHaveBeenCalledWith("/home");
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("실패하면 오류와 [다시 시도]를 보여 주고 자동으로 반복하지 않는다", async () => {

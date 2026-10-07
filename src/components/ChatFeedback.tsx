@@ -2,6 +2,7 @@
 
 import { ChevronLeft, CircleAlert, CircleCheck, Info, Pencil, ThumbsUp } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { showsFurigana, type Language, type Level } from "@/lib/levels";
 import { VALID_SESSION_TURNS, isValidSession } from "@/lib/today";
@@ -36,10 +37,13 @@ type Props = {
   language: Language;
   level: Level;
   turns: ChatTurnView[];
+  // 오늘(한국 날짜) 확정된 턴 수. 날짜를 넘겨 이어 한 세션도 홈의 오늘 목표와 같은 기준으로 판정한다
+  doneTurnsToday: number;
   result: EndResult | null;
 };
 
-export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns, result }: Props) {
+export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns, doneTurnsToday, result }: Props) {
+  const router = useRouter();
   const [polled, setPolled] = useState<EndResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [firstWait, setFirstWait] = useState(FIRST_CHECK_SECONDS);
@@ -59,7 +63,8 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns,
       const res = await api<ChatEndResponse>("POST", `/api/chat/sessions/${sessionId}/end`);
       inFlight = false;
       if (stopped) return;
-      if (!res.ok) setError(res.message);
+      if (!res.ok && res.code === "NOT_FOUND") router.push("/home");
+      else if (!res.ok) setError(res.message);
       else if (res.data.status === "ended") setPolled(res.data);
       else wait(res.data.retryAfterSeconds);
     }
@@ -85,7 +90,7 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns,
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [waiting, error, firstWait, sessionId]);
+  }, [waiting, error, firstWait, sessionId, router]);
 
   function retry() {
     setError(null);
@@ -93,7 +98,7 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns,
   }
 
   const goal =
-    shown === null || shown.feedbackStatus === "skipped" ? null : isValidSession(turns.length) ? (
+    shown === null || shown.feedbackStatus === "skipped" ? null : isValidSession(doneTurnsToday) ? (
       <div className={`${NOTICE} bg-mint`}>
         <CircleCheck size={20} aria-hidden="true" className="shrink-0 text-accent" />
         <p className="font-bold">오늘 대화 목표를 채웠어요</p>

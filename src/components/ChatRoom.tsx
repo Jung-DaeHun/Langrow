@@ -30,6 +30,8 @@ import { WaitingDots } from "./WaitingDots";
 
 const SESSION_MAX_TURNS = 20;
 const COUNTER_FROM = 250;
+// 다른 곳에서 보낸 턴이 처리 중일 때 다시 읽는 간격. 기한(최대 90초)까지만 기다린다
+const PENDING_REFRESH_MS = 3000;
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const PILL = `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-line-input bg-card px-3 text-sm font-semibold text-ink hover:bg-hover disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;
@@ -54,16 +56,33 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   const [end, setEnd] = useState<{ result: EndResult | null } | null>(null);
   // 이 화면에서 확정된 턴. router.refresh()로 room.turns가 새로 오면 그쪽에 이미 있는 턴은 room.turns를 쓴다
   const [added, setAdded] = useState<ChatTurnView[]>([]);
+  // 기한이 지나 더 기다리지 않는 room.pendingTurn. 다시 읽으면 새 객체가 오지만 그때는 서버가 이미 null을 준다
+  const [expiredPending, setExpiredPending] = useState<ChatRoomData["pendingTurn"]>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const lastTurnNo = room.turns.at(-1)?.turnNo ?? 0;
-  const turns = [...room.turns, ...added.filter((t) => t.turnNo > lastTurnNo)];
+  const addedTurns = added.filter((t) => t.turnNo > lastTurnNo);
+  const turns = [...room.turns, ...addedTurns];
   const showFeedback = room.status !== "active" || end !== null;
+  // 다른 탭이나 이전 방문에서 보낸 턴이 처리 중이면 완료를 기다린다(spec 1장 "대화 도중 이탈했다가 돌아옴")
+  const otherPending = room.pendingTurn !== expiredPending ? room.pendingTurn : null;
+  const shownPending = pending ?? otherPending?.userText ?? null;
+
+  useEffect(() => {
+    const waiting = room.pendingTurn;
+    if (waiting === null || showFeedback) return;
+    const refreshTimer = setTimeout(() => router.refresh(), PENDING_REFRESH_MS);
+    const expireTimer = setTimeout(() => setExpiredPending(waiting), waiting.msLeft);
+    return () => {
+      clearTimeout(refreshTimer);
+      clearTimeout(expireTimer);
+    };
+  }, [room.pendingTurn, showFeedback, router]);
 
   // 대화는 새 메시지가 보이게 맨 아래로, 피드백으로 바뀌면 화면 전환이라 맨 위로 올린다
   useEffect(() => {
     window.scrollTo(0, showFeedback ? 0 : document.documentElement.scrollHeight);
-  }, [showFeedback, turns.length, pending, failed]);
+  }, [showFeedback, turns.length, shownPending, failed]);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -80,13 +99,14 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         language={room.language}
         level={room.level}
         turns={turns}
+        doneTurnsToday={room.doneTurnsToday + addedTurns.length}
         result={end?.result ?? room.result}
       />
     );
   }
 
   const inputLocked = full || block?.kind === "failure-limit";
-  const canSend = isValidChatInput(input) && pending === null && block === null && !full && !ending;
+  const canSend = isValidChatInput(input) && shownPending === null && block === null && !full && !ending;
   const chars = countChars(input);
 
   async function send(text: string) {
@@ -149,6 +169,10 @@ export function ChatRoom({ room, scenario, trial }: Props) {
     setEndError(null);
     const result = await api<ChatEndResponse>("POST", `/api/chat/sessions/${room.id}/end`);
     setEnding(false);
+    if (!result.ok && result.code === "NOT_FOUND") {
+      router.push("/home");
+      return;
+    }
     if (!result.ok) {
       setEndError(result.message);
       return;
@@ -158,7 +182,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   }
 
   const furigana = room.language === "ja" && showsFurigana(room.level);
-  const busy = pending !== null || ending;
+  const busy = shownPending !== null || ending;
 
   return (
     <div data-focus-mode className="flex min-h-dvh flex-col">
@@ -212,10 +236,10 @@ export function ChatRoom({ room, scenario, trial }: Props) {
             <AiBubble line={{ text: t.reply, ko: t.replyKo }} language={room.language} level={room.level} />
           </Fragment>
         ))}
-        {pending !== null && (
+        {shownPending !== null && (
           <>
             <p lang={room.language} className={`${MY_BUBBLE} bg-house text-white`}>
-              {pending}
+              {shownPending}
             </p>
             <div className={`self-start ${AI_BUBBLE}`}>
               <WaitingDots label="응답을 기다리고 있어요" />

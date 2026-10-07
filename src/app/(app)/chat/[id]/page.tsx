@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "대화 · Langrow" };
 export default async function ChatRoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, userId, account, now } = await requireReady();
-  const room = await readChatRoom(supabase, userId, id);
+  const room = await readChatRoom(supabase, userId, id, now);
   if (room === null) notFound();
 
   const scenario = findScenario(room.scenarioId);

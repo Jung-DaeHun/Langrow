@@ -57,6 +57,10 @@ export type ChatRoomData = {
   status: "active" | "ending" | "ended";
   result: EndResult | null;
   turns: ChatTurnView[];
+  // 오늘(한국 날짜) 확정된 턴 수. 피드백 화면의 오늘 목표용이며 홈(readBestSessionTurnsToday)과 같은 기준이다
+  doneTurnsToday: number;
+  // 다른 탭이나 이전 방문에서 보낸 턴이 아직 처리 중이면 그 문장과 기한까지 남은 ms. 기한이 지났으면 null(다음 전송 때 RPC가 복구한다)
+  pendingTurn: { userText: string; msLeft: number } | null;
 };
 
 const WORD_COLUMNS = "id, language, level, rank, word, reading, meaning_ko, example, example_ko, distractors";
@@ -254,22 +258,31 @@ export async function readEndedScenarioIds(sb: Sb, userId: string, language: Lan
 }
 
 // 남의 세션·없는 세션은 null. uuid가 아니면 Postgres 캐스트 오류(500)가 나지 않게 쿼리하지 않는다
-export async function readChatRoom(sb: Sb, userId: string, sessionId: string): Promise<ChatRoomData | null> {
+export async function readChatRoom(
+  sb: Sb,
+  userId: string,
+  sessionId: string,
+  now: Date,
+): Promise<ChatRoomData | null> {
   if (!SESSION_ID.safeParse(sessionId).success) return null;
   const { data, error } = await sb
     .from("chat_sessions")
     .select(
-      "id, language, level, scenario_id, status, feedback_status, feedback, chat_turns(turn_no, user_text, reply, reply_ko, correction)",
+      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, chat_turns(turn_no, status, user_text, reply, reply_ko, correction, created_at)",
     )
     .eq("id", sessionId)
     .eq("user_id", userId)
-    .eq("chat_turns.status", "done")
     .order("turn_no", { referencedTable: "chat_turns" })
     .maybeSingle();
   if (error) throw readError("chat_sessions", error);
   if (!data) return null;
 
   const status = data.status as ChatRoomData["status"];
+  const done = data.chat_turns.filter((turn) => turn.status === "done");
+  // 세션당 pending은 1개다 (partial UNIQUE). 기한은 세션의 작업 토큰 기한이다
+  const pending = data.chat_turns.find((turn) => turn.status === "pending");
+  const msLeft = data.operation_expires_at === null ? 0 : new Date(data.operation_expires_at).getTime() - now.getTime();
+  const { from, to } = todayRange(now);
   return {
     id: data.id,
     language: data.language as Language,
@@ -278,12 +291,17 @@ export async function readChatRoom(sb: Sb, userId: string, sessionId: string): P
     status,
     result: status === "ended" ? ({ feedbackStatus: data.feedback_status, feedback: data.feedback } as EndResult) : null,
     // done 턴은 reply·reply_ko가 null이 아니다 (chat_turns_done_has_reply)
-    turns: data.chat_turns.map((turn) => ({
+    turns: done.map((turn) => ({
       turnNo: turn.turn_no,
       userText: turn.user_text,
       reply: turn.reply as string,
       replyKo: turn.reply_ko as string,
       correction: turn.correction as TurnReply["correction"],
     })),
+    doneTurnsToday: done.filter((turn) => {
+      const at = new Date(turn.created_at).toISOString();
+      return at >= from && at < to;
+    }).length,
+    pendingTurn: pending !== undefined && msLeft > 0 ? { userText: pending.user_text, msLeft } : null,
   };
 }

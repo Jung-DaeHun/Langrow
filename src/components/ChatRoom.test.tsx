@@ -30,6 +30,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 const MESSAGES_PATH = "/api/chat/sessions/s-1/messages";
@@ -49,7 +50,18 @@ function turn(turnNo: number, overrides: Partial<ChatTurnView> = {}): ChatTurnVi
 }
 
 function room(overrides: Partial<ChatRoomData> = {}): ChatRoomData {
-  return { id: "s-1", language: "en", level: 3, scenarioId: "l3-cafe", status: "active", result: null, turns: [], ...overrides };
+  return {
+    id: "s-1",
+    language: "en",
+    level: 3,
+    scenarioId: "l3-cafe",
+    status: "active",
+    result: null,
+    turns: [],
+    doneTurnsToday: 0,
+    pendingTurn: null,
+    ...overrides,
+  };
 }
 
 function setup(data: ChatRoomData = room(), trial: TrialState = { kind: "available" }, scenario = SCENARIO) {
@@ -462,6 +474,26 @@ describe("ChatRoom 종료", () => {
     expect(screen.getByText("잘 주문했어요")).toBeInTheDocument();
   });
 
+  it("/end 404면 홈으로 이동한다", async () => {
+    apiMock.mockResolvedValue(failure(404, "NOT_FOUND", "찾을 수 없어요."));
+    const { user } = setup(room({ turns: [turn(1)] }));
+
+    await user.click(endButton());
+
+    expect(push).toHaveBeenCalledWith("/home");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("오늘 확정된 턴에 이 화면에서 확정한 턴을 더해 피드백의 오늘 목표를 정한다", async () => {
+    apiMock.mockResolvedValueOnce(replied(3, 17)).mockResolvedValueOnce(endedReady);
+    const { user } = setup(room({ turns: [turn(1), turn(2)], doneTurnsToday: 2 }));
+
+    await typeAndSend(user, "hello");
+    await user.click(endButton());
+
+    expect(screen.getByText("오늘 대화 목표를 채웠어요")).toBeInTheDocument();
+  });
+
   it("종료 요청 중에는 [대화 끝내기]와 전송을 막는다", async () => {
     apiMock.mockReturnValue(deferred<ApiResult<ChatEndResponse>>().promise);
     const { user } = setup(room({ turns: [turn(1)] }));
@@ -471,6 +503,50 @@ describe("ChatRoom 종료", () => {
 
     expect(endButton()).toBeDisabled();
     expect(sendButton()).toBeDisabled();
+  });
+});
+
+describe("ChatRoom 처리 중인 턴", () => {
+  const waiting = { userText: "still waiting", msLeft: 60_000 };
+
+  it("다른 곳에서 보낸 턴이 처리 중이면 그 문장과 대기 점을 보여 주고 전송과 [대화 끝내기]를 막는다", () => {
+    setup(room({ turns: [turn(1)], pendingTurn: waiting }));
+    fireEvent.change(textbox(), { target: { value: "hello" } });
+
+    expect(screen.getByText("still waiting")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("응답을 기다리고 있어요");
+    expect(sendButton()).toBeDisabled();
+    expect(endButton()).toBeDisabled();
+  });
+
+  it("처리 중이면 3초 뒤 다시 읽고, 다시 읽은 room에서 확정됐으면 새 턴을 보여 주고 전송을 연다", () => {
+    vi.useFakeTimers();
+    const { rerender } = setup(room({ turns: [turn(1)], pendingTurn: waiting }));
+
+    act(() => vi.advanceTimersByTime(2999));
+    expect(refresh).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(1));
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    rerender(room({ turns: [turn(1), turn(2, { userText: "still waiting", reply: "AI 2" })], pendingTurn: null }));
+    fireEvent.change(textbox(), { target: { value: "hello" } });
+
+    expect(screen.getByText("AI 2")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(sendButton()).toBeEnabled();
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("기한이 지나면 기다리기를 멈추고 전송을 연다 (다음 전송 때 서버가 복구한다)", () => {
+    vi.useFakeTimers();
+    setup(room({ turns: [turn(1)], pendingTurn: { userText: "still waiting", msLeft: 1000 } }));
+
+    act(() => vi.advanceTimersByTime(1000));
+    fireEvent.change(textbox(), { target: { value: "hello" } });
+
+    expect(screen.queryByText("still waiting")).toBeNull();
+    expect(sendButton()).toBeEnabled();
   });
 });
 

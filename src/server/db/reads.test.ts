@@ -416,14 +416,17 @@ describe("readEndedScenarioIds", () => {
 });
 
 describe("readChatRoom", () => {
-  it("내 세션의 done 턴만 turn_no 순서로 돌려준다", async () => {
+  it("done 턴은 turn_no 순서로 돌려주고, 처리 중인 턴은 문장과 남은 기한만 따로 돌려준다", async () => {
     const user = await createReadyUser("en", 1);
     const session = await newSession(user.id);
     await doneTurn(user.id, session, CORRECTED, "Can I have latte?");
     await doneTurn(user.id, session, PLAIN, "No, thanks.");
     await pendingTurn(user.id, session);
 
-    expect(await readChatRoom(await signedInClient(user), user.id, session)).toEqual({
+    const room = await readChatRoom(await signedInClient(user), user.id, session, new Date());
+    expect(room?.pendingTurn?.msLeft).toBeGreaterThan(0);
+    expect(room?.pendingTurn?.msLeft).toBeLessThanOrEqual(90_000);
+    expect(room).toEqual({
       id: session,
       language: "en",
       level: 1,
@@ -440,7 +443,33 @@ describe("readChatRoom", () => {
         },
         { turnNo: 2, userText: "No, thanks.", reply: PLAIN.reply, replyKo: PLAIN.reply_ko, correction: null },
       ],
+      doneTurnsToday: 2,
+      pendingTurn: { userText: "still waiting", msLeft: room?.pendingTurn?.msLeft },
     });
+  });
+
+  it("기한이 지난 처리 중 턴은 pendingTurn이 null이다 (다음 전송 때 RPC가 복구한다)", async () => {
+    const user = await createReadyUser("en", 1);
+    const session = await newSession(user.id);
+    await pendingTurn(user.id, session);
+    const sb = await signedInClient(user);
+
+    expect(await readChatRoom(sb, user.id, session, new Date(Date.now() + 91_000))).toMatchObject({
+      turns: [],
+      pendingTurn: null,
+    });
+  });
+
+  it("doneTurnsToday는 오늘(한국 날짜) 확정된 턴만 센다", async () => {
+    const now = new Date();
+    const user = await createReadyUser("en", 1);
+    const session = await newSession(user.id);
+    for (let i = 0; i < 3; i++) await doneTurn(user.id, session);
+    await moveTurn(session, 1, dayBounds(now).yesterdayLast);
+
+    const room = await readChatRoom(await signedInClient(user), user.id, session, now);
+    expect(room?.turns).toHaveLength(3);
+    expect(room?.doneTurnsToday).toBe(2);
   });
 
   it("result는 ended일 때만 있다 (skipped, ready)", async () => {
@@ -448,7 +477,7 @@ describe("readChatRoom", () => {
     const sb = await signedInClient(user);
     const skipped = await newSession(user.id);
     await endSkipped(user.id, skipped);
-    expect(await readChatRoom(sb, user.id, skipped)).toMatchObject({
+    expect(await readChatRoom(sb, user.id, skipped, new Date())).toMatchObject({
       status: "ended",
       result: { feedbackStatus: "skipped", feedback: null },
       turns: [],
@@ -457,10 +486,10 @@ describe("readChatRoom", () => {
     const session = await newSession(user.id);
     await doneTurn(user.id, session);
     const token = await startEnd(user.id, session);
-    expect(await readChatRoom(sb, user.id, session)).toMatchObject({ status: "ending", result: null });
+    expect(await readChatRoom(sb, user.id, session, new Date())).toMatchObject({ status: "ending", result: null });
 
     valueOf(await finishEnd(user.id, session, token, FEEDBACK));
-    const room = await readChatRoom(sb, user.id, session);
+    const room = await readChatRoom(sb, user.id, session, new Date());
     expect(room).toMatchObject({ status: "ended", result: { feedbackStatus: "ready", feedback: FEEDBACK } });
     expect(room?.turns).toHaveLength(1);
   });
@@ -471,9 +500,9 @@ describe("readChatRoom", () => {
     const othersSession = await newSession(other.id);
     const sb = await signedInClient(me);
 
-    expect(await readChatRoom(sb, me.id, othersSession)).toBeNull();
-    expect(await readChatRoom(sb, other.id, othersSession)).toBeNull();
-    expect(await readChatRoom(sb, me.id, randomUUID())).toBeNull();
-    expect(await readChatRoom(sb, me.id, "not-a-uuid")).toBeNull();
+    expect(await readChatRoom(sb, me.id, othersSession, new Date())).toBeNull();
+    expect(await readChatRoom(sb, other.id, othersSession, new Date())).toBeNull();
+    expect(await readChatRoom(sb, me.id, randomUUID(), new Date())).toBeNull();
+    expect(await readChatRoom(sb, me.id, "not-a-uuid", new Date())).toBeNull();
   });
 });
