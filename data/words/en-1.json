@@ -1,0 +1,3202 @@
+[
+  {
+    "id": "en-1-001",
+    "language": "en",
+    "level": 1,
+    "rank": 1,
+    "word": "hello",
+    "reading": null,
+    "meaning_ko": "안녕하세요",
+    "example": "{{Hello}}, my name is Mina.",
+    "example_ko": "안녕하세요, 제 이름은 미나예요.",
+    "distractors": [
+      "Goodbye",
+      "Sorry",
+      "Thanks"
+    ]
+  },
+  {
+    "id": "en-1-002",
+    "language": "en",
+    "level": 1,
+    "rank": 2,
+    "word": "thank",
+    "reading": null,
+    "meaning_ko": "감사하다",
+    "example": "I {{thank}} you for the gift.",
+    "example_ko": "선물 고마워요.",
+    "distractors": [
+      "thanks",
+      "thanked",
+      "thanking"
+    ]
+  },
+  {
+    "id": "en-1-003",
+    "language": "en",
+    "level": 1,
+    "rank": 3,
+    "word": "yes",
+    "reading": null,
+    "meaning_ko": "네, 예",
+    "example": "{{Yes}}, I like it.",
+    "example_ko": "네, 저는 그것이 좋아요.",
+    "distractors": [
+      "No",
+      "Sorry",
+      "Goodbye"
+    ]
+  },
+  {
+    "id": "en-1-004",
+    "language": "en",
+    "level": 1,
+    "rank": 4,
+    "word": "please",
+    "reading": null,
+    "meaning_ko": "제발, ~해 주세요",
+    "example": "{{Please}} sit down.",
+    "example_ko": "앉아 주세요.",
+    "distractors": [
+      "Sorry",
+      "Hello",
+      "Thanks"
+    ]
+  },
+  {
+    "id": "en-1-005",
+    "language": "en",
+    "level": 1,
+    "rank": 5,
+    "word": "good",
+    "reading": null,
+    "meaning_ko": "좋은",
+    "example": "This is a {{good}} book.",
+    "example_ko": "이것은 좋은 책이에요.",
+    "distractors": [
+      "heavy",
+      "empty",
+      "angry"
+    ]
+  },
+  {
+    "id": "en-1-006",
+    "language": "en",
+    "level": 1,
+    "rank": 6,
+    "word": "name",
+    "reading": null,
+    "meaning_ko": "이름",
+    "example": "My {{name}} is Tom.",
+    "example_ko": "내 이름은 톰이야.",
+    "distractors": [
+      "chair",
+      "river",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-007",
+    "language": "en",
+    "level": 1,
+    "rank": 7,
+    "word": "like",
+    "reading": null,
+    "meaning_ko": "좋아하다",
+    "example": "I {{like}} cats.",
+    "example_ko": "나는 고양이를 좋아해.",
+    "distractors": [
+      "likes",
+      "liked",
+      "liking"
+    ]
+  },
+  {
+    "id": "en-1-008",
+    "language": "en",
+    "level": 1,
+    "rank": 8,
+    "word": "want",
+    "reading": null,
+    "meaning_ko": "원하다",
+    "example": "I {{want}} some water.",
+    "example_ko": "나는 물을 좀 원해요.",
+    "distractors": [
+      "wants",
+      "wanted",
+      "wanting"
+    ]
+  },
+  {
+    "id": "en-1-009",
+    "language": "en",
+    "level": 1,
+    "rank": 9,
+    "word": "know",
+    "reading": null,
+    "meaning_ko": "알다",
+    "example": "Do you {{know}} him?",
+    "example_ko": "너는 그를 아니?",
+    "distractors": [
+      "knows",
+      "knew",
+      "known"
+    ]
+  },
+  {
+    "id": "en-1-010",
+    "language": "en",
+    "level": 1,
+    "rank": 10,
+    "word": "go",
+    "reading": null,
+    "meaning_ko": "가다",
+    "example": "I want to {{go}} home.",
+    "example_ko": "나는 집에 가고 싶어.",
+    "distractors": [
+      "goes",
+      "went",
+      "going"
+    ]
+  },
+  {
+    "id": "en-1-011",
+    "language": "en",
+    "level": 1,
+    "rank": 11,
+    "word": "come",
+    "reading": null,
+    "meaning_ko": "오다",
+    "example": "Please {{come}} here.",
+    "example_ko": "여기로 와 주세요.",
+    "distractors": [
+      "comes",
+      "came",
+      "coming"
+    ]
+  },
+  {
+    "id": "en-1-012",
+    "language": "en",
+    "level": 1,
+    "rank": 12,
+    "word": "see",
+    "reading": null,
+    "meaning_ko": "보다",
+    "example": "Let me {{see}} it.",
+    "example_ko": "그거 좀 볼게요.",
+    "distractors": [
+      "sees",
+      "saw",
+      "seen"
+    ]
+  },
+  {
+    "id": "en-1-013",
+    "language": "en",
+    "level": 1,
+    "rank": 13,
+    "word": "make",
+    "reading": null,
+    "meaning_ko": "만들다",
+    "example": "I can {{make}} tea.",
+    "example_ko": "나는 차를 만들 수 있어요.",
+    "distractors": [
+      "makes",
+      "made",
+      "making"
+    ]
+  },
+  {
+    "id": "en-1-014",
+    "language": "en",
+    "level": 1,
+    "rank": 14,
+    "word": "think",
+    "reading": null,
+    "meaning_ko": "생각하다",
+    "example": "I will {{think}} about it.",
+    "example_ko": "그것에 대해 생각해 볼게요.",
+    "distractors": [
+      "thinks",
+      "thought",
+      "thinking"
+    ]
+  },
+  {
+    "id": "en-1-015",
+    "language": "en",
+    "level": 1,
+    "rank": 15,
+    "word": "time",
+    "reading": null,
+    "meaning_ko": "시간",
+    "example": "I have no {{time}} today.",
+    "example_ko": "오늘은 시간이 없어요.",
+    "distractors": [
+      "apple",
+      "river",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-016",
+    "language": "en",
+    "level": 1,
+    "rank": 16,
+    "word": "day",
+    "reading": null,
+    "meaning_ko": "하루, 날",
+    "example": "Have a nice {{day}}.",
+    "example_ko": "좋은 하루 보내세요.",
+    "distractors": [
+      "bag",
+      "shoe",
+      "tree"
+    ]
+  },
+  {
+    "id": "en-1-017",
+    "language": "en",
+    "level": 1,
+    "rank": 17,
+    "word": "friend",
+    "reading": null,
+    "meaning_ko": "친구",
+    "example": "She is my {{friend}}.",
+    "example_ko": "그녀는 내 친구예요.",
+    "distractors": [
+      "pencil",
+      "river",
+      "table"
+    ]
+  },
+  {
+    "id": "en-1-018",
+    "language": "en",
+    "level": 1,
+    "rank": 18,
+    "word": "people",
+    "reading": null,
+    "meaning_ko": "사람들",
+    "example": "Many {{people}} are here.",
+    "example_ko": "많은 사람들이 여기 있어요.",
+    "distractors": [
+      "cars",
+      "trees",
+      "books"
+    ]
+  },
+  {
+    "id": "en-1-019",
+    "language": "en",
+    "level": 1,
+    "rank": 19,
+    "word": "big",
+    "reading": null,
+    "meaning_ko": "큰",
+    "example": "That is a {{big}} dog.",
+    "example_ko": "저것은 큰 개예요.",
+    "distractors": [
+      "small",
+      "red",
+      "cold"
+    ]
+  },
+  {
+    "id": "en-1-020",
+    "language": "en",
+    "level": 1,
+    "rank": 20,
+    "word": "new",
+    "reading": null,
+    "meaning_ko": "새로운",
+    "example": "I have a {{new}} bag.",
+    "example_ko": "나는 새 가방이 있어요.",
+    "distractors": [
+      "old",
+      "heavy",
+      "empty"
+    ]
+  },
+  {
+    "id": "en-1-021",
+    "language": "en",
+    "level": 1,
+    "rank": 21,
+    "word": "help",
+    "reading": null,
+    "meaning_ko": "돕다",
+    "example": "Can you {{help}} me?",
+    "example_ko": "저를 도와줄 수 있나요?",
+    "distractors": [
+      "helps",
+      "helped",
+      "helping"
+    ]
+  },
+  {
+    "id": "en-1-022",
+    "language": "en",
+    "level": 1,
+    "rank": 22,
+    "word": "love",
+    "reading": null,
+    "meaning_ko": "사랑하다",
+    "example": "Do you {{love}} him?",
+    "example_ko": "너는 그를 사랑하니?",
+    "distractors": [
+      "loves",
+      "loved",
+      "loving"
+    ]
+  },
+  {
+    "id": "en-1-023",
+    "language": "en",
+    "level": 1,
+    "rank": 23,
+    "word": "eat",
+    "reading": null,
+    "meaning_ko": "먹다",
+    "example": "Let's {{eat}} lunch.",
+    "example_ko": "점심 먹자.",
+    "distractors": [
+      "eats",
+      "ate",
+      "eaten"
+    ]
+  },
+  {
+    "id": "en-1-024",
+    "language": "en",
+    "level": 1,
+    "rank": 24,
+    "word": "drink",
+    "reading": null,
+    "meaning_ko": "마시다",
+    "example": "Let's {{drink}} some water.",
+    "example_ko": "물을 좀 마시자.",
+    "distractors": [
+      "drinks",
+      "drank",
+      "drunk"
+    ]
+  },
+  {
+    "id": "en-1-025",
+    "language": "en",
+    "level": 1,
+    "rank": 25,
+    "word": "today",
+    "reading": null,
+    "meaning_ko": "오늘",
+    "example": "It is hot {{today}}.",
+    "example_ko": "오늘은 더워요.",
+    "distractors": [
+      "tomorrow",
+      "yesterday",
+      "never"
+    ]
+  },
+  {
+    "id": "en-1-026",
+    "language": "en",
+    "level": 1,
+    "rank": 26,
+    "word": "very",
+    "reading": null,
+    "meaning_ko": "매우",
+    "example": "She is {{very}} kind.",
+    "example_ko": "그녀는 매우 친절해요.",
+    "distractors": [
+      "never",
+      "again",
+      "here"
+    ]
+  },
+  {
+    "id": "en-1-027",
+    "language": "en",
+    "level": 1,
+    "rank": 27,
+    "word": "water",
+    "reading": null,
+    "meaning_ko": "물",
+    "example": "I need some {{water}}.",
+    "example_ko": "나는 물이 좀 필요해요.",
+    "distractors": [
+      "bread",
+      "paper",
+      "milk"
+    ]
+  },
+  {
+    "id": "en-1-028",
+    "language": "en",
+    "level": 1,
+    "rank": 28,
+    "word": "school",
+    "reading": null,
+    "meaning_ko": "학교",
+    "example": "I go to {{school}} by bus.",
+    "example_ko": "나는 버스로 학교에 가요.",
+    "distractors": [
+      "hospital",
+      "market",
+      "library"
+    ]
+  },
+  {
+    "id": "en-1-029",
+    "language": "en",
+    "level": 1,
+    "rank": 29,
+    "word": "home",
+    "reading": null,
+    "meaning_ko": "집",
+    "example": "I am at {{home}} now.",
+    "example_ko": "나는 지금 집에 있어요.",
+    "distractors": [
+      "school",
+      "work",
+      "sea"
+    ]
+  },
+  {
+    "id": "en-1-030",
+    "language": "en",
+    "level": 1,
+    "rank": 30,
+    "word": "happy",
+    "reading": null,
+    "meaning_ko": "행복한",
+    "example": "I am {{happy}} today.",
+    "example_ko": "나는 오늘 행복해요.",
+    "distractors": [
+      "sad",
+      "tired",
+      "angry"
+    ]
+  },
+  {
+    "id": "en-1-031",
+    "language": "en",
+    "level": 1,
+    "rank": 31,
+    "word": "have",
+    "reading": null,
+    "meaning_ko": "가지고 있다",
+    "example": "Do you {{have}} a pen?",
+    "example_ko": "펜 있어요?",
+    "distractors": [
+      "has",
+      "had",
+      "having"
+    ]
+  },
+  {
+    "id": "en-1-032",
+    "language": "en",
+    "level": 1,
+    "rank": 32,
+    "word": "say",
+    "reading": null,
+    "meaning_ko": "말하다",
+    "example": "Please {{say}} it again.",
+    "example_ko": "다시 말해 주세요.",
+    "distractors": [
+      "says",
+      "said",
+      "saying"
+    ]
+  },
+  {
+    "id": "en-1-033",
+    "language": "en",
+    "level": 1,
+    "rank": 33,
+    "word": "get",
+    "reading": null,
+    "meaning_ko": "얻다, 사다",
+    "example": "I will {{get}} some milk.",
+    "example_ko": "내가 우유를 좀 사 올게.",
+    "distractors": [
+      "gets",
+      "got",
+      "getting"
+    ]
+  },
+  {
+    "id": "en-1-034",
+    "language": "en",
+    "level": 1,
+    "rank": 34,
+    "word": "take",
+    "reading": null,
+    "meaning_ko": "가져가다, 잡다, 타다",
+    "example": "Please {{take}} a seat.",
+    "example_ko": "자리에 앉으세요.",
+    "distractors": [
+      "takes",
+      "took",
+      "taken"
+    ]
+  },
+  {
+    "id": "en-1-035",
+    "language": "en",
+    "level": 1,
+    "rank": 35,
+    "word": "give",
+    "reading": null,
+    "meaning_ko": "주다",
+    "example": "Please {{give}} me the pen.",
+    "example_ko": "그 펜을 저에게 주세요.",
+    "distractors": [
+      "gives",
+      "gave",
+      "given"
+    ]
+  },
+  {
+    "id": "en-1-036",
+    "language": "en",
+    "level": 1,
+    "rank": 36,
+    "word": "look",
+    "reading": null,
+    "meaning_ko": "보다, 쳐다보다",
+    "example": "Let's {{look}} at the map.",
+    "example_ko": "지도를 보자.",
+    "distractors": [
+      "looks",
+      "looked",
+      "looking"
+    ]
+  },
+  {
+    "id": "en-1-037",
+    "language": "en",
+    "level": 1,
+    "rank": 37,
+    "word": "use",
+    "reading": null,
+    "meaning_ko": "사용하다",
+    "example": "Can I {{use}} your phone?",
+    "example_ko": "전화기 좀 써도 될까요?",
+    "distractors": [
+      "uses",
+      "used",
+      "using"
+    ]
+  },
+  {
+    "id": "en-1-038",
+    "language": "en",
+    "level": 1,
+    "rank": 38,
+    "word": "work",
+    "reading": null,
+    "meaning_ko": "일하다",
+    "example": "Do you {{work}} here?",
+    "example_ko": "여기서 일하세요?",
+    "distractors": [
+      "works",
+      "worked",
+      "working"
+    ]
+  },
+  {
+    "id": "en-1-039",
+    "language": "en",
+    "level": 1,
+    "rank": 39,
+    "word": "family",
+    "reading": null,
+    "meaning_ko": "가족",
+    "example": "I live with my {{family}}.",
+    "example_ko": "나는 가족과 함께 살아요.",
+    "distractors": [
+      "teacher",
+      "pencil",
+      "bicycle"
+    ]
+  },
+  {
+    "id": "en-1-040",
+    "language": "en",
+    "level": 1,
+    "rank": 40,
+    "word": "food",
+    "reading": null,
+    "meaning_ko": "음식",
+    "example": "I like Korean {{food}}.",
+    "example_ko": "나는 한국 음식을 좋아해요.",
+    "distractors": [
+      "shoes",
+      "river",
+      "desk"
+    ]
+  },
+  {
+    "id": "en-1-041",
+    "language": "en",
+    "level": 1,
+    "rank": 41,
+    "word": "morning",
+    "reading": null,
+    "meaning_ko": "아침",
+    "example": "I wake up early in the {{morning}}.",
+    "example_ko": "나는 아침에 일찍 일어나요.",
+    "distractors": [
+      "kitchen",
+      "river",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-042",
+    "language": "en",
+    "level": 1,
+    "rank": 42,
+    "word": "sorry",
+    "reading": null,
+    "meaning_ko": "미안한",
+    "example": "I am {{sorry}} for being late.",
+    "example_ko": "늦어서 미안해요.",
+    "distractors": [
+      "hungry",
+      "tall",
+      "young"
+    ]
+  },
+  {
+    "id": "en-1-043",
+    "language": "en",
+    "level": 1,
+    "rank": 43,
+    "word": "nice",
+    "reading": null,
+    "meaning_ko": "좋은, 반가운",
+    "example": "It is {{nice}} to meet you.",
+    "example_ko": "만나서 반가워요.",
+    "distractors": [
+      "heavy",
+      "cold",
+      "short"
+    ]
+  },
+  {
+    "id": "en-1-044",
+    "language": "en",
+    "level": 1,
+    "rank": 44,
+    "word": "fine",
+    "reading": null,
+    "meaning_ko": "괜찮은, 좋은",
+    "example": "I am {{fine}}, thank you.",
+    "example_ko": "저는 괜찮아요, 고마워요.",
+    "distractors": [
+      "angry",
+      "lost",
+      "busy"
+    ]
+  },
+  {
+    "id": "en-1-045",
+    "language": "en",
+    "level": 1,
+    "rank": 45,
+    "word": "where",
+    "reading": null,
+    "meaning_ko": "어디",
+    "example": "{{Where}} is the bathroom?",
+    "example_ko": "화장실이 어디예요?",
+    "distractors": [
+      "Who",
+      "Why",
+      "When"
+    ]
+  },
+  {
+    "id": "en-1-046",
+    "language": "en",
+    "level": 1,
+    "rank": 46,
+    "word": "what",
+    "reading": null,
+    "meaning_ko": "무엇",
+    "example": "{{What}} is your name?",
+    "example_ko": "이름이 무엇이에요?",
+    "distractors": [
+      "Where",
+      "Why",
+      "When"
+    ]
+  },
+  {
+    "id": "en-1-047",
+    "language": "en",
+    "level": 1,
+    "rank": 47,
+    "word": "how",
+    "reading": null,
+    "meaning_ko": "어떻게",
+    "example": "{{How}} are you?",
+    "example_ko": "어떻게 지내세요?",
+    "distractors": [
+      "Who",
+      "Where",
+      "Why"
+    ]
+  },
+  {
+    "id": "en-1-048",
+    "language": "en",
+    "level": 1,
+    "rank": 48,
+    "word": "now",
+    "reading": null,
+    "meaning_ko": "지금",
+    "example": "I am busy {{now}}.",
+    "example_ko": "나는 지금 바빠요.",
+    "distractors": [
+      "yesterday",
+      "never",
+      "again"
+    ]
+  },
+  {
+    "id": "en-1-049",
+    "language": "en",
+    "level": 1,
+    "rank": 49,
+    "word": "here",
+    "reading": null,
+    "meaning_ko": "여기",
+    "example": "Sit {{here}}, please.",
+    "example_ko": "여기 앉으세요.",
+    "distractors": [
+      "tomorrow",
+      "never",
+      "early"
+    ]
+  },
+  {
+    "id": "en-1-050",
+    "language": "en",
+    "level": 1,
+    "rank": 50,
+    "word": "old",
+    "reading": null,
+    "meaning_ko": "나이 든, 오래된",
+    "example": "My grandfather is {{old}}.",
+    "example_ko": "우리 할아버지는 연세가 많으세요.",
+    "distractors": [
+      "short",
+      "hungry",
+      "empty"
+    ]
+  },
+  {
+    "id": "en-1-051",
+    "language": "en",
+    "level": 1,
+    "rank": 51,
+    "word": "need",
+    "reading": null,
+    "meaning_ko": "필요하다",
+    "example": "I {{need}} some water.",
+    "example_ko": "나는 물이 좀 필요하다.",
+    "distractors": [
+      "needs",
+      "needed",
+      "needing"
+    ]
+  },
+  {
+    "id": "en-1-052",
+    "language": "en",
+    "level": 1,
+    "rank": 52,
+    "word": "night",
+    "reading": null,
+    "meaning_ko": "밤",
+    "example": "Good {{night}}.",
+    "example_ko": "잘 자요.",
+    "distractors": [
+      "week",
+      "year",
+      "color"
+    ]
+  },
+  {
+    "id": "en-1-053",
+    "language": "en",
+    "level": 1,
+    "rank": 53,
+    "word": "book",
+    "reading": null,
+    "meaning_ko": "책",
+    "example": "This {{book}} is very fun.",
+    "example_ko": "이 책은 아주 재미있다.",
+    "distractors": [
+      "chair",
+      "river",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-054",
+    "language": "en",
+    "level": 1,
+    "rank": 54,
+    "word": "mother",
+    "reading": null,
+    "meaning_ko": "어머니",
+    "example": "My {{mother}} cooks dinner.",
+    "example_ko": "우리 어머니는 저녁을 요리하신다.",
+    "distractors": [
+      "window",
+      "river",
+      "pencil"
+    ]
+  },
+  {
+    "id": "en-1-055",
+    "language": "en",
+    "level": 1,
+    "rank": 55,
+    "word": "father",
+    "reading": null,
+    "meaning_ko": "아버지",
+    "example": "My {{father}} drives a car.",
+    "example_ko": "아빠는 차를 운전하신다.",
+    "distractors": [
+      "apple",
+      "table",
+      "cloud"
+    ]
+  },
+  {
+    "id": "en-1-056",
+    "language": "en",
+    "level": 1,
+    "rank": 56,
+    "word": "house",
+    "reading": null,
+    "meaning_ko": "집",
+    "example": "This {{house}} is very big.",
+    "example_ko": "이 집은 아주 크다.",
+    "distractors": [
+      "bird",
+      "shoe",
+      "rain"
+    ]
+  },
+  {
+    "id": "en-1-057",
+    "language": "en",
+    "level": 1,
+    "rank": 57,
+    "word": "tell",
+    "reading": null,
+    "meaning_ko": "말해 주다",
+    "example": "Can you {{tell}} me your name?",
+    "example_ko": "이름을 알려 주실래요?",
+    "distractors": [
+      "tells",
+      "told",
+      "telling"
+    ]
+  },
+  {
+    "id": "en-1-058",
+    "language": "en",
+    "level": 1,
+    "rank": 58,
+    "word": "play",
+    "reading": null,
+    "meaning_ko": "놀다, 경기하다",
+    "example": "The children {{play}} in the park.",
+    "example_ko": "아이들이 공원에서 논다.",
+    "distractors": [
+      "plays",
+      "played",
+      "playing"
+    ]
+  },
+  {
+    "id": "en-1-059",
+    "language": "en",
+    "level": 1,
+    "rank": 59,
+    "word": "buy",
+    "reading": null,
+    "meaning_ko": "사다",
+    "example": "I want to {{buy}} bread.",
+    "example_ko": "나는 빵을 사고 싶다.",
+    "distractors": [
+      "buys",
+      "bought",
+      "buying"
+    ]
+  },
+  {
+    "id": "en-1-060",
+    "language": "en",
+    "level": 1,
+    "rank": 60,
+    "word": "live",
+    "reading": null,
+    "meaning_ko": "살다",
+    "example": "I {{live}} in Seoul.",
+    "example_ko": "나는 서울에 산다.",
+    "distractors": [
+      "lives",
+      "lived",
+      "living"
+    ]
+  },
+  {
+    "id": "en-1-061",
+    "language": "en",
+    "level": 1,
+    "rank": 61,
+    "word": "many",
+    "reading": null,
+    "meaning_ko": "많은",
+    "example": "I have {{many}} friends.",
+    "example_ko": "나는 친구가 많다.",
+    "distractors": [
+      "much",
+      "every",
+      "a"
+    ]
+  },
+  {
+    "id": "en-1-062",
+    "language": "en",
+    "level": 1,
+    "rank": 62,
+    "word": "tomorrow",
+    "reading": null,
+    "meaning_ko": "내일",
+    "example": "See you {{tomorrow}}.",
+    "example_ko": "내일 봐요.",
+    "distractors": [
+      "yesterday",
+      "never",
+      "often"
+    ]
+  },
+  {
+    "id": "en-1-063",
+    "language": "en",
+    "level": 1,
+    "rank": 63,
+    "word": "always",
+    "reading": null,
+    "meaning_ko": "항상",
+    "example": "I {{always}} eat breakfast.",
+    "example_ko": "나는 항상 아침을 먹는다.",
+    "distractors": [
+      "never",
+      "tomorrow",
+      "slowly"
+    ]
+  },
+  {
+    "id": "en-1-064",
+    "language": "en",
+    "level": 1,
+    "rank": 64,
+    "word": "again",
+    "reading": null,
+    "meaning_ko": "다시",
+    "example": "Please say it {{again}}.",
+    "example_ko": "다시 말해 주세요.",
+    "distractors": [
+      "early",
+      "yesterday",
+      "tonight"
+    ]
+  },
+  {
+    "id": "en-1-065",
+    "language": "en",
+    "level": 1,
+    "rank": 65,
+    "word": "too",
+    "reading": null,
+    "meaning_ko": "~도 또한",
+    "example": "Me {{too}}.",
+    "example_ko": "나도요.",
+    "distractors": [
+      "never",
+      "soon",
+      "ago"
+    ]
+  },
+  {
+    "id": "en-1-066",
+    "language": "en",
+    "level": 1,
+    "rank": 66,
+    "word": "read",
+    "reading": null,
+    "meaning_ko": "읽다",
+    "example": "She is {{reading}} a book.",
+    "example_ko": "그녀는 책을 읽고 있다.",
+    "distractors": [
+      "reads",
+      "read",
+      "reader"
+    ]
+  },
+  {
+    "id": "en-1-067",
+    "language": "en",
+    "level": 1,
+    "rank": 67,
+    "word": "write",
+    "reading": null,
+    "meaning_ko": "쓰다",
+    "example": "Please {{write}} your name.",
+    "example_ko": "이름을 써 주세요.",
+    "distractors": [
+      "writes",
+      "wrote",
+      "writing"
+    ]
+  },
+  {
+    "id": "en-1-068",
+    "language": "en",
+    "level": 1,
+    "rank": 68,
+    "word": "ask",
+    "reading": null,
+    "meaning_ko": "묻다",
+    "example": "I will {{ask}} my teacher.",
+    "example_ko": "나는 선생님께 물어볼 것이다.",
+    "distractors": [
+      "asks",
+      "asked",
+      "asking"
+    ]
+  },
+  {
+    "id": "en-1-069",
+    "language": "en",
+    "level": 1,
+    "rank": 69,
+    "word": "small",
+    "reading": null,
+    "meaning_ko": "작은",
+    "example": "I have a {{small}} bag.",
+    "example_ko": "나는 작은 가방이 있다.",
+    "distractors": [
+      "cold",
+      "sweet",
+      "angry"
+    ]
+  },
+  {
+    "id": "en-1-070",
+    "language": "en",
+    "level": 1,
+    "rank": 70,
+    "word": "bad",
+    "reading": null,
+    "meaning_ko": "나쁜",
+    "example": "The weather is {{bad}}.",
+    "example_ko": "날씨가 나쁘다.",
+    "distractors": [
+      "sweet",
+      "round",
+      "fast"
+    ]
+  },
+  {
+    "id": "en-1-071",
+    "language": "en",
+    "level": 1,
+    "rank": 71,
+    "word": "room",
+    "reading": null,
+    "meaning_ko": "방",
+    "example": "My {{room}} is clean.",
+    "example_ko": "내 방은 깨끗하다.",
+    "distractors": [
+      "horse",
+      "song",
+      "tree"
+    ]
+  },
+  {
+    "id": "en-1-072",
+    "language": "en",
+    "level": 1,
+    "rank": 72,
+    "word": "teacher",
+    "reading": null,
+    "meaning_ko": "선생님",
+    "example": "My {{teacher}} is kind.",
+    "example_ko": "우리 선생님은 친절하시다.",
+    "distractors": [
+      "banana",
+      "street",
+      "ocean"
+    ]
+  },
+  {
+    "id": "en-1-073",
+    "language": "en",
+    "level": 1,
+    "rank": 73,
+    "word": "student",
+    "reading": null,
+    "meaning_ko": "학생",
+    "example": "I am a {{student}}.",
+    "example_ko": "나는 학생이다.",
+    "distractors": [
+      "doctor",
+      "farmer",
+      "singer"
+    ]
+  },
+  {
+    "id": "en-1-074",
+    "language": "en",
+    "level": 1,
+    "rank": 74,
+    "word": "car",
+    "reading": null,
+    "meaning_ko": "자동차",
+    "example": "I have a red {{car}}.",
+    "example_ko": "나는 빨간 차가 있다.",
+    "distractors": [
+      "milk",
+      "flower",
+      "hat"
+    ]
+  },
+  {
+    "id": "en-1-075",
+    "language": "en",
+    "level": 1,
+    "rank": 75,
+    "word": "dog",
+    "reading": null,
+    "meaning_ko": "개",
+    "example": "The {{dog}} is under the table.",
+    "example_ko": "개가 탁자 밑에 있다.",
+    "distractors": [
+      "moon",
+      "shirt",
+      "bread"
+    ]
+  },
+  {
+    "id": "en-1-076",
+    "language": "en",
+    "level": 1,
+    "rank": 76,
+    "word": "cat",
+    "reading": null,
+    "meaning_ko": "고양이",
+    "example": "My {{cat}} likes fish.",
+    "example_ko": "우리 고양이는 생선을 좋아한다.",
+    "distractors": [
+      "road",
+      "coat",
+      "game"
+    ]
+  },
+  {
+    "id": "en-1-077",
+    "language": "en",
+    "level": 1,
+    "rank": 77,
+    "word": "run",
+    "reading": null,
+    "meaning_ko": "달리다",
+    "example": "I {{run}} every morning.",
+    "example_ko": "나는 매일 아침 달린다.",
+    "distractors": [
+      "runs",
+      "ran",
+      "running"
+    ]
+  },
+  {
+    "id": "en-1-078",
+    "language": "en",
+    "level": 1,
+    "rank": 78,
+    "word": "walk",
+    "reading": null,
+    "meaning_ko": "걷다",
+    "example": "We {{walk}} to school.",
+    "example_ko": "우리는 학교에 걸어간다.",
+    "distractors": [
+      "walks",
+      "walked",
+      "walking"
+    ]
+  },
+  {
+    "id": "en-1-079",
+    "language": "en",
+    "level": 1,
+    "rank": 79,
+    "word": "sleep",
+    "reading": null,
+    "meaning_ko": "자다",
+    "example": "I go to {{sleep}} at ten.",
+    "example_ko": "나는 10시에 잔다.",
+    "distractors": [
+      "sleeps",
+      "slept",
+      "sleeping"
+    ]
+  },
+  {
+    "id": "en-1-080",
+    "language": "en",
+    "level": 1,
+    "rank": 80,
+    "word": "open",
+    "reading": null,
+    "meaning_ko": "열다",
+    "example": "Please {{open}} the window.",
+    "example_ko": "창문을 열어 주세요.",
+    "distractors": [
+      "opens",
+      "opened",
+      "opening"
+    ]
+  },
+  {
+    "id": "en-1-081",
+    "language": "en",
+    "level": 1,
+    "rank": 81,
+    "word": "cook",
+    "reading": null,
+    "meaning_ko": "요리하다",
+    "example": "My mom can {{cook}} well.",
+    "example_ko": "엄마는 요리를 잘하신다.",
+    "distractors": [
+      "cooks",
+      "cooked",
+      "cooking"
+    ]
+  },
+  {
+    "id": "en-1-082",
+    "language": "en",
+    "level": 1,
+    "rank": 82,
+    "word": "hot",
+    "reading": null,
+    "meaning_ko": "뜨거운, 더운",
+    "example": "The soup is {{hot}}.",
+    "example_ko": "수프가 뜨겁다.",
+    "distractors": [
+      "cold",
+      "sad",
+      "short"
+    ]
+  },
+  {
+    "id": "en-1-083",
+    "language": "en",
+    "level": 1,
+    "rank": 83,
+    "word": "cold",
+    "reading": null,
+    "meaning_ko": "추운, 차가운",
+    "example": "It is {{cold}} today.",
+    "example_ko": "오늘은 춥다.",
+    "distractors": [
+      "hot",
+      "tall",
+      "young"
+    ]
+  },
+  {
+    "id": "en-1-084",
+    "language": "en",
+    "level": 1,
+    "rank": 84,
+    "word": "brother",
+    "reading": null,
+    "meaning_ko": "형, 오빠, 남동생",
+    "example": "I have one {{brother}}.",
+    "example_ko": "나는 남자 형제가 한 명 있다.",
+    "distractors": [
+      "lake",
+      "pencil",
+      "spoon"
+    ]
+  },
+  {
+    "id": "en-1-085",
+    "language": "en",
+    "level": 1,
+    "rank": 85,
+    "word": "sister",
+    "reading": null,
+    "meaning_ko": "누나, 언니, 여동생",
+    "example": "My {{sister}} sings well.",
+    "example_ko": "내 여동생은 노래를 잘한다.",
+    "distractors": [
+      "window",
+      "bridge",
+      "carrot"
+    ]
+  },
+  {
+    "id": "en-1-086",
+    "language": "en",
+    "level": 1,
+    "rank": 86,
+    "word": "apple",
+    "reading": null,
+    "meaning_ko": "사과",
+    "example": "I eat a red {{apple}}.",
+    "example_ko": "나는 빨간 사과를 먹는다.",
+    "distractors": [
+      "shoe",
+      "cloud",
+      "bus"
+    ]
+  },
+  {
+    "id": "en-1-087",
+    "language": "en",
+    "level": 1,
+    "rank": 87,
+    "word": "milk",
+    "reading": null,
+    "meaning_ko": "우유",
+    "example": "I drink {{milk}} in the morning.",
+    "example_ko": "나는 아침에 우유를 마신다.",
+    "distractors": [
+      "paper",
+      "stone",
+      "shirt"
+    ]
+  },
+  {
+    "id": "en-1-088",
+    "language": "en",
+    "level": 1,
+    "rank": 88,
+    "word": "phone",
+    "reading": null,
+    "meaning_ko": "전화기",
+    "example": "My {{phone}} is on the desk.",
+    "example_ko": "내 전화기는 책상 위에 있다.",
+    "distractors": [
+      "cheese",
+      "garden",
+      "horse"
+    ]
+  },
+  {
+    "id": "en-1-089",
+    "language": "en",
+    "level": 1,
+    "rank": 89,
+    "word": "money",
+    "reading": null,
+    "meaning_ko": "돈",
+    "example": "I have no {{money}}.",
+    "example_ko": "나는 돈이 없다.",
+    "distractors": [
+      "hat",
+      "door",
+      "wall"
+    ]
+  },
+  {
+    "id": "en-1-090",
+    "language": "en",
+    "level": 1,
+    "rank": 90,
+    "word": "music",
+    "reading": null,
+    "meaning_ko": "음악",
+    "example": "I like {{music}}.",
+    "example_ko": "나는 음악을 좋아한다.",
+    "distractors": [
+      "soup",
+      "forest",
+      "table"
+    ]
+  },
+  {
+    "id": "en-1-091",
+    "language": "en",
+    "level": 1,
+    "rank": 91,
+    "word": "beautiful",
+    "reading": null,
+    "meaning_ko": "아름다운",
+    "example": "The flower is {{beautiful}}.",
+    "example_ko": "그 꽃은 아름답다.",
+    "distractors": [
+      "heavy",
+      "angry",
+      "noisy"
+    ]
+  },
+  {
+    "id": "en-1-092",
+    "language": "en",
+    "level": 1,
+    "rank": 92,
+    "word": "girl",
+    "reading": null,
+    "meaning_ko": "소녀",
+    "example": "The {{girl}} has a red hat.",
+    "example_ko": "소녀는 빨간 모자를 쓰고 있다.",
+    "distractors": [
+      "tiger",
+      "kitchen",
+      "ticket"
+    ]
+  },
+  {
+    "id": "en-1-093",
+    "language": "en",
+    "level": 1,
+    "rank": 93,
+    "word": "boy",
+    "reading": null,
+    "meaning_ko": "소년",
+    "example": "The {{boy}} plays soccer.",
+    "example_ko": "소년은 축구를 한다.",
+    "distractors": [
+      "lemon",
+      "mountain",
+      "pillow"
+    ]
+  },
+  {
+    "id": "en-1-094",
+    "language": "en",
+    "level": 1,
+    "rank": 94,
+    "word": "city",
+    "reading": null,
+    "meaning_ko": "도시",
+    "example": "Seoul is a big {{city}}.",
+    "example_ko": "서울은 큰 도시이다.",
+    "distractors": [
+      "shirt",
+      "spoon",
+      "bird"
+    ]
+  },
+  {
+    "id": "en-1-095",
+    "language": "en",
+    "level": 1,
+    "rank": 95,
+    "word": "door",
+    "reading": null,
+    "meaning_ko": "문",
+    "example": "Close the {{door}}, please.",
+    "example_ko": "문을 닫아 주세요.",
+    "distractors": [
+      "cake",
+      "hand",
+      "moon"
+    ]
+  },
+  {
+    "id": "en-1-096",
+    "language": "en",
+    "level": 1,
+    "rank": 96,
+    "word": "try",
+    "reading": null,
+    "meaning_ko": "시도하다",
+    "example": "Let me {{try}}.",
+    "example_ko": "제가 해 볼게요.",
+    "distractors": [
+      "tries",
+      "tried",
+      "trying"
+    ]
+  },
+  {
+    "id": "en-1-097",
+    "language": "en",
+    "level": 1,
+    "rank": 97,
+    "word": "start",
+    "reading": null,
+    "meaning_ko": "시작하다",
+    "example": "The class will {{start}} soon.",
+    "example_ko": "수업이 곧 시작될 것이다.",
+    "distractors": [
+      "starts",
+      "started",
+      "starting"
+    ]
+  },
+  {
+    "id": "en-1-098",
+    "language": "en",
+    "level": 1,
+    "rank": 98,
+    "word": "wait",
+    "reading": null,
+    "meaning_ko": "기다리다",
+    "example": "Please {{wait}} here.",
+    "example_ko": "여기서 기다려 주세요.",
+    "distractors": [
+      "waits",
+      "waited",
+      "waiting"
+    ]
+  },
+  {
+    "id": "en-1-099",
+    "language": "en",
+    "level": 1,
+    "rank": 99,
+    "word": "late",
+    "reading": null,
+    "meaning_ko": "늦은",
+    "example": "I am {{late}} for school.",
+    "example_ko": "나는 학교에 늦었다.",
+    "distractors": [
+      "kind",
+      "warm",
+      "rich"
+    ]
+  },
+  {
+    "id": "en-1-100",
+    "language": "en",
+    "level": 1,
+    "rank": 100,
+    "word": "dinner",
+    "reading": null,
+    "meaning_ko": "저녁 식사",
+    "example": "We eat {{dinner}} at six.",
+    "example_ko": "우리는 6시에 저녁을 먹는다.",
+    "distractors": [
+      "bridge",
+      "ticket",
+      "forest"
+    ]
+  },
+  {
+    "id": "en-1-101",
+    "language": "en",
+    "level": 1,
+    "rank": 101,
+    "word": "who",
+    "reading": null,
+    "meaning_ko": "누구",
+    "example": "{{Who}} is that man?",
+    "example_ko": "저 남자는 누구예요?",
+    "distractors": [
+      "Where",
+      "When",
+      "Why"
+    ]
+  },
+  {
+    "id": "en-1-102",
+    "language": "en",
+    "level": 1,
+    "rank": 102,
+    "word": "why",
+    "reading": null,
+    "meaning_ko": "왜",
+    "example": "{{Why}} are you sad?",
+    "example_ko": "너는 왜 슬퍼하니?",
+    "distractors": [
+      "Who",
+      "Where",
+      "Which"
+    ]
+  },
+  {
+    "id": "en-1-103",
+    "language": "en",
+    "level": 1,
+    "rank": 103,
+    "word": "when",
+    "reading": null,
+    "meaning_ko": "언제",
+    "example": "{{When}} do you eat lunch?",
+    "example_ko": "점심은 언제 먹어요?",
+    "distractors": [
+      "Who",
+      "Where",
+      "Which"
+    ]
+  },
+  {
+    "id": "en-1-104",
+    "language": "en",
+    "level": 1,
+    "rank": 104,
+    "word": "man",
+    "reading": null,
+    "meaning_ko": "남자",
+    "example": "That {{man}} is my teacher.",
+    "example_ko": "저 남자는 우리 선생님이다.",
+    "distractors": [
+      "table",
+      "rice",
+      "park"
+    ]
+  },
+  {
+    "id": "en-1-105",
+    "language": "en",
+    "level": 1,
+    "rank": 105,
+    "word": "woman",
+    "reading": null,
+    "meaning_ko": "여자",
+    "example": "The {{woman}} has a red bag.",
+    "example_ko": "그 여자는 빨간 가방을 가지고 있다.",
+    "distractors": [
+      "fish",
+      "chair",
+      "street"
+    ]
+  },
+  {
+    "id": "en-1-106",
+    "language": "en",
+    "level": 1,
+    "rank": 106,
+    "word": "child",
+    "reading": null,
+    "meaning_ko": "아이",
+    "example": "The {{child}} is five years old.",
+    "example_ko": "그 아이는 다섯 살이다.",
+    "distractors": [
+      "table",
+      "coffee",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-107",
+    "language": "en",
+    "level": 1,
+    "rank": 107,
+    "word": "week",
+    "reading": null,
+    "meaning_ko": "주, 일주일",
+    "example": "I work five days a {{week}}.",
+    "example_ko": "나는 일주일에 5일 일한다.",
+    "distractors": [
+      "hand",
+      "bed",
+      "shop"
+    ]
+  },
+  {
+    "id": "en-1-108",
+    "language": "en",
+    "level": 1,
+    "rank": 108,
+    "word": "year",
+    "reading": null,
+    "meaning_ko": "해, 년",
+    "example": "This {{year}} I will learn English.",
+    "example_ko": "올해 나는 영어를 배울 것이다.",
+    "distractors": [
+      "bread",
+      "street",
+      "chair"
+    ]
+  },
+  {
+    "id": "en-1-109",
+    "language": "en",
+    "level": 1,
+    "rank": 109,
+    "word": "yesterday",
+    "reading": null,
+    "meaning_ko": "어제",
+    "example": "I saw him {{yesterday}}.",
+    "example_ko": "나는 어제 그를 봤다.",
+    "distractors": [
+      "tomorrow",
+      "never",
+      "together"
+    ]
+  },
+  {
+    "id": "en-1-110",
+    "language": "en",
+    "level": 1,
+    "rank": 110,
+    "word": "breakfast",
+    "reading": null,
+    "meaning_ko": "아침 식사",
+    "example": "I eat {{breakfast}} at seven.",
+    "example_ko": "나는 7시에 아침을 먹는다.",
+    "distractors": [
+      "window",
+      "park",
+      "table"
+    ]
+  },
+  {
+    "id": "en-1-111",
+    "language": "en",
+    "level": 1,
+    "rank": 111,
+    "word": "lunch",
+    "reading": null,
+    "meaning_ko": "점심 식사",
+    "example": "We have {{lunch}} at noon.",
+    "example_ko": "우리는 정오에 점심을 먹는다.",
+    "distractors": [
+      "bed",
+      "hand",
+      "street"
+    ]
+  },
+  {
+    "id": "en-1-112",
+    "language": "en",
+    "level": 1,
+    "rank": 112,
+    "word": "bread",
+    "reading": null,
+    "meaning_ko": "빵",
+    "example": "I want some {{bread}}.",
+    "example_ko": "나는 빵을 좀 먹고 싶다.",
+    "distractors": [
+      "chair",
+      "river",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-113",
+    "language": "en",
+    "level": 1,
+    "rank": 113,
+    "word": "rice",
+    "reading": null,
+    "meaning_ko": "쌀, 밥",
+    "example": "We eat {{rice}} every day.",
+    "example_ko": "우리는 매일 밥을 먹는다.",
+    "distractors": [
+      "chair",
+      "street",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-114",
+    "language": "en",
+    "level": 1,
+    "rank": 114,
+    "word": "egg",
+    "reading": null,
+    "meaning_ko": "달걀",
+    "example": "I eat one {{egg}} every morning.",
+    "example_ko": "나는 매일 아침 달걀 하나를 먹는다.",
+    "distractors": [
+      "hand",
+      "bed",
+      "park"
+    ]
+  },
+  {
+    "id": "en-1-115",
+    "language": "en",
+    "level": 1,
+    "rank": 115,
+    "word": "fish",
+    "reading": null,
+    "meaning_ko": "생선, 물고기",
+    "example": "My cat likes {{fish}}.",
+    "example_ko": "우리 고양이는 생선을 좋아한다.",
+    "distractors": [
+      "chair",
+      "window",
+      "street"
+    ]
+  },
+  {
+    "id": "en-1-116",
+    "language": "en",
+    "level": 1,
+    "rank": 116,
+    "word": "coffee",
+    "reading": null,
+    "meaning_ko": "커피",
+    "example": "He drinks {{coffee}} every morning.",
+    "example_ko": "그는 매일 아침 커피를 마신다.",
+    "distractors": [
+      "table",
+      "shop",
+      "hand"
+    ]
+  },
+  {
+    "id": "en-1-117",
+    "language": "en",
+    "level": 1,
+    "rank": 117,
+    "word": "tea",
+    "reading": null,
+    "meaning_ko": "차",
+    "example": "Would you like some {{tea}}?",
+    "example_ko": "차 좀 드시겠어요?",
+    "distractors": [
+      "bed",
+      "street",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-118",
+    "language": "en",
+    "level": 1,
+    "rank": 118,
+    "word": "table",
+    "reading": null,
+    "meaning_ko": "탁자, 식탁",
+    "example": "The cup is on the {{table}}.",
+    "example_ko": "컵이 탁자 위에 있다.",
+    "distractors": [
+      "river",
+      "bread",
+      "street"
+    ]
+  },
+  {
+    "id": "en-1-119",
+    "language": "en",
+    "level": 1,
+    "rank": 119,
+    "word": "chair",
+    "reading": null,
+    "meaning_ko": "의자",
+    "example": "Please sit on the {{chair}}.",
+    "example_ko": "의자에 앉아 주세요.",
+    "distractors": [
+      "coffee",
+      "river",
+      "street"
+    ]
+  },
+  {
+    "id": "en-1-120",
+    "language": "en",
+    "level": 1,
+    "rank": 120,
+    "word": "bed",
+    "reading": null,
+    "meaning_ko": "침대",
+    "example": "I go to {{bed}} at eleven.",
+    "example_ko": "나는 11시에 잠자리에 든다.",
+    "distractors": [
+      "river",
+      "window",
+      "hand"
+    ]
+  },
+  {
+    "id": "en-1-121",
+    "language": "en",
+    "level": 1,
+    "rank": 121,
+    "word": "window",
+    "reading": null,
+    "meaning_ko": "창문",
+    "example": "Please open the {{window}}.",
+    "example_ko": "창문을 열어 주세요.",
+    "distractors": [
+      "bread",
+      "river",
+      "coffee"
+    ]
+  },
+  {
+    "id": "en-1-122",
+    "language": "en",
+    "level": 1,
+    "rank": 122,
+    "word": "street",
+    "reading": null,
+    "meaning_ko": "거리, 길",
+    "example": "There are many cars on the {{street}}.",
+    "example_ko": "길에 차가 많이 있다.",
+    "distractors": [
+      "egg",
+      "tea",
+      "hand"
+    ]
+  },
+  {
+    "id": "en-1-123",
+    "language": "en",
+    "level": 1,
+    "rank": 123,
+    "word": "shop",
+    "reading": null,
+    "meaning_ko": "가게",
+    "example": "The {{shop}} opens at nine.",
+    "example_ko": "그 가게는 9시에 문을 연다.",
+    "distractors": [
+      "rice",
+      "hand",
+      "eye"
+    ]
+  },
+  {
+    "id": "en-1-124",
+    "language": "en",
+    "level": 1,
+    "rank": 124,
+    "word": "park",
+    "reading": null,
+    "meaning_ko": "공원",
+    "example": "We walk in the {{park}}.",
+    "example_ko": "우리는 공원에서 걷는다.",
+    "distractors": [
+      "egg",
+      "hand",
+      "coffee"
+    ]
+  },
+  {
+    "id": "en-1-125",
+    "language": "en",
+    "level": 1,
+    "rank": 125,
+    "word": "hand",
+    "reading": null,
+    "meaning_ko": "손",
+    "example": "I have a pen in my {{hand}}.",
+    "example_ko": "나는 손에 펜을 들고 있다.",
+    "distractors": [
+      "bread",
+      "street",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-126",
+    "language": "en",
+    "level": 1,
+    "rank": 126,
+    "word": "head",
+    "reading": null,
+    "meaning_ko": "머리",
+    "example": "My {{head}} hurts.",
+    "example_ko": "머리가 아프다.",
+    "distractors": [
+      "street",
+      "bread",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-127",
+    "language": "en",
+    "level": 1,
+    "rank": 127,
+    "word": "eye",
+    "reading": null,
+    "meaning_ko": "눈",
+    "example": "I closed one {{eye}}.",
+    "example_ko": "나는 한쪽 눈을 감았다.",
+    "distractors": [
+      "bread",
+      "street",
+      "table"
+    ]
+  },
+  {
+    "id": "en-1-128",
+    "language": "en",
+    "level": 1,
+    "rank": 128,
+    "word": "easy",
+    "reading": null,
+    "meaning_ko": "쉬운",
+    "example": "This test is {{easy}}.",
+    "example_ko": "이 시험은 쉽다.",
+    "distractors": [
+      "tired",
+      "young",
+      "tall"
+    ]
+  },
+  {
+    "id": "en-1-129",
+    "language": "en",
+    "level": 1,
+    "rank": 129,
+    "word": "hard",
+    "reading": null,
+    "meaning_ko": "어려운, 딱딱한",
+    "example": "This work is very {{hard}}.",
+    "example_ko": "이 일은 매우 어렵다.",
+    "distractors": [
+      "green",
+      "tall",
+      "white"
+    ]
+  },
+  {
+    "id": "en-1-130",
+    "language": "en",
+    "level": 1,
+    "rank": 130,
+    "word": "long",
+    "reading": null,
+    "meaning_ko": "긴",
+    "example": "She has {{long}} hair.",
+    "example_ko": "그녀는 머리가 길다.",
+    "distractors": [
+      "busy",
+      "sad",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-131",
+    "language": "en",
+    "level": 1,
+    "rank": 131,
+    "word": "short",
+    "reading": null,
+    "meaning_ko": "짧은",
+    "example": "This pencil is too {{short}}.",
+    "example_ko": "이 연필은 너무 짧다.",
+    "distractors": [
+      "hungry",
+      "happy",
+      "blue"
+    ]
+  },
+  {
+    "id": "en-1-132",
+    "language": "en",
+    "level": 1,
+    "rank": 132,
+    "word": "tall",
+    "reading": null,
+    "meaning_ko": "키가 큰",
+    "example": "My father is {{tall}}.",
+    "example_ko": "우리 아빠는 키가 크다.",
+    "distractors": [
+      "sad",
+      "cheap",
+      "blue"
+    ]
+  },
+  {
+    "id": "en-1-133",
+    "language": "en",
+    "level": 1,
+    "rank": 133,
+    "word": "young",
+    "reading": null,
+    "meaning_ko": "어린, 젊은",
+    "example": "The {{young}} girl is my sister.",
+    "example_ko": "그 어린 소녀는 내 여동생이다.",
+    "distractors": [
+      "cheap",
+      "green",
+      "hungry"
+    ]
+  },
+  {
+    "id": "en-1-134",
+    "language": "en",
+    "level": 1,
+    "rank": 134,
+    "word": "fast",
+    "reading": null,
+    "meaning_ko": "빠른",
+    "example": "That car is very {{fast}}.",
+    "example_ko": "저 차는 매우 빠르다.",
+    "distractors": [
+      "tired",
+      "sad",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-135",
+    "language": "en",
+    "level": 1,
+    "rank": 135,
+    "word": "slow",
+    "reading": null,
+    "meaning_ko": "느린",
+    "example": "The bus is {{slow}}.",
+    "example_ko": "그 버스는 느리다.",
+    "distractors": [
+      "hungry",
+      "blue",
+      "tired"
+    ]
+  },
+  {
+    "id": "en-1-136",
+    "language": "en",
+    "level": 1,
+    "rank": 136,
+    "word": "sad",
+    "reading": null,
+    "meaning_ko": "슬픈",
+    "example": "I am {{sad}} today.",
+    "example_ko": "나는 오늘 슬프다.",
+    "distractors": [
+      "cheap",
+      "green",
+      "long"
+    ]
+  },
+  {
+    "id": "en-1-137",
+    "language": "en",
+    "level": 1,
+    "rank": 137,
+    "word": "tired",
+    "reading": null,
+    "meaning_ko": "피곤한",
+    "example": "I am very {{tired}}.",
+    "example_ko": "나는 매우 피곤하다.",
+    "distractors": [
+      "cheap",
+      "green",
+      "long"
+    ]
+  },
+  {
+    "id": "en-1-138",
+    "language": "en",
+    "level": 1,
+    "rank": 138,
+    "word": "hungry",
+    "reading": null,
+    "meaning_ko": "배고픈",
+    "example": "I am {{hungry}}.",
+    "example_ko": "나는 배고프다.",
+    "distractors": [
+      "cheap",
+      "white",
+      "long"
+    ]
+  },
+  {
+    "id": "en-1-139",
+    "language": "en",
+    "level": 1,
+    "rank": 139,
+    "word": "busy",
+    "reading": null,
+    "meaning_ko": "바쁜",
+    "example": "I am {{busy}} now.",
+    "example_ko": "나는 지금 바쁘다.",
+    "distractors": [
+      "cheap",
+      "green",
+      "white"
+    ]
+  },
+  {
+    "id": "en-1-140",
+    "language": "en",
+    "level": 1,
+    "rank": 140,
+    "word": "cheap",
+    "reading": null,
+    "meaning_ko": "값싼",
+    "example": "This bag is {{cheap}}.",
+    "example_ko": "이 가방은 싸다.",
+    "distractors": [
+      "hungry",
+      "tired",
+      "sad"
+    ]
+  },
+  {
+    "id": "en-1-141",
+    "language": "en",
+    "level": 1,
+    "rank": 141,
+    "word": "red",
+    "reading": null,
+    "meaning_ko": "빨간, 빨간색",
+    "example": "She wears a {{red}} dress.",
+    "example_ko": "그녀는 빨간 원피스를 입는다.",
+    "distractors": [
+      "blue",
+      "green",
+      "black"
+    ]
+  },
+  {
+    "id": "en-1-142",
+    "language": "en",
+    "level": 1,
+    "rank": 142,
+    "word": "blue",
+    "reading": null,
+    "meaning_ko": "파란, 파란색",
+    "example": "The sky is {{blue}}.",
+    "example_ko": "하늘은 파랗다.",
+    "distractors": [
+      "red",
+      "black",
+      "white"
+    ]
+  },
+  {
+    "id": "en-1-143",
+    "language": "en",
+    "level": 1,
+    "rank": 143,
+    "word": "white",
+    "reading": null,
+    "meaning_ko": "하얀, 흰색",
+    "example": "Snow is {{white}}.",
+    "example_ko": "눈은 하얗다.",
+    "distractors": [
+      "red",
+      "green",
+      "black"
+    ]
+  },
+  {
+    "id": "en-1-144",
+    "language": "en",
+    "level": 1,
+    "rank": 144,
+    "word": "black",
+    "reading": null,
+    "meaning_ko": "검은, 검은색",
+    "example": "My cat is {{black}}.",
+    "example_ko": "우리 고양이는 검은색이다.",
+    "distractors": [
+      "white",
+      "red",
+      "blue"
+    ]
+  },
+  {
+    "id": "en-1-145",
+    "language": "en",
+    "level": 1,
+    "rank": 145,
+    "word": "green",
+    "reading": null,
+    "meaning_ko": "초록색의, 초록색",
+    "example": "The grass is {{green}}.",
+    "example_ko": "풀은 초록색이다.",
+    "distractors": [
+      "red",
+      "black",
+      "white"
+    ]
+  },
+  {
+    "id": "en-1-146",
+    "language": "en",
+    "level": 1,
+    "rank": 146,
+    "word": "sometimes",
+    "reading": null,
+    "meaning_ko": "가끔",
+    "example": "I {{sometimes}} drink tea.",
+    "example_ko": "나는 가끔 차를 마신다.",
+    "distractors": [
+      "never",
+      "yesterday",
+      "soon"
+    ]
+  },
+  {
+    "id": "en-1-147",
+    "language": "en",
+    "level": 1,
+    "rank": 147,
+    "word": "never",
+    "reading": null,
+    "meaning_ko": "결코 ~ 않다",
+    "example": "I {{never}} eat fish.",
+    "example_ko": "나는 생선을 절대 먹지 않는다.",
+    "distractors": [
+      "always",
+      "often",
+      "sometimes"
+    ]
+  },
+  {
+    "id": "en-1-148",
+    "language": "en",
+    "level": 1,
+    "rank": 148,
+    "word": "often",
+    "reading": null,
+    "meaning_ko": "자주",
+    "example": "We {{often}} play music.",
+    "example_ko": "우리는 자주 음악을 연주한다.",
+    "distractors": [
+      "never",
+      "yesterday",
+      "soon"
+    ]
+  },
+  {
+    "id": "en-1-149",
+    "language": "en",
+    "level": 1,
+    "rank": 149,
+    "word": "also",
+    "reading": null,
+    "meaning_ko": "또한, ~도",
+    "example": "I {{also}} like coffee.",
+    "example_ko": "나는 커피도 좋아한다.",
+    "distractors": [
+      "never",
+      "yesterday",
+      "soon"
+    ]
+  },
+  {
+    "id": "en-1-150",
+    "language": "en",
+    "level": 1,
+    "rank": 150,
+    "word": "question",
+    "reading": null,
+    "meaning_ko": "질문",
+    "example": "I have a {{question}}.",
+    "example_ko": "질문이 하나 있어요.",
+    "distractors": [
+      "bread",
+      "street",
+      "window"
+    ]
+  },
+  {
+    "id": "en-1-151",
+    "language": "en",
+    "level": 1,
+    "rank": 151,
+    "word": "thing",
+    "reading": null,
+    "meaning_ko": "것, 물건",
+    "example": "This is a good {{thing}}.",
+    "example_ko": "이것은 좋은 것이다.",
+    "distractors": [
+      "tree",
+      "shirt",
+      "bridge"
+    ]
+  },
+  {
+    "id": "en-1-152",
+    "language": "en",
+    "level": 1,
+    "rank": 152,
+    "word": "really",
+    "reading": null,
+    "meaning_ko": "정말, 진짜로",
+    "example": "I {{really}} like this song.",
+    "example_ko": "나는 이 노래를 정말 좋아해요.",
+    "distractors": [
+      "slowly",
+      "early",
+      "outside"
+    ]
+  },
+  {
+    "id": "en-1-153",
+    "language": "en",
+    "level": 1,
+    "rank": 153,
+    "word": "call",
+    "reading": null,
+    "meaning_ko": "전화하다, 부르다",
+    "example": "Please {{call}} me tonight.",
+    "example_ko": "오늘 밤에 저에게 전화해 주세요.",
+    "distractors": [
+      "called",
+      "calls",
+      "calling"
+    ]
+  },
+  {
+    "id": "en-1-154",
+    "language": "en",
+    "level": 1,
+    "rank": 154,
+    "word": "find",
+    "reading": null,
+    "meaning_ko": "찾다, 발견하다",
+    "example": "I can't {{find}} my keys.",
+    "example_ko": "내 열쇠를 찾을 수 없어요.",
+    "distractors": [
+      "found",
+      "finds",
+      "finding"
+    ]
+  },
+  {
+    "id": "en-1-155",
+    "language": "en",
+    "level": 1,
+    "rank": 155,
+    "word": "feel",
+    "reading": null,
+    "meaning_ko": "느끼다",
+    "example": "Do you {{feel}} cold?",
+    "example_ko": "너는 추위를 느끼니?",
+    "distractors": [
+      "felt",
+      "feels",
+      "feeling"
+    ]
+  },
+  {
+    "id": "en-1-156",
+    "language": "en",
+    "level": 1,
+    "rank": 156,
+    "word": "talk",
+    "reading": null,
+    "meaning_ko": "말하다, 이야기하다",
+    "example": "I want to {{talk}} to you.",
+    "example_ko": "나는 너와 이야기하고 싶어.",
+    "distractors": [
+      "talks",
+      "talked",
+      "talking"
+    ]
+  },
+  {
+    "id": "en-1-157",
+    "language": "en",
+    "level": 1,
+    "rank": 157,
+    "word": "next",
+    "reading": null,
+    "meaning_ko": "다음의",
+    "example": "See you {{next}} week.",
+    "example_ko": "다음 주에 봐요.",
+    "distractors": [
+      "last",
+      "young",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-158",
+    "language": "en",
+    "level": 1,
+    "rank": 158,
+    "word": "first",
+    "reading": null,
+    "meaning_ko": "첫 번째의",
+    "example": "This is my {{first}} day.",
+    "example_ko": "오늘은 나의 첫날이에요.",
+    "distractors": [
+      "tall",
+      "sad",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-159",
+    "language": "en",
+    "level": 1,
+    "rank": 159,
+    "word": "stop",
+    "reading": null,
+    "meaning_ko": "멈추다",
+    "example": "Please {{stop}} here.",
+    "example_ko": "여기에서 멈춰 주세요.",
+    "distractors": [
+      "stopped",
+      "stops",
+      "stopping"
+    ]
+  },
+  {
+    "id": "en-1-160",
+    "language": "en",
+    "level": 1,
+    "rank": 160,
+    "word": "meet",
+    "reading": null,
+    "meaning_ko": "만나다",
+    "example": "Nice to {{meet}} you.",
+    "example_ko": "만나서 반가워요.",
+    "distractors": [
+      "met",
+      "meets",
+      "meeting"
+    ]
+  },
+  {
+    "id": "en-1-161",
+    "language": "en",
+    "level": 1,
+    "rank": 161,
+    "word": "watch",
+    "reading": null,
+    "meaning_ko": "보다, 지켜보다",
+    "example": "Let's {{watch}} TV tonight.",
+    "example_ko": "오늘 밤에 TV를 보자.",
+    "distractors": [
+      "watched",
+      "watches",
+      "watching"
+    ]
+  },
+  {
+    "id": "en-1-162",
+    "language": "en",
+    "level": 1,
+    "rank": 162,
+    "word": "listen",
+    "reading": null,
+    "meaning_ko": "듣다, 귀 기울이다",
+    "example": "I like to {{listen}} to music.",
+    "example_ko": "나는 음악 듣는 것을 좋아해요.",
+    "distractors": [
+      "listens",
+      "listened",
+      "listening"
+    ]
+  },
+  {
+    "id": "en-1-163",
+    "language": "en",
+    "level": 1,
+    "rank": 163,
+    "word": "bring",
+    "reading": null,
+    "meaning_ko": "가져오다",
+    "example": "Please {{bring}} your book.",
+    "example_ko": "책을 가져오세요.",
+    "distractors": [
+      "brought",
+      "brings",
+      "bringing"
+    ]
+  },
+  {
+    "id": "en-1-164",
+    "language": "en",
+    "level": 1,
+    "rank": 164,
+    "word": "soon",
+    "reading": null,
+    "meaning_ko": "곧, 머지않아",
+    "example": "Dinner will be ready {{soon}}.",
+    "example_ko": "저녁이 곧 준비될 거예요.",
+    "distractors": [
+      "slowly",
+      "outside",
+      "yesterday"
+    ]
+  },
+  {
+    "id": "en-1-165",
+    "language": "en",
+    "level": 1,
+    "rank": 165,
+    "word": "together",
+    "reading": null,
+    "meaning_ko": "함께",
+    "example": "We study {{together}}.",
+    "example_ko": "우리는 함께 공부해요.",
+    "distractors": [
+      "early",
+      "outside",
+      "quietly"
+    ]
+  },
+  {
+    "id": "en-1-166",
+    "language": "en",
+    "level": 1,
+    "rank": 166,
+    "word": "place",
+    "reading": null,
+    "meaning_ko": "장소, 곳",
+    "example": "This is a nice {{place}}.",
+    "example_ko": "여기는 좋은 곳이에요.",
+    "distractors": [
+      "fruit",
+      "shirt",
+      "bridge"
+    ]
+  },
+  {
+    "id": "en-1-167",
+    "language": "en",
+    "level": 1,
+    "rank": 167,
+    "word": "word",
+    "reading": null,
+    "meaning_ko": "단어, 말",
+    "example": "I don't know this {{word}}.",
+    "example_ko": "나는 이 단어를 몰라요.",
+    "distractors": [
+      "song",
+      "mountain",
+      "ticket"
+    ]
+  },
+  {
+    "id": "en-1-168",
+    "language": "en",
+    "level": 1,
+    "rank": 168,
+    "word": "number",
+    "reading": null,
+    "meaning_ko": "숫자, 번호",
+    "example": "What is your phone {{number}}?",
+    "example_ko": "당신의 전화번호가 뭐예요?",
+    "distractors": [
+      "garden",
+      "bridge",
+      "lesson"
+    ]
+  },
+  {
+    "id": "en-1-169",
+    "language": "en",
+    "level": 1,
+    "rank": 169,
+    "word": "game",
+    "reading": null,
+    "meaning_ko": "게임, 경기",
+    "example": "We play a {{game}} after school.",
+    "example_ko": "우리는 방과 후에 게임을 해요.",
+    "distractors": [
+      "soup",
+      "forest",
+      "jacket"
+    ]
+  },
+  {
+    "id": "en-1-170",
+    "language": "en",
+    "level": 1,
+    "rank": 170,
+    "word": "movie",
+    "reading": null,
+    "meaning_ko": "영화",
+    "example": "We watched a {{movie}} last night.",
+    "example_ko": "우리는 어젯밤에 영화를 봤어요.",
+    "distractors": [
+      "pencil",
+      "forest",
+      "ticket"
+    ]
+  },
+  {
+    "id": "en-1-171",
+    "language": "en",
+    "level": 1,
+    "rank": 171,
+    "word": "bus",
+    "reading": null,
+    "meaning_ko": "버스",
+    "example": "I go to school by {{bus}}.",
+    "example_ko": "나는 버스로 학교에 가요.",
+    "distractors": [
+      "pen",
+      "soup",
+      "tree"
+    ]
+  },
+  {
+    "id": "en-1-172",
+    "language": "en",
+    "level": 1,
+    "rank": 172,
+    "word": "bag",
+    "reading": null,
+    "meaning_ko": "가방",
+    "example": "My {{bag}} is very heavy.",
+    "example_ko": "내 가방은 아주 무거워요.",
+    "distractors": [
+      "river",
+      "song",
+      "cloud"
+    ]
+  },
+  {
+    "id": "en-1-173",
+    "language": "en",
+    "level": 1,
+    "rank": 173,
+    "word": "doctor",
+    "reading": null,
+    "meaning_ko": "의사",
+    "example": "The {{doctor}} is kind.",
+    "example_ko": "그 의사 선생님은 친절해요.",
+    "distractors": [
+      "banana",
+      "mountain",
+      "pencil"
+    ]
+  },
+  {
+    "id": "en-1-174",
+    "language": "en",
+    "level": 1,
+    "rank": 174,
+    "word": "birthday",
+    "reading": null,
+    "meaning_ko": "생일",
+    "example": "Today is my {{birthday}}.",
+    "example_ko": "오늘은 내 생일이에요.",
+    "distractors": [
+      "ticket",
+      "forest",
+      "garden"
+    ]
+  },
+  {
+    "id": "en-1-175",
+    "language": "en",
+    "level": 1,
+    "rank": 175,
+    "word": "weather",
+    "reading": null,
+    "meaning_ko": "날씨",
+    "example": "The {{weather}} is nice today.",
+    "example_ko": "오늘은 날씨가 좋아요.",
+    "distractors": [
+      "soup",
+      "bridge",
+      "pencil"
+    ]
+  },
+  {
+    "id": "en-1-176",
+    "language": "en",
+    "level": 1,
+    "rank": 176,
+    "word": "sun",
+    "reading": null,
+    "meaning_ko": "해, 태양",
+    "example": "The {{sun}} is bright.",
+    "example_ko": "해가 밝아요.",
+    "distractors": [
+      "shirt",
+      "bridge",
+      "soup"
+    ]
+  },
+  {
+    "id": "en-1-177",
+    "language": "en",
+    "level": 1,
+    "rank": 177,
+    "word": "rain",
+    "reading": null,
+    "meaning_ko": "비",
+    "example": "I like the {{rain}}.",
+    "example_ko": "나는 비를 좋아해요.",
+    "distractors": [
+      "shirt",
+      "bridge",
+      "ticket"
+    ]
+  },
+  {
+    "id": "en-1-178",
+    "language": "en",
+    "level": 1,
+    "rank": 178,
+    "word": "ready",
+    "reading": null,
+    "meaning_ko": "준비된",
+    "example": "I am {{ready}} to go.",
+    "example_ko": "나는 갈 준비가 됐어요.",
+    "distractors": [
+      "cheap",
+      "tall",
+      "white"
+    ]
+  },
+  {
+    "id": "en-1-179",
+    "language": "en",
+    "level": 1,
+    "rank": 179,
+    "word": "same",
+    "reading": null,
+    "meaning_ko": "같은",
+    "example": "We have the {{same}} bag.",
+    "example_ko": "우리는 같은 가방을 갖고 있어요.",
+    "distractors": [
+      "hungry",
+      "busy",
+      "young"
+    ]
+  },
+  {
+    "id": "en-1-180",
+    "language": "en",
+    "level": 1,
+    "rank": 180,
+    "word": "different",
+    "reading": null,
+    "meaning_ko": "다른",
+    "example": "My bag is {{different}} from yours.",
+    "example_ko": "내 가방은 네 것과 달라요.",
+    "distractors": [
+      "hungry",
+      "young",
+      "tall"
+    ]
+  },
+  {
+    "id": "en-1-181",
+    "language": "en",
+    "level": 1,
+    "rank": 181,
+    "word": "kind",
+    "reading": null,
+    "meaning_ko": "친절한",
+    "example": "She is very {{kind}}.",
+    "example_ko": "그녀는 매우 친절해요.",
+    "distractors": [
+      "cheap",
+      "blue",
+      "tall"
+    ]
+  },
+  {
+    "id": "en-1-182",
+    "language": "en",
+    "level": 1,
+    "rank": 182,
+    "word": "strong",
+    "reading": null,
+    "meaning_ko": "힘이 센, 강한",
+    "example": "He is {{strong}}.",
+    "example_ko": "그는 힘이 세요.",
+    "distractors": [
+      "sad",
+      "busy",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-183",
+    "language": "en",
+    "level": 1,
+    "rank": 183,
+    "word": "warm",
+    "reading": null,
+    "meaning_ko": "따뜻한",
+    "example": "The soup is {{warm}}.",
+    "example_ko": "수프가 따뜻해요.",
+    "distractors": [
+      "tall",
+      "blue",
+      "young"
+    ]
+  },
+  {
+    "id": "en-1-184",
+    "language": "en",
+    "level": 1,
+    "rank": 184,
+    "word": "dark",
+    "reading": null,
+    "meaning_ko": "어두운",
+    "example": "It is {{dark}} outside.",
+    "example_ko": "밖이 어두워요.",
+    "distractors": [
+      "cheap",
+      "young",
+      "tall"
+    ]
+  },
+  {
+    "id": "en-1-185",
+    "language": "en",
+    "level": 1,
+    "rank": 185,
+    "word": "funny",
+    "reading": null,
+    "meaning_ko": "웃긴, 재미있는",
+    "example": "That movie is {{funny}}.",
+    "example_ko": "저 영화는 웃겨요.",
+    "distractors": [
+      "cheap",
+      "tall",
+      "young"
+    ]
+  },
+  {
+    "id": "en-1-186",
+    "language": "en",
+    "level": 1,
+    "rank": 186,
+    "word": "free",
+    "reading": null,
+    "meaning_ko": "한가한, 자유로운",
+    "example": "Are you {{free}} today?",
+    "example_ko": "오늘 시간 있어요?",
+    "distractors": [
+      "tall",
+      "young",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-187",
+    "language": "en",
+    "level": 1,
+    "rank": 187,
+    "word": "full",
+    "reading": null,
+    "meaning_ko": "배부른, 가득 찬",
+    "example": "I am {{full}} now.",
+    "example_ko": "나는 지금 배불러요.",
+    "distractors": [
+      "tall",
+      "young",
+      "cheap"
+    ]
+  },
+  {
+    "id": "en-1-188",
+    "language": "en",
+    "level": 1,
+    "rank": 188,
+    "word": "sit",
+    "reading": null,
+    "meaning_ko": "앉다",
+    "example": "Please {{sit}} here.",
+    "example_ko": "여기에 앉으세요.",
+    "distractors": [
+      "sits",
+      "sat",
+      "sitting"
+    ]
+  },
+  {
+    "id": "en-1-189",
+    "language": "en",
+    "level": 1,
+    "rank": 189,
+    "word": "stand",
+    "reading": null,
+    "meaning_ko": "서다, 일어서다",
+    "example": "Please {{stand}} up.",
+    "example_ko": "일어서 주세요.",
+    "distractors": [
+      "stands",
+      "stood",
+      "standing"
+    ]
+  },
+  {
+    "id": "en-1-190",
+    "language": "en",
+    "level": 1,
+    "rank": 190,
+    "word": "wear",
+    "reading": null,
+    "meaning_ko": "입다, 착용하다",
+    "example": "I want to {{wear}} a red shirt.",
+    "example_ko": "나는 빨간 셔츠를 입고 싶어요.",
+    "distractors": [
+      "wears",
+      "wore",
+      "wearing"
+    ]
+  },
+  {
+    "id": "en-1-191",
+    "language": "en",
+    "level": 1,
+    "rank": 191,
+    "word": "wash",
+    "reading": null,
+    "meaning_ko": "씻다",
+    "example": "Please {{wash}} your hands.",
+    "example_ko": "손을 씻으세요.",
+    "distractors": [
+      "washes",
+      "washed",
+      "washing"
+    ]
+  },
+  {
+    "id": "en-1-192",
+    "language": "en",
+    "level": 1,
+    "rank": 192,
+    "word": "clean",
+    "reading": null,
+    "meaning_ko": "청소하다",
+    "example": "I need to {{clean}} my room.",
+    "example_ko": "나는 내 방을 청소해야 해요.",
+    "distractors": [
+      "cleans",
+      "cleaned",
+      "cleaning"
+    ]
+  },
+  {
+    "id": "en-1-193",
+    "language": "en",
+    "level": 1,
+    "rank": 193,
+    "word": "stay",
+    "reading": null,
+    "meaning_ko": "머물다",
+    "example": "I will {{stay}} at home.",
+    "example_ko": "나는 집에 머물 거예요.",
+    "distractors": [
+      "stays",
+      "stayed",
+      "staying"
+    ]
+  },
+  {
+    "id": "en-1-194",
+    "language": "en",
+    "level": 1,
+    "rank": 194,
+    "word": "visit",
+    "reading": null,
+    "meaning_ko": "방문하다",
+    "example": "I want to {{visit}} my uncle.",
+    "example_ko": "나는 삼촌을 방문하고 싶어요.",
+    "distractors": [
+      "visits",
+      "visited",
+      "visiting"
+    ]
+  },
+  {
+    "id": "en-1-195",
+    "language": "en",
+    "level": 1,
+    "rank": 195,
+    "word": "answer",
+    "reading": null,
+    "meaning_ko": "대답하다",
+    "example": "Please {{answer}} the question.",
+    "example_ko": "질문에 답해 주세요.",
+    "distractors": [
+      "answers",
+      "answered",
+      "answering"
+    ]
+  },
+  {
+    "id": "en-1-196",
+    "language": "en",
+    "level": 1,
+    "rank": 196,
+    "word": "close",
+    "reading": null,
+    "meaning_ko": "닫다",
+    "example": "Please {{close}} the door.",
+    "example_ko": "문을 닫아 주세요.",
+    "distractors": [
+      "closes",
+      "closed",
+      "closing"
+    ]
+  },
+  {
+    "id": "en-1-197",
+    "language": "en",
+    "level": 1,
+    "rank": 197,
+    "word": "sing",
+    "reading": null,
+    "meaning_ko": "노래하다",
+    "example": "She can {{sing}} very well.",
+    "example_ko": "그녀는 노래를 아주 잘해요.",
+    "distractors": [
+      "sings",
+      "sang",
+      "sung"
+    ]
+  },
+  {
+    "id": "en-1-198",
+    "language": "en",
+    "level": 1,
+    "rank": 198,
+    "word": "dance",
+    "reading": null,
+    "meaning_ko": "춤추다",
+    "example": "Let's {{dance}} together.",
+    "example_ko": "함께 춤추자.",
+    "distractors": [
+      "dances",
+      "danced",
+      "dancing"
+    ]
+  },
+  {
+    "id": "en-1-199",
+    "language": "en",
+    "level": 1,
+    "rank": 199,
+    "word": "swim",
+    "reading": null,
+    "meaning_ko": "수영하다",
+    "example": "I can {{swim}}.",
+    "example_ko": "나는 수영할 수 있어요.",
+    "distractors": [
+      "swims",
+      "swam",
+      "swimming"
+    ]
+  },
+  {
+    "id": "en-1-200",
+    "language": "en",
+    "level": 1,
+    "rank": 200,
+    "word": "only",
+    "reading": null,
+    "meaning_ko": "오직, 단지",
+    "example": "I have {{only}} one pen.",
+    "example_ko": "나는 펜이 한 자루뿐이에요.",
+    "distractors": [
+      "yesterday",
+      "slowly",
+      "outside"
+    ]
+  }
+]

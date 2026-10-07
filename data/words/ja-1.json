@@ -1,0 +1,3202 @@
+[
+  {
+    "id": "ja-1-001",
+    "language": "ja",
+    "level": 1,
+    "rank": 1,
+    "word": "はい",
+    "reading": "はい",
+    "meaning_ko": "네",
+    "example": "{{はい}}、そうです。",
+    "example_ko": "네, 그래요.",
+    "distractors": [
+      "いいえ",
+      "ありがとう",
+      "すみません"
+    ]
+  },
+  {
+    "id": "ja-1-002",
+    "language": "ja",
+    "level": 1,
+    "rank": 2,
+    "word": "いいえ",
+    "reading": "いいえ",
+    "meaning_ko": "아니요",
+    "example": "{{いいえ}}、[違|ちが]います。",
+    "example_ko": "아니요, 아니에요.",
+    "distractors": [
+      "はい",
+      "こんにちは",
+      "さようなら"
+    ]
+  },
+  {
+    "id": "ja-1-003",
+    "language": "ja",
+    "level": 1,
+    "rank": 3,
+    "word": "ありがとう",
+    "reading": "ありがとう",
+    "meaning_ko": "고마워요",
+    "example": "{{ありがとう}}ございます。",
+    "example_ko": "감사합니다.",
+    "distractors": [
+      "さようなら",
+      "いいえ",
+      "はい"
+    ]
+  },
+  {
+    "id": "ja-1-004",
+    "language": "ja",
+    "level": 1,
+    "rank": 4,
+    "word": "すみません",
+    "reading": "すみません",
+    "meaning_ko": "죄송합니다, 실례합니다",
+    "example": "{{すみません}}、トイレはどこですか。",
+    "example_ko": "실례합니다, 화장실은 어디예요?",
+    "distractors": [
+      "ありがとう",
+      "さようなら",
+      "おやすみ"
+    ]
+  },
+  {
+    "id": "ja-1-005",
+    "language": "ja",
+    "level": 1,
+    "rank": 5,
+    "word": "こんにちは",
+    "reading": "こんにちは",
+    "meaning_ko": "안녕하세요",
+    "example": "{{こんにちは}}、[田中|たなか]さん。",
+    "example_ko": "안녕하세요, 다나카 씨.",
+    "distractors": [
+      "さようなら",
+      "ありがとう",
+      "いいえ"
+    ]
+  },
+  {
+    "id": "ja-1-006",
+    "language": "ja",
+    "level": 1,
+    "rank": 6,
+    "word": "私",
+    "reading": "わたし",
+    "meaning_ko": "나, 저",
+    "example": "{{[私|わたし]}}は[学生|がくせい]です。",
+    "example_ko": "저는 학생이에요.",
+    "distractors": [
+      "[彼|かれ]",
+      "あなた",
+      "[誰|だれ]"
+    ]
+  },
+  {
+    "id": "ja-1-007",
+    "language": "ja",
+    "level": 1,
+    "rank": 7,
+    "word": "これ",
+    "reading": "これ",
+    "meaning_ko": "이것",
+    "example": "{{これ}}は[本|ほん]です。",
+    "example_ko": "이것은 책이에요.",
+    "distractors": [
+      "あそこ",
+      "だれ",
+      "いつ"
+    ]
+  },
+  {
+    "id": "ja-1-008",
+    "language": "ja",
+    "level": 1,
+    "rank": 8,
+    "word": "人",
+    "reading": "ひと",
+    "meaning_ko": "사람",
+    "example": "あの{{[人|ひと]}}は[先生|せんせい]です。",
+    "example_ko": "저 사람은 선생님이에요.",
+    "distractors": [
+      "[犬|いぬ]",
+      "[車|くるま]",
+      "[水|みず]"
+    ]
+  },
+  {
+    "id": "ja-1-009",
+    "language": "ja",
+    "level": 1,
+    "rank": 9,
+    "word": "日本",
+    "reading": "にほん",
+    "meaning_ko": "일본",
+    "example": "[私|わたし]は{{[日本|にほん]}}から[来|き]ました。",
+    "example_ko": "저는 일본에서 왔어요.",
+    "distractors": [
+      "[中国|ちゅうごく]",
+      "[韓国|かんこく]",
+      "[台湾|たいわん]"
+    ]
+  },
+  {
+    "id": "ja-1-010",
+    "language": "ja",
+    "level": 1,
+    "rank": 10,
+    "word": "食べる",
+    "reading": "たべる",
+    "meaning_ko": "먹다",
+    "example": "[朝|あさ]ごはんを{{[食|た]べました}}。",
+    "example_ko": "아침밥을 먹었어요.",
+    "distractors": [
+      "[食|た]べる",
+      "[食|た]べて",
+      "[食|た]べません"
+    ]
+  },
+  {
+    "id": "ja-1-011",
+    "language": "ja",
+    "level": 1,
+    "rank": 11,
+    "word": "飲む",
+    "reading": "のむ",
+    "meaning_ko": "마시다",
+    "example": "[水|みず]を{{[飲|の]みます}}。",
+    "example_ko": "물을 마셔요.",
+    "distractors": [
+      "[飲|の]んだ",
+      "[飲|の]まない",
+      "[飲|の]んで"
+    ]
+  },
+  {
+    "id": "ja-1-012",
+    "language": "ja",
+    "level": 1,
+    "rank": 12,
+    "word": "行く",
+    "reading": "いく",
+    "meaning_ko": "가다",
+    "example": "[学校|がっこう]に{{[行|い]きます}}。",
+    "example_ko": "학교에 가요.",
+    "distractors": [
+      "[行|い]った",
+      "[行|い]かない",
+      "[行|い]って"
+    ]
+  },
+  {
+    "id": "ja-1-013",
+    "language": "ja",
+    "level": 1,
+    "rank": 13,
+    "word": "来る",
+    "reading": "くる",
+    "meaning_ko": "오다",
+    "example": "[友達|ともだち]が{{[来|き]ました}}。",
+    "example_ko": "친구가 왔어요.",
+    "distractors": [
+      "[来|く]る",
+      "[来|こ]ない",
+      "[来|き]て"
+    ]
+  },
+  {
+    "id": "ja-1-014",
+    "language": "ja",
+    "level": 1,
+    "rank": 14,
+    "word": "見る",
+    "reading": "みる",
+    "meaning_ko": "보다",
+    "example": "テレビを{{[見|み]ます}}。",
+    "example_ko": "텔레비전을 봐요.",
+    "distractors": [
+      "[見|み]た",
+      "[見|み]ない",
+      "[見|み]て"
+    ]
+  },
+  {
+    "id": "ja-1-015",
+    "language": "ja",
+    "level": 1,
+    "rank": 15,
+    "word": "する",
+    "reading": "する",
+    "meaning_ko": "하다",
+    "example": "[宿題|しゅくだい]を{{します}}。",
+    "example_ko": "숙제를 해요.",
+    "distractors": [
+      "した",
+      "しない",
+      "して"
+    ]
+  },
+  {
+    "id": "ja-1-016",
+    "language": "ja",
+    "level": 1,
+    "rank": 16,
+    "word": "ある",
+    "reading": "ある",
+    "meaning_ko": "있다 (사물)",
+    "example": "[机|つくえ]の[上|うえ]に[本|ほん]が{{あります}}。",
+    "example_ko": "책상 위에 책이 있어요.",
+    "distractors": [
+      "ありません",
+      "ありました",
+      "あって"
+    ]
+  },
+  {
+    "id": "ja-1-017",
+    "language": "ja",
+    "level": 1,
+    "rank": 17,
+    "word": "いる",
+    "reading": "いる",
+    "meaning_ko": "있다 (사람·동물)",
+    "example": "[庭|にわ]に[犬|いぬ]が{{います}}。",
+    "example_ko": "정원에 개가 있어요.",
+    "distractors": [
+      "いません",
+      "いた",
+      "いて"
+    ]
+  },
+  {
+    "id": "ja-1-018",
+    "language": "ja",
+    "level": 1,
+    "rank": 18,
+    "word": "好き",
+    "reading": "すき",
+    "meaning_ko": "좋아함",
+    "example": "[犬|いぬ]が{{[好|す]き}}です。",
+    "example_ko": "개를 좋아해요.",
+    "distractors": [
+      "[好|す]きな",
+      "[好|す]きだ",
+      "[好|す]きに"
+    ]
+  },
+  {
+    "id": "ja-1-019",
+    "language": "ja",
+    "level": 1,
+    "rank": 19,
+    "word": "大きい",
+    "reading": "おおきい",
+    "meaning_ko": "크다",
+    "example": "この[家|いえ]は{{[大|おお]きい}}です。",
+    "example_ko": "이 집은 커요.",
+    "distractors": [
+      "[大|おお]きな",
+      "[大|おお]きく",
+      "[大|おお]きくて"
+    ]
+  },
+  {
+    "id": "ja-1-020",
+    "language": "ja",
+    "level": 1,
+    "rank": 20,
+    "word": "小さい",
+    "reading": "ちいさい",
+    "meaning_ko": "작다",
+    "example": "この[犬|いぬ]は{{[小|ちい]さい}}です。",
+    "example_ko": "이 개는 작아요.",
+    "distractors": [
+      "[小|ちい]さな",
+      "[小|ちい]さく",
+      "[小|ちい]さくて"
+    ]
+  },
+  {
+    "id": "ja-1-021",
+    "language": "ja",
+    "level": 1,
+    "rank": 21,
+    "word": "新しい",
+    "reading": "あたらしい",
+    "meaning_ko": "새롭다",
+    "example": "{{[新|あたら]しい}}[本|ほん]を[買|か]いました。",
+    "example_ko": "새 책을 샀어요.",
+    "distractors": [
+      "[新|あたら]しく",
+      "[新|あたら]しくて",
+      "[新|あたら]しさ"
+    ]
+  },
+  {
+    "id": "ja-1-022",
+    "language": "ja",
+    "level": 1,
+    "rank": 22,
+    "word": "今日",
+    "reading": "きょう",
+    "meaning_ko": "오늘",
+    "example": "{{[今日|きょう]}}は[月曜日|げつようび]です。",
+    "example_ko": "오늘은 월요일이에요.",
+    "distractors": [
+      "[昨日|きのう]",
+      "[明日|あした]",
+      "[去年|きょねん]"
+    ]
+  },
+  {
+    "id": "ja-1-023",
+    "language": "ja",
+    "level": 1,
+    "rank": 23,
+    "word": "明日",
+    "reading": "あした",
+    "meaning_ko": "내일",
+    "example": "{{[明日|あした]}}[学校|がっこう]に[行|い]きます。",
+    "example_ko": "내일 학교에 가요.",
+    "distractors": [
+      "[昨日|きのう]",
+      "[今朝|けさ]",
+      "[先週|せんしゅう]"
+    ]
+  },
+  {
+    "id": "ja-1-024",
+    "language": "ja",
+    "level": 1,
+    "rank": 24,
+    "word": "昨日",
+    "reading": "きのう",
+    "meaning_ko": "어제",
+    "example": "{{[昨日|きのう]}}[映画|えいが]を[見|み]ました。",
+    "example_ko": "어제 영화를 봤어요.",
+    "distractors": [
+      "[明日|あした]",
+      "[来週|らいしゅう]",
+      "[今|いま]"
+    ]
+  },
+  {
+    "id": "ja-1-025",
+    "language": "ja",
+    "level": 1,
+    "rank": 25,
+    "word": "時間",
+    "reading": "じかん",
+    "meaning_ko": "시간",
+    "example": "{{[時間|じかん]}}がありません。",
+    "example_ko": "시간이 없어요.",
+    "distractors": [
+      "[切手|きって]",
+      "[傘|かさ]",
+      "[鍵|かぎ]"
+    ]
+  },
+  {
+    "id": "ja-1-026",
+    "language": "ja",
+    "level": 1,
+    "rank": 26,
+    "word": "友達",
+    "reading": "ともだち",
+    "meaning_ko": "친구",
+    "example": "{{[友達|ともだち]}}と[遊|あそ]びます。",
+    "example_ko": "친구와 놀아요.",
+    "distractors": [
+      "[先生|せんせい]",
+      "[医者|いしゃ]",
+      "[店員|てんいん]"
+    ]
+  },
+  {
+    "id": "ja-1-027",
+    "language": "ja",
+    "level": 1,
+    "rank": 27,
+    "word": "家",
+    "reading": "いえ",
+    "meaning_ko": "집",
+    "example": "{{[家|いえ]}}に[帰|かえ]ります。",
+    "example_ko": "집에 돌아가요.",
+    "distractors": [
+      "[駅|えき]",
+      "[学校|がっこう]",
+      "[店|みせ]"
+    ]
+  },
+  {
+    "id": "ja-1-028",
+    "language": "ja",
+    "level": 1,
+    "rank": 28,
+    "word": "学校",
+    "reading": "がっこう",
+    "meaning_ko": "학교",
+    "example": "{{[学校|がっこう]}}は[駅|えき]の[近|ちか]くです。",
+    "example_ko": "학교는 역 근처예요.",
+    "distractors": [
+      "[病院|びょういん]",
+      "[会社|かいしゃ]",
+      "[銀行|ぎんこう]"
+    ]
+  },
+  {
+    "id": "ja-1-029",
+    "language": "ja",
+    "level": 1,
+    "rank": 29,
+    "word": "本",
+    "reading": "ほん",
+    "meaning_ko": "책",
+    "example": "{{[本|ほん]}}を[読|よ]みます。",
+    "example_ko": "책을 읽어요.",
+    "distractors": [
+      "[車|くるま]",
+      "[窓|まど]",
+      "[靴|くつ]"
+    ]
+  },
+  {
+    "id": "ja-1-030",
+    "language": "ja",
+    "level": 1,
+    "rank": 30,
+    "word": "水",
+    "reading": "みず",
+    "meaning_ko": "물",
+    "example": "{{[水|みず]}}を[飲|の]みたいです。",
+    "example_ko": "물을 마시고 싶어요.",
+    "distractors": [
+      "[本|ほん]",
+      "[駅|えき]",
+      "[先生|せんせい]"
+    ]
+  },
+  {
+    "id": "ja-1-031",
+    "language": "ja",
+    "level": 1,
+    "rank": 31,
+    "word": "犬",
+    "reading": "いぬ",
+    "meaning_ko": "개",
+    "example": "{{[犬|いぬ]}}が[走|はし]っています。",
+    "example_ko": "개가 달리고 있어요.",
+    "distractors": [
+      "[鳥|とり]",
+      "[魚|さかな]",
+      "[馬|うま]"
+    ]
+  },
+  {
+    "id": "ja-1-032",
+    "language": "ja",
+    "level": 1,
+    "rank": 32,
+    "word": "猫",
+    "reading": "ねこ",
+    "meaning_ko": "고양이",
+    "example": "{{[猫|ねこ]}}が[寝|ね]ています。",
+    "example_ko": "고양이가 자고 있어요.",
+    "distractors": [
+      "[鳥|とり]",
+      "[魚|さかな]",
+      "[馬|うま]"
+    ]
+  },
+  {
+    "id": "ja-1-033",
+    "language": "ja",
+    "level": 1,
+    "rank": 33,
+    "word": "美味しい",
+    "reading": "おいしい",
+    "meaning_ko": "맛있다",
+    "example": "この[料理|りょうり]は{{[美味|おい]しい}}です。",
+    "example_ko": "이 요리는 맛있어요.",
+    "distractors": [
+      "[美味|おい]しく",
+      "[美味|おい]しくて",
+      "[美味|おい]しくない"
+    ]
+  },
+  {
+    "id": "ja-1-034",
+    "language": "ja",
+    "level": 1,
+    "rank": 34,
+    "word": "とても",
+    "reading": "とても",
+    "meaning_ko": "매우",
+    "example": "{{とても}}[大|おお]きいです。",
+    "example_ko": "매우 커요.",
+    "distractors": [
+      "あまり",
+      "ゆっくり",
+      "ときどき"
+    ]
+  },
+  {
+    "id": "ja-1-035",
+    "language": "ja",
+    "level": 1,
+    "rank": 35,
+    "word": "少し",
+    "reading": "すこし",
+    "meaning_ko": "조금, 잠깐",
+    "example": "{{[少|すこ]し}}[待|ま]ってください。",
+    "example_ko": "잠깐 기다려 주세요.",
+    "distractors": [
+      "もう",
+      "いつも",
+      "よく"
+    ]
+  },
+  {
+    "id": "ja-1-036",
+    "language": "ja",
+    "level": 1,
+    "rank": 36,
+    "word": "一緒に",
+    "reading": "いっしょに",
+    "meaning_ko": "함께, 같이",
+    "example": "{{[一緒|いっしょ]に}}[行|い]きましょう。",
+    "example_ko": "같이 갑시다.",
+    "distractors": [
+      "ゆっくり",
+      "ときどき",
+      "もっと"
+    ]
+  },
+  {
+    "id": "ja-1-037",
+    "language": "ja",
+    "level": 1,
+    "rank": 37,
+    "word": "買う",
+    "reading": "かう",
+    "meaning_ko": "사다",
+    "example": "[靴|くつ]を{{[買|か]いました}}。",
+    "example_ko": "구두를 샀어요.",
+    "distractors": [
+      "[買|か]う",
+      "[買|か]って",
+      "[買|か]いません"
+    ]
+  },
+  {
+    "id": "ja-1-038",
+    "language": "ja",
+    "level": 1,
+    "rank": 38,
+    "word": "話す",
+    "reading": "はなす",
+    "meaning_ko": "말하다, 이야기하다",
+    "example": "[先生|せんせい]と{{[話|はな]します}}。",
+    "example_ko": "선생님과 이야기해요.",
+    "distractors": [
+      "[話|はな]した",
+      "[話|はな]さない",
+      "[話|はな]して"
+    ]
+  },
+  {
+    "id": "ja-1-039",
+    "language": "ja",
+    "level": 1,
+    "rank": 39,
+    "word": "聞く",
+    "reading": "きく",
+    "meaning_ko": "듣다, 묻다",
+    "example": "[音楽|おんがく]を{{[聞|き]きます}}。",
+    "example_ko": "음악을 들어요.",
+    "distractors": [
+      "[聞|き]いた",
+      "[聞|き]かない",
+      "[聞|き]いて"
+    ]
+  },
+  {
+    "id": "ja-1-040",
+    "language": "ja",
+    "level": 1,
+    "rank": 40,
+    "word": "読む",
+    "reading": "よむ",
+    "meaning_ko": "읽다",
+    "example": "[新聞|しんぶん]を{{[読|よ]みます}}。",
+    "example_ko": "신문을 읽어요.",
+    "distractors": [
+      "[読|よ]んだ",
+      "[読|よ]まない",
+      "[読|よ]んで"
+    ]
+  },
+  {
+    "id": "ja-1-041",
+    "language": "ja",
+    "level": 1,
+    "rank": 41,
+    "word": "書く",
+    "reading": "かく",
+    "meaning_ko": "쓰다",
+    "example": "[手紙|てがみ]を{{[書|か]きます}}。",
+    "example_ko": "편지를 써요.",
+    "distractors": [
+      "[書|か]いた",
+      "[書|か]かない",
+      "[書|か]いて"
+    ]
+  },
+  {
+    "id": "ja-1-042",
+    "language": "ja",
+    "level": 1,
+    "rank": 42,
+    "word": "会う",
+    "reading": "あう",
+    "meaning_ko": "만나다",
+    "example": "[駅|えき]で[友達|ともだち]に{{[会|あ]います}}。",
+    "example_ko": "역에서 친구를 만나요.",
+    "distractors": [
+      "[会|あ]った",
+      "[会|あ]わない",
+      "[会|あ]って"
+    ]
+  },
+  {
+    "id": "ja-1-043",
+    "language": "ja",
+    "level": 1,
+    "rank": 43,
+    "word": "駅",
+    "reading": "えき",
+    "meaning_ko": "역",
+    "example": "{{[駅|えき]}}はどこですか。",
+    "example_ko": "역은 어디예요?",
+    "distractors": [
+      "[店|みせ]",
+      "[銀行|ぎんこう]",
+      "[病院|びょういん]"
+    ]
+  },
+  {
+    "id": "ja-1-044",
+    "language": "ja",
+    "level": 1,
+    "rank": 44,
+    "word": "電車",
+    "reading": "でんしゃ",
+    "meaning_ko": "전철",
+    "example": "{{[電車|でんしゃ]}}で[行|い]きます。",
+    "example_ko": "전철로 가요.",
+    "distractors": [
+      "[飛行機|ひこうき]",
+      "[自転車|じてんしゃ]",
+      "[船|ふね]"
+    ]
+  },
+  {
+    "id": "ja-1-045",
+    "language": "ja",
+    "level": 1,
+    "rank": 45,
+    "word": "名前",
+    "reading": "なまえ",
+    "meaning_ko": "이름",
+    "example": "お{{[名前|なまえ]}}は[何|なん]ですか。",
+    "example_ko": "이름이 뭐예요?",
+    "distractors": [
+      "[住所|じゅうしょ]",
+      "[仕事|しごと]",
+      "[電話|でんわ]"
+    ]
+  },
+  {
+    "id": "ja-1-046",
+    "language": "ja",
+    "level": 1,
+    "rank": 46,
+    "word": "お金",
+    "reading": "おかね",
+    "meaning_ko": "돈",
+    "example": "{{お[金|かね]}}がありません。",
+    "example_ko": "돈이 없어요.",
+    "distractors": [
+      "[切手|きって]",
+      "[傘|かさ]",
+      "[鍵|かぎ]"
+    ]
+  },
+  {
+    "id": "ja-1-047",
+    "language": "ja",
+    "level": 1,
+    "rank": 47,
+    "word": "天気",
+    "reading": "てんき",
+    "meaning_ko": "날씨",
+    "example": "[今日|きょう]は{{[天気|てんき]}}がいいです。",
+    "example_ko": "오늘은 날씨가 좋아요.",
+    "distractors": [
+      "[料理|りょうり]",
+      "[電話|でんわ]",
+      "[仕事|しごと]"
+    ]
+  },
+  {
+    "id": "ja-1-048",
+    "language": "ja",
+    "level": 1,
+    "rank": 48,
+    "word": "何",
+    "reading": "なに",
+    "meaning_ko": "무엇",
+    "example": "{{[何|なに]}}を[食|た]べますか。",
+    "example_ko": "뭘 먹어요?",
+    "distractors": [
+      "[誰|だれ]",
+      "いつ",
+      "どこ"
+    ]
+  },
+  {
+    "id": "ja-1-049",
+    "language": "ja",
+    "level": 1,
+    "rank": 49,
+    "word": "誰",
+    "reading": "だれ",
+    "meaning_ko": "누구",
+    "example": "あの[人|ひと]は{{[誰|だれ]}}ですか。",
+    "example_ko": "저 사람은 누구예요?",
+    "distractors": [
+      "[何|なに]",
+      "いつ",
+      "どこ"
+    ]
+  },
+  {
+    "id": "ja-1-050",
+    "language": "ja",
+    "level": 1,
+    "rank": 50,
+    "word": "先生",
+    "reading": "せんせい",
+    "meaning_ko": "선생님",
+    "example": "{{[先生|せんせい]}}は[日本人|にほんじん]です。",
+    "example_ko": "선생님은 일본인이에요.",
+    "distractors": [
+      "[学生|がくせい]",
+      "[店員|てんいん]",
+      "[医者|いしゃ]"
+    ]
+  },
+  {
+    "id": "ja-1-051",
+    "language": "ja",
+    "level": 1,
+    "rank": 51,
+    "word": "今",
+    "reading": "いま",
+    "meaning_ko": "지금",
+    "example": "{{[今|いま]}}、[何時|なんじ]ですか。",
+    "example_ko": "지금 몇 시예요?",
+    "distractors": [
+      "[昨日|きのう]",
+      "[来年|らいねん]",
+      "[去年|きょねん]"
+    ]
+  },
+  {
+    "id": "ja-1-052",
+    "language": "ja",
+    "level": 1,
+    "rank": 52,
+    "word": "言う",
+    "reading": "いう",
+    "meaning_ko": "말하다",
+    "example": "[先生|せんせい]が「はい」と{{[言|い]います}}。",
+    "example_ko": "선생님이 \"네\"라고 말해요.",
+    "distractors": [
+      "[言|い]った",
+      "[言|い]わない",
+      "[言|い]って"
+    ]
+  },
+  {
+    "id": "ja-1-053",
+    "language": "ja",
+    "level": 1,
+    "rank": 53,
+    "word": "思う",
+    "reading": "おもう",
+    "meaning_ko": "생각하다",
+    "example": "[明日|あした]は[雨|あめ]だと{{[思|おも]います}}。",
+    "example_ko": "내일은 비가 올 거라고 생각해요.",
+    "distractors": [
+      "[思|おも]った",
+      "[思|おも]わない",
+      "[思|おも]って"
+    ]
+  },
+  {
+    "id": "ja-1-054",
+    "language": "ja",
+    "level": 1,
+    "rank": 54,
+    "word": "分かる",
+    "reading": "わかる",
+    "meaning_ko": "알다, 이해하다",
+    "example": "[日本語|にほんご]が{{[分|わ]かります}}。",
+    "example_ko": "일본어를 알아요.",
+    "distractors": [
+      "[分|わ]かった",
+      "[分|わ]からない",
+      "[分|わ]かって"
+    ]
+  },
+  {
+    "id": "ja-1-055",
+    "language": "ja",
+    "level": 1,
+    "rank": 55,
+    "word": "毎日",
+    "reading": "まいにち",
+    "meaning_ko": "매일",
+    "example": "{{[毎日|まいにち]}}[日本語|にほんご]を[勉強|べんきょう]します。",
+    "example_ko": "매일 일본어를 공부해요.",
+    "distractors": [
+      "[去年|きょねん]",
+      "[来週|らいしゅう]",
+      "[今朝|けさ]"
+    ]
+  },
+  {
+    "id": "ja-1-056",
+    "language": "ja",
+    "level": 1,
+    "rank": 56,
+    "word": "仕事",
+    "reading": "しごと",
+    "meaning_ko": "일, 직업",
+    "example": "[今日|きょう]は{{[仕事|しごと]}}があります。",
+    "example_ko": "오늘은 일이 있어요.",
+    "distractors": [
+      "[果物|くだもの]",
+      "[写真|しゃしん]",
+      "[財布|さいふ]"
+    ]
+  },
+  {
+    "id": "ja-1-057",
+    "language": "ja",
+    "level": 1,
+    "rank": 57,
+    "word": "学生",
+    "reading": "がくせい",
+    "meaning_ko": "학생",
+    "example": "[私|わたし]は{{[学生|がくせい]}}です。",
+    "example_ko": "저는 학생이에요.",
+    "distractors": [
+      "[電車|でんしゃ]",
+      "[天気|てんき]",
+      "[果物|くだもの]"
+    ]
+  },
+  {
+    "id": "ja-1-058",
+    "language": "ja",
+    "level": 1,
+    "rank": 58,
+    "word": "高い",
+    "reading": "たかい",
+    "meaning_ko": "비싸다, 높다",
+    "example": "この[本|ほん]は{{[高|たか]い}}です。",
+    "example_ko": "이 책은 비싸요.",
+    "distractors": [
+      "[高|たか]かった",
+      "[高|たか]く",
+      "[高|たか]くない"
+    ]
+  },
+  {
+    "id": "ja-1-059",
+    "language": "ja",
+    "level": 1,
+    "rank": 59,
+    "word": "多い",
+    "reading": "おおい",
+    "meaning_ko": "많다",
+    "example": "[今日|きょう]は[人|ひと]が{{[多|おお]い}}です。",
+    "example_ko": "오늘은 사람이 많아요.",
+    "distractors": [
+      "[多|おお]かった",
+      "[多|おお]く",
+      "[多|おお]くない"
+    ]
+  },
+  {
+    "id": "ja-1-060",
+    "language": "ja",
+    "level": 1,
+    "rank": 60,
+    "word": "持つ",
+    "reading": "もつ",
+    "meaning_ko": "가지다, 들다",
+    "example": "[傘|かさ]を{{[持|も]っています}}。",
+    "example_ko": "우산을 가지고 있어요.",
+    "distractors": [
+      "[持|も]ちます",
+      "[持|も]たない",
+      "[持|も]った"
+    ]
+  },
+  {
+    "id": "ja-1-061",
+    "language": "ja",
+    "level": 1,
+    "rank": 61,
+    "word": "使う",
+    "reading": "つかう",
+    "meaning_ko": "사용하다",
+    "example": "このペンを{{[使|つか]います}}。",
+    "example_ko": "이 펜을 써요.",
+    "distractors": [
+      "[使|つか]った",
+      "[使|つか]わない",
+      "[使|つか]って"
+    ]
+  },
+  {
+    "id": "ja-1-062",
+    "language": "ja",
+    "level": 1,
+    "rank": 62,
+    "word": "待つ",
+    "reading": "まつ",
+    "meaning_ko": "기다리다",
+    "example": "ここで{{[待|ま]ちます}}。",
+    "example_ko": "여기서 기다려요.",
+    "distractors": [
+      "[待|ま]った",
+      "[待|ま]たない",
+      "[待|ま]って"
+    ]
+  },
+  {
+    "id": "ja-1-063",
+    "language": "ja",
+    "level": 1,
+    "rank": 63,
+    "word": "もう",
+    "reading": "もう",
+    "meaning_ko": "이미, 벌써",
+    "example": "{{もう}}[食|た]べました。",
+    "example_ko": "이미 먹었어요.",
+    "distractors": [
+      "まだ",
+      "いつも",
+      "あまり"
+    ]
+  },
+  {
+    "id": "ja-1-064",
+    "language": "ja",
+    "level": 1,
+    "rank": 64,
+    "word": "よく",
+    "reading": "よく",
+    "meaning_ko": "자주, 잘",
+    "example": "{{よく}}[友達|ともだち]と[会|あ]います。",
+    "example_ko": "자주 친구와 만나요.",
+    "distractors": [
+      "まだ",
+      "もう",
+      "たぶん"
+    ]
+  },
+  {
+    "id": "ja-1-065",
+    "language": "ja",
+    "level": 1,
+    "rank": 65,
+    "word": "作る",
+    "reading": "つくる",
+    "meaning_ko": "만들다",
+    "example": "[私|わたし]は[料理|りょうり]を{{[作|つく]ります}}。",
+    "example_ko": "저는 요리를 만들어요.",
+    "distractors": [
+      "[作|つく]った",
+      "[作|つく]らない",
+      "[作|つく]って"
+    ]
+  },
+  {
+    "id": "ja-1-066",
+    "language": "ja",
+    "level": 1,
+    "rank": 66,
+    "word": "帰る",
+    "reading": "かえる",
+    "meaning_ko": "돌아가다, 돌아오다",
+    "example": "[六時|ろくじ]に{{[帰|かえ]ります}}。",
+    "example_ko": "6시에 돌아가요.",
+    "distractors": [
+      "[帰|かえ]った",
+      "[帰|かえ]らない",
+      "[帰|かえ]って"
+    ]
+  },
+  {
+    "id": "ja-1-067",
+    "language": "ja",
+    "level": 1,
+    "rank": 67,
+    "word": "入る",
+    "reading": "はいる",
+    "meaning_ko": "들어가다, 들어오다",
+    "example": "[部屋|へや]に{{[入|はい]ります}}。",
+    "example_ko": "방에 들어가요.",
+    "distractors": [
+      "[入|はい]った",
+      "[入|はい]らない",
+      "[入|はい]って"
+    ]
+  },
+  {
+    "id": "ja-1-068",
+    "language": "ja",
+    "level": 1,
+    "rank": 68,
+    "word": "出る",
+    "reading": "でる",
+    "meaning_ko": "나가다, 나오다",
+    "example": "[八時|はちじ]に[家|いえ]を{{[出|で]ます}}。",
+    "example_ko": "8시에 집을 나가요.",
+    "distractors": [
+      "[出|で]た",
+      "[出|で]ない",
+      "[出|で]て"
+    ]
+  },
+  {
+    "id": "ja-1-069",
+    "language": "ja",
+    "level": 1,
+    "rank": 69,
+    "word": "安い",
+    "reading": "やすい",
+    "meaning_ko": "싸다",
+    "example": "このりんごは{{[安|やす]い}}です。",
+    "example_ko": "이 사과는 싸요.",
+    "distractors": [
+      "[安|やす]かった",
+      "[安|やす]く",
+      "[安|やす]くない"
+    ]
+  },
+  {
+    "id": "ja-1-070",
+    "language": "ja",
+    "level": 1,
+    "rank": 70,
+    "word": "楽しい",
+    "reading": "たのしい",
+    "meaning_ko": "즐겁다",
+    "example": "[日本語|にほんご]の[授業|じゅぎょう]は{{[楽|たの]しい}}です。",
+    "example_ko": "일본어 수업은 즐거워요.",
+    "distractors": [
+      "[楽|たの]しかった",
+      "[楽|たの]しく",
+      "[楽|たの]しくない"
+    ]
+  },
+  {
+    "id": "ja-1-071",
+    "language": "ja",
+    "level": 1,
+    "rank": 71,
+    "word": "忙しい",
+    "reading": "いそがしい",
+    "meaning_ko": "바쁘다",
+    "example": "[今週|こんしゅう]は{{[忙|いそが]しい}}です。",
+    "example_ko": "이번 주는 바빠요.",
+    "distractors": [
+      "[忙|いそが]しかった",
+      "[忙|いそが]しく",
+      "[忙|いそが]しくない"
+    ]
+  },
+  {
+    "id": "ja-1-072",
+    "language": "ja",
+    "level": 1,
+    "rank": 72,
+    "word": "難しい",
+    "reading": "むずかしい",
+    "meaning_ko": "어렵다",
+    "example": "この[問題|もんだい]は{{[難|むずか]しい}}です。",
+    "example_ko": "이 문제는 어려워요.",
+    "distractors": [
+      "[難|むずか]しかった",
+      "[難|むずか]しく",
+      "[難|むずか]しくない"
+    ]
+  },
+  {
+    "id": "ja-1-073",
+    "language": "ja",
+    "level": 1,
+    "rank": 73,
+    "word": "起きる",
+    "reading": "おきる",
+    "meaning_ko": "일어나다",
+    "example": "[毎朝|まいあさ][七時|しちじ]に{{[起|お]きます}}。",
+    "example_ko": "매일 아침 7시에 일어나요.",
+    "distractors": [
+      "[起|お]きた",
+      "[起|お]きない",
+      "[起|お]きて"
+    ]
+  },
+  {
+    "id": "ja-1-074",
+    "language": "ja",
+    "level": 1,
+    "rank": 74,
+    "word": "寝る",
+    "reading": "ねる",
+    "meaning_ko": "자다",
+    "example": "[夜|よる]、[十一時|じゅういちじ]に{{[寝|ね]ます}}。",
+    "example_ko": "밤에 11시에 자요.",
+    "distractors": [
+      "[寝|ね]た",
+      "[寝|ね]ない",
+      "[寝|ね]て"
+    ]
+  },
+  {
+    "id": "ja-1-075",
+    "language": "ja",
+    "level": 1,
+    "rank": 75,
+    "word": "元気",
+    "reading": "げんき",
+    "meaning_ko": "건강함, 활기참",
+    "example": "[友達|ともだち]は{{[元気|げんき]}}です。",
+    "example_ko": "친구는 잘 지내요.",
+    "distractors": [
+      "[暇|ひま]",
+      "[有名|ゆうめい]",
+      "[便利|べんり]"
+    ]
+  },
+  {
+    "id": "ja-1-076",
+    "language": "ja",
+    "level": 1,
+    "rank": 76,
+    "word": "簡単",
+    "reading": "かんたん",
+    "meaning_ko": "간단함, 쉬움",
+    "example": "この[問題|もんだい]は{{[簡単|かんたん]}}です。",
+    "example_ko": "이 문제는 간단해요.",
+    "distractors": [
+      "[静|しず]か",
+      "[親切|しんせつ]",
+      "[有名|ゆうめい]"
+    ]
+  },
+  {
+    "id": "ja-1-077",
+    "language": "ja",
+    "level": 1,
+    "rank": 77,
+    "word": "朝",
+    "reading": "あさ",
+    "meaning_ko": "아침",
+    "example": "{{[朝|あさ]}}、コーヒーを[飲|の]みます。",
+    "example_ko": "아침에 커피를 마셔요.",
+    "distractors": [
+      "[夏|なつ]",
+      "[来年|らいねん]",
+      "[週末|しゅうまつ]"
+    ]
+  },
+  {
+    "id": "ja-1-078",
+    "language": "ja",
+    "level": 1,
+    "rank": 78,
+    "word": "夜",
+    "reading": "よる",
+    "meaning_ko": "밤",
+    "example": "{{[夜|よる]}}は[早|はや]く[寝|ね]ます。",
+    "example_ko": "밤에는 일찍 자요.",
+    "distractors": [
+      "[春|はる]",
+      "[去年|きょねん]",
+      "[今年|ことし]"
+    ]
+  },
+  {
+    "id": "ja-1-079",
+    "language": "ja",
+    "level": 1,
+    "rank": 79,
+    "word": "母",
+    "reading": "はは",
+    "meaning_ko": "어머니",
+    "example": "{{[母|はは]}}は[先生|せんせい]です。",
+    "example_ko": "어머니는 선생님이에요.",
+    "distractors": [
+      "[窓|まど]",
+      "[靴|くつ]",
+      "[財布|さいふ]"
+    ]
+  },
+  {
+    "id": "ja-1-080",
+    "language": "ja",
+    "level": 1,
+    "rank": 80,
+    "word": "父",
+    "reading": "ちち",
+    "meaning_ko": "아버지",
+    "example": "{{[父|ちち]}}は[会社|かいしゃ]に[行|い]きます。",
+    "example_ko": "아버지는 회사에 가요.",
+    "distractors": [
+      "[窓|まど]",
+      "[靴|くつ]",
+      "[傘|かさ]"
+    ]
+  },
+  {
+    "id": "ja-1-081",
+    "language": "ja",
+    "level": 1,
+    "rank": 81,
+    "word": "子ども",
+    "reading": "こども",
+    "meaning_ko": "아이",
+    "example": "{{[子|こ]ども}}が[公園|こうえん]で[遊|あそ]んでいます。",
+    "example_ko": "아이가 공원에서 놀고 있어요.",
+    "distractors": [
+      "[机|つくえ]",
+      "[靴|くつ]",
+      "[財布|さいふ]"
+    ]
+  },
+  {
+    "id": "ja-1-082",
+    "language": "ja",
+    "level": 1,
+    "rank": 82,
+    "word": "車",
+    "reading": "くるま",
+    "meaning_ko": "자동차",
+    "example": "{{[車|くるま]}}で[会社|かいしゃ]に[行|い]きます。",
+    "example_ko": "차로 회사에 가요.",
+    "distractors": [
+      "[靴|くつ]",
+      "[箸|はし]",
+      "[机|つくえ]"
+    ]
+  },
+  {
+    "id": "ja-1-083",
+    "language": "ja",
+    "level": 1,
+    "rank": 83,
+    "word": "部屋",
+    "reading": "へや",
+    "meaning_ko": "방",
+    "example": "[私|わたし]の{{[部屋|へや]}}は[小|ちい]さいです。",
+    "example_ko": "제 방은 작아요.",
+    "distractors": [
+      "[果物|くだもの]",
+      "[電話|でんわ]",
+      "[歌|うた]"
+    ]
+  },
+  {
+    "id": "ja-1-084",
+    "language": "ja",
+    "level": 1,
+    "rank": 84,
+    "word": "店",
+    "reading": "みせ",
+    "meaning_ko": "가게",
+    "example": "あの{{[店|みせ]}}でパンを[買|か]います。",
+    "example_ko": "저 가게에서 빵을 사요.",
+    "distractors": [
+      "[箸|はし]",
+      "[机|つくえ]",
+      "[歌|うた]"
+    ]
+  },
+  {
+    "id": "ja-1-085",
+    "language": "ja",
+    "level": 1,
+    "rank": 85,
+    "word": "手",
+    "reading": "て",
+    "meaning_ko": "손",
+    "example": "{{[手|て]}}を[洗|あら]います。",
+    "example_ko": "손을 씻어요.",
+    "distractors": [
+      "[目|め]",
+      "[耳|みみ]",
+      "[口|くち]"
+    ]
+  },
+  {
+    "id": "ja-1-086",
+    "language": "ja",
+    "level": 1,
+    "rank": 86,
+    "word": "魚",
+    "reading": "さかな",
+    "meaning_ko": "생선, 물고기",
+    "example": "[私|わたし]は{{[魚|さかな]}}が[好|す]きです。",
+    "example_ko": "저는 생선을 좋아해요.",
+    "distractors": [
+      "[雨|あめ]",
+      "[山|やま]",
+      "[歌|うた]"
+    ]
+  },
+  {
+    "id": "ja-1-087",
+    "language": "ja",
+    "level": 1,
+    "rank": 87,
+    "word": "お茶",
+    "reading": "おちゃ",
+    "meaning_ko": "차",
+    "example": "{{お[茶|ちゃ]}}を[飲|の]みます。",
+    "example_ko": "차를 마셔요.",
+    "distractors": [
+      "[靴|くつ]",
+      "[歌|うた]",
+      "[机|つくえ]"
+    ]
+  },
+  {
+    "id": "ja-1-088",
+    "language": "ja",
+    "level": 1,
+    "rank": 88,
+    "word": "映画",
+    "reading": "えいが",
+    "meaning_ko": "영화",
+    "example": "[週末|しゅうまつ]に{{[映画|えいが]}}を[見|み]ます。",
+    "example_ko": "주말에 영화를 봐요.",
+    "distractors": [
+      "[歌|うた]",
+      "[財布|さいふ]",
+      "[果物|くだもの]"
+    ]
+  },
+  {
+    "id": "ja-1-089",
+    "language": "ja",
+    "level": 1,
+    "rank": 89,
+    "word": "音楽",
+    "reading": "おんがく",
+    "meaning_ko": "음악",
+    "example": "{{[音楽|おんがく]}}を[聞|き]きます。",
+    "example_ko": "음악을 들어요.",
+    "distractors": [
+      "[財布|さいふ]",
+      "[果物|くだもの]",
+      "[机|つくえ]"
+    ]
+  },
+  {
+    "id": "ja-1-090",
+    "language": "ja",
+    "level": 1,
+    "rank": 90,
+    "word": "日本語",
+    "reading": "にほんご",
+    "meaning_ko": "일본어",
+    "example": "{{[日本語|にほんご]}}を[勉強|べんきょう]します。",
+    "example_ko": "일본어를 공부해요.",
+    "distractors": [
+      "[英語|えいご]",
+      "[中国語|ちゅうごくご]",
+      "[韓国語|かんこくご]"
+    ]
+  },
+  {
+    "id": "ja-1-091",
+    "language": "ja",
+    "level": 1,
+    "rank": 91,
+    "word": "電話",
+    "reading": "でんわ",
+    "meaning_ko": "전화",
+    "example": "[友達|ともだち]に{{[電話|でんわ]}}します。",
+    "example_ko": "친구에게 전화해요.",
+    "distractors": [
+      "[勉強|べんきょう]",
+      "[料理|りょうり]",
+      "[散歩|さんぽ]"
+    ]
+  },
+  {
+    "id": "ja-1-092",
+    "language": "ja",
+    "level": 1,
+    "rank": 92,
+    "word": "雨",
+    "reading": "あめ",
+    "meaning_ko": "비",
+    "example": "{{[雨|あめ]}}が[降|ふ]っています。",
+    "example_ko": "비가 내리고 있어요.",
+    "distractors": [
+      "[山|やま]",
+      "[歌|うた]",
+      "[窓|まど]"
+    ]
+  },
+  {
+    "id": "ja-1-093",
+    "language": "ja",
+    "level": 1,
+    "rank": 93,
+    "word": "山",
+    "reading": "やま",
+    "meaning_ko": "산",
+    "example": "{{[山|やま]}}に[登|のぼ]りました。",
+    "example_ko": "산에 올랐어요.",
+    "distractors": [
+      "[海|うみ]",
+      "[川|かわ]",
+      "[空|そら]"
+    ]
+  },
+  {
+    "id": "ja-1-094",
+    "language": "ja",
+    "level": 1,
+    "rank": 94,
+    "word": "花",
+    "reading": "はな",
+    "meaning_ko": "꽃",
+    "example": "{{[花|はな]}}がきれいです。",
+    "example_ko": "꽃이 예뻐요.",
+    "distractors": [
+      "[靴|くつ]",
+      "[箸|はし]",
+      "[財布|さいふ]"
+    ]
+  },
+  {
+    "id": "ja-1-095",
+    "language": "ja",
+    "level": 1,
+    "rank": 95,
+    "word": "前",
+    "reading": "まえ",
+    "meaning_ko": "앞, 전",
+    "example": "[駅|えき]の{{[前|まえ]}}で[会|あ]いましょう。",
+    "example_ko": "역 앞에서 만나요.",
+    "distractors": [
+      "[上|うえ]",
+      "[中|なか]",
+      "[後|うし]ろ"
+    ]
+  },
+  {
+    "id": "ja-1-096",
+    "language": "ja",
+    "level": 1,
+    "rank": 96,
+    "word": "上",
+    "reading": "うえ",
+    "meaning_ko": "위",
+    "example": "[机|つくえ]の{{[上|うえ]}}に[本|ほん]があります。",
+    "example_ko": "책상 위에 책이 있어요.",
+    "distractors": [
+      "[下|した]",
+      "[中|なか]",
+      "[前|まえ]"
+    ]
+  },
+  {
+    "id": "ja-1-097",
+    "language": "ja",
+    "level": 1,
+    "rank": 97,
+    "word": "嫌い",
+    "reading": "きらい",
+    "meaning_ko": "싫어함",
+    "example": "[私|わたし]は[雨|あめ]が{{[嫌|きら]い}}です。",
+    "example_ko": "저는 비를 싫어해요.",
+    "distractors": [
+      "[上手|じょうず]",
+      "[有名|ゆうめい]",
+      "[便利|べんり]"
+    ]
+  },
+  {
+    "id": "ja-1-098",
+    "language": "ja",
+    "level": 1,
+    "rank": 98,
+    "word": "上手",
+    "reading": "じょうず",
+    "meaning_ko": "능숙함, 잘함",
+    "example": "[彼|かれ]は[歌|うた]が{{[上手|じょうず]}}です。",
+    "example_ko": "그는 노래를 잘해요.",
+    "distractors": [
+      "[便利|べんり]",
+      "[有名|ゆうめい]",
+      "[静|しず]か"
+    ]
+  },
+  {
+    "id": "ja-1-099",
+    "language": "ja",
+    "level": 1,
+    "rank": 99,
+    "word": "英語",
+    "reading": "えいご",
+    "meaning_ko": "영어",
+    "example": "{{[英語|えいご]}}を[話|はな]します。",
+    "example_ko": "영어를 말해요.",
+    "distractors": [
+      "[日本語|にほんご]",
+      "[中国語|ちゅうごくご]",
+      "[韓国語|かんこくご]"
+    ]
+  },
+  {
+    "id": "ja-1-100",
+    "language": "ja",
+    "level": 1,
+    "rank": 100,
+    "word": "あまり",
+    "reading": "あまり",
+    "meaning_ko": "별로, 그다지",
+    "example": "{{あまり}}[好|す]きじゃないです。",
+    "example_ko": "별로 좋아하지 않아요.",
+    "distractors": [
+      "とても",
+      "よく",
+      "もう"
+    ]
+  },
+  {
+    "id": "ja-1-101",
+    "language": "ja",
+    "level": 1,
+    "rank": 101,
+    "word": "ここ",
+    "reading": "ここ",
+    "meaning_ko": "여기",
+    "example": "{{ここ}}は[私|わたし]の[家|いえ]です。",
+    "example_ko": "여기는 제 집이에요.",
+    "distractors": [
+      "そこ",
+      "あそこ",
+      "どこ"
+    ]
+  },
+  {
+    "id": "ja-1-102",
+    "language": "ja",
+    "level": 1,
+    "rank": 102,
+    "word": "どこ",
+    "reading": "どこ",
+    "meaning_ko": "어디",
+    "example": "[駅|えき]は{{どこ}}ですか。",
+    "example_ko": "역은 어디예요?",
+    "distractors": [
+      "いつ",
+      "だれ",
+      "なに"
+    ]
+  },
+  {
+    "id": "ja-1-103",
+    "language": "ja",
+    "level": 1,
+    "rank": 103,
+    "word": "それ",
+    "reading": "それ",
+    "meaning_ko": "그것",
+    "example": "{{それ}}は[私|わたし]の[本|ほん]です。",
+    "example_ko": "그것은 제 책이에요.",
+    "distractors": [
+      "これ",
+      "あれ",
+      "どれ"
+    ]
+  },
+  {
+    "id": "ja-1-104",
+    "language": "ja",
+    "level": 1,
+    "rank": 104,
+    "word": "あれ",
+    "reading": "あれ",
+    "meaning_ko": "저것",
+    "example": "{{あれ}}は[駅|えき]です。",
+    "example_ko": "저것은 역이에요.",
+    "distractors": [
+      "これ",
+      "それ",
+      "どれ"
+    ]
+  },
+  {
+    "id": "ja-1-105",
+    "language": "ja",
+    "level": 1,
+    "rank": 105,
+    "word": "いつ",
+    "reading": "いつ",
+    "meaning_ko": "언제",
+    "example": "{{いつ}}[日本|にほん]に[行|い]きますか。",
+    "example_ko": "언제 일본에 가요?",
+    "distractors": [
+      "どこ",
+      "だれ",
+      "なぜ"
+    ]
+  },
+  {
+    "id": "ja-1-106",
+    "language": "ja",
+    "level": 1,
+    "rank": 106,
+    "word": "いい",
+    "reading": "いい",
+    "meaning_ko": "좋다",
+    "example": "この[店|みせ]は{{いい}}です。",
+    "example_ko": "이 가게는 좋아요.",
+    "distractors": [
+      "よく",
+      "よくて",
+      "よかった"
+    ]
+  },
+  {
+    "id": "ja-1-107",
+    "language": "ja",
+    "level": 1,
+    "rank": 107,
+    "word": "ちょっと",
+    "reading": "ちょっと",
+    "meaning_ko": "잠깐, 조금",
+    "example": "{{ちょっと}}[待|ま]ってください。",
+    "example_ko": "잠깐 기다려 주세요.",
+    "distractors": [
+      "ずっと",
+      "ぜんぜん",
+      "もっと"
+    ]
+  },
+  {
+    "id": "ja-1-108",
+    "language": "ja",
+    "level": 1,
+    "rank": 108,
+    "word": "みんな",
+    "reading": "みんな",
+    "meaning_ko": "모두",
+    "example": "{{みんな}}[元気|げんき]です。",
+    "example_ko": "모두 잘 지내요.",
+    "distractors": [
+      "ひとり",
+      "だれ",
+      "あなた"
+    ]
+  },
+  {
+    "id": "ja-1-109",
+    "language": "ja",
+    "level": 1,
+    "rank": 109,
+    "word": "いつも",
+    "reading": "いつも",
+    "meaning_ko": "항상",
+    "example": "{{いつも}}[朝|あさ]ご[飯|はん]を[食|た]べます。",
+    "example_ko": "항상 아침밥을 먹어요.",
+    "distractors": [
+      "まだ",
+      "あまり",
+      "ぜんぜん"
+    ]
+  },
+  {
+    "id": "ja-1-110",
+    "language": "ja",
+    "level": 1,
+    "rank": 110,
+    "word": "ご飯",
+    "reading": "ごはん",
+    "meaning_ko": "밥",
+    "example": "{{ご[飯|はん]}}を[食|た]べます。",
+    "example_ko": "밥을 먹어요.",
+    "distractors": [
+      "[靴|くつ]",
+      "[窓|まど]",
+      "[空|そら]"
+    ]
+  },
+  {
+    "id": "ja-1-111",
+    "language": "ja",
+    "level": 1,
+    "rank": 111,
+    "word": "あなた",
+    "reading": "あなた",
+    "meaning_ko": "당신",
+    "example": "{{あなた}}は[学生|がくせい]ですか。",
+    "example_ko": "당신은 학생이에요?",
+    "distractors": [
+      "[彼|かれ]",
+      "[彼女|かのじょ]",
+      "[誰|だれ]"
+    ]
+  },
+  {
+    "id": "ja-1-112",
+    "language": "ja",
+    "level": 1,
+    "rank": 112,
+    "word": "大丈夫",
+    "reading": "だいじょうぶ",
+    "meaning_ko": "괜찮다",
+    "example": "{{[大丈夫|だいじょうぶ]}}ですか。",
+    "example_ko": "괜찮아요?",
+    "distractors": [
+      "[有名|ゆうめい]",
+      "[便利|べんり]",
+      "[静|しず]か"
+    ]
+  },
+  {
+    "id": "ja-1-113",
+    "language": "ja",
+    "level": 1,
+    "rank": 113,
+    "word": "悪い",
+    "reading": "わるい",
+    "meaning_ko": "나쁘다",
+    "example": "[天気|てんき]が{{[悪|わる]い}}です。",
+    "example_ko": "날씨가 나빠요.",
+    "distractors": [
+      "[悪|わる]く",
+      "[悪|わる]くて",
+      "[悪|わる]かった"
+    ]
+  },
+  {
+    "id": "ja-1-114",
+    "language": "ja",
+    "level": 1,
+    "rank": 114,
+    "word": "もっと",
+    "reading": "もっと",
+    "meaning_ko": "더",
+    "example": "{{もっと}}[食|た]べたいです。",
+    "example_ko": "더 먹고 싶어요.",
+    "distractors": [
+      "ぜんぜん",
+      "あまり",
+      "すぐ"
+    ]
+  },
+  {
+    "id": "ja-1-115",
+    "language": "ja",
+    "level": 1,
+    "rank": 115,
+    "word": "たくさん",
+    "reading": "たくさん",
+    "meaning_ko": "많이",
+    "example": "{{たくさん}}[食|た]べました。",
+    "example_ko": "많이 먹었어요.",
+    "distractors": [
+      "ぜんぜん",
+      "あまり",
+      "ちょっと"
+    ]
+  },
+  {
+    "id": "ja-1-116",
+    "language": "ja",
+    "level": 1,
+    "rank": 116,
+    "word": "すぐ",
+    "reading": "すぐ",
+    "meaning_ko": "곧, 바로",
+    "example": "{{すぐ}}[行|い]きます。",
+    "example_ko": "곧 갈게요.",
+    "distractors": [
+      "ゆっくり",
+      "ぜんぜん",
+      "あまり"
+    ]
+  },
+  {
+    "id": "ja-1-117",
+    "language": "ja",
+    "level": 1,
+    "rank": 117,
+    "word": "勉強",
+    "reading": "べんきょう",
+    "meaning_ko": "공부",
+    "example": "[毎日|まいにち]{{[勉強|べんきょう]}}します。",
+    "example_ko": "매일 공부해요.",
+    "distractors": [
+      "[散歩|さんぽ]",
+      "[運動|うんどう]",
+      "[料理|りょうり]"
+    ]
+  },
+  {
+    "id": "ja-1-118",
+    "language": "ja",
+    "level": 1,
+    "rank": 118,
+    "word": "暑い",
+    "reading": "あつい",
+    "meaning_ko": "덥다",
+    "example": "[今日|きょう]は{{[暑|あつ]い}}です。",
+    "example_ko": "오늘은 더워요.",
+    "distractors": [
+      "[暑|あつ]く",
+      "[暑|あつ]くて",
+      "[暑|あつ]かった"
+    ]
+  },
+  {
+    "id": "ja-1-119",
+    "language": "ja",
+    "level": 1,
+    "rank": 119,
+    "word": "寒い",
+    "reading": "さむい",
+    "meaning_ko": "춥다",
+    "example": "[冬|ふゆ]は{{[寒|さむ]い}}です。",
+    "example_ko": "겨울은 추워요.",
+    "distractors": [
+      "[寒|さむ]く",
+      "[寒|さむ]くて",
+      "[寒|さむ]かった"
+    ]
+  },
+  {
+    "id": "ja-1-120",
+    "language": "ja",
+    "level": 1,
+    "rank": 120,
+    "word": "早い",
+    "reading": "はやい",
+    "meaning_ko": "이르다",
+    "example": "[電車|でんしゃ]の[時間|じかん]が{{[早|はや]い}}です。",
+    "example_ko": "전철 시간이 일러요.",
+    "distractors": [
+      "[早|はや]く",
+      "[早|はや]くて",
+      "[早|はや]かった"
+    ]
+  },
+  {
+    "id": "ja-1-121",
+    "language": "ja",
+    "level": 1,
+    "rank": 121,
+    "word": "古い",
+    "reading": "ふるい",
+    "meaning_ko": "낡다, 오래되다",
+    "example": "これは{{[古|ふる]い}}[本|ほん]です。",
+    "example_ko": "이것은 오래된 책이에요.",
+    "distractors": [
+      "[古|ふる]く",
+      "[古|ふる]くて",
+      "[古|ふる]かった"
+    ]
+  },
+  {
+    "id": "ja-1-122",
+    "language": "ja",
+    "level": 1,
+    "rank": 122,
+    "word": "長い",
+    "reading": "ながい",
+    "meaning_ko": "길다",
+    "example": "{{[長|なが]い}}[川|かわ]です。",
+    "example_ko": "긴 강이에요.",
+    "distractors": [
+      "[長|なが]く",
+      "[長|なが]くて",
+      "[長|なが]かった"
+    ]
+  },
+  {
+    "id": "ja-1-123",
+    "language": "ja",
+    "level": 1,
+    "rank": 123,
+    "word": "うれしい",
+    "reading": "うれしい",
+    "meaning_ko": "기쁘다",
+    "example": "とても{{うれしい}}です。",
+    "example_ko": "매우 기뻐요.",
+    "distractors": [
+      "うれしく",
+      "うれしくて",
+      "うれしかった"
+    ]
+  },
+  {
+    "id": "ja-1-124",
+    "language": "ja",
+    "level": 1,
+    "rank": 124,
+    "word": "教える",
+    "reading": "おしえる",
+    "meaning_ko": "가르치다",
+    "example": "[先生|せんせい]は[英語|えいご]を{{[教|おし]えます}}。",
+    "example_ko": "선생님은 영어를 가르쳐요.",
+    "distractors": [
+      "[教|おし]えて",
+      "[教|おし]えない",
+      "[教|おし]えました"
+    ]
+  },
+  {
+    "id": "ja-1-125",
+    "language": "ja",
+    "level": 1,
+    "rank": 125,
+    "word": "習う",
+    "reading": "ならう",
+    "meaning_ko": "배우다",
+    "example": "[日本語|にほんご]を{{[習|なら]います}}。",
+    "example_ko": "일본어를 배워요.",
+    "distractors": [
+      "[習|なら]いました",
+      "[習|なら]って",
+      "[習|なら]わない"
+    ]
+  },
+  {
+    "id": "ja-1-126",
+    "language": "ja",
+    "level": 1,
+    "rank": 126,
+    "word": "歩く",
+    "reading": "あるく",
+    "meaning_ko": "걷다",
+    "example": "[駅|えき]まで{{[歩|ある]きます}}。",
+    "example_ko": "역까지 걸어요.",
+    "distractors": [
+      "[歩|ある]きました",
+      "[歩|ある]いて",
+      "[歩|ある]かない"
+    ]
+  },
+  {
+    "id": "ja-1-127",
+    "language": "ja",
+    "level": 1,
+    "rank": 127,
+    "word": "住む",
+    "reading": "すむ",
+    "meaning_ko": "살다",
+    "example": "[東京|とうきょう]に{{[住|す]んでいます}}。",
+    "example_ko": "도쿄에 살고 있어요.",
+    "distractors": [
+      "[住|す]みます",
+      "[住|す]んだ",
+      "[住|す]まない"
+    ]
+  },
+  {
+    "id": "ja-1-128",
+    "language": "ja",
+    "level": 1,
+    "rank": 128,
+    "word": "知る",
+    "reading": "しる",
+    "meaning_ko": "알다",
+    "example": "その[人|ひと]を{{[知|し]っています}}。",
+    "example_ko": "그 사람을 알고 있어요.",
+    "distractors": [
+      "[知|し]りました",
+      "[知|し]らない",
+      "[知|し]って"
+    ]
+  },
+  {
+    "id": "ja-1-129",
+    "language": "ja",
+    "level": 1,
+    "rank": 129,
+    "word": "遊ぶ",
+    "reading": "あそぶ",
+    "meaning_ko": "놀다",
+    "example": "[友達|ともだち]と{{[遊|あそ]びます}}。",
+    "example_ko": "친구와 놀아요.",
+    "distractors": [
+      "[遊|あそ]びました",
+      "[遊|あそ]んで",
+      "[遊|あそ]ばない"
+    ]
+  },
+  {
+    "id": "ja-1-130",
+    "language": "ja",
+    "level": 1,
+    "rank": 130,
+    "word": "開ける",
+    "reading": "あける",
+    "meaning_ko": "열다",
+    "example": "[窓|まど]を{{[開|あ]けます}}。",
+    "example_ko": "창문을 열어요.",
+    "distractors": [
+      "[開|あ]けました",
+      "[開|あ]けて",
+      "[開|あ]けない"
+    ]
+  },
+  {
+    "id": "ja-1-131",
+    "language": "ja",
+    "level": 1,
+    "rank": 131,
+    "word": "閉める",
+    "reading": "しめる",
+    "meaning_ko": "닫다",
+    "example": "ドアを{{[閉|し]めます}}。",
+    "example_ko": "문을 닫아요.",
+    "distractors": [
+      "[閉|し]めました",
+      "[閉|し]めて",
+      "[閉|し]めない"
+    ]
+  },
+  {
+    "id": "ja-1-132",
+    "language": "ja",
+    "level": 1,
+    "rank": 132,
+    "word": "歌う",
+    "reading": "うたう",
+    "meaning_ko": "노래하다",
+    "example": "[歌|うた]を{{[歌|うた]います}}。",
+    "example_ko": "노래를 불러요.",
+    "distractors": [
+      "[歌|うた]いました",
+      "[歌|うた]って",
+      "[歌|うた]わない"
+    ]
+  },
+  {
+    "id": "ja-1-133",
+    "language": "ja",
+    "level": 1,
+    "rank": 133,
+    "word": "泳ぐ",
+    "reading": "およぐ",
+    "meaning_ko": "헤엄치다",
+    "example": "[海|うみ]で{{[泳|およ]ぎます}}。",
+    "example_ko": "바다에서 수영해요.",
+    "distractors": [
+      "[泳|およ]ぎました",
+      "[泳|およ]いで",
+      "[泳|およ]がない"
+    ]
+  },
+  {
+    "id": "ja-1-134",
+    "language": "ja",
+    "level": 1,
+    "rank": 134,
+    "word": "走る",
+    "reading": "はしる",
+    "meaning_ko": "달리다",
+    "example": "[公園|こうえん]で{{[走|はし]ります}}。",
+    "example_ko": "공원에서 달려요.",
+    "distractors": [
+      "[走|はし]りました",
+      "[走|はし]って",
+      "[走|はし]らない"
+    ]
+  },
+  {
+    "id": "ja-1-135",
+    "language": "ja",
+    "level": 1,
+    "rank": 135,
+    "word": "飲み物",
+    "reading": "のみもの",
+    "meaning_ko": "마실 것, 음료",
+    "example": "{{[飲|の]み[物|もの]}}は[何|なに]がいいですか。",
+    "example_ko": "마실 것은 뭐가 좋아요?",
+    "distractors": [
+      "[靴|くつ]",
+      "[鞄|かばん]",
+      "[傘|かさ]"
+    ]
+  },
+  {
+    "id": "ja-1-136",
+    "language": "ja",
+    "level": 1,
+    "rank": 136,
+    "word": "食べ物",
+    "reading": "たべもの",
+    "meaning_ko": "음식",
+    "example": "[好|す]きな{{[食|た]べ[物|もの]}}は[何|なん]ですか。",
+    "example_ko": "좋아하는 음식은 뭐예요?",
+    "distractors": [
+      "[歌|うた]",
+      "[服|ふく]",
+      "[海|うみ]"
+    ]
+  },
+  {
+    "id": "ja-1-137",
+    "language": "ja",
+    "level": 1,
+    "rank": 137,
+    "word": "料理",
+    "reading": "りょうり",
+    "meaning_ko": "요리",
+    "example": "[母|はは]の{{[料理|りょうり]}}は[美味|おい]しいです。",
+    "example_ko": "어머니의 요리는 맛있어요.",
+    "distractors": [
+      "[写真|しゃしん]",
+      "[財布|さいふ]",
+      "[手紙|てがみ]"
+    ]
+  },
+  {
+    "id": "ja-1-138",
+    "language": "ja",
+    "level": 1,
+    "rank": 138,
+    "word": "病院",
+    "reading": "びょういん",
+    "meaning_ko": "병원",
+    "example": "{{[病院|びょういん]}}に[行|い]きます。",
+    "example_ko": "병원에 가요.",
+    "distractors": [
+      "[銀行|ぎんこう]",
+      "[図書館|としょかん]",
+      "[空港|くうこう]"
+    ]
+  },
+  {
+    "id": "ja-1-139",
+    "language": "ja",
+    "level": 1,
+    "rank": 139,
+    "word": "町",
+    "reading": "まち",
+    "meaning_ko": "마을, 동네",
+    "example": "この{{[町|まち]}}は[小|ちい]さいです。",
+    "example_ko": "이 마을은 작아요.",
+    "distractors": [
+      "[海|うみ]",
+      "[川|かわ]",
+      "[窓|まど]"
+    ]
+  },
+  {
+    "id": "ja-1-140",
+    "language": "ja",
+    "level": 1,
+    "rank": 140,
+    "word": "国",
+    "reading": "くに",
+    "meaning_ko": "나라",
+    "example": "[私|わたし]の{{[国|くに]}}は[韓国|かんこく]です。",
+    "example_ko": "제 나라는 한국이에요.",
+    "distractors": [
+      "[靴|くつ]",
+      "[空|そら]",
+      "[紙|かみ]"
+    ]
+  },
+  {
+    "id": "ja-1-141",
+    "language": "ja",
+    "level": 1,
+    "rank": 141,
+    "word": "色",
+    "reading": "いろ",
+    "meaning_ko": "색",
+    "example": "[好|す]きな{{[色|いろ]}}は[青|あお]です。",
+    "example_ko": "좋아하는 색은 파랑이에요.",
+    "distractors": [
+      "[音|おと]",
+      "[味|あじ]",
+      "[町|まち]"
+    ]
+  },
+  {
+    "id": "ja-1-142",
+    "language": "ja",
+    "level": 1,
+    "rank": 142,
+    "word": "青い",
+    "reading": "あおい",
+    "meaning_ko": "파랗다",
+    "example": "{{[青|あお]い}}[空|そら]です。",
+    "example_ko": "파란 하늘이에요.",
+    "distractors": [
+      "[青|あお]く",
+      "[青|あお]くて",
+      "[青|あお]かった"
+    ]
+  },
+  {
+    "id": "ja-1-143",
+    "language": "ja",
+    "level": 1,
+    "rank": 143,
+    "word": "赤い",
+    "reading": "あかい",
+    "meaning_ko": "빨갛다",
+    "example": "{{[赤|あか]い}}[花|はな]が[好|す]きです。",
+    "example_ko": "빨간 꽃을 좋아해요.",
+    "distractors": [
+      "[赤|あか]く",
+      "[赤|あか]くて",
+      "[赤|あか]かった"
+    ]
+  },
+  {
+    "id": "ja-1-144",
+    "language": "ja",
+    "level": 1,
+    "rank": 144,
+    "word": "時々",
+    "reading": "ときどき",
+    "meaning_ko": "가끔",
+    "example": "{{[時々|ときどき]}}[映画|えいが]を[見|み]ます。",
+    "example_ko": "가끔 영화를 봐요.",
+    "distractors": [
+      "いつも",
+      "まだ",
+      "ぜんぜん"
+    ]
+  },
+  {
+    "id": "ja-1-145",
+    "language": "ja",
+    "level": 1,
+    "rank": 145,
+    "word": "今年",
+    "reading": "ことし",
+    "meaning_ko": "올해",
+    "example": "{{[今年|ことし]}}[日本|にほん]に[行|い]きます。",
+    "example_ko": "올해 일본에 가요.",
+    "distractors": [
+      "[去年|きょねん]",
+      "[昨日|きのう]",
+      "[先週|せんしゅう]"
+    ]
+  },
+  {
+    "id": "ja-1-146",
+    "language": "ja",
+    "level": 1,
+    "rank": 146,
+    "word": "来週",
+    "reading": "らいしゅう",
+    "meaning_ko": "다음 주",
+    "example": "{{[来週|らいしゅう]}}[友達|ともだち]に[会|あ]います。",
+    "example_ko": "다음 주에 친구를 만나요.",
+    "distractors": [
+      "[先週|せんしゅう]",
+      "[昨日|きのう]",
+      "[去年|きょねん]"
+    ]
+  },
+  {
+    "id": "ja-1-147",
+    "language": "ja",
+    "level": 1,
+    "rank": 147,
+    "word": "全部",
+    "reading": "ぜんぶ",
+    "meaning_ko": "전부",
+    "example": "{{[全部|ぜんぶ]}}[食|た]べました。",
+    "example_ko": "전부 먹었어요.",
+    "distractors": [
+      "[半分|はんぶん]",
+      "[少|すこ]し",
+      "[一回|いっかい]"
+    ]
+  },
+  {
+    "id": "ja-1-148",
+    "language": "ja",
+    "level": 1,
+    "rank": 148,
+    "word": "一つ",
+    "reading": "ひとつ",
+    "meaning_ko": "한 개",
+    "example": "りんごを{{[一|ひと]つ}}ください。",
+    "example_ko": "사과를 한 개 주세요.",
+    "distractors": [
+      "[二|ふた]つ",
+      "[三|みっ]つ",
+      "[四|よっ]つ"
+    ]
+  },
+  {
+    "id": "ja-1-149",
+    "language": "ja",
+    "level": 1,
+    "rank": 149,
+    "word": "ゆっくり",
+    "reading": "ゆっくり",
+    "meaning_ko": "천천히",
+    "example": "{{ゆっくり}}[話|はな]してください。",
+    "example_ko": "천천히 말해 주세요.",
+    "distractors": [
+      "すぐ",
+      "もっと",
+      "ぜんぜん"
+    ]
+  },
+  {
+    "id": "ja-1-150",
+    "language": "ja",
+    "level": 1,
+    "rank": 150,
+    "word": "休み",
+    "reading": "やすみ",
+    "meaning_ko": "휴일, 쉼",
+    "example": "[明日|あした]は{{[休|やす]み}}です。",
+    "example_ko": "내일은 쉬는 날이에요.",
+    "distractors": [
+      "[雨|あめ]",
+      "[仕事|しごと]",
+      "[試験|しけん]"
+    ]
+  },
+  {
+    "id": "ja-1-151",
+    "language": "ja",
+    "level": 1,
+    "rank": 151,
+    "word": "まだ",
+    "reading": "まだ",
+    "meaning_ko": "아직",
+    "example": "{{まだ}}[雨|あめ]が[降|ふ]っています。",
+    "example_ko": "아직 비가 내리고 있어요.",
+    "distractors": [
+      "とても",
+      "ゆっくり",
+      "あまり"
+    ]
+  },
+  {
+    "id": "ja-1-152",
+    "language": "ja",
+    "level": 1,
+    "rank": 152,
+    "word": "また",
+    "reading": "また",
+    "meaning_ko": "또, 다시",
+    "example": "{{また}}[明日|あした][会|あ]いましょう。",
+    "example_ko": "내일 또 만나요.",
+    "distractors": [
+      "とても",
+      "あまり",
+      "ちょっと"
+    ]
+  },
+  {
+    "id": "ja-1-153",
+    "language": "ja",
+    "level": 1,
+    "rank": 153,
+    "word": "面白い",
+    "reading": "おもしろい",
+    "meaning_ko": "재미있다",
+    "example": "この[映画|えいが]は{{[面白|おもしろ]い}}です。",
+    "example_ko": "이 영화는 재미있어요.",
+    "distractors": [
+      "[面白|おもしろ]かった",
+      "[面白|おもしろ]くない",
+      "[面白|おもしろ]くて"
+    ]
+  },
+  {
+    "id": "ja-1-154",
+    "language": "ja",
+    "level": 1,
+    "rank": 154,
+    "word": "きれい",
+    "reading": "きれい",
+    "meaning_ko": "예쁘다, 깨끗하다",
+    "example": "この[花|はな]はとても{{きれい}}です。",
+    "example_ko": "이 꽃은 매우 예뻐요.",
+    "distractors": [
+      "きれいな",
+      "きれいに",
+      "きれいだった"
+    ]
+  },
+  {
+    "id": "ja-1-155",
+    "language": "ja",
+    "level": 1,
+    "rank": 155,
+    "word": "働く",
+    "reading": "はたらく",
+    "meaning_ko": "일하다",
+    "example": "[兄|あに]は[店|みせ]で{{[働|はたら]いて}}います。",
+    "example_ko": "형은 가게에서 일하고 있어요.",
+    "distractors": [
+      "[働|はたら]く",
+      "[働|はたら]いた",
+      "[働|はたら]かない"
+    ]
+  },
+  {
+    "id": "ja-1-156",
+    "language": "ja",
+    "level": 1,
+    "rank": 156,
+    "word": "乗る",
+    "reading": "のる",
+    "meaning_ko": "타다",
+    "example": "[電車|でんしゃ]に{{[乗|の]って}}[学校|がっこう]へ[行|い]きます。",
+    "example_ko": "전철을 타고 학교에 가요.",
+    "distractors": [
+      "[乗|の]る",
+      "[乗|の]った",
+      "[乗|の]ります"
+    ]
+  },
+  {
+    "id": "ja-1-157",
+    "language": "ja",
+    "level": 1,
+    "rank": 157,
+    "word": "中",
+    "reading": "なか",
+    "meaning_ko": "안, 속",
+    "example": "[箱|はこ]の{{[中|なか]}}に[猫|ねこ]がいます。",
+    "example_ko": "상자 안에 고양이가 있어요.",
+    "distractors": [
+      "[水|みず]",
+      "[駅|えき]",
+      "[名前|なまえ]"
+    ]
+  },
+  {
+    "id": "ja-1-158",
+    "language": "ja",
+    "level": 1,
+    "rank": 158,
+    "word": "道",
+    "reading": "みち",
+    "meaning_ko": "길",
+    "example": "この{{[道|みち]}}をまっすぐ[行|い]ってください。",
+    "example_ko": "이 길을 쭉 가 주세요.",
+    "distractors": [
+      "[手|て]",
+      "[魚|さかな]",
+      "[音楽|おんがく]"
+    ]
+  },
+  {
+    "id": "ja-1-159",
+    "language": "ja",
+    "level": 1,
+    "rank": 159,
+    "word": "近い",
+    "reading": "ちかい",
+    "meaning_ko": "가깝다",
+    "example": "[駅|えき]は{{[近|ちか]い}}です。",
+    "example_ko": "역은 가까워요.",
+    "distractors": [
+      "[近|ちか]くない",
+      "[近|ちか]かった",
+      "[近|ちか]くて"
+    ]
+  },
+  {
+    "id": "ja-1-160",
+    "language": "ja",
+    "level": 1,
+    "rank": 160,
+    "word": "遠い",
+    "reading": "とおい",
+    "meaning_ko": "멀다",
+    "example": "[学校|がっこう]は{{[遠|とお]い}}です。",
+    "example_ko": "학교는 멀어요.",
+    "distractors": [
+      "[遠|とお]くない",
+      "[遠|とお]かった",
+      "[遠|とお]くて"
+    ]
+  },
+  {
+    "id": "ja-1-161",
+    "language": "ja",
+    "level": 1,
+    "rank": 161,
+    "word": "着る",
+    "reading": "きる",
+    "meaning_ko": "입다",
+    "example": "[新|あたら]しい[服|ふく]を{{[着|き]たい}}です。",
+    "example_ko": "새 옷을 입고 싶어요.",
+    "distractors": [
+      "[着|き]ます",
+      "[着|き]た",
+      "[着|き]ない"
+    ]
+  },
+  {
+    "id": "ja-1-162",
+    "language": "ja",
+    "level": 1,
+    "rank": 162,
+    "word": "座る",
+    "reading": "すわる",
+    "meaning_ko": "앉다",
+    "example": "ここに{{[座|すわ]って}}ください。",
+    "example_ko": "여기에 앉아 주세요.",
+    "distractors": [
+      "[座|すわ]る",
+      "[座|すわ]った",
+      "[座|すわ]らない"
+    ]
+  },
+  {
+    "id": "ja-1-163",
+    "language": "ja",
+    "level": 1,
+    "rank": 163,
+    "word": "立つ",
+    "reading": "たつ",
+    "meaning_ko": "서다",
+    "example": "[教室|きょうしつ]で{{[立|た]って}}います。",
+    "example_ko": "교실에 서 있어요.",
+    "distractors": [
+      "[立|た]つ",
+      "[立|た]った",
+      "[立|た]たない"
+    ]
+  },
+  {
+    "id": "ja-1-164",
+    "language": "ja",
+    "level": 1,
+    "rank": 164,
+    "word": "兄",
+    "reading": "あに",
+    "meaning_ko": "형, 오빠",
+    "example": "{{[兄|あに]}}は[大学生|だいがくせい]です。",
+    "example_ko": "형은 대학생이에요.",
+    "distractors": [
+      "[山|やま]",
+      "[駅|えき]",
+      "お[金|かね]"
+    ]
+  },
+  {
+    "id": "ja-1-165",
+    "language": "ja",
+    "level": 1,
+    "rank": 165,
+    "word": "姉",
+    "reading": "あね",
+    "meaning_ko": "누나, 언니",
+    "example": "{{[姉|あね]}}は[料理|りょうり]が[上手|じょうず]です。",
+    "example_ko": "누나는 요리를 잘해요.",
+    "distractors": [
+      "[駅|えき]",
+      "[雨|あめ]",
+      "[山|やま]"
+    ]
+  },
+  {
+    "id": "ja-1-166",
+    "language": "ja",
+    "level": 1,
+    "rank": 166,
+    "word": "弟",
+    "reading": "おとうと",
+    "meaning_ko": "남동생",
+    "example": "{{[弟|おとうと]}}は[毎日|まいにち][走|はし]ります。",
+    "example_ko": "남동생은 매일 달려요.",
+    "distractors": [
+      "[花|はな]",
+      "[電話|でんわ]",
+      "[天気|てんき]"
+    ]
+  },
+  {
+    "id": "ja-1-167",
+    "language": "ja",
+    "level": 1,
+    "rank": 167,
+    "word": "妹",
+    "reading": "いもうと",
+    "meaning_ko": "여동생",
+    "example": "{{[妹|いもうと]}}は[歌|うた]が[好|す]きです。",
+    "example_ko": "여동생은 노래를 좋아해요.",
+    "distractors": [
+      "[車|くるま]",
+      "[部屋|へや]",
+      "[映画|えいが]"
+    ]
+  },
+  {
+    "id": "ja-1-168",
+    "language": "ja",
+    "level": 1,
+    "rank": 168,
+    "word": "男",
+    "reading": "おとこ",
+    "meaning_ko": "남자",
+    "example": "あの{{[男|おとこ]}}の[人|ひと]は[先生|せんせい]です。",
+    "example_ko": "저 남자분은 선생님이에요.",
+    "distractors": [
+      "[魚|さかな]",
+      "[雨|あめ]",
+      "[花|はな]"
+    ]
+  },
+  {
+    "id": "ja-1-169",
+    "language": "ja",
+    "level": 1,
+    "rank": 169,
+    "word": "女",
+    "reading": "おんな",
+    "meaning_ko": "여자",
+    "example": "{{[女|おんな]}}の[子|こ]が[歌|うた]っています。",
+    "example_ko": "여자아이가 노래하고 있어요.",
+    "distractors": [
+      "[魚|さかな]",
+      "[山|やま]",
+      "[雨|あめ]"
+    ]
+  },
+  {
+    "id": "ja-1-170",
+    "language": "ja",
+    "level": 1,
+    "rank": 170,
+    "word": "下",
+    "reading": "した",
+    "meaning_ko": "아래, 밑",
+    "example": "[机|つくえ]の{{[下|した]}}に[猫|ねこ]がいます。",
+    "example_ko": "책상 아래에 고양이가 있어요.",
+    "distractors": [
+      "[駅|えき]",
+      "[名前|なまえ]",
+      "[先生|せんせい]"
+    ]
+  },
+  {
+    "id": "ja-1-171",
+    "language": "ja",
+    "level": 1,
+    "rank": 171,
+    "word": "右",
+    "reading": "みぎ",
+    "meaning_ko": "오른쪽",
+    "example": "{{[右|みぎ]}}に[曲|ま]がってください。",
+    "example_ko": "오른쪽으로 돌아 주세요.",
+    "distractors": [
+      "[水|みず]",
+      "[本|ほん]",
+      "[駅|えき]"
+    ]
+  },
+  {
+    "id": "ja-1-172",
+    "language": "ja",
+    "level": 1,
+    "rank": 172,
+    "word": "左",
+    "reading": "ひだり",
+    "meaning_ko": "왼쪽",
+    "example": "[銀行|ぎんこう]は{{[左|ひだり]}}にあります。",
+    "example_ko": "은행은 왼쪽에 있어요.",
+    "distractors": [
+      "[水|みず]",
+      "[本|ほん]",
+      "[犬|いぬ]"
+    ]
+  },
+  {
+    "id": "ja-1-173",
+    "language": "ja",
+    "level": 1,
+    "rank": 173,
+    "word": "白い",
+    "reading": "しろい",
+    "meaning_ko": "하얗다",
+    "example": "{{[白|しろ]い}}[犬|いぬ]がいます。",
+    "example_ko": "하얀 개가 있어요.",
+    "distractors": [
+      "[白|しろ]く",
+      "[白|しろ]くて",
+      "[白|しろ]かった"
+    ]
+  },
+  {
+    "id": "ja-1-174",
+    "language": "ja",
+    "level": 1,
+    "rank": 174,
+    "word": "黒い",
+    "reading": "くろい",
+    "meaning_ko": "검다",
+    "example": "{{[黒|くろ]い}}[猫|ねこ]が[好|す]きです。",
+    "example_ko": "검은 고양이를 좋아해요.",
+    "distractors": [
+      "[黒|くろ]く",
+      "[黒|くろ]くて",
+      "[黒|くろ]かった"
+    ]
+  },
+  {
+    "id": "ja-1-175",
+    "language": "ja",
+    "level": 1,
+    "rank": 175,
+    "word": "静か",
+    "reading": "しずか",
+    "meaning_ko": "조용하다",
+    "example": "この[町|まち]は{{[静|しず]か}}です。",
+    "example_ko": "이 마을은 조용해요.",
+    "distractors": [
+      "[静|しず]かな",
+      "[静|しず]かに",
+      "[静|しず]かだった"
+    ]
+  },
+  {
+    "id": "ja-1-176",
+    "language": "ja",
+    "level": 1,
+    "rank": 176,
+    "word": "有名",
+    "reading": "ゆうめい",
+    "meaning_ko": "유명하다",
+    "example": "[京都|きょうと]は{{[有名|ゆうめい]}}です。",
+    "example_ko": "교토는 유명해요.",
+    "distractors": [
+      "[有名|ゆうめい]な",
+      "[有名|ゆうめい]に",
+      "[有名|ゆうめい]だった"
+    ]
+  },
+  {
+    "id": "ja-1-177",
+    "language": "ja",
+    "level": 1,
+    "rank": 177,
+    "word": "便利",
+    "reading": "べんり",
+    "meaning_ko": "편리하다",
+    "example": "この[店|みせ]は{{[便利|べんり]}}です。",
+    "example_ko": "이 가게는 편리해요.",
+    "distractors": [
+      "[便利|べんり]な",
+      "[便利|べんり]に",
+      "[便利|べんり]だった"
+    ]
+  },
+  {
+    "id": "ja-1-178",
+    "language": "ja",
+    "level": 1,
+    "rank": 178,
+    "word": "忘れる",
+    "reading": "わすれる",
+    "meaning_ko": "잊다",
+    "example": "[名前|なまえ]を{{[忘|わす]れ}}ました。",
+    "example_ko": "이름을 잊어버렸어요.",
+    "distractors": [
+      "[忘|わす]れる",
+      "[忘|わす]れて",
+      "[忘|わす]れない"
+    ]
+  },
+  {
+    "id": "ja-1-179",
+    "language": "ja",
+    "level": 1,
+    "rank": 179,
+    "word": "覚える",
+    "reading": "おぼえる",
+    "meaning_ko": "외우다, 기억하다",
+    "example": "[新|あたら]しい[言葉|ことば]を{{[覚|おぼ]えたい}}です。",
+    "example_ko": "새로운 말을 외우고 싶어요.",
+    "distractors": [
+      "[覚|おぼ]えます",
+      "[覚|おぼ]えた",
+      "[覚|おぼ]えない"
+    ]
+  },
+  {
+    "id": "ja-1-180",
+    "language": "ja",
+    "level": 1,
+    "rank": 180,
+    "word": "終わる",
+    "reading": "おわる",
+    "meaning_ko": "끝나다",
+    "example": "[仕事|しごと]が{{[終|お]わったら}}、[電話|でんわ]します。",
+    "example_ko": "일이 끝나면 전화할게요.",
+    "distractors": [
+      "[終|お]わる",
+      "[終|お]わって",
+      "[終|お]わらない"
+    ]
+  },
+  {
+    "id": "ja-1-181",
+    "language": "ja",
+    "level": 1,
+    "rank": 181,
+    "word": "始まる",
+    "reading": "はじまる",
+    "meaning_ko": "시작되다",
+    "example": "[映画|えいが]が{{[始|はじ]まる}}[前|まえ]に[行|い]きます。",
+    "example_ko": "영화가 시작하기 전에 가요.",
+    "distractors": [
+      "[始|はじ]まった",
+      "[始|はじ]まって",
+      "[始|はじ]まります"
+    ]
+  },
+  {
+    "id": "ja-1-182",
+    "language": "ja",
+    "level": 1,
+    "rank": 182,
+    "word": "疲れる",
+    "reading": "つかれる",
+    "meaning_ko": "피곤하다, 지치다",
+    "example": "とても{{[疲|つか]れて}}います。",
+    "example_ko": "매우 지쳐 있어요.",
+    "distractors": [
+      "[疲|つか]れる",
+      "[疲|つか]れた",
+      "[疲|つか]れない"
+    ]
+  },
+  {
+    "id": "ja-1-183",
+    "language": "ja",
+    "level": 1,
+    "rank": 183,
+    "word": "洗う",
+    "reading": "あらう",
+    "meaning_ko": "씻다",
+    "example": "[手|て]を{{[洗|あら]い}}ましょう。",
+    "example_ko": "손을 씻읍시다.",
+    "distractors": [
+      "[洗|あら]う",
+      "[洗|あら]った",
+      "[洗|あら]って"
+    ]
+  },
+  {
+    "id": "ja-1-184",
+    "language": "ja",
+    "level": 1,
+    "rank": 184,
+    "word": "呼ぶ",
+    "reading": "よぶ",
+    "meaning_ko": "부르다",
+    "example": "[友達|ともだち]を{{[呼|よ]んで}}[一緒|いっしょ]に[食|た]べます。",
+    "example_ko": "친구를 불러서 함께 먹어요.",
+    "distractors": [
+      "[呼|よ]ぶ",
+      "[呼|よ]んだ",
+      "[呼|よ]ばない"
+    ]
+  },
+  {
+    "id": "ja-1-185",
+    "language": "ja",
+    "level": 1,
+    "rank": 185,
+    "word": "借りる",
+    "reading": "かりる",
+    "meaning_ko": "빌리다",
+    "example": "[友達|ともだち]に[本|ほん]を{{[借|か]り}}ました。",
+    "example_ko": "친구에게 책을 빌렸어요.",
+    "distractors": [
+      "[借|か]りる",
+      "[借|か]りて",
+      "[借|か]りない"
+    ]
+  },
+  {
+    "id": "ja-1-186",
+    "language": "ja",
+    "level": 1,
+    "rank": 186,
+    "word": "貸す",
+    "reading": "かす",
+    "meaning_ko": "빌려주다",
+    "example": "[私|わたし]は[友達|ともだち]にお[金|かね]を{{[貸|か]して}}あげました。",
+    "example_ko": "나는 친구에게 돈을 빌려줬어요.",
+    "distractors": [
+      "[貸|か]す",
+      "[貸|か]した",
+      "[貸|か]さない"
+    ]
+  },
+  {
+    "id": "ja-1-187",
+    "language": "ja",
+    "level": 1,
+    "rank": 187,
+    "word": "野菜",
+    "reading": "やさい",
+    "meaning_ko": "채소",
+    "example": "{{[野菜|やさい]}}をたくさん[食|た]べます。",
+    "example_ko": "채소를 많이 먹어요.",
+    "distractors": [
+      "[電車|でんしゃ]",
+      "[天気|てんき]",
+      "[名前|なまえ]"
+    ]
+  },
+  {
+    "id": "ja-1-188",
+    "language": "ja",
+    "level": 1,
+    "rank": 188,
+    "word": "肉",
+    "reading": "にく",
+    "meaning_ko": "고기",
+    "example": "{{[肉|にく]}}より[魚|さかな]が[好|す]きです。",
+    "example_ko": "고기보다 생선을 좋아해요.",
+    "distractors": [
+      "[駅|えき]",
+      "[天気|てんき]",
+      "[名前|なまえ]"
+    ]
+  },
+  {
+    "id": "ja-1-189",
+    "language": "ja",
+    "level": 1,
+    "rank": 189,
+    "word": "卵",
+    "reading": "たまご",
+    "meaning_ko": "달걀",
+    "example": "{{[卵|たまご]}}を[二|ふた]つ[買|か]いました。",
+    "example_ko": "달걀을 두 개 샀어요.",
+    "distractors": [
+      "[天気|てんき]",
+      "[名前|なまえ]",
+      "[駅|えき]"
+    ]
+  },
+  {
+    "id": "ja-1-190",
+    "language": "ja",
+    "level": 1,
+    "rank": 190,
+    "word": "旅行",
+    "reading": "りょこう",
+    "meaning_ko": "여행",
+    "example": "[来年|らいねん]、[日本|にほん]へ{{[旅行|りょこう]}}します。",
+    "example_ko": "내년에 일본으로 여행해요.",
+    "distractors": [
+      "[天気|てんき]",
+      "[名前|なまえ]",
+      "[電車|でんしゃ]"
+    ]
+  },
+  {
+    "id": "ja-1-191",
+    "language": "ja",
+    "level": 1,
+    "rank": 191,
+    "word": "写真",
+    "reading": "しゃしん",
+    "meaning_ko": "사진",
+    "example": "[犬|いぬ]の{{[写真|しゃしん]}}を[見|み]ます。",
+    "example_ko": "개 사진을 봐요.",
+    "distractors": [
+      "お[茶|ちゃ]",
+      "[電話|でんわ]",
+      "[魚|さかな]"
+    ]
+  },
+  {
+    "id": "ja-1-192",
+    "language": "ja",
+    "level": 1,
+    "rank": 192,
+    "word": "銀行",
+    "reading": "ぎんこう",
+    "meaning_ko": "은행",
+    "example": "{{[銀行|ぎんこう]}}でお[金|かね]を[出|だ]します。",
+    "example_ko": "은행에서 돈을 찾아요.",
+    "distractors": [
+      "[山|やま]",
+      "[雨|あめ]",
+      "[犬|いぬ]"
+    ]
+  },
+  {
+    "id": "ja-1-193",
+    "language": "ja",
+    "level": 1,
+    "rank": 193,
+    "word": "海",
+    "reading": "うみ",
+    "meaning_ko": "바다",
+    "example": "[夏|なつ]は{{[海|うみ]}}へ[行|い]きたいです。",
+    "example_ko": "여름에는 바다에 가고 싶어요.",
+    "distractors": [
+      "[電話|でんわ]",
+      "[名前|なまえ]",
+      "[天気|てんき]"
+    ]
+  },
+  {
+    "id": "ja-1-194",
+    "language": "ja",
+    "level": 1,
+    "rank": 194,
+    "word": "川",
+    "reading": "かわ",
+    "meaning_ko": "강",
+    "example": "[大|おお]きい{{[川|かわ]}}があります。",
+    "example_ko": "큰 강이 있어요.",
+    "distractors": [
+      "[電話|でんわ]",
+      "[車|くるま]",
+      "[花|はな]"
+    ]
+  },
+  {
+    "id": "ja-1-195",
+    "language": "ja",
+    "level": 1,
+    "rank": 195,
+    "word": "空",
+    "reading": "そら",
+    "meaning_ko": "하늘",
+    "example": "{{[空|そら]}}が[青|あお]いです。",
+    "example_ko": "하늘이 파래요.",
+    "distractors": [
+      "[犬|いぬ]",
+      "[名前|なまえ]",
+      "お[茶|ちゃ]"
+    ]
+  },
+  {
+    "id": "ja-1-196",
+    "language": "ja",
+    "level": 1,
+    "rank": 196,
+    "word": "傘",
+    "reading": "かさ",
+    "meaning_ko": "우산",
+    "example": "[雨|あめ]ですから、{{[傘|かさ]}}を[持|も]って[行|い]きます。",
+    "example_ko": "비가 오니까 우산을 가지고 가요.",
+    "distractors": [
+      "[名前|なまえ]",
+      "[先生|せんせい]",
+      "[天気|てんき]"
+    ]
+  },
+  {
+    "id": "ja-1-197",
+    "language": "ja",
+    "level": 1,
+    "rank": 197,
+    "word": "鞄",
+    "reading": "かばん",
+    "meaning_ko": "가방",
+    "example": "{{[鞄|かばん]}}の[中|なか]に[本|ほん]があります。",
+    "example_ko": "가방 안에 책이 있어요.",
+    "distractors": [
+      "[駅|えき]",
+      "[先生|せんせい]",
+      "[天気|てんき]"
+    ]
+  },
+  {
+    "id": "ja-1-198",
+    "language": "ja",
+    "level": 1,
+    "rank": 198,
+    "word": "全然",
+    "reading": "ぜんぜん",
+    "meaning_ko": "전혀",
+    "example": "[肉|にく]は{{[全然|ぜんぜん]}}[食|た]べません。",
+    "example_ko": "고기는 전혀 먹지 않아요.",
+    "distractors": [
+      "とても",
+      "ゆっくり",
+      "すぐ"
+    ]
+  },
+  {
+    "id": "ja-1-199",
+    "language": "ja",
+    "level": 1,
+    "rank": 199,
+    "word": "最近",
+    "reading": "さいきん",
+    "meaning_ko": "요즘, 최근",
+    "example": "{{[最近|さいきん]}}、とても[忙|いそが]しいです。",
+    "example_ko": "요즘 매우 바빠요.",
+    "distractors": [
+      "[明日|あした]",
+      "[昨日|きのう]",
+      "[来週|らいしゅう]"
+    ]
+  },
+  {
+    "id": "ja-1-200",
+    "language": "ja",
+    "level": 1,
+    "rank": 200,
+    "word": "去年",
+    "reading": "きょねん",
+    "meaning_ko": "작년",
+    "example": "{{[去年|きょねん]}}[日本|にほん]へ[行|い]きました。",
+    "example_ko": "작년에 일본에 갔어요.",
+    "distractors": [
+      "[明日|あした]",
+      "[来週|らいしゅう]",
+      "[今年|ことし]"
+    ]
+  }
+]
