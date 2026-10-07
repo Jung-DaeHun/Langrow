@@ -1,0 +1,3202 @@
+[
+  {
+    "id": "en-3-001",
+    "language": "en",
+    "level": 3,
+    "rank": 1,
+    "word": "actually",
+    "reading": null,
+    "meaning_ko": "사실은, 실제로",
+    "example": "I {{actually}} liked the movie.",
+    "example_ko": "나는 사실 그 영화가 좋았어.",
+    "distractors": [
+      "quietly",
+      "nearly",
+      "loudly"
+    ]
+  },
+  {
+    "id": "en-3-002",
+    "language": "en",
+    "level": 3,
+    "rank": 2,
+    "word": "however",
+    "reading": null,
+    "meaning_ko": "하지만, 그러나",
+    "example": "I like it. {{However}}, it is too expensive.",
+    "example_ko": "나는 그게 마음에 들어. 하지만 너무 비싸.",
+    "distractors": [
+      "Therefore",
+      "Besides",
+      "Meanwhile"
+    ]
+  },
+  {
+    "id": "en-3-003",
+    "language": "en",
+    "level": 3,
+    "rank": 3,
+    "word": "consider",
+    "reading": null,
+    "meaning_ko": "고려하다",
+    "example": "I will {{consider}} your offer.",
+    "example_ko": "당신의 제안을 고려해 볼게요.",
+    "distractors": [
+      "considered",
+      "considers",
+      "considering"
+    ]
+  },
+  {
+    "id": "en-3-004",
+    "language": "en",
+    "level": 3,
+    "rank": 4,
+    "word": "experience",
+    "reading": null,
+    "meaning_ko": "경험",
+    "example": "She has a lot of work {{experience}}.",
+    "example_ko": "그녀는 업무 경험이 많다.",
+    "distractors": [
+      "ticket",
+      "garden",
+      "mountain"
+    ]
+  },
+  {
+    "id": "en-3-005",
+    "language": "en",
+    "level": 3,
+    "rank": 5,
+    "word": "decision",
+    "reading": null,
+    "meaning_ko": "결정",
+    "example": "It was a hard {{decision}}.",
+    "example_ko": "그건 어려운 결정이었다.",
+    "distractors": [
+      "umbrella",
+      "bridge",
+      "towel"
+    ]
+  },
+  {
+    "id": "en-3-006",
+    "language": "en",
+    "level": 3,
+    "rank": 6,
+    "word": "suggest",
+    "reading": null,
+    "meaning_ko": "제안하다",
+    "example": "Yesterday, he {{suggested}} a new plan.",
+    "example_ko": "어제 그는 새로운 계획을 제안했다.",
+    "distractors": [
+      "suggest",
+      "suggests",
+      "suggesting"
+    ]
+  },
+  {
+    "id": "en-3-007",
+    "language": "en",
+    "level": 3,
+    "rank": 7,
+    "word": "expect",
+    "reading": null,
+    "meaning_ko": "예상하다, 기대하다",
+    "example": "I didn't {{expect}} so many people.",
+    "example_ko": "나는 그렇게 많은 사람이 있을 줄 예상하지 못했어.",
+    "distractors": [
+      "expected",
+      "expects",
+      "expecting"
+    ]
+  },
+  {
+    "id": "en-3-008",
+    "language": "en",
+    "level": 3,
+    "rank": 8,
+    "word": "situation",
+    "reading": null,
+    "meaning_ko": "상황",
+    "example": "The {{situation}} is getting better.",
+    "example_ko": "상황이 나아지고 있어.",
+    "distractors": [
+      "kitchen",
+      "pocket",
+      "village"
+    ]
+  },
+  {
+    "id": "en-3-009",
+    "language": "en",
+    "level": 3,
+    "rank": 9,
+    "word": "support",
+    "reading": null,
+    "meaning_ko": "지지하다, 지원하다",
+    "example": "My mother {{supports}} me every day.",
+    "example_ko": "어머니는 매일 나를 지지해 주신다.",
+    "distractors": [
+      "support",
+      "supported",
+      "supporting"
+    ]
+  },
+  {
+    "id": "en-3-010",
+    "language": "en",
+    "level": 3,
+    "rank": 10,
+    "word": "reason",
+    "reading": null,
+    "meaning_ko": "이유",
+    "example": "What is the {{reason}} for the delay?",
+    "example_ko": "지연된 이유가 뭐예요?",
+    "distractors": [
+      "garden",
+      "island",
+      "towel"
+    ]
+  },
+  {
+    "id": "en-3-011",
+    "language": "en",
+    "level": 3,
+    "rank": 11,
+    "word": "continue",
+    "reading": null,
+    "meaning_ko": "계속하다",
+    "example": "Please {{continue}} your story.",
+    "example_ko": "이야기를 계속해 주세요.",
+    "distractors": [
+      "continued",
+      "continues",
+      "continuing"
+    ]
+  },
+  {
+    "id": "en-3-012",
+    "language": "en",
+    "level": 3,
+    "rank": 12,
+    "word": "recently",
+    "reading": null,
+    "meaning_ko": "최근에",
+    "example": "I {{recently}} moved to a new city.",
+    "example_ko": "나는 최근에 새로운 도시로 이사했어.",
+    "distractors": [
+      "nearly",
+      "loudly",
+      "deeply"
+    ]
+  },
+  {
+    "id": "en-3-013",
+    "language": "en",
+    "level": 3,
+    "rank": 13,
+    "word": "available",
+    "reading": null,
+    "meaning_ko": "이용 가능한, 비어 있는",
+    "example": "Is this seat {{available}}?",
+    "example_ko": "이 자리 비어 있나요?",
+    "distractors": [
+      "heavy",
+      "angry",
+      "proud"
+    ]
+  },
+  {
+    "id": "en-3-014",
+    "language": "en",
+    "level": 3,
+    "rank": 14,
+    "word": "opportunity",
+    "reading": null,
+    "meaning_ko": "기회",
+    "example": "This is a great {{opportunity}}.",
+    "example_ko": "이건 정말 좋은 기회야.",
+    "distractors": [
+      "bridge",
+      "pocket",
+      "farm"
+    ]
+  },
+  {
+    "id": "en-3-015",
+    "language": "en",
+    "level": 3,
+    "rank": 15,
+    "word": "relationship",
+    "reading": null,
+    "meaning_ko": "관계",
+    "example": "They have a good {{relationship}}.",
+    "example_ko": "그들은 좋은 관계를 유지하고 있다.",
+    "distractors": [
+      "library",
+      "shower",
+      "cloud"
+    ]
+  },
+  {
+    "id": "en-3-016",
+    "language": "en",
+    "level": 3,
+    "rank": 16,
+    "word": "environment",
+    "reading": null,
+    "meaning_ko": "환경",
+    "example": "We should protect the {{environment}}.",
+    "example_ko": "우리는 환경을 보호해야 해.",
+    "distractors": [
+      "kitchen",
+      "wallet",
+      "village"
+    ]
+  },
+  {
+    "id": "en-3-017",
+    "language": "en",
+    "level": 3,
+    "rank": 17,
+    "word": "manage",
+    "reading": null,
+    "meaning_ko": "해내다, 관리하다",
+    "example": "Can you {{manage}} this work alone?",
+    "example_ko": "이 일을 혼자 해낼 수 있어?",
+    "distractors": [
+      "manages",
+      "managed",
+      "managing"
+    ]
+  },
+  {
+    "id": "en-3-018",
+    "language": "en",
+    "level": 3,
+    "rank": 18,
+    "word": "improve",
+    "reading": null,
+    "meaning_ko": "향상시키다, 개선하다",
+    "example": "I want to {{improve}} my English.",
+    "example_ko": "나는 영어 실력을 향상시키고 싶어.",
+    "distractors": [
+      "improves",
+      "improved",
+      "improving"
+    ]
+  },
+  {
+    "id": "en-3-019",
+    "language": "en",
+    "level": 3,
+    "rank": 19,
+    "word": "notice",
+    "reading": null,
+    "meaning_ko": "알아차리다",
+    "example": "Did you {{notice}} the change?",
+    "example_ko": "그 변화를 알아차렸어?",
+    "distractors": [
+      "noticed",
+      "notices",
+      "noticing"
+    ]
+  },
+  {
+    "id": "en-3-020",
+    "language": "en",
+    "level": 3,
+    "rank": 20,
+    "word": "appear",
+    "reading": null,
+    "meaning_ko": "나타나다",
+    "example": "Dark clouds began to {{appear}}.",
+    "example_ko": "먹구름이 나타나기 시작했다.",
+    "distractors": [
+      "appeared",
+      "appears",
+      "appearing"
+    ]
+  },
+  {
+    "id": "en-3-021",
+    "language": "en",
+    "level": 3,
+    "rank": 21,
+    "word": "avoid",
+    "reading": null,
+    "meaning_ko": "피하다",
+    "example": "Try to {{avoid}} junk food.",
+    "example_ko": "정크푸드는 피하도록 해 봐.",
+    "distractors": [
+      "avoids",
+      "avoided",
+      "avoiding"
+    ]
+  },
+  {
+    "id": "en-3-022",
+    "language": "en",
+    "level": 3,
+    "rank": 22,
+    "word": "discuss",
+    "reading": null,
+    "meaning_ko": "논의하다",
+    "example": "Let's {{discuss}} it later.",
+    "example_ko": "그건 나중에 논의하자.",
+    "distractors": [
+      "discussed",
+      "discusses",
+      "discussing"
+    ]
+  },
+  {
+    "id": "en-3-023",
+    "language": "en",
+    "level": 3,
+    "rank": 23,
+    "word": "describe",
+    "reading": null,
+    "meaning_ko": "묘사하다, 설명하다",
+    "example": "Can you {{describe}} the man?",
+    "example_ko": "그 남자를 묘사해 줄 수 있어요?",
+    "distractors": [
+      "described",
+      "describes",
+      "describing"
+    ]
+  },
+  {
+    "id": "en-3-024",
+    "language": "en",
+    "level": 3,
+    "rank": 24,
+    "word": "recommend",
+    "reading": null,
+    "meaning_ko": "추천하다",
+    "example": "Could you {{recommend}} a good restaurant?",
+    "example_ko": "괜찮은 식당 하나 추천해 주실래요?",
+    "distractors": [
+      "recommended",
+      "recommends",
+      "recommending"
+    ]
+  },
+  {
+    "id": "en-3-025",
+    "language": "en",
+    "level": 3,
+    "rank": 25,
+    "word": "effect",
+    "reading": null,
+    "meaning_ko": "효과, 영향",
+    "example": "The medicine had a strong {{effect}}.",
+    "example_ko": "그 약은 효과가 강했다.",
+    "distractors": [
+      "garden",
+      "towel",
+      "lake"
+    ]
+  },
+  {
+    "id": "en-3-026",
+    "language": "en",
+    "level": 3,
+    "rank": 26,
+    "word": "especially",
+    "reading": null,
+    "meaning_ko": "특히",
+    "example": "I love fruit, {{especially}} mangoes.",
+    "example_ko": "나는 과일을 좋아해, 특히 망고를.",
+    "distractors": [
+      "slowly",
+      "quietly",
+      "nearly"
+    ]
+  },
+  {
+    "id": "en-3-027",
+    "language": "en",
+    "level": 3,
+    "rank": 27,
+    "word": "accept",
+    "reading": null,
+    "meaning_ko": "받아들이다",
+    "example": "Please {{accept}} my apology.",
+    "example_ko": "제 사과를 받아 주세요.",
+    "distractors": [
+      "accepted",
+      "accepts",
+      "accepting"
+    ]
+  },
+  {
+    "id": "en-3-028",
+    "language": "en",
+    "level": 3,
+    "rank": 28,
+    "word": "agree",
+    "reading": null,
+    "meaning_ko": "동의하다",
+    "example": "I don't {{agree}} with you.",
+    "example_ko": "나는 너에게 동의하지 않아.",
+    "distractors": [
+      "agrees",
+      "agreed",
+      "agreeing"
+    ]
+  },
+  {
+    "id": "en-3-029",
+    "language": "en",
+    "level": 3,
+    "rank": 29,
+    "word": "create",
+    "reading": null,
+    "meaning_ko": "만들어 내다, 창조하다",
+    "example": "He wants to {{create}} a new app.",
+    "example_ko": "그는 새로운 앱을 만들고 싶어 한다.",
+    "distractors": [
+      "creates",
+      "created",
+      "creating"
+    ]
+  },
+  {
+    "id": "en-3-030",
+    "language": "en",
+    "level": 3,
+    "rank": 30,
+    "word": "control",
+    "reading": null,
+    "meaning_ko": "통제하다, 조절하다",
+    "example": "I can't {{control}} my anger.",
+    "example_ko": "나는 화를 조절할 수 없어.",
+    "distractors": [
+      "controls",
+      "controlled",
+      "controlling"
+    ]
+  },
+  {
+    "id": "en-3-031",
+    "language": "en",
+    "level": 3,
+    "rank": 31,
+    "word": "compare",
+    "reading": null,
+    "meaning_ko": "비교하다",
+    "example": "Don't {{compare}} yourself with others.",
+    "example_ko": "다른 사람과 너 자신을 비교하지 마.",
+    "distractors": [
+      "compares",
+      "compared",
+      "comparing"
+    ]
+  },
+  {
+    "id": "en-3-032",
+    "language": "en",
+    "level": 3,
+    "rank": 32,
+    "word": "effort",
+    "reading": null,
+    "meaning_ko": "노력",
+    "example": "Thank you for your {{effort}}.",
+    "example_ko": "노력해 주셔서 감사합니다.",
+    "distractors": [
+      "shower",
+      "cloud",
+      "towel"
+    ]
+  },
+  {
+    "id": "en-3-033",
+    "language": "en",
+    "level": 3,
+    "rank": 33,
+    "word": "attention",
+    "reading": null,
+    "meaning_ko": "주의, 관심",
+    "example": "Please pay {{attention}} to the teacher.",
+    "example_ko": "선생님께 주목해 주세요.",
+    "distractors": [
+      "bridge",
+      "lake",
+      "farm"
+    ]
+  },
+  {
+    "id": "en-3-034",
+    "language": "en",
+    "level": 3,
+    "rank": 34,
+    "word": "challenge",
+    "reading": null,
+    "meaning_ko": "도전, 과제",
+    "example": "Learning a language is a big {{challenge}}.",
+    "example_ko": "언어를 배우는 것은 큰 도전이다.",
+    "distractors": [
+      "pocket",
+      "island",
+      "library"
+    ]
+  },
+  {
+    "id": "en-3-035",
+    "language": "en",
+    "level": 3,
+    "rank": 35,
+    "word": "cancel",
+    "reading": null,
+    "meaning_ko": "취소하다",
+    "example": "I had to {{cancel}} the meeting.",
+    "example_ko": "나는 회의를 취소해야 했다.",
+    "distractors": [
+      "canceled",
+      "cancels",
+      "canceling"
+    ]
+  },
+  {
+    "id": "en-3-036",
+    "language": "en",
+    "level": 3,
+    "rank": 36,
+    "word": "arrange",
+    "reading": null,
+    "meaning_ko": "마련하다, 준비하다",
+    "example": "She will {{arrange}} a meeting.",
+    "example_ko": "그녀가 회의를 마련할 거야.",
+    "distractors": [
+      "arranged",
+      "arranges",
+      "arranging"
+    ]
+  },
+  {
+    "id": "en-3-037",
+    "language": "en",
+    "level": 3,
+    "rank": 37,
+    "word": "depend",
+    "reading": null,
+    "meaning_ko": "~에 달려 있다",
+    "example": "It {{depends}} on the weather.",
+    "example_ko": "그건 날씨에 달려 있어.",
+    "distractors": [
+      "depend",
+      "depended",
+      "depending"
+    ]
+  },
+  {
+    "id": "en-3-038",
+    "language": "en",
+    "level": 3,
+    "rank": 38,
+    "word": "connect",
+    "reading": null,
+    "meaning_ko": "연결하다",
+    "example": "Please {{connect}} the phone to the charger.",
+    "example_ko": "전화기를 충전기에 연결해 주세요.",
+    "distractors": [
+      "connects",
+      "connected",
+      "connecting"
+    ]
+  },
+  {
+    "id": "en-3-039",
+    "language": "en",
+    "level": 3,
+    "rank": 39,
+    "word": "convenient",
+    "reading": null,
+    "meaning_ko": "편리한",
+    "example": "The hotel is in a {{convenient}} location.",
+    "example_ko": "그 호텔은 편리한 위치에 있다.",
+    "distractors": [
+      "dangerous",
+      "empty",
+      "sweet"
+    ]
+  },
+  {
+    "id": "en-3-040",
+    "language": "en",
+    "level": 3,
+    "rank": 40,
+    "word": "confident",
+    "reading": null,
+    "meaning_ko": "자신 있는",
+    "example": "She feels {{confident}} about the test.",
+    "example_ko": "그녀는 시험에 자신이 있다.",
+    "distractors": [
+      "thirsty",
+      "spicy",
+      "wet"
+    ]
+  },
+  {
+    "id": "en-3-041",
+    "language": "en",
+    "level": 3,
+    "rank": 41,
+    "word": "disappointed",
+    "reading": null,
+    "meaning_ko": "실망한",
+    "example": "I was {{disappointed}} with the result.",
+    "example_ko": "나는 결과에 실망했다.",
+    "distractors": [
+      "thirsty",
+      "polite",
+      "spicy"
+    ]
+  },
+  {
+    "id": "en-3-042",
+    "language": "en",
+    "level": 3,
+    "rank": 42,
+    "word": "encourage",
+    "reading": null,
+    "meaning_ko": "격려하다",
+    "example": "My coach wants to {{encourage}} us.",
+    "example_ko": "우리 코치님은 우리를 격려하고 싶어 하신다.",
+    "distractors": [
+      "encourages",
+      "encouraged",
+      "encouraging"
+    ]
+  },
+  {
+    "id": "en-3-043",
+    "language": "en",
+    "level": 3,
+    "rank": 43,
+    "word": "damage",
+    "reading": null,
+    "meaning_ko": "피해, 손상",
+    "example": "The storm did a lot of {{damage}}.",
+    "example_ko": "폭풍이 많은 피해를 입혔다.",
+    "distractors": [
+      "bridge",
+      "wallet",
+      "farm"
+    ]
+  },
+  {
+    "id": "en-3-044",
+    "language": "en",
+    "level": 3,
+    "rank": 44,
+    "word": "culture",
+    "reading": null,
+    "meaning_ko": "문화",
+    "example": "I'm interested in Korean {{culture}}.",
+    "example_ko": "나는 한국 문화에 관심이 있어.",
+    "distractors": [
+      "bridge",
+      "pocket",
+      "shower"
+    ]
+  },
+  {
+    "id": "en-3-045",
+    "language": "en",
+    "level": 3,
+    "rank": 45,
+    "word": "event",
+    "reading": null,
+    "meaning_ko": "행사, 사건",
+    "example": "The {{event}} starts at seven.",
+    "example_ko": "그 행사는 7시에 시작해.",
+    "distractors": [
+      "towel",
+      "pocket",
+      "garden"
+    ]
+  },
+  {
+    "id": "en-3-046",
+    "language": "en",
+    "level": 3,
+    "rank": 46,
+    "word": "completely",
+    "reading": null,
+    "meaning_ko": "완전히",
+    "example": "I {{completely}} forgot about it.",
+    "example_ko": "나는 그걸 완전히 잊어버렸어.",
+    "distractors": [
+      "softly",
+      "politely",
+      "nervously"
+    ]
+  },
+  {
+    "id": "en-3-047",
+    "language": "en",
+    "level": 3,
+    "rank": 47,
+    "word": "apologize",
+    "reading": null,
+    "meaning_ko": "사과하다",
+    "example": "I want to {{apologize}} for being late.",
+    "example_ko": "늦은 것에 대해 사과드리고 싶어요.",
+    "distractors": [
+      "apologized",
+      "apologizes",
+      "apologizing"
+    ]
+  },
+  {
+    "id": "en-3-048",
+    "language": "en",
+    "level": 3,
+    "rank": 48,
+    "word": "achieve",
+    "reading": null,
+    "meaning_ko": "달성하다, 이루다",
+    "example": "She worked hard to {{achieve}} her goal.",
+    "example_ko": "그녀는 목표를 이루기 위해 열심히 노력했다.",
+    "distractors": [
+      "achieved",
+      "achieves",
+      "achieving"
+    ]
+  },
+  {
+    "id": "en-3-049",
+    "language": "en",
+    "level": 3,
+    "rank": 49,
+    "word": "definitely",
+    "reading": null,
+    "meaning_ko": "꼭, 확실히",
+    "example": "I will {{definitely}} come back.",
+    "example_ko": "나는 꼭 다시 올 거야.",
+    "distractors": [
+      "quietly",
+      "slowly",
+      "loudly"
+    ]
+  },
+  {
+    "id": "en-3-050",
+    "language": "en",
+    "level": 3,
+    "rank": 50,
+    "word": "although",
+    "reading": null,
+    "meaning_ko": "~이지만, ~에도 불구하고",
+    "example": "{{Although}} it was raining, we went out.",
+    "example_ko": "비가 오고 있었지만 우리는 밖으로 나갔다.",
+    "distractors": [
+      "Because",
+      "Unless",
+      "Until"
+    ]
+  },
+  {
+    "id": "en-3-051",
+    "language": "en",
+    "level": 3,
+    "rank": 51,
+    "word": "provide",
+    "reading": null,
+    "meaning_ko": "제공하다",
+    "example": "The hotel {{provides}} free breakfast.",
+    "example_ko": "호텔은 무료 조식을 제공한다.",
+    "distractors": [
+      "provide",
+      "provided",
+      "providing"
+    ]
+  },
+  {
+    "id": "en-3-052",
+    "language": "en",
+    "level": 3,
+    "rank": 52,
+    "word": "require",
+    "reading": null,
+    "meaning_ko": "요구하다, 필요로 하다",
+    "example": "This job {{requires}} good communication skills.",
+    "example_ko": "이 일은 뛰어난 의사소통 능력을 요구한다.",
+    "distractors": [
+      "require",
+      "required",
+      "requiring"
+    ]
+  },
+  {
+    "id": "en-3-053",
+    "language": "en",
+    "level": 3,
+    "rank": 53,
+    "word": "purpose",
+    "reading": null,
+    "meaning_ko": "목적",
+    "example": "What is the {{purpose}} of your visit?",
+    "example_ko": "방문 목적이 무엇인가요?",
+    "distractors": [
+      "weather",
+      "price",
+      "season"
+    ]
+  },
+  {
+    "id": "en-3-054",
+    "language": "en",
+    "level": 3,
+    "rank": 54,
+    "word": "prefer",
+    "reading": null,
+    "meaning_ko": "더 좋아하다, 선호하다",
+    "example": "I {{prefer}} tea to coffee.",
+    "example_ko": "나는 커피보다 차를 더 좋아한다.",
+    "distractors": [
+      "prefers",
+      "preferred",
+      "preferring"
+    ]
+  },
+  {
+    "id": "en-3-055",
+    "language": "en",
+    "level": 3,
+    "rank": 55,
+    "word": "afford",
+    "reading": null,
+    "meaning_ko": "~할 여유가 있다",
+    "example": "We can't {{afford}} a new car right now.",
+    "example_ko": "우리는 지금 새 차를 살 여유가 없다.",
+    "distractors": [
+      "affords",
+      "afforded",
+      "affording"
+    ]
+  },
+  {
+    "id": "en-3-056",
+    "language": "en",
+    "level": 3,
+    "rank": 56,
+    "word": "refuse",
+    "reading": null,
+    "meaning_ko": "거절하다, 거부하다",
+    "example": "He {{refused}} to answer the question.",
+    "example_ko": "그는 질문에 대답하기를 거부했다.",
+    "distractors": [
+      "refuse",
+      "refuses",
+      "refusing"
+    ]
+  },
+  {
+    "id": "en-3-057",
+    "language": "en",
+    "level": 3,
+    "rank": 57,
+    "word": "argue",
+    "reading": null,
+    "meaning_ko": "다투다, 주장하다",
+    "example": "They always {{argue}} about money.",
+    "example_ko": "그들은 항상 돈 문제로 다툰다.",
+    "distractors": [
+      "argues",
+      "argued",
+      "arguing"
+    ]
+  },
+  {
+    "id": "en-3-058",
+    "language": "en",
+    "level": 3,
+    "rank": 58,
+    "word": "behavior",
+    "reading": null,
+    "meaning_ko": "행동",
+    "example": "His {{behavior}} at the party surprised everyone.",
+    "example_ko": "파티에서의 그의 행동은 모두를 놀라게 했다.",
+    "distractors": [
+      "ticket",
+      "island",
+      "kitchen"
+    ]
+  },
+  {
+    "id": "en-3-059",
+    "language": "en",
+    "level": 3,
+    "rank": 59,
+    "word": "average",
+    "reading": null,
+    "meaning_ko": "평균의",
+    "example": "The {{average}} age of the students is twenty.",
+    "example_ko": "학생들의 평균 나이는 스무 살이다.",
+    "distractors": [
+      "wet",
+      "loud",
+      "empty"
+    ]
+  },
+  {
+    "id": "en-3-060",
+    "language": "en",
+    "level": 3,
+    "rank": 60,
+    "word": "ability",
+    "reading": null,
+    "meaning_ko": "능력",
+    "example": "She has the {{ability}} to learn quickly.",
+    "example_ko": "그녀는 빨리 배우는 능력이 있다.",
+    "distractors": [
+      "pocket",
+      "garden",
+      "bridge"
+    ]
+  },
+  {
+    "id": "en-3-061",
+    "language": "en",
+    "level": 3,
+    "rank": 61,
+    "word": "advantage",
+    "reading": null,
+    "meaning_ko": "장점, 이점",
+    "example": "Speaking two languages is a big {{advantage}}.",
+    "example_ko": "두 언어를 말할 수 있는 것은 큰 장점이다.",
+    "distractors": [
+      "mountain",
+      "umbrella",
+      "wallet"
+    ]
+  },
+  {
+    "id": "en-3-062",
+    "language": "en",
+    "level": 3,
+    "rank": 62,
+    "word": "amount",
+    "reading": null,
+    "meaning_ko": "양",
+    "example": "A large {{amount}} of rain fell last night.",
+    "example_ko": "어젯밤에 많은 양의 비가 내렸다.",
+    "distractors": [
+      "corner",
+      "picture",
+      "museum"
+    ]
+  },
+  {
+    "id": "en-3-063",
+    "language": "en",
+    "level": 3,
+    "rank": 63,
+    "word": "attitude",
+    "reading": null,
+    "meaning_ko": "태도",
+    "example": "I like her positive {{attitude}}.",
+    "example_ko": "나는 그녀의 긍정적인 태도가 좋다.",
+    "distractors": [
+      "floor",
+      "market",
+      "library"
+    ]
+  },
+  {
+    "id": "en-3-064",
+    "language": "en",
+    "level": 3,
+    "rank": 64,
+    "word": "benefit",
+    "reading": null,
+    "meaning_ko": "이점, 혜택",
+    "example": "Exercise has many health {{benefits}}.",
+    "example_ko": "운동은 건강에 많은 이점이 있다.",
+    "distractors": [
+      "towels",
+      "bridges",
+      "pockets"
+    ]
+  },
+  {
+    "id": "en-3-065",
+    "language": "en",
+    "level": 3,
+    "rank": 65,
+    "word": "comment",
+    "reading": null,
+    "meaning_ko": "의견, 댓글",
+    "example": "Thank you for your {{comment}} on my post.",
+    "example_ko": "제 게시글에 의견을 남겨 주셔서 감사합니다.",
+    "distractors": [
+      "umbrella",
+      "garden",
+      "corner"
+    ]
+  },
+  {
+    "id": "en-3-066",
+    "language": "en",
+    "level": 3,
+    "rank": 66,
+    "word": "community",
+    "reading": null,
+    "meaning_ko": "지역 사회, 공동체",
+    "example": "Our {{community}} is very friendly.",
+    "example_ko": "우리 지역 사회는 매우 친근하다.",
+    "distractors": [
+      "kitchen",
+      "cloud",
+      "shirt"
+    ]
+  },
+  {
+    "id": "en-3-067",
+    "language": "en",
+    "level": 3,
+    "rank": 67,
+    "word": "condition",
+    "reading": null,
+    "meaning_ko": "상태, 조건",
+    "example": "The car is in good {{condition}}.",
+    "example_ko": "그 차는 상태가 좋다.",
+    "distractors": [
+      "island",
+      "bridge",
+      "window"
+    ]
+  },
+  {
+    "id": "en-3-068",
+    "language": "en",
+    "level": 3,
+    "rank": 68,
+    "word": "discover",
+    "reading": null,
+    "meaning_ko": "발견하다",
+    "example": "Scientists {{discovered}} a new kind of fish.",
+    "example_ko": "과학자들이 새로운 종류의 물고기를 발견했다.",
+    "distractors": [
+      "discover",
+      "discovers",
+      "discovering"
+    ]
+  },
+  {
+    "id": "en-3-069",
+    "language": "en",
+    "level": 3,
+    "rank": 69,
+    "word": "particularly",
+    "reading": null,
+    "meaning_ko": "특히",
+    "example": "I'm {{particularly}} interested in history.",
+    "example_ko": "나는 특히 역사에 관심이 있다.",
+    "distractors": [
+      "twice",
+      "upstairs",
+      "downstairs"
+    ]
+  },
+  {
+    "id": "en-3-070",
+    "language": "en",
+    "level": 3,
+    "rank": 70,
+    "word": "obviously",
+    "reading": null,
+    "meaning_ko": "분명히, 명백하게",
+    "example": "She was {{obviously}} tired after the trip.",
+    "example_ko": "그녀는 여행 후 분명히 피곤해 보였다.",
+    "distractors": [
+      "carefully",
+      "twice",
+      "nearby"
+    ]
+  },
+  {
+    "id": "en-3-071",
+    "language": "en",
+    "level": 3,
+    "rank": 71,
+    "word": "nearly",
+    "reading": null,
+    "meaning_ko": "거의",
+    "example": "I {{nearly}} missed the last train.",
+    "example_ko": "나는 마지막 기차를 거의 놓칠 뻔했다.",
+    "distractors": [
+      "twice",
+      "upstairs",
+      "abroad"
+    ]
+  },
+  {
+    "id": "en-3-072",
+    "language": "en",
+    "level": 3,
+    "rank": 72,
+    "word": "normal",
+    "reading": null,
+    "meaning_ko": "정상적인, 보통의",
+    "example": "It's {{normal}} to feel nervous before a test.",
+    "example_ko": "시험 전에 긴장하는 것은 정상이다.",
+    "distractors": [
+      "thick",
+      "proud",
+      "shy"
+    ]
+  },
+  {
+    "id": "en-3-073",
+    "language": "en",
+    "level": 3,
+    "rank": 73,
+    "word": "major",
+    "reading": null,
+    "meaning_ko": "주요한",
+    "example": "Traffic is a {{major}} problem in this city.",
+    "example_ko": "교통은 이 도시의 주요 문제다.",
+    "distractors": [
+      "soft",
+      "thirsty",
+      "spicy"
+    ]
+  },
+  {
+    "id": "en-3-074",
+    "language": "en",
+    "level": 3,
+    "rank": 74,
+    "word": "individual",
+    "reading": null,
+    "meaning_ko": "개인",
+    "example": "Each {{individual}} has different needs.",
+    "example_ko": "각 개인은 서로 다른 필요가 있다.",
+    "distractors": [
+      "shower",
+      "bridge",
+      "cloud"
+    ]
+  },
+  {
+    "id": "en-3-075",
+    "language": "en",
+    "level": 3,
+    "rank": 75,
+    "word": "influence",
+    "reading": null,
+    "meaning_ko": "영향",
+    "example": "Friends have a strong {{influence}} on teenagers.",
+    "example_ko": "친구는 십대에게 강한 영향을 미친다.",
+    "distractors": [
+      "bridge",
+      "umbrella",
+      "pocket"
+    ]
+  },
+  {
+    "id": "en-3-076",
+    "language": "en",
+    "level": 3,
+    "rank": 76,
+    "word": "research",
+    "reading": null,
+    "meaning_ko": "연구, 조사",
+    "example": "She did {{research}} on climate change.",
+    "example_ko": "그녀는 기후 변화에 대해 연구를 했다.",
+    "distractors": [
+      "towel",
+      "kitchen",
+      "corner"
+    ]
+  },
+  {
+    "id": "en-3-077",
+    "language": "en",
+    "level": 3,
+    "rank": 77,
+    "word": "society",
+    "reading": null,
+    "meaning_ko": "사회",
+    "example": "Technology has changed {{society}} a lot.",
+    "example_ko": "기술은 사회를 많이 바꿔 놓았다.",
+    "distractors": [
+      "bridge",
+      "pocket",
+      "lake"
+    ]
+  },
+  {
+    "id": "en-3-078",
+    "language": "en",
+    "level": 3,
+    "rank": 78,
+    "word": "realize",
+    "reading": null,
+    "meaning_ko": "깨닫다, 알아차리다",
+    "example": "I didn't {{realize}} it was so late.",
+    "example_ko": "나는 그렇게 늦었는지 몰랐다.",
+    "distractors": [
+      "realized",
+      "realizes",
+      "realizing"
+    ]
+  },
+  {
+    "id": "en-3-079",
+    "language": "en",
+    "level": 3,
+    "rank": 79,
+    "word": "involve",
+    "reading": null,
+    "meaning_ko": "포함하다, 관련시키다",
+    "example": "The project will {{involve}} many people.",
+    "example_ko": "그 프로젝트에는 많은 사람이 관련될 것이다.",
+    "distractors": [
+      "involves",
+      "involved",
+      "involving"
+    ]
+  },
+  {
+    "id": "en-3-080",
+    "language": "en",
+    "level": 3,
+    "rank": 80,
+    "word": "mention",
+    "reading": null,
+    "meaning_ko": "언급하다",
+    "example": "She didn't {{mention}} the price.",
+    "example_ko": "그녀는 가격을 언급하지 않았다.",
+    "distractors": [
+      "mentions",
+      "mentioned",
+      "mentioning"
+    ]
+  },
+  {
+    "id": "en-3-081",
+    "language": "en",
+    "level": 3,
+    "rank": 81,
+    "word": "admit",
+    "reading": null,
+    "meaning_ko": "인정하다",
+    "example": "He {{admitted}} that he made a mistake.",
+    "example_ko": "그는 실수했다고 인정했다.",
+    "distractors": [
+      "admit",
+      "admits",
+      "admitting"
+    ]
+  },
+  {
+    "id": "en-3-082",
+    "language": "en",
+    "level": 3,
+    "rank": 82,
+    "word": "prevent",
+    "reading": null,
+    "meaning_ko": "예방하다, 막다",
+    "example": "Washing your hands can {{prevent}} illness.",
+    "example_ko": "손을 씻으면 병을 예방할 수 있다.",
+    "distractors": [
+      "prevents",
+      "prevented",
+      "preventing"
+    ]
+  },
+  {
+    "id": "en-3-083",
+    "language": "en",
+    "level": 3,
+    "rank": 83,
+    "word": "reduce",
+    "reading": null,
+    "meaning_ko": "줄이다",
+    "example": "We need to {{reduce}} the cost.",
+    "example_ko": "우리는 비용을 줄여야 한다.",
+    "distractors": [
+      "reduces",
+      "reduced",
+      "reducing"
+    ]
+  },
+  {
+    "id": "en-3-084",
+    "language": "en",
+    "level": 3,
+    "rank": 84,
+    "word": "increase",
+    "reading": null,
+    "meaning_ko": "증가하다, 늘다",
+    "example": "Prices {{increased}} last year.",
+    "example_ko": "작년에 물가가 올랐다.",
+    "distractors": [
+      "increase",
+      "increases",
+      "increasing"
+    ]
+  },
+  {
+    "id": "en-3-085",
+    "language": "en",
+    "level": 3,
+    "rank": 85,
+    "word": "receive",
+    "reading": null,
+    "meaning_ko": "받다",
+    "example": "I {{received}} your email this morning.",
+    "example_ko": "오늘 아침 당신의 이메일을 받았어요.",
+    "distractors": [
+      "receive",
+      "receives",
+      "receiving"
+    ]
+  },
+  {
+    "id": "en-3-086",
+    "language": "en",
+    "level": 3,
+    "rank": 86,
+    "word": "remain",
+    "reading": null,
+    "meaning_ko": "계속 ~한 상태이다, 남다",
+    "example": "Please {{remain}} seated.",
+    "example_ko": "자리에 앉은 채로 계세요.",
+    "distractors": [
+      "remains",
+      "remained",
+      "remaining"
+    ]
+  },
+  {
+    "id": "en-3-087",
+    "language": "en",
+    "level": 3,
+    "rank": 87,
+    "word": "contact",
+    "reading": null,
+    "meaning_ko": "연락하다",
+    "example": "You can {{contact}} me by email.",
+    "example_ko": "이메일로 저에게 연락하시면 됩니다.",
+    "distractors": [
+      "contacts",
+      "contacted",
+      "contacting"
+    ]
+  },
+  {
+    "id": "en-3-088",
+    "language": "en",
+    "level": 3,
+    "rank": 88,
+    "word": "article",
+    "reading": null,
+    "meaning_ko": "기사, 글",
+    "example": "I read an interesting {{article}} online.",
+    "example_ko": "나는 온라인에서 흥미로운 기사를 읽었다.",
+    "distractors": [
+      "shower",
+      "bridge",
+      "lake"
+    ]
+  },
+  {
+    "id": "en-3-089",
+    "language": "en",
+    "level": 3,
+    "rank": 89,
+    "word": "failure",
+    "reading": null,
+    "meaning_ko": "실패",
+    "example": "The first attempt was a {{failure}}.",
+    "example_ko": "첫 시도는 실패였다.",
+    "distractors": [
+      "pocket",
+      "garden",
+      "towel"
+    ]
+  },
+  {
+    "id": "en-3-090",
+    "language": "en",
+    "level": 3,
+    "rank": 90,
+    "word": "skill",
+    "reading": null,
+    "meaning_ko": "기술, 능력",
+    "example": "Cooking is a useful {{skill}}.",
+    "example_ko": "요리는 유용한 기술이다.",
+    "distractors": [
+      "lake",
+      "shower",
+      "cloud"
+    ]
+  },
+  {
+    "id": "en-3-091",
+    "language": "en",
+    "level": 3,
+    "rank": 91,
+    "word": "responsible",
+    "reading": null,
+    "meaning_ko": "책임이 있는",
+    "example": "Parents are {{responsible}} for their children.",
+    "example_ko": "부모는 자녀에 대해 책임이 있다.",
+    "distractors": [
+      "thick",
+      "soft",
+      "shy"
+    ]
+  },
+  {
+    "id": "en-3-092",
+    "language": "en",
+    "level": 3,
+    "rank": 92,
+    "word": "official",
+    "reading": null,
+    "meaning_ko": "공식적인",
+    "example": "The {{official}} language of Brazil is Portuguese.",
+    "example_ko": "브라질의 공용어는 포르투갈어다.",
+    "distractors": [
+      "thirsty",
+      "wet",
+      "soft"
+    ]
+  },
+  {
+    "id": "en-3-093",
+    "language": "en",
+    "level": 3,
+    "rank": 93,
+    "word": "properly",
+    "reading": null,
+    "meaning_ko": "제대로, 적절히",
+    "example": "The door doesn't close {{properly}}.",
+    "example_ko": "문이 제대로 닫히지 않는다.",
+    "distractors": [
+      "twice",
+      "upstairs",
+      "abroad"
+    ]
+  },
+  {
+    "id": "en-3-094",
+    "language": "en",
+    "level": 3,
+    "rank": 94,
+    "word": "generally",
+    "reading": null,
+    "meaning_ko": "일반적으로, 대체로",
+    "example": "People {{generally}} arrive on time here.",
+    "example_ko": "여기서는 사람들이 대체로 제시간에 도착한다.",
+    "distractors": [
+      "twice",
+      "nearby",
+      "downstairs"
+    ]
+  },
+  {
+    "id": "en-3-095",
+    "language": "en",
+    "level": 3,
+    "rank": 95,
+    "word": "frequently",
+    "reading": null,
+    "meaning_ko": "자주, 빈번히",
+    "example": "She {{frequently}} travels for work.",
+    "example_ko": "그녀는 업무로 자주 출장을 간다.",
+    "distractors": [
+      "upstairs",
+      "abroad",
+      "nearby"
+    ]
+  },
+  {
+    "id": "en-3-096",
+    "language": "en",
+    "level": 3,
+    "rank": 96,
+    "word": "efficient",
+    "reading": null,
+    "meaning_ko": "효율적인",
+    "example": "This machine is very {{efficient}}.",
+    "example_ko": "이 기계는 매우 효율적이다.",
+    "distractors": [
+      "thirsty",
+      "spicy",
+      "shy"
+    ]
+  },
+  {
+    "id": "en-3-097",
+    "language": "en",
+    "level": 3,
+    "rank": 97,
+    "word": "flexible",
+    "reading": null,
+    "meaning_ko": "유연한, 융통성 있는",
+    "example": "My schedule is {{flexible}} this week.",
+    "example_ko": "이번 주 내 일정은 유연하다.",
+    "distractors": [
+      "wet",
+      "thick",
+      "proud"
+    ]
+  },
+  {
+    "id": "en-3-098",
+    "language": "en",
+    "level": 3,
+    "rank": 98,
+    "word": "familiar",
+    "reading": null,
+    "meaning_ko": "낯익은, 익숙한",
+    "example": "Her face looks {{familiar}}.",
+    "example_ko": "그녀의 얼굴이 낯익다.",
+    "distractors": [
+      "thirsty",
+      "wet",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-099",
+    "language": "en",
+    "level": 3,
+    "rank": 99,
+    "word": "independent",
+    "reading": null,
+    "meaning_ko": "독립적인",
+    "example": "She is a very {{independent}} person.",
+    "example_ko": "그녀는 매우 독립적인 사람이다.",
+    "distractors": [
+      "thirsty",
+      "spicy",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-100",
+    "language": "en",
+    "level": 3,
+    "rank": 100,
+    "word": "curious",
+    "reading": null,
+    "meaning_ko": "호기심이 많은",
+    "example": "Children are {{curious}} about everything.",
+    "example_ko": "아이들은 모든 것에 호기심이 많다.",
+    "distractors": [
+      "thick",
+      "spicy",
+      "wet"
+    ]
+  },
+  {
+    "id": "en-3-101",
+    "language": "en",
+    "level": 3,
+    "rank": 101,
+    "word": "struggle",
+    "reading": null,
+    "meaning_ko": "고군분투하다, 애쓰다",
+    "example": "He {{struggled}} to find a job last year.",
+    "example_ko": "그는 작년에 일자리를 찾으려고 고군분투했다.",
+    "distractors": [
+      "struggle",
+      "struggles",
+      "struggling"
+    ]
+  },
+  {
+    "id": "en-3-102",
+    "language": "en",
+    "level": 3,
+    "rank": 102,
+    "word": "assume",
+    "reading": null,
+    "meaning_ko": "추정하다, 가정하다",
+    "example": "I can't {{assume}} anything yet.",
+    "example_ko": "나는 아직 아무것도 단정할 수 없다.",
+    "distractors": [
+      "assumed",
+      "assumes",
+      "assuming"
+    ]
+  },
+  {
+    "id": "en-3-103",
+    "language": "en",
+    "level": 3,
+    "rank": 103,
+    "word": "potential",
+    "reading": null,
+    "meaning_ko": "잠재적인",
+    "example": "This is a {{potential}} problem for us.",
+    "example_ko": "이것은 우리에게 잠재적인 문제다.",
+    "distractors": [
+      "soft",
+      "shy",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-104",
+    "language": "en",
+    "level": 3,
+    "rank": 104,
+    "word": "issue",
+    "reading": null,
+    "meaning_ko": "문제, 쟁점",
+    "example": "We need to talk about this {{issue}} soon.",
+    "example_ko": "우리는 이 문제에 대해 곧 이야기해야 한다.",
+    "distractors": [
+      "towel",
+      "island",
+      "garden"
+    ]
+  },
+  {
+    "id": "en-3-105",
+    "language": "en",
+    "level": 3,
+    "rank": 105,
+    "word": "remind",
+    "reading": null,
+    "meaning_ko": "상기시키다",
+    "example": "Please {{remind}} me to call her.",
+    "example_ko": "그녀에게 전화하라고 나에게 상기시켜 줘.",
+    "distractors": [
+      "reminds",
+      "reminded",
+      "reminding"
+    ]
+  },
+  {
+    "id": "en-3-106",
+    "language": "en",
+    "level": 3,
+    "rank": 106,
+    "word": "fortunately",
+    "reading": null,
+    "meaning_ko": "다행히",
+    "example": "{{Fortunately}}, no one was hurt in the accident.",
+    "example_ko": "다행히 그 사고에서 아무도 다치지 않았다.",
+    "distractors": [
+      "Slowly",
+      "Loudly",
+      "Quietly"
+    ]
+  },
+  {
+    "id": "en-3-107",
+    "language": "en",
+    "level": 3,
+    "rank": 107,
+    "word": "approach",
+    "reading": null,
+    "meaning_ko": "다가가다, 접근하다",
+    "example": "The dog {{approached}} us slowly yesterday.",
+    "example_ko": "어제 그 개가 우리에게 천천히 다가왔다.",
+    "distractors": [
+      "approach",
+      "approaches",
+      "approaching"
+    ]
+  },
+  {
+    "id": "en-3-108",
+    "language": "en",
+    "level": 3,
+    "rank": 108,
+    "word": "apply",
+    "reading": null,
+    "meaning_ko": "지원하다, 신청하다",
+    "example": "She {{applied}} for the job last week.",
+    "example_ko": "그녀는 지난주에 그 일자리에 지원했다.",
+    "distractors": [
+      "apply",
+      "applies",
+      "applying"
+    ]
+  },
+  {
+    "id": "en-3-109",
+    "language": "en",
+    "level": 3,
+    "rank": 109,
+    "word": "immediately",
+    "reading": null,
+    "meaning_ko": "즉시",
+    "example": "Call me {{immediately}} if there is a problem.",
+    "example_ko": "문제가 있으면 즉시 나에게 전화해.",
+    "distractors": [
+      "tomorrow",
+      "upstairs",
+      "twice"
+    ]
+  },
+  {
+    "id": "en-3-110",
+    "language": "en",
+    "level": 3,
+    "rank": 110,
+    "word": "income",
+    "reading": null,
+    "meaning_ko": "소득, 수입",
+    "example": "Her {{income}} is quite high.",
+    "example_ko": "그녀의 소득은 꽤 높다.",
+    "distractors": [
+      "bridge",
+      "lake",
+      "shower"
+    ]
+  },
+  {
+    "id": "en-3-111",
+    "language": "en",
+    "level": 3,
+    "rank": 111,
+    "word": "responsibility",
+    "reading": null,
+    "meaning_ko": "책임",
+    "example": "It is your {{responsibility}} to lock the door.",
+    "example_ko": "문을 잠그는 것은 네 책임이다.",
+    "distractors": [
+      "pocket",
+      "farm",
+      "cloud"
+    ]
+  },
+  {
+    "id": "en-3-112",
+    "language": "en",
+    "level": 3,
+    "rank": 112,
+    "word": "serious",
+    "reading": null,
+    "meaning_ko": "심각한, 진지한",
+    "example": "This is a {{serious}} problem.",
+    "example_ko": "이것은 심각한 문제다.",
+    "distractors": [
+      "soft",
+      "shy",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-113",
+    "language": "en",
+    "level": 3,
+    "rank": 113,
+    "word": "impress",
+    "reading": null,
+    "meaning_ko": "깊은 인상을 주다",
+    "example": "Her speech {{impressed}} everyone last night.",
+    "example_ko": "어젯밤 그녀의 연설은 모두에게 깊은 인상을 주었다.",
+    "distractors": [
+      "impress",
+      "impresses",
+      "impressing"
+    ]
+  },
+  {
+    "id": "en-3-114",
+    "language": "en",
+    "level": 3,
+    "rank": 114,
+    "word": "nowadays",
+    "reading": null,
+    "meaning_ko": "요즘에는",
+    "example": "{{Nowadays}}, most people use smartphones.",
+    "example_ko": "요즘에는 대부분의 사람들이 스마트폰을 쓴다.",
+    "distractors": [
+      "Downstairs",
+      "Twice",
+      "Once"
+    ]
+  },
+  {
+    "id": "en-3-115",
+    "language": "en",
+    "level": 3,
+    "rank": 115,
+    "word": "memory",
+    "reading": null,
+    "meaning_ko": "기억, 추억",
+    "example": "I have a happy {{memory}} of that trip.",
+    "example_ko": "나는 그 여행에 대한 행복한 추억이 있다.",
+    "distractors": [
+      "bridge",
+      "towel",
+      "island"
+    ]
+  },
+  {
+    "id": "en-3-116",
+    "language": "en",
+    "level": 3,
+    "rank": 116,
+    "word": "pressure",
+    "reading": null,
+    "meaning_ko": "압력, 부담",
+    "example": "He feels a lot of {{pressure}} at work.",
+    "example_ko": "그는 직장에서 부담을 많이 느낀다.",
+    "distractors": [
+      "garden",
+      "lake",
+      "pocket"
+    ]
+  },
+  {
+    "id": "en-3-117",
+    "language": "en",
+    "level": 3,
+    "rank": 117,
+    "word": "range",
+    "reading": null,
+    "meaning_ko": "범위, 다양함",
+    "example": "The store sells a wide {{range}} of products.",
+    "example_ko": "그 가게는 아주 다양한 제품을 판다.",
+    "distractors": [
+      "lake",
+      "farm",
+      "library"
+    ]
+  },
+  {
+    "id": "en-3-118",
+    "language": "en",
+    "level": 3,
+    "rank": 118,
+    "word": "solution",
+    "reading": null,
+    "meaning_ko": "해결책",
+    "example": "We found a {{solution}} to the problem.",
+    "example_ko": "우리는 그 문제의 해결책을 찾았다.",
+    "distractors": [
+      "shower",
+      "village",
+      "wallet"
+    ]
+  },
+  {
+    "id": "en-3-119",
+    "language": "en",
+    "level": 3,
+    "rank": 119,
+    "word": "recognize",
+    "reading": null,
+    "meaning_ko": "알아보다, 인식하다",
+    "example": "I couldn't {{recognize}} him at first.",
+    "example_ko": "나는 처음에 그를 알아보지 못했다.",
+    "distractors": [
+      "recognized",
+      "recognizes",
+      "recognizing"
+    ]
+  },
+  {
+    "id": "en-3-120",
+    "language": "en",
+    "level": 3,
+    "rank": 120,
+    "word": "expand",
+    "reading": null,
+    "meaning_ko": "확장하다",
+    "example": "The company plans to {{expand}} overseas.",
+    "example_ko": "그 회사는 해외로 사업을 확장할 계획이다.",
+    "distractors": [
+      "expands",
+      "expanded",
+      "expanding"
+    ]
+  },
+  {
+    "id": "en-3-121",
+    "language": "en",
+    "level": 3,
+    "rank": 121,
+    "word": "generous",
+    "reading": null,
+    "meaning_ko": "관대한, 후한",
+    "example": "He is very {{generous}} with his time.",
+    "example_ko": "그는 시간을 아주 아낌없이 내준다.",
+    "distractors": [
+      "thick",
+      "wet",
+      "empty"
+    ]
+  },
+  {
+    "id": "en-3-122",
+    "language": "en",
+    "level": 3,
+    "rank": 122,
+    "word": "otherwise",
+    "reading": null,
+    "meaning_ko": "그렇지 않으면",
+    "example": "Hurry up, {{otherwise}} we'll miss the train.",
+    "example_ko": "서둘러, 그렇지 않으면 기차를 놓칠 거야.",
+    "distractors": [
+      "twice",
+      "upstairs",
+      "nearby"
+    ]
+  },
+  {
+    "id": "en-3-123",
+    "language": "en",
+    "level": 3,
+    "rank": 123,
+    "word": "currently",
+    "reading": null,
+    "meaning_ko": "현재, 지금",
+    "example": "I'm {{currently}} living in Busan.",
+    "example_ko": "나는 현재 부산에 살고 있다.",
+    "distractors": [
+      "twice",
+      "once",
+      "downstairs"
+    ]
+  },
+  {
+    "id": "en-3-124",
+    "language": "en",
+    "level": 3,
+    "rank": 124,
+    "word": "predict",
+    "reading": null,
+    "meaning_ko": "예측하다",
+    "example": "No one can {{predict}} the future.",
+    "example_ko": "아무도 미래를 예측할 수 없다.",
+    "distractors": [
+      "predicts",
+      "predicted",
+      "predicting"
+    ]
+  },
+  {
+    "id": "en-3-125",
+    "language": "en",
+    "level": 3,
+    "rank": 125,
+    "word": "survive",
+    "reading": null,
+    "meaning_ko": "살아남다",
+    "example": "Few plants can {{survive}} in the desert.",
+    "example_ko": "사막에서 살아남을 수 있는 식물은 거의 없다.",
+    "distractors": [
+      "survives",
+      "survived",
+      "surviving"
+    ]
+  },
+  {
+    "id": "en-3-126",
+    "language": "en",
+    "level": 3,
+    "rank": 126,
+    "word": "industry",
+    "reading": null,
+    "meaning_ko": "산업",
+    "example": "The tourism {{industry}} is growing fast.",
+    "example_ko": "관광 산업이 빠르게 성장하고 있다.",
+    "distractors": [
+      "kitchen",
+      "umbrella",
+      "pocket"
+    ]
+  },
+  {
+    "id": "en-3-127",
+    "language": "en",
+    "level": 3,
+    "rank": 127,
+    "word": "employee",
+    "reading": null,
+    "meaning_ko": "직원",
+    "example": "Each {{employee}} gets a free lunch.",
+    "example_ko": "직원마다 무료 점심을 받는다.",
+    "distractors": [
+      "umbrella",
+      "island",
+      "garden"
+    ]
+  },
+  {
+    "id": "en-3-128",
+    "language": "en",
+    "level": 3,
+    "rank": 128,
+    "word": "tend",
+    "reading": null,
+    "meaning_ko": "~하는 경향이 있다",
+    "example": "She doesn't {{tend}} to complain.",
+    "example_ko": "그녀는 불평하는 경향이 없다.",
+    "distractors": [
+      "tends",
+      "tended",
+      "tending"
+    ]
+  },
+  {
+    "id": "en-3-129",
+    "language": "en",
+    "level": 3,
+    "rank": 129,
+    "word": "relevant",
+    "reading": null,
+    "meaning_ko": "관련 있는",
+    "example": "That comment isn't {{relevant}} to our topic.",
+    "example_ko": "그 의견은 우리 주제와 관련이 없다.",
+    "distractors": [
+      "soft",
+      "proud",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-130",
+    "language": "en",
+    "level": 3,
+    "rank": 130,
+    "word": "similar",
+    "reading": null,
+    "meaning_ko": "비슷한",
+    "example": "Our phones are very {{similar}}.",
+    "example_ko": "우리 휴대폰은 아주 비슷하다.",
+    "distractors": [
+      "empty",
+      "shy",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-131",
+    "language": "en",
+    "level": 3,
+    "rank": 131,
+    "word": "examine",
+    "reading": null,
+    "meaning_ko": "검사하다, 조사하다",
+    "example": "The doctor will {{examine}} you now.",
+    "example_ko": "의사가 지금 당신을 진찰할 것입니다.",
+    "distractors": [
+      "examines",
+      "examined",
+      "examining"
+    ]
+  },
+  {
+    "id": "en-3-132",
+    "language": "en",
+    "level": 3,
+    "rank": 132,
+    "word": "strategy",
+    "reading": null,
+    "meaning_ko": "전략",
+    "example": "We need a new marketing {{strategy}}.",
+    "example_ko": "우리는 새로운 마케팅 전략이 필요하다.",
+    "distractors": [
+      "bridge",
+      "towel",
+      "lake"
+    ]
+  },
+  {
+    "id": "en-3-133",
+    "language": "en",
+    "level": 3,
+    "rank": 133,
+    "word": "unfortunately",
+    "reading": null,
+    "meaning_ko": "불행히도",
+    "example": "{{Unfortunately}}, the flight was canceled.",
+    "example_ko": "불행히도 그 비행기는 취소되었다.",
+    "distractors": [
+      "Twice",
+      "Nearby",
+      "Downstairs"
+    ]
+  },
+  {
+    "id": "en-3-134",
+    "language": "en",
+    "level": 3,
+    "rank": 134,
+    "word": "publish",
+    "reading": null,
+    "meaning_ko": "출판하다, 발표하다",
+    "example": "The author {{published}} her first novel last year.",
+    "example_ko": "그 작가는 작년에 첫 소설을 출간했다.",
+    "distractors": [
+      "publish",
+      "publishes",
+      "publishing"
+    ]
+  },
+  {
+    "id": "en-3-135",
+    "language": "en",
+    "level": 3,
+    "rank": 135,
+    "word": "overcome",
+    "reading": null,
+    "meaning_ko": "극복하다",
+    "example": "She {{overcame}} many difficulties last year.",
+    "example_ko": "그녀는 작년에 많은 어려움을 극복했다.",
+    "distractors": [
+      "overcome",
+      "overcomes",
+      "overcoming"
+    ]
+  },
+  {
+    "id": "en-3-136",
+    "language": "en",
+    "level": 3,
+    "rank": 136,
+    "word": "estimate",
+    "reading": null,
+    "meaning_ko": "추정하다, 어림잡다",
+    "example": "They {{estimated}} the cost at $500 last week.",
+    "example_ko": "그들은 지난주에 비용을 500달러로 추정했다.",
+    "distractors": [
+      "estimate",
+      "estimates",
+      "estimating"
+    ]
+  },
+  {
+    "id": "en-3-137",
+    "language": "en",
+    "level": 3,
+    "rank": 137,
+    "word": "evidence",
+    "reading": null,
+    "meaning_ko": "증거",
+    "example": "There is no {{evidence}} of that.",
+    "example_ko": "그것에 대한 증거는 없다.",
+    "distractors": [
+      "kitchen",
+      "island",
+      "towel"
+    ]
+  },
+  {
+    "id": "en-3-138",
+    "language": "en",
+    "level": 3,
+    "rank": 138,
+    "word": "focus",
+    "reading": null,
+    "meaning_ko": "집중하다",
+    "example": "I can't {{focus}} with this noise.",
+    "example_ko": "이 소음 때문에 집중할 수가 없다.",
+    "distractors": [
+      "focused",
+      "focuses",
+      "focusing"
+    ]
+  },
+  {
+    "id": "en-3-139",
+    "language": "en",
+    "level": 3,
+    "rank": 139,
+    "word": "attract",
+    "reading": null,
+    "meaning_ko": "끌어들이다",
+    "example": "The festival will {{attract}} many tourists.",
+    "example_ko": "그 축제는 많은 관광객을 끌어들일 것이다.",
+    "distractors": [
+      "attracts",
+      "attracted",
+      "attracting"
+    ]
+  },
+  {
+    "id": "en-3-140",
+    "language": "en",
+    "level": 3,
+    "rank": 140,
+    "word": "huge",
+    "reading": null,
+    "meaning_ko": "거대한",
+    "example": "They live in a {{huge}} house.",
+    "example_ko": "그들은 거대한 집에 산다.",
+    "distractors": [
+      "wet",
+      "shy",
+      "proud"
+    ]
+  },
+  {
+    "id": "en-3-141",
+    "language": "en",
+    "level": 3,
+    "rank": 141,
+    "word": "typical",
+    "reading": null,
+    "meaning_ko": "전형적인, 보통의",
+    "example": "It was a {{typical}} Monday morning.",
+    "example_ko": "그것은 전형적인 월요일 아침이었다.",
+    "distractors": [
+      "empty",
+      "rich",
+      "soft"
+    ]
+  },
+  {
+    "id": "en-3-142",
+    "language": "en",
+    "level": 3,
+    "rank": 142,
+    "word": "rather",
+    "reading": null,
+    "meaning_ko": "꽤, 상당히; 오히려, ~보다는",
+    "example": "It was {{rather}} cold this morning.",
+    "example_ko": "오늘 아침은 꽤 추웠다.",
+    "distractors": [
+      "twice",
+      "upstairs",
+      "once"
+    ]
+  },
+  {
+    "id": "en-3-143",
+    "language": "en",
+    "level": 3,
+    "rank": 143,
+    "word": "whether",
+    "reading": null,
+    "meaning_ko": "~인지 아닌지",
+    "example": "I don't know {{whether}} he will come.",
+    "example_ko": "나는 그가 올지 안 올지 모르겠다.",
+    "distractors": [
+      "until",
+      "unless",
+      "since"
+    ]
+  },
+  {
+    "id": "en-3-144",
+    "language": "en",
+    "level": 3,
+    "rank": 144,
+    "word": "lack",
+    "reading": null,
+    "meaning_ko": "부족",
+    "example": "A {{lack}} of sleep can make you sick.",
+    "example_ko": "수면 부족은 몸을 아프게 만들 수 있다.",
+    "distractors": [
+      "bridge",
+      "towel",
+      "island"
+    ]
+  },
+  {
+    "id": "en-3-145",
+    "language": "en",
+    "level": 3,
+    "rank": 145,
+    "word": "gain",
+    "reading": null,
+    "meaning_ko": "얻다",
+    "example": "You can {{gain}} experience by volunteering.",
+    "example_ko": "자원봉사를 하면 경험을 얻을 수 있다.",
+    "distractors": [
+      "gains",
+      "gained",
+      "gaining"
+    ]
+  },
+  {
+    "id": "en-3-146",
+    "language": "en",
+    "level": 3,
+    "rank": 146,
+    "word": "tradition",
+    "reading": null,
+    "meaning_ko": "전통",
+    "example": "It's a family {{tradition}}.",
+    "example_ko": "그것은 우리 집안의 전통이다.",
+    "distractors": [
+      "garden",
+      "bridge",
+      "towel"
+    ]
+  },
+  {
+    "id": "en-3-147",
+    "language": "en",
+    "level": 3,
+    "rank": 147,
+    "word": "purchase",
+    "reading": null,
+    "meaning_ko": "구매하다",
+    "example": "She {{purchased}} a new laptop last week.",
+    "example_ko": "그녀는 지난주에 새 노트북을 구입했다.",
+    "distractors": [
+      "purchase",
+      "purchases",
+      "purchasing"
+    ]
+  },
+  {
+    "id": "en-3-148",
+    "language": "en",
+    "level": 3,
+    "rank": 148,
+    "word": "gradually",
+    "reading": null,
+    "meaning_ko": "점차, 서서히",
+    "example": "Her English is {{gradually}} getting better.",
+    "example_ko": "그녀의 영어는 점차 나아지고 있다.",
+    "distractors": [
+      "twice",
+      "upstairs",
+      "nearby"
+    ]
+  },
+  {
+    "id": "en-3-149",
+    "language": "en",
+    "level": 3,
+    "rank": 149,
+    "word": "ancient",
+    "reading": null,
+    "meaning_ko": "고대의",
+    "example": "We visited some {{ancient}} ruins.",
+    "example_ko": "우리는 고대 유적지를 몇 군데 방문했다.",
+    "distractors": [
+      "wet",
+      "shy",
+      "thick"
+    ]
+  },
+  {
+    "id": "en-3-150",
+    "language": "en",
+    "level": 3,
+    "rank": 150,
+    "word": "threat",
+    "reading": null,
+    "meaning_ko": "위협",
+    "example": "Pollution is a {{threat}} to health.",
+    "example_ko": "오염은 건강에 대한 위협이다.",
+    "distractors": [
+      "bridge",
+      "towel",
+      "lake"
+    ]
+  },
+  {
+    "id": "en-3-151",
+    "language": "en",
+    "level": 3,
+    "rank": 151,
+    "word": "affect",
+    "reading": null,
+    "meaning_ko": "영향을 미치다",
+    "example": "The weather can {{affect}} your mood.",
+    "example_ko": "날씨는 기분에 영향을 미칠 수 있다.",
+    "distractors": [
+      "affects",
+      "affected",
+      "affecting"
+    ]
+  },
+  {
+    "id": "en-3-152",
+    "language": "en",
+    "level": 3,
+    "rank": 152,
+    "word": "various",
+    "reading": null,
+    "meaning_ko": "다양한",
+    "example": "She has tried {{various}} diets.",
+    "example_ko": "그녀는 다양한 다이어트를 해 봤다.",
+    "distractors": [
+      "sleepy",
+      "wooden",
+      "silent"
+    ]
+  },
+  {
+    "id": "en-3-153",
+    "language": "en",
+    "level": 3,
+    "rank": 153,
+    "word": "factor",
+    "reading": null,
+    "meaning_ko": "요인",
+    "example": "Price is an important {{factor}} when I shop.",
+    "example_ko": "쇼핑할 때 가격은 중요한 요인이다.",
+    "distractors": [
+      "blanket",
+      "shadow",
+      "valley"
+    ]
+  },
+  {
+    "id": "en-3-154",
+    "language": "en",
+    "level": 3,
+    "rank": 154,
+    "word": "maintain",
+    "reading": null,
+    "meaning_ko": "유지하다",
+    "example": "It's hard to {{maintain}} a healthy routine.",
+    "example_ko": "건강한 생활 습관을 유지하기는 어렵다.",
+    "distractors": [
+      "maintains",
+      "maintained",
+      "maintaining"
+    ]
+  },
+  {
+    "id": "en-3-155",
+    "language": "en",
+    "level": 3,
+    "rank": 155,
+    "word": "positive",
+    "reading": null,
+    "meaning_ko": "긍정적인",
+    "example": "She has a {{positive}} attitude.",
+    "example_ko": "그녀는 긍정적인 태도를 가지고 있다.",
+    "distractors": [
+      "wooden",
+      "narrow",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-3-156",
+    "language": "en",
+    "level": 3,
+    "rank": 156,
+    "word": "source",
+    "reading": null,
+    "meaning_ko": "출처, 원천",
+    "example": "The internet is a major {{source}} of news.",
+    "example_ko": "인터넷은 뉴스의 주요 출처이다.",
+    "distractors": [
+      "bottle",
+      "ladder",
+      "forest"
+    ]
+  },
+  {
+    "id": "en-3-157",
+    "language": "en",
+    "level": 3,
+    "rank": 157,
+    "word": "respond",
+    "reading": null,
+    "meaning_ko": "답하다, 반응하다",
+    "example": "She didn't {{respond}} to my email.",
+    "example_ko": "그녀는 내 이메일에 답하지 않았다.",
+    "distractors": [
+      "responds",
+      "responded",
+      "responding"
+    ]
+  },
+  {
+    "id": "en-3-158",
+    "language": "en",
+    "level": 3,
+    "rank": 158,
+    "word": "significant",
+    "reading": null,
+    "meaning_ko": "상당한, 중요한",
+    "example": "There was a {{significant}} change in sales.",
+    "example_ko": "매출에 상당한 변화가 있었다.",
+    "distractors": [
+      "sleepy",
+      "wooden",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-3-159",
+    "language": "en",
+    "level": 3,
+    "rank": 159,
+    "word": "contribute",
+    "reading": null,
+    "meaning_ko": "기여하다",
+    "example": "Everyone should {{contribute}} to the project.",
+    "example_ko": "모두가 그 프로젝트에 기여해야 한다.",
+    "distractors": [
+      "contributes",
+      "contributed",
+      "contributing"
+    ]
+  },
+  {
+    "id": "en-3-160",
+    "language": "en",
+    "level": 3,
+    "rank": 160,
+    "word": "therefore",
+    "reading": null,
+    "meaning_ko": "그러므로",
+    "example": "It rained all day; {{therefore}}, we stayed inside.",
+    "example_ko": "하루 종일 비가 왔다. 그래서 우리는 안에 머물렀다.",
+    "distractors": [
+      "nowhere",
+      "yearly",
+      "quietly"
+    ]
+  },
+  {
+    "id": "en-3-161",
+    "language": "en",
+    "level": 3,
+    "rank": 161,
+    "word": "aspect",
+    "reading": null,
+    "meaning_ko": "측면",
+    "example": "Which {{aspect}} of the job do you like most?",
+    "example_ko": "그 일의 어떤 측면이 가장 마음에 드나요?",
+    "distractors": [
+      "ceiling",
+      "tunnel",
+      "jacket"
+    ]
+  },
+  {
+    "id": "en-3-162",
+    "language": "en",
+    "level": 3,
+    "rank": 162,
+    "word": "indicate",
+    "reading": null,
+    "meaning_ko": "나타내다, 시사하다",
+    "example": "Studies {{indicate}} that sleep is important.",
+    "example_ko": "연구들은 수면이 중요하다는 것을 보여 준다.",
+    "distractors": [
+      "indicates",
+      "indicated",
+      "indicating"
+    ]
+  },
+  {
+    "id": "en-3-163",
+    "language": "en",
+    "level": 3,
+    "rank": 163,
+    "word": "schedule",
+    "reading": null,
+    "meaning_ko": "일정",
+    "example": "My {{schedule}} is full this week.",
+    "example_ko": "이번 주 내 일정은 꽉 찼다.",
+    "distractors": [
+      "ocean",
+      "jacket",
+      "button"
+    ]
+  },
+  {
+    "id": "en-3-164",
+    "language": "en",
+    "level": 3,
+    "rank": 164,
+    "word": "establish",
+    "reading": null,
+    "meaning_ko": "설립하다, 확립하다",
+    "example": "They plan to {{establish}} a new company.",
+    "example_ko": "그들은 새 회사를 설립할 계획이다.",
+    "distractors": [
+      "establishes",
+      "established",
+      "establishing"
+    ]
+  },
+  {
+    "id": "en-3-165",
+    "language": "en",
+    "level": 3,
+    "rank": 165,
+    "word": "eventually",
+    "reading": null,
+    "meaning_ko": "결국, 마침내",
+    "example": "{{Eventually}}, I found my keys.",
+    "example_ko": "결국 나는 열쇠를 찾았다.",
+    "distractors": [
+      "Nowhere",
+      "Seldom",
+      "Hardly"
+    ]
+  },
+  {
+    "id": "en-3-166",
+    "language": "en",
+    "level": 3,
+    "rank": 166,
+    "word": "reveal",
+    "reading": null,
+    "meaning_ko": "드러내다, 밝히다",
+    "example": "He refused to {{reveal}} the secret.",
+    "example_ko": "그는 비밀을 밝히기를 거부했다.",
+    "distractors": [
+      "reveals",
+      "revealed",
+      "revealing"
+    ]
+  },
+  {
+    "id": "en-3-167",
+    "language": "en",
+    "level": 3,
+    "rank": 167,
+    "word": "negative",
+    "reading": null,
+    "meaning_ko": "부정적인",
+    "example": "The review was mostly {{negative}}.",
+    "example_ko": "그 후기는 대부분 부정적이었다.",
+    "distractors": [
+      "golden",
+      "narrow",
+      "wooden"
+    ]
+  },
+  {
+    "id": "en-3-168",
+    "language": "en",
+    "level": 3,
+    "rank": 168,
+    "word": "occur",
+    "reading": null,
+    "meaning_ko": "일어나다, 발생하다",
+    "example": "Accidents can {{occur}} at any time.",
+    "example_ko": "사고는 언제든 일어날 수 있다.",
+    "distractors": [
+      "occurs",
+      "occurred",
+      "occurring"
+    ]
+  },
+  {
+    "id": "en-3-169",
+    "language": "en",
+    "level": 3,
+    "rank": 169,
+    "word": "concern",
+    "reading": null,
+    "meaning_ko": "우려, 걱정",
+    "example": "I have a {{concern}} about the plan.",
+    "example_ko": "나는 그 계획에 대해 우려가 있다.",
+    "distractors": [
+      "shadow",
+      "ladder",
+      "button"
+    ]
+  },
+  {
+    "id": "en-3-170",
+    "language": "en",
+    "level": 3,
+    "rank": 170,
+    "word": "submit",
+    "reading": null,
+    "meaning_ko": "제출하다",
+    "example": "You must {{submit}} the report by Friday.",
+    "example_ko": "금요일까지 보고서를 제출해야 한다.",
+    "distractors": [
+      "submits",
+      "submitted",
+      "submitting"
+    ]
+  },
+  {
+    "id": "en-3-171",
+    "language": "en",
+    "level": 3,
+    "rank": 171,
+    "word": "context",
+    "reading": null,
+    "meaning_ko": "문맥, 맥락",
+    "example": "You can guess the meaning from the {{context}}.",
+    "example_ko": "문맥으로 뜻을 짐작할 수 있다.",
+    "distractors": [
+      "ceiling",
+      "harvest",
+      "pillow"
+    ]
+  },
+  {
+    "id": "en-3-172",
+    "language": "en",
+    "level": 3,
+    "rank": 172,
+    "word": "observe",
+    "reading": null,
+    "meaning_ko": "관찰하다",
+    "example": "Scientists {{observe}} the birds every spring.",
+    "example_ko": "과학자들은 매년 봄 새를 관찰한다.",
+    "distractors": [
+      "observes",
+      "observed",
+      "observing"
+    ]
+  },
+  {
+    "id": "en-3-173",
+    "language": "en",
+    "level": 3,
+    "rank": 173,
+    "word": "reliable",
+    "reading": null,
+    "meaning_ko": "믿을 수 있는",
+    "example": "He is a {{reliable}} worker.",
+    "example_ko": "그는 믿을 수 있는 직원이다.",
+    "distractors": [
+      "frozen",
+      "sleepy",
+      "narrow"
+    ]
+  },
+  {
+    "id": "en-3-174",
+    "language": "en",
+    "level": 3,
+    "rank": 174,
+    "word": "resource",
+    "reading": null,
+    "meaning_ko": "자원",
+    "example": "Water is a valuable {{resource}}.",
+    "example_ko": "물은 귀중한 자원이다.",
+    "distractors": [
+      "shadow",
+      "button",
+      "jacket"
+    ]
+  },
+  {
+    "id": "en-3-175",
+    "language": "en",
+    "level": 3,
+    "rank": 175,
+    "word": "approve",
+    "reading": null,
+    "meaning_ko": "승인하다",
+    "example": "My boss didn't {{approve}} my request.",
+    "example_ko": "상사는 내 요청을 승인하지 않았다.",
+    "distractors": [
+      "approves",
+      "approved",
+      "approving"
+    ]
+  },
+  {
+    "id": "en-3-176",
+    "language": "en",
+    "level": 3,
+    "rank": 176,
+    "word": "occasion",
+    "reading": null,
+    "meaning_ko": "경우, 행사",
+    "example": "It was a special {{occasion}}.",
+    "example_ko": "그것은 특별한 행사였다.",
+    "distractors": [
+      "bottle",
+      "shoulder",
+      "ladder"
+    ]
+  },
+  {
+    "id": "en-3-177",
+    "language": "en",
+    "level": 3,
+    "rank": 177,
+    "word": "emphasize",
+    "reading": null,
+    "meaning_ko": "강조하다",
+    "example": "Teachers often {{emphasize}} the importance of practice.",
+    "example_ko": "선생님들은 연습의 중요성을 자주 강조한다.",
+    "distractors": [
+      "emphasizes",
+      "emphasized",
+      "emphasizing"
+    ]
+  },
+  {
+    "id": "en-3-178",
+    "language": "en",
+    "level": 3,
+    "rank": 178,
+    "word": "temporary",
+    "reading": null,
+    "meaning_ko": "임시의",
+    "example": "This is only a {{temporary}} solution.",
+    "example_ko": "이것은 임시 해결책일 뿐이다.",
+    "distractors": [
+      "wooden",
+      "frozen",
+      "narrow"
+    ]
+  },
+  {
+    "id": "en-3-179",
+    "language": "en",
+    "level": 3,
+    "rank": 179,
+    "word": "recover",
+    "reading": null,
+    "meaning_ko": "회복하다",
+    "example": "It took me a week to {{recover}} from the flu.",
+    "example_ko": "독감에서 회복하는 데 일주일이 걸렸다.",
+    "distractors": [
+      "recovers",
+      "recovered",
+      "recovering"
+    ]
+  },
+  {
+    "id": "en-3-180",
+    "language": "en",
+    "level": 3,
+    "rank": 180,
+    "word": "destination",
+    "reading": null,
+    "meaning_ko": "목적지",
+    "example": "Our final {{destination}} is Busan.",
+    "example_ko": "우리의 최종 목적지는 부산이다.",
+    "distractors": [
+      "bottle",
+      "shoulder",
+      "uncle"
+    ]
+  },
+  {
+    "id": "en-3-181",
+    "language": "en",
+    "level": 3,
+    "rank": 181,
+    "word": "generate",
+    "reading": null,
+    "meaning_ko": "만들어 내다, 발생시키다",
+    "example": "Solar panels {{generate}} electricity.",
+    "example_ko": "태양광 패널은 전기를 만들어 낸다.",
+    "distractors": [
+      "generates",
+      "generated",
+      "generating"
+    ]
+  },
+  {
+    "id": "en-3-182",
+    "language": "en",
+    "level": 3,
+    "rank": 182,
+    "word": "slightly",
+    "reading": null,
+    "meaning_ko": "약간, 조금",
+    "example": "The price went up {{slightly}}.",
+    "example_ko": "가격이 약간 올랐다.",
+    "distractors": [
+      "yearly",
+      "nowhere",
+      "silently"
+    ]
+  },
+  {
+    "id": "en-3-183",
+    "language": "en",
+    "level": 3,
+    "rank": 183,
+    "word": "attempt",
+    "reading": null,
+    "meaning_ko": "시도하다",
+    "example": "Don't {{attempt}} to fix it yourself.",
+    "example_ko": "직접 고치려고 시도하지 마세요.",
+    "distractors": [
+      "attempts",
+      "attempted",
+      "attempting"
+    ]
+  },
+  {
+    "id": "en-3-184",
+    "language": "en",
+    "level": 3,
+    "rank": 184,
+    "word": "consequence",
+    "reading": null,
+    "meaning_ko": "결과, 영향",
+    "example": "Every choice has a {{consequence}}.",
+    "example_ko": "모든 선택에는 결과가 따른다.",
+    "distractors": [
+      "pillow",
+      "ladder",
+      "tunnel"
+    ]
+  },
+  {
+    "id": "en-3-185",
+    "language": "en",
+    "level": 3,
+    "rank": 185,
+    "word": "critical",
+    "reading": null,
+    "meaning_ko": "중대한, 결정적인; 비판적인",
+    "example": "It's {{critical}} that we finish on time.",
+    "example_ko": "우리가 제시간에 끝내는 것이 매우 중요하다.",
+    "distractors": [
+      "tasty",
+      "narrow",
+      "sleepy"
+    ]
+  },
+  {
+    "id": "en-3-186",
+    "language": "en",
+    "level": 3,
+    "rank": 186,
+    "word": "meanwhile",
+    "reading": null,
+    "meaning_ko": "그동안, 한편",
+    "example": "I cooked; {{meanwhile}}, he set the table.",
+    "example_ko": "나는 요리를 했고, 그동안 그는 상을 차렸다.",
+    "distractors": [
+      "seldom",
+      "hardly",
+      "nowhere"
+    ]
+  },
+  {
+    "id": "en-3-187",
+    "language": "en",
+    "level": 3,
+    "rank": 187,
+    "word": "negotiate",
+    "reading": null,
+    "meaning_ko": "협상하다",
+    "example": "Let's {{negotiate}} the price.",
+    "example_ko": "가격을 협상해 봅시다.",
+    "distractors": [
+      "negotiates",
+      "negotiated",
+      "negotiating"
+    ]
+  },
+  {
+    "id": "en-3-188",
+    "language": "en",
+    "level": 3,
+    "rank": 188,
+    "word": "equipment",
+    "reading": null,
+    "meaning_ko": "장비",
+    "example": "We need new {{equipment}} for the gym.",
+    "example_ko": "우리는 체육관에 쓸 새 장비가 필요하다.",
+    "distractors": [
+      "blanket",
+      "vegetable",
+      "language"
+    ]
+  },
+  {
+    "id": "en-3-189",
+    "language": "en",
+    "level": 3,
+    "rank": 189,
+    "word": "obvious",
+    "reading": null,
+    "meaning_ko": "분명한, 명백한",
+    "example": "The answer is {{obvious}}.",
+    "example_ko": "답은 분명하다.",
+    "distractors": [
+      "sleepy",
+      "narrow",
+      "wooden"
+    ]
+  },
+  {
+    "id": "en-3-190",
+    "language": "en",
+    "level": 3,
+    "rank": 190,
+    "word": "behave",
+    "reading": null,
+    "meaning_ko": "행동하다",
+    "example": "Please {{behave}} yourself at the party.",
+    "example_ko": "파티에서는 예의 바르게 행동해 주세요.",
+    "distractors": [
+      "behaves",
+      "behaved",
+      "behaving"
+    ]
+  },
+  {
+    "id": "en-3-191",
+    "language": "en",
+    "level": 3,
+    "rank": 191,
+    "word": "debate",
+    "reading": null,
+    "meaning_ko": "토론, 논쟁",
+    "example": "They had a long {{debate}} about the new law.",
+    "example_ko": "그들은 새 법에 대해 오랫동안 토론했다.",
+    "distractors": [
+      "umbrella",
+      "shoulder",
+      "bottle"
+    ]
+  },
+  {
+    "id": "en-3-192",
+    "language": "en",
+    "level": 3,
+    "rank": 192,
+    "word": "reflect",
+    "reading": null,
+    "meaning_ko": "반사하다, 반영하다",
+    "example": "The mirror {{reflects}} the light.",
+    "example_ko": "거울이 빛을 반사한다.",
+    "distractors": [
+      "reflect",
+      "reflected",
+      "reflecting"
+    ]
+  },
+  {
+    "id": "en-3-193",
+    "language": "en",
+    "level": 3,
+    "rank": 193,
+    "word": "currency",
+    "reading": null,
+    "meaning_ko": "통화, 화폐",
+    "example": "What is the local {{currency}}?",
+    "example_ko": "이곳의 통화는 무엇인가요?",
+    "distractors": [
+      "forest",
+      "blanket",
+      "ladder"
+    ]
+  },
+  {
+    "id": "en-3-194",
+    "language": "en",
+    "level": 3,
+    "rank": 194,
+    "word": "relax",
+    "reading": null,
+    "meaning_ko": "휴식하다, 긴장을 풀다",
+    "example": "I like to {{relax}} after work.",
+    "example_ko": "나는 퇴근 후에 쉬는 것을 좋아한다.",
+    "distractors": [
+      "relaxes",
+      "relaxed",
+      "relaxing"
+    ]
+  },
+  {
+    "id": "en-3-195",
+    "language": "en",
+    "level": 3,
+    "rank": 195,
+    "word": "employer",
+    "reading": null,
+    "meaning_ko": "고용주",
+    "example": "My {{employer}} offers free lunch.",
+    "example_ko": "내 고용주는 무료 점심을 제공한다.",
+    "distractors": [
+      "cousin",
+      "pilot",
+      "farmer"
+    ]
+  },
+  {
+    "id": "en-3-196",
+    "language": "en",
+    "level": 3,
+    "rank": 196,
+    "word": "basically",
+    "reading": null,
+    "meaning_ko": "기본적으로",
+    "example": "It's {{basically}} the same idea.",
+    "example_ko": "그건 기본적으로 같은 생각이다.",
+    "distractors": [
+      "yearly",
+      "nowhere",
+      "silently"
+    ]
+  },
+  {
+    "id": "en-3-197",
+    "language": "en",
+    "level": 3,
+    "rank": 197,
+    "word": "volunteer",
+    "reading": null,
+    "meaning_ko": "자원봉사하다",
+    "example": "I {{volunteer}} at an animal shelter on weekends.",
+    "example_ko": "나는 주말마다 동물 보호소에서 자원봉사를 한다.",
+    "distractors": [
+      "volunteers",
+      "volunteered",
+      "volunteering"
+    ]
+  },
+  {
+    "id": "en-3-198",
+    "language": "en",
+    "level": 3,
+    "rank": 198,
+    "word": "conclude",
+    "reading": null,
+    "meaning_ko": "끝맺다, 결론짓다",
+    "example": "Let me {{conclude}} with a short story.",
+    "example_ko": "짧은 이야기로 마무리하겠습니다.",
+    "distractors": [
+      "concludes",
+      "concluded",
+      "concluding"
+    ]
+  },
+  {
+    "id": "en-3-199",
+    "language": "en",
+    "level": 3,
+    "rank": 199,
+    "word": "discount",
+    "reading": null,
+    "meaning_ko": "할인",
+    "example": "Is there a {{discount}} for students?",
+    "example_ko": "학생 할인이 있나요?",
+    "distractors": [
+      "shadow",
+      "valley",
+      "button"
+    ]
+  },
+  {
+    "id": "en-3-200",
+    "language": "en",
+    "level": 3,
+    "rank": 200,
+    "word": "release",
+    "reading": null,
+    "meaning_ko": "출시하다, 공개하다",
+    "example": "The company will {{release}} a new phone next month.",
+    "example_ko": "그 회사는 다음 달에 새 휴대폰을 출시할 것이다.",
+    "distractors": [
+      "releases",
+      "released",
+      "releasing"
+    ]
+  }
+]

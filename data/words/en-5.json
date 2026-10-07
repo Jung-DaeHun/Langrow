@@ -1,0 +1,3202 @@
+[
+  {
+    "id": "en-5-001",
+    "language": "en",
+    "level": 5,
+    "rank": 1,
+    "word": "pragmatic",
+    "reading": null,
+    "meaning_ko": "실용적인",
+    "example": "She took a {{pragmatic}} approach to the problem.",
+    "example_ko": "그녀는 그 문제에 실용적인 접근 방식을 취했다.",
+    "distractors": [
+      "hungry",
+      "ancient",
+      "fragile"
+    ]
+  },
+  {
+    "id": "en-5-002",
+    "language": "en",
+    "level": 5,
+    "rank": 2,
+    "word": "skeptical",
+    "reading": null,
+    "meaning_ko": "회의적인",
+    "example": "I'm {{skeptical}} about his promises.",
+    "example_ko": "나는 그의 약속이 미심쩍다.",
+    "distractors": [
+      "thrilled",
+      "sleepy",
+      "generous"
+    ]
+  },
+  {
+    "id": "en-5-003",
+    "language": "en",
+    "level": 5,
+    "rank": 3,
+    "word": "vivid",
+    "reading": null,
+    "meaning_ko": "생생한",
+    "example": "He has a {{vivid}} memory of that summer.",
+    "example_ko": "그는 그 여름의 생생한 기억이 있다.",
+    "distractors": [
+      "tiny",
+      "bitter",
+      "hollow"
+    ]
+  },
+  {
+    "id": "en-5-004",
+    "language": "en",
+    "level": 5,
+    "rank": 4,
+    "word": "trivial",
+    "reading": null,
+    "meaning_ko": "사소한",
+    "example": "Don't argue over such a {{trivial}} matter.",
+    "example_ko": "그런 사소한 일로 다투지 마.",
+    "distractors": [
+      "enormous",
+      "fragile",
+      "fertile"
+    ]
+  },
+  {
+    "id": "en-5-005",
+    "language": "en",
+    "level": 5,
+    "rank": 5,
+    "word": "scarce",
+    "reading": null,
+    "meaning_ko": "부족한, 드문",
+    "example": "Fresh water is {{scarce}} in the desert.",
+    "example_ko": "사막에서는 신선한 물이 귀하다.",
+    "distractors": [
+      "plentiful",
+      "noisy",
+      "polite"
+    ]
+  },
+  {
+    "id": "en-5-006",
+    "language": "en",
+    "level": 5,
+    "rank": 6,
+    "word": "advocate",
+    "reading": null,
+    "meaning_ko": "옹호하다, 지지하다",
+    "example": "She {{advocated}} for stricter safety rules.",
+    "example_ko": "그녀는 더 엄격한 안전 규정을 지지했다.",
+    "distractors": [
+      "advocate",
+      "advocates",
+      "advocating"
+    ]
+  },
+  {
+    "id": "en-5-007",
+    "language": "en",
+    "level": 5,
+    "rank": 7,
+    "word": "grasp",
+    "reading": null,
+    "meaning_ko": "이해하다, 움켜쥐다",
+    "example": "He couldn't {{grasp}} the full meaning of her words.",
+    "example_ko": "그는 그녀의 말이 지닌 온전한 뜻을 이해하지 못했다.",
+    "distractors": [
+      "grasped",
+      "grasps",
+      "grasping"
+    ]
+  },
+  {
+    "id": "en-5-008",
+    "language": "en",
+    "level": 5,
+    "rank": 8,
+    "word": "abrupt",
+    "reading": null,
+    "meaning_ko": "갑작스러운",
+    "example": "The meeting came to an {{abrupt}} end.",
+    "example_ko": "회의는 갑작스럽게 끝났다.",
+    "distractors": [
+      "ancient",
+      "elegant",
+      "ordinary"
+    ]
+  },
+  {
+    "id": "en-5-009",
+    "language": "en",
+    "level": 5,
+    "rank": 9,
+    "word": "coherent",
+    "reading": null,
+    "meaning_ko": "일관성 있는, 논리적인",
+    "example": "He gave a clear and {{coherent}} explanation.",
+    "example_ko": "그는 명확하고 일관성 있는 설명을 했다.",
+    "distractors": [
+      "reckless",
+      "fragile",
+      "hostile"
+    ]
+  },
+  {
+    "id": "en-5-010",
+    "language": "en",
+    "level": 5,
+    "rank": 10,
+    "word": "discern",
+    "reading": null,
+    "meaning_ko": "분간하다, 알아차리다",
+    "example": "It was hard to {{discern}} his true motives.",
+    "example_ko": "그의 진짜 동기를 알아차리기는 어려웠다.",
+    "distractors": [
+      "discerned",
+      "discerns",
+      "discerning"
+    ]
+  },
+  {
+    "id": "en-5-011",
+    "language": "en",
+    "level": 5,
+    "rank": 11,
+    "word": "unprecedented",
+    "reading": null,
+    "meaning_ko": "전례 없는",
+    "example": "The company saw {{unprecedented}} growth last year.",
+    "example_ko": "그 회사는 작년에 전례 없는 성장을 했다.",
+    "distractors": [
+      "ordinary",
+      "reluctant",
+      "fragile"
+    ]
+  },
+  {
+    "id": "en-5-012",
+    "language": "en",
+    "level": 5,
+    "rank": 12,
+    "word": "pervasive",
+    "reading": null,
+    "meaning_ko": "만연한",
+    "example": "The sense of fear was {{pervasive}} in the town.",
+    "example_ko": "두려움이 마을 전체에 만연해 있었다.",
+    "distractors": [
+      "cheerful",
+      "tiny",
+      "rigid"
+    ]
+  },
+  {
+    "id": "en-5-013",
+    "language": "en",
+    "level": 5,
+    "rank": 13,
+    "word": "tedious",
+    "reading": null,
+    "meaning_ko": "지루한, 따분한",
+    "example": "The paperwork was long and {{tedious}}.",
+    "example_ko": "서류 작업은 길고 지루했다.",
+    "distractors": [
+      "thrilling",
+      "fragile",
+      "generous"
+    ]
+  },
+  {
+    "id": "en-5-014",
+    "language": "en",
+    "level": 5,
+    "rank": 14,
+    "word": "candid",
+    "reading": null,
+    "meaning_ko": "솔직한",
+    "example": "Thanks for being so {{candid}} with me.",
+    "example_ko": "나에게 그렇게 솔직하게 말해줘서 고마워.",
+    "distractors": [
+      "sleepy",
+      "jealous",
+      "greedy"
+    ]
+  },
+  {
+    "id": "en-5-015",
+    "language": "en",
+    "level": 5,
+    "rank": 15,
+    "word": "mundane",
+    "reading": null,
+    "meaning_ko": "평범하고 따분한",
+    "example": "She wanted to escape her {{mundane}} routine.",
+    "example_ko": "그녀는 평범하고 따분한 일상에서 벗어나고 싶었다.",
+    "distractors": [
+      "golden",
+      "dangerous",
+      "famous"
+    ]
+  },
+  {
+    "id": "en-5-016",
+    "language": "en",
+    "level": 5,
+    "rank": 16,
+    "word": "venture",
+    "reading": null,
+    "meaning_ko": "위험을 무릅쓰고 가다",
+    "example": "Few people {{venture}} into the jungle alone.",
+    "example_ko": "정글에 혼자 감히 들어가는 사람은 거의 없다.",
+    "distractors": [
+      "ventured",
+      "ventures",
+      "venturing"
+    ]
+  },
+  {
+    "id": "en-5-017",
+    "language": "en",
+    "level": 5,
+    "rank": 17,
+    "word": "bolster",
+    "reading": null,
+    "meaning_ko": "강화하다, 북돋우다",
+    "example": "The news helped {{bolster}} investor confidence.",
+    "example_ko": "그 소식은 투자자 신뢰를 강화하는 데 도움이 되었다.",
+    "distractors": [
+      "bolstered",
+      "bolsters",
+      "bolstering"
+    ]
+  },
+  {
+    "id": "en-5-018",
+    "language": "en",
+    "level": 5,
+    "rank": 18,
+    "word": "relentless",
+    "reading": null,
+    "meaning_ko": "끊임없는, 가차 없는",
+    "example": "The team faced {{relentless}} pressure from the media.",
+    "example_ko": "그 팀은 언론의 끊임없는 압박에 직면했다.",
+    "distractors": [
+      "gentle",
+      "brief",
+      "cheerful"
+    ]
+  },
+  {
+    "id": "en-5-019",
+    "language": "en",
+    "level": 5,
+    "rank": 19,
+    "word": "indispensable",
+    "reading": null,
+    "meaning_ko": "없어서는 안 될",
+    "example": "Her advice proved {{indispensable}} to us.",
+    "example_ko": "그녀의 조언은 우리에게 없어서는 안 될 것으로 드러났다.",
+    "distractors": [
+      "careless",
+      "harmless",
+      "fragile"
+    ]
+  },
+  {
+    "id": "en-5-020",
+    "language": "en",
+    "level": 5,
+    "rank": 20,
+    "word": "blatant",
+    "reading": null,
+    "meaning_ko": "노골적인, 뻔뻔한",
+    "example": "That was a {{blatant}} lie.",
+    "example_ko": "그것은 뻔뻔한 거짓말이었다.",
+    "distractors": [
+      "gentle",
+      "tiny",
+      "golden"
+    ]
+  },
+  {
+    "id": "en-5-021",
+    "language": "en",
+    "level": 5,
+    "rank": 21,
+    "word": "formidable",
+    "reading": null,
+    "meaning_ko": "만만찮은, 강력한",
+    "example": "They faced a {{formidable}} opponent in the final.",
+    "example_ko": "그들은 결승에서 만만찮은 상대를 만났다.",
+    "distractors": [
+      "friendly",
+      "sleepy",
+      "plain"
+    ]
+  },
+  {
+    "id": "en-5-022",
+    "language": "en",
+    "level": 5,
+    "rank": 22,
+    "word": "eloquent",
+    "reading": null,
+    "meaning_ko": "웅변의, 달변의",
+    "example": "She gave an {{eloquent}} speech on freedom.",
+    "example_ko": "그녀는 자유에 관한 웅변적인 연설을 했다.",
+    "distractors": [
+      "ancient",
+      "edible",
+      "enormous"
+    ]
+  },
+  {
+    "id": "en-5-023",
+    "language": "en",
+    "level": 5,
+    "rank": 23,
+    "word": "imminent",
+    "reading": null,
+    "meaning_ko": "임박한",
+    "example": "Experts warned that a storm was {{imminent}}.",
+    "example_ko": "전문가들은 폭풍이 임박했다고 경고했다.",
+    "distractors": [
+      "ancient",
+      "gentle",
+      "generous"
+    ]
+  },
+  {
+    "id": "en-5-024",
+    "language": "en",
+    "level": 5,
+    "rank": 24,
+    "word": "wary",
+    "reading": null,
+    "meaning_ko": "경계하는, 조심하는",
+    "example": "Be {{wary}} of strangers offering free gifts.",
+    "example_ko": "공짜 선물을 주겠다는 낯선 사람을 경계하라.",
+    "distractors": [
+      "fond",
+      "proud",
+      "eager"
+    ]
+  },
+  {
+    "id": "en-5-025",
+    "language": "en",
+    "level": 5,
+    "rank": 25,
+    "word": "lenient",
+    "reading": null,
+    "meaning_ko": "관대한",
+    "example": "The judge was surprisingly {{lenient}} with him.",
+    "example_ko": "판사는 놀랄 만큼 그에게 관대했다.",
+    "distractors": [
+      "hungry",
+      "jealous",
+      "sleepy"
+    ]
+  },
+  {
+    "id": "en-5-026",
+    "language": "en",
+    "level": 5,
+    "rank": 26,
+    "word": "mediocre",
+    "reading": null,
+    "meaning_ko": "평범한, 그저 그런",
+    "example": "The food was {{mediocre}} at best.",
+    "example_ko": "음식은 기껏해야 그저 그랬다.",
+    "distractors": [
+      "fragile",
+      "hollow",
+      "rural"
+    ]
+  },
+  {
+    "id": "en-5-027",
+    "language": "en",
+    "level": 5,
+    "rank": 27,
+    "word": "elusive",
+    "reading": null,
+    "meaning_ko": "좀처럼 잡히지 않는",
+    "example": "Success remained {{elusive}} for years.",
+    "example_ko": "성공은 몇 해 동안 좀처럼 손에 잡히지 않았다.",
+    "distractors": [
+      "generous",
+      "plentiful",
+      "noisy"
+    ]
+  },
+  {
+    "id": "en-5-028",
+    "language": "en",
+    "level": 5,
+    "rank": 28,
+    "word": "exacerbate",
+    "reading": null,
+    "meaning_ko": "악화시키다",
+    "example": "Stress can {{exacerbate}} the symptoms.",
+    "example_ko": "스트레스는 증상을 악화시킬 수 있다.",
+    "distractors": [
+      "exacerbated",
+      "exacerbates",
+      "exacerbating"
+    ]
+  },
+  {
+    "id": "en-5-029",
+    "language": "en",
+    "level": 5,
+    "rank": 29,
+    "word": "scrutinize",
+    "reading": null,
+    "meaning_ko": "면밀히 조사하다",
+    "example": "Auditors will {{scrutinize}} every receipt.",
+    "example_ko": "감사관들은 모든 영수증을 면밀히 조사할 것이다.",
+    "distractors": [
+      "scrutinized",
+      "scrutinizes",
+      "scrutinizing"
+    ]
+  },
+  {
+    "id": "en-5-030",
+    "language": "en",
+    "level": 5,
+    "rank": 30,
+    "word": "stifle",
+    "reading": null,
+    "meaning_ko": "억누르다, 질식시키다",
+    "example": "Heavy rules can {{stifle}} creativity.",
+    "example_ko": "과도한 규칙은 창의성을 억누를 수 있다.",
+    "distractors": [
+      "stifled",
+      "stifles",
+      "stifling"
+    ]
+  },
+  {
+    "id": "en-5-031",
+    "language": "en",
+    "level": 5,
+    "rank": 31,
+    "word": "thwart",
+    "reading": null,
+    "meaning_ko": "좌절시키다, 저지하다",
+    "example": "Police managed to {{thwart}} the robbery.",
+    "example_ko": "경찰은 강도 계획을 가까스로 저지했다.",
+    "distractors": [
+      "thwarted",
+      "thwarts",
+      "thwarting"
+    ]
+  },
+  {
+    "id": "en-5-032",
+    "language": "en",
+    "level": 5,
+    "rank": 32,
+    "word": "rampant",
+    "reading": null,
+    "meaning_ko": "만연한, 걷잡을 수 없는",
+    "example": "Corruption was {{rampant}} in the region.",
+    "example_ko": "그 지역에서는 부패가 만연했다.",
+    "distractors": [
+      "fragile",
+      "tidy",
+      "gentle"
+    ]
+  },
+  {
+    "id": "en-5-033",
+    "language": "en",
+    "level": 5,
+    "rank": 33,
+    "word": "adamant",
+    "reading": null,
+    "meaning_ko": "단호한, 요지부동의",
+    "example": "He was {{adamant}} that he had done nothing wrong.",
+    "example_ko": "그는 자신이 잘못한 게 없다고 단호히 주장했다.",
+    "distractors": [
+      "sleepy",
+      "jealous",
+      "grateful"
+    ]
+  },
+  {
+    "id": "en-5-034",
+    "language": "en",
+    "level": 5,
+    "rank": 34,
+    "word": "cumbersome",
+    "reading": null,
+    "meaning_ko": "번거로운, 다루기 힘든",
+    "example": "The old software is slow and {{cumbersome}}.",
+    "example_ko": "그 오래된 소프트웨어는 느리고 다루기 번거롭다.",
+    "distractors": [
+      "generous",
+      "tasty",
+      "brave"
+    ]
+  },
+  {
+    "id": "en-5-035",
+    "language": "en",
+    "level": 5,
+    "rank": 35,
+    "word": "tenacious",
+    "reading": null,
+    "meaning_ko": "끈질긴",
+    "example": "She is a {{tenacious}} negotiator.",
+    "example_ko": "그녀는 끈질긴 협상가다.",
+    "distractors": [
+      "sleepy",
+      "gentle",
+      "gloomy"
+    ]
+  },
+  {
+    "id": "en-5-036",
+    "language": "en",
+    "level": 5,
+    "rank": 36,
+    "word": "ephemeral",
+    "reading": null,
+    "meaning_ko": "덧없는, 순식간의",
+    "example": "Fame can be {{ephemeral}}.",
+    "example_ko": "명성은 덧없을 수 있다.",
+    "distractors": [
+      "generous",
+      "spicy",
+      "rigid"
+    ]
+  },
+  {
+    "id": "en-5-037",
+    "language": "en",
+    "level": 5,
+    "rank": 37,
+    "word": "ubiquitous",
+    "reading": null,
+    "meaning_ko": "어디에나 있는",
+    "example": "Smartphones are now {{ubiquitous}}.",
+    "example_ko": "스마트폰은 이제 어디에나 있다.",
+    "distractors": [
+      "fragile",
+      "hollow",
+      "bitter"
+    ]
+  },
+  {
+    "id": "en-5-038",
+    "language": "en",
+    "level": 5,
+    "rank": 38,
+    "word": "quintessential",
+    "reading": null,
+    "meaning_ko": "전형적인, 본질적인",
+    "example": "He is the {{quintessential}} gentleman.",
+    "example_ko": "그는 전형적인 신사의 표본이다.",
+    "distractors": [
+      "reluctant",
+      "hungry",
+      "fragile"
+    ]
+  },
+  {
+    "id": "en-5-039",
+    "language": "en",
+    "level": 5,
+    "rank": 39,
+    "word": "impeccable",
+    "reading": null,
+    "meaning_ko": "흠잡을 데 없는",
+    "example": "Her manners are {{impeccable}}.",
+    "example_ko": "그녀의 예의는 흠잡을 데 없다.",
+    "distractors": [
+      "hungry",
+      "gloomy",
+      "bitter"
+    ]
+  },
+  {
+    "id": "en-5-040",
+    "language": "en",
+    "level": 5,
+    "rank": 40,
+    "word": "whimsical",
+    "reading": null,
+    "meaning_ko": "기발한, 엉뚱한",
+    "example": "The cafe has a {{whimsical}} charm.",
+    "example_ko": "그 카페는 기발하고 엉뚱한 매력이 있다.",
+    "distractors": [
+      "rigid",
+      "stern",
+      "plain"
+    ]
+  },
+  {
+    "id": "en-5-041",
+    "language": "en",
+    "level": 5,
+    "rank": 41,
+    "word": "nostalgic",
+    "reading": null,
+    "meaning_ko": "향수에 젖은",
+    "example": "Old photos make me {{nostalgic}}.",
+    "example_ko": "옛 사진은 나를 향수에 젖게 한다.",
+    "distractors": [
+      "hungry",
+      "jealous",
+      "drowsy"
+    ]
+  },
+  {
+    "id": "en-5-042",
+    "language": "en",
+    "level": 5,
+    "rank": 42,
+    "word": "pitfall",
+    "reading": null,
+    "meaning_ko": "함정, 위험 요소",
+    "example": "One common {{pitfall}} is ignoring the fine print.",
+    "example_ko": "흔한 함정 중 하나는 깨알 같은 조항을 무시하는 것이다.",
+    "distractors": [
+      "harvest",
+      "lantern",
+      "blanket"
+    ]
+  },
+  {
+    "id": "en-5-043",
+    "language": "en",
+    "level": 5,
+    "rank": 43,
+    "word": "inadvertently",
+    "reading": null,
+    "meaning_ko": "무심코, 실수로",
+    "example": "I {{inadvertently}} deleted the file.",
+    "example_ko": "나는 실수로 그 파일을 삭제했다.",
+    "distractors": [
+      "eagerly",
+      "politely",
+      "annually"
+    ]
+  },
+  {
+    "id": "en-5-044",
+    "language": "en",
+    "level": 5,
+    "rank": 44,
+    "word": "ostensibly",
+    "reading": null,
+    "meaning_ko": "표면상으로, 겉보기에는",
+    "example": "He left early, {{ostensibly}} to catch a train.",
+    "example_ko": "그는 겉보기에는 기차를 타려고 일찍 떠났다.",
+    "distractors": [
+      "eagerly",
+      "annually",
+      "quietly"
+    ]
+  },
+  {
+    "id": "en-5-045",
+    "language": "en",
+    "level": 5,
+    "rank": 45,
+    "word": "haphazard",
+    "reading": null,
+    "meaning_ko": "무계획적인, 아무렇게나 한",
+    "example": "The files were stored in a {{haphazard}} way.",
+    "example_ko": "파일들은 아무렇게나 무질서하게 보관되어 있었다.",
+    "distractors": [
+      "tidy",
+      "gentle",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-046",
+    "language": "en",
+    "level": 5,
+    "rank": 46,
+    "word": "meager",
+    "reading": null,
+    "meaning_ko": "빈약한, 보잘것없는",
+    "example": "He lived on a {{meager}} salary.",
+    "example_ko": "그는 보잘것없는 월급으로 살았다.",
+    "distractors": [
+      "generous",
+      "golden",
+      "fragile"
+    ]
+  },
+  {
+    "id": "en-5-047",
+    "language": "en",
+    "level": 5,
+    "rank": 47,
+    "word": "tantamount",
+    "reading": null,
+    "meaning_ko": "~나 다름없는",
+    "example": "Silence is {{tantamount}} to agreement.",
+    "example_ko": "침묵은 동의나 마찬가지다.",
+    "distractors": [
+      "hungry",
+      "allergic",
+      "hostile"
+    ]
+  },
+  {
+    "id": "en-5-048",
+    "language": "en",
+    "level": 5,
+    "rank": 48,
+    "word": "juxtapose",
+    "reading": null,
+    "meaning_ko": "나란히 놓고 대비하다",
+    "example": "The exhibit will {{juxtapose}} old and new art.",
+    "example_ko": "그 전시는 옛 미술과 새 미술을 나란히 놓고 대비시킬 것이다.",
+    "distractors": [
+      "juxtaposed",
+      "juxtaposes",
+      "juxtaposing"
+    ]
+  },
+  {
+    "id": "en-5-049",
+    "language": "en",
+    "level": 5,
+    "rank": 49,
+    "word": "bewildered",
+    "reading": null,
+    "meaning_ko": "어리둥절한",
+    "example": "I was {{bewildered}} by the complicated rules.",
+    "example_ko": "나는 복잡한 규칙에 어리둥절했다.",
+    "distractors": [
+      "delighted",
+      "grateful",
+      "relaxed"
+    ]
+  },
+  {
+    "id": "en-5-050",
+    "language": "en",
+    "level": 5,
+    "rank": 50,
+    "word": "gratify",
+    "reading": null,
+    "meaning_ko": "만족시키다, 기쁘게 하다",
+    "example": "It would {{gratify}} me to see you succeed.",
+    "example_ko": "네가 성공하는 모습을 보면 나는 만족스러울 것이다.",
+    "distractors": [
+      "gratified",
+      "gratifies",
+      "gratifying"
+    ]
+  },
+  {
+    "id": "en-5-051",
+    "language": "en",
+    "level": 5,
+    "rank": 51,
+    "word": "daunting",
+    "reading": null,
+    "meaning_ko": "엄두가 나지 않는, 벅찬",
+    "example": "Moving abroad alone felt like a {{daunting}} prospect.",
+    "example_ko": "혼자 해외로 이사하는 것은 엄두가 나지 않는 일처럼 느껴졌다.",
+    "distractors": [
+      "tasty",
+      "rainy",
+      "silent"
+    ]
+  },
+  {
+    "id": "en-5-052",
+    "language": "en",
+    "level": 5,
+    "rank": 52,
+    "word": "ambivalent",
+    "reading": null,
+    "meaning_ko": "양가감정을 가진, 마음이 엇갈리는",
+    "example": "She felt {{ambivalent}} about accepting the job offer.",
+    "example_ko": "그녀는 그 일자리 제안을 받아들이는 것에 대해 마음이 엇갈렸다.",
+    "distractors": [
+      "rectangular",
+      "sunny",
+      "famous"
+    ]
+  },
+  {
+    "id": "en-5-053",
+    "language": "en",
+    "level": 5,
+    "rank": 53,
+    "word": "conspicuous",
+    "reading": null,
+    "meaning_ko": "눈에 띄는, 두드러진",
+    "example": "His red jacket made him {{conspicuous}} in the crowd.",
+    "example_ko": "그의 붉은 재킷 때문에 그는 군중 속에서 눈에 띄었다.",
+    "distractors": [
+      "generous",
+      "ancient",
+      "sleepy"
+    ]
+  },
+  {
+    "id": "en-5-054",
+    "language": "en",
+    "level": 5,
+    "rank": 54,
+    "word": "poignant",
+    "reading": null,
+    "meaning_ko": "가슴을 울리는, 애절한",
+    "example": "The film ended with a {{poignant}} farewell scene.",
+    "example_ko": "그 영화는 가슴을 울리는 작별 장면으로 끝났다.",
+    "distractors": [
+      "wooden",
+      "rapid",
+      "spicy"
+    ]
+  },
+  {
+    "id": "en-5-055",
+    "language": "en",
+    "level": 5,
+    "rank": 55,
+    "word": "intricate",
+    "reading": null,
+    "meaning_ko": "복잡하고 정교한",
+    "example": "The watch has an {{intricate}} mechanism.",
+    "example_ko": "그 시계에는 복잡하고 정교한 장치가 들어 있다.",
+    "distractors": [
+      "angry",
+      "icy",
+      "eager"
+    ]
+  },
+  {
+    "id": "en-5-056",
+    "language": "en",
+    "level": 5,
+    "rank": 56,
+    "word": "pertinent",
+    "reading": null,
+    "meaning_ko": "관련 있는, 적절한",
+    "example": "Please include only {{pertinent}} details in your report.",
+    "example_ko": "보고서에는 관련 있는 세부 사항만 포함해 주세요.",
+    "distractors": [
+      "sleepy",
+      "golden",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-057",
+    "language": "en",
+    "level": 5,
+    "rank": 57,
+    "word": "disparity",
+    "reading": null,
+    "meaning_ko": "격차, 불균형",
+    "example": "There is a wide {{disparity}} between rich and poor.",
+    "example_ko": "부자와 빈자 사이에는 큰 격차가 있다.",
+    "distractors": [
+      "kitchen",
+      "harvest",
+      "journey"
+    ]
+  },
+  {
+    "id": "en-5-058",
+    "language": "en",
+    "level": 5,
+    "rank": 58,
+    "word": "plight",
+    "reading": null,
+    "meaning_ko": "곤경, 어려운 처지",
+    "example": "The documentary highlighted the {{plight}} of refugees.",
+    "example_ko": "그 다큐멘터리는 난민들의 곤경을 조명했다.",
+    "distractors": [
+      "recipe",
+      "chimney",
+      "parade"
+    ]
+  },
+  {
+    "id": "en-5-059",
+    "language": "en",
+    "level": 5,
+    "rank": 59,
+    "word": "impetus",
+    "reading": null,
+    "meaning_ko": "추진력, 자극",
+    "example": "The scandal gave {{impetus}} to the reform movement.",
+    "example_ko": "그 스캔들은 개혁 운동에 추진력을 주었다.",
+    "distractors": [
+      "lemon",
+      "curtain",
+      "bucket"
+    ]
+  },
+  {
+    "id": "en-5-060",
+    "language": "en",
+    "level": 5,
+    "rank": 60,
+    "word": "notorious",
+    "reading": null,
+    "meaning_ko": "악명 높은",
+    "example": "The city is {{notorious}} for its traffic jams.",
+    "example_ko": "그 도시는 교통 체증으로 악명이 높다.",
+    "distractors": [
+      "tasty",
+      "patient",
+      "fluffy"
+    ]
+  },
+  {
+    "id": "en-5-061",
+    "language": "en",
+    "level": 5,
+    "rank": 61,
+    "word": "reticent",
+    "reading": null,
+    "meaning_ko": "말을 아끼는, 과묵한",
+    "example": "He was {{reticent}} about his personal life.",
+    "example_ko": "그는 자신의 사생활에 대해 말을 아꼈다.",
+    "distractors": [
+      "rectangular",
+      "furry",
+      "liquid"
+    ]
+  },
+  {
+    "id": "en-5-062",
+    "language": "en",
+    "level": 5,
+    "rank": 62,
+    "word": "resolute",
+    "reading": null,
+    "meaning_ko": "단호한, 굳건한",
+    "example": "She remained {{resolute}} despite the criticism.",
+    "example_ko": "그녀는 비판에도 불구하고 단호한 태도를 유지했다.",
+    "distractors": [
+      "crunchy",
+      "tropical",
+      "wooden"
+    ]
+  },
+  {
+    "id": "en-5-063",
+    "language": "en",
+    "level": 5,
+    "rank": 63,
+    "word": "obsolete",
+    "reading": null,
+    "meaning_ko": "쓸모없어진, 구식의",
+    "example": "Floppy disks are now {{obsolete}}.",
+    "example_ko": "플로피 디스크는 이제 구식이 되었다.",
+    "distractors": [
+      "fragrant",
+      "jealous",
+      "sleepy"
+    ]
+  },
+  {
+    "id": "en-5-064",
+    "language": "en",
+    "level": 5,
+    "rank": 64,
+    "word": "dwindle",
+    "reading": null,
+    "meaning_ko": "점점 줄어들다",
+    "example": "Our savings began to {{dwindle}} quickly.",
+    "example_ko": "우리의 저축은 빠르게 줄어들기 시작했다.",
+    "distractors": [
+      "dwindled",
+      "dwindles",
+      "dwindling"
+    ]
+  },
+  {
+    "id": "en-5-065",
+    "language": "en",
+    "level": 5,
+    "rank": 65,
+    "word": "falter",
+    "reading": null,
+    "meaning_ko": "흔들리다, 비틀거리다",
+    "example": "His confidence started to {{falter}} under pressure.",
+    "example_ko": "압박감 속에서 그의 자신감이 흔들리기 시작했다.",
+    "distractors": [
+      "faltered",
+      "falters",
+      "faltering"
+    ]
+  },
+  {
+    "id": "en-5-066",
+    "language": "en",
+    "level": 5,
+    "rank": 66,
+    "word": "languish",
+    "reading": null,
+    "meaning_ko": "시들해지다, 방치되어 있다",
+    "example": "Without funding, the project will {{languish}} for years.",
+    "example_ko": "자금이 없으면 그 프로젝트는 몇 년 동안 방치될 것이다.",
+    "distractors": [
+      "languished",
+      "languishes",
+      "languishing"
+    ]
+  },
+  {
+    "id": "en-5-067",
+    "language": "en",
+    "level": 5,
+    "rank": 67,
+    "word": "condone",
+    "reading": null,
+    "meaning_ko": "묵인하다, 용납하다",
+    "example": "I cannot {{condone}} such rude behavior.",
+    "example_ko": "나는 그런 무례한 행동을 용납할 수 없다.",
+    "distractors": [
+      "condoned",
+      "condones",
+      "condoning"
+    ]
+  },
+  {
+    "id": "en-5-068",
+    "language": "en",
+    "level": 5,
+    "rank": 68,
+    "word": "belittle",
+    "reading": null,
+    "meaning_ko": "깎아내리다, 하찮게 여기다",
+    "example": "Don't {{belittle}} her achievements.",
+    "example_ko": "그녀의 성과를 깎아내리지 마라.",
+    "distractors": [
+      "belittled",
+      "belittles",
+      "belittling"
+    ]
+  },
+  {
+    "id": "en-5-069",
+    "language": "en",
+    "level": 5,
+    "rank": 69,
+    "word": "complacent",
+    "reading": null,
+    "meaning_ko": "현실에 안주하는, 자만하는",
+    "example": "Success made the team {{complacent}}.",
+    "example_ko": "성공은 그 팀을 안일하게 만들었다.",
+    "distractors": [
+      "tropical",
+      "crunchy",
+      "liquid"
+    ]
+  },
+  {
+    "id": "en-5-070",
+    "language": "en",
+    "level": 5,
+    "rank": 70,
+    "word": "contentious",
+    "reading": null,
+    "meaning_ko": "논쟁의 소지가 큰",
+    "example": "Tax reform remains a {{contentious}} issue.",
+    "example_ko": "세제 개편은 여전히 논쟁적인 사안이다.",
+    "distractors": [
+      "fluffy",
+      "sleepy",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-071",
+    "language": "en",
+    "level": 5,
+    "rank": 71,
+    "word": "copious",
+    "reading": null,
+    "meaning_ko": "풍부한, 방대한",
+    "example": "She took {{copious}} notes during the lecture.",
+    "example_ko": "그녀는 강의 중에 방대한 양의 필기를 했다.",
+    "distractors": [
+      "frozen",
+      "rusty",
+      "bitter"
+    ]
+  },
+  {
+    "id": "en-5-072",
+    "language": "en",
+    "level": 5,
+    "rank": 72,
+    "word": "dubious",
+    "reading": null,
+    "meaning_ko": "의심스러운, 미심쩍은",
+    "example": "I'm {{dubious}} about his promises.",
+    "example_ko": "나는 그의 약속이 미심쩍다.",
+    "distractors": [
+      "rectangular",
+      "fragrant",
+      "sunny"
+    ]
+  },
+  {
+    "id": "en-5-073",
+    "language": "en",
+    "level": 5,
+    "rank": 73,
+    "word": "eccentric",
+    "reading": null,
+    "meaning_ko": "괴짜의, 별난",
+    "example": "Their uncle is a bit {{eccentric}}, always wearing a cape.",
+    "example_ko": "그들의 삼촌은 늘 망토를 입고 다녀서 좀 괴짜다.",
+    "distractors": [
+      "sleepy",
+      "frozen",
+      "tasty"
+    ]
+  },
+  {
+    "id": "en-5-074",
+    "language": "en",
+    "level": 5,
+    "rank": 74,
+    "word": "fastidious",
+    "reading": null,
+    "meaning_ko": "까다로운, 꼼꼼한",
+    "example": "He is {{fastidious}} about keeping his desk tidy.",
+    "example_ko": "그는 책상을 깔끔하게 유지하는 데 매우 까다롭다.",
+    "distractors": [
+      "rainy",
+      "rusty",
+      "liquid"
+    ]
+  },
+  {
+    "id": "en-5-075",
+    "language": "en",
+    "level": 5,
+    "rank": 75,
+    "word": "flourish",
+    "reading": null,
+    "meaning_ko": "번성하다, 잘 자라다",
+    "example": "Small businesses can {{flourish}} here.",
+    "example_ko": "소규모 사업체들은 이곳에서 번성할 수 있다.",
+    "distractors": [
+      "flourished",
+      "flourishes",
+      "flourishing"
+    ]
+  },
+  {
+    "id": "en-5-076",
+    "language": "en",
+    "level": 5,
+    "rank": 76,
+    "word": "frugal",
+    "reading": null,
+    "meaning_ko": "검소한, 절약하는",
+    "example": "They lead a {{frugal}} life to save for a house.",
+    "example_ko": "그들은 집을 마련하려고 검소하게 산다.",
+    "distractors": [
+      "fluffy",
+      "tropical",
+      "wooden"
+    ]
+  },
+  {
+    "id": "en-5-077",
+    "language": "en",
+    "level": 5,
+    "rank": 77,
+    "word": "gullible",
+    "reading": null,
+    "meaning_ko": "속기 쉬운, 잘 믿는",
+    "example": "Only a {{gullible}} person would believe that.",
+    "example_ko": "속기 쉬운 사람이나 그것을 믿을 것이다.",
+    "distractors": [
+      "sunny",
+      "wooden",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-078",
+    "language": "en",
+    "level": 5,
+    "rank": 78,
+    "word": "hamper",
+    "reading": null,
+    "meaning_ko": "방해하다, 저해하다",
+    "example": "Heavy rain may {{hamper}} rescue efforts.",
+    "example_ko": "폭우가 구조 활동을 방해할 수 있다.",
+    "distractors": [
+      "hampered",
+      "hampers",
+      "hampering"
+    ]
+  },
+  {
+    "id": "en-5-079",
+    "language": "en",
+    "level": 5,
+    "rank": 79,
+    "word": "idiosyncrasy",
+    "reading": null,
+    "meaning_ko": "특이한 버릇, 기벽",
+    "example": "Every writer has at least one {{idiosyncrasy}}.",
+    "example_ko": "모든 작가에게는 적어도 하나의 독특한 버릇이 있다.",
+    "distractors": [
+      "umbrella",
+      "mountain",
+      "balloon"
+    ]
+  },
+  {
+    "id": "en-5-080",
+    "language": "en",
+    "level": 5,
+    "rank": 80,
+    "word": "lucid",
+    "reading": null,
+    "meaning_ko": "명쾌한, 알기 쉬운",
+    "example": "The professor gave a {{lucid}} explanation.",
+    "example_ko": "그 교수는 명쾌한 설명을 해 주었다.",
+    "distractors": [
+      "frozen",
+      "wooden",
+      "sleepy"
+    ]
+  },
+  {
+    "id": "en-5-081",
+    "language": "en",
+    "level": 5,
+    "rank": 81,
+    "word": "nonchalant",
+    "reading": null,
+    "meaning_ko": "태연한, 무심한",
+    "example": "He seemed {{nonchalant}} even after failing.",
+    "example_ko": "그는 실패한 뒤에도 태연해 보였다.",
+    "distractors": [
+      "rusty",
+      "tropical",
+      "liquid"
+    ]
+  },
+  {
+    "id": "en-5-082",
+    "language": "en",
+    "level": 5,
+    "rank": 82,
+    "word": "opaque",
+    "reading": null,
+    "meaning_ko": "불투명한, 이해하기 어려운",
+    "example": "The glass was {{opaque}}, so we couldn't see through it.",
+    "example_ko": "그 유리는 불투명해서 우리는 안을 들여다볼 수 없었다.",
+    "distractors": [
+      "fragrant",
+      "cheerful",
+      "polite"
+    ]
+  },
+  {
+    "id": "en-5-083",
+    "language": "en",
+    "level": 5,
+    "rank": 83,
+    "word": "paramount",
+    "reading": null,
+    "meaning_ko": "가장 중요한, 최고의",
+    "example": "Safety is {{paramount}} in this job.",
+    "example_ko": "이 일에서는 안전이 가장 중요하다.",
+    "distractors": [
+      "frozen",
+      "bitter",
+      "fluffy"
+    ]
+  },
+  {
+    "id": "en-5-084",
+    "language": "en",
+    "level": 5,
+    "rank": 84,
+    "word": "quandary",
+    "reading": null,
+    "meaning_ko": "난처한 처지, 딜레마",
+    "example": "He was in a {{quandary}} over which offer to accept.",
+    "example_ko": "그는 어느 제안을 받아들일지 몰라 난처한 처지에 있었다.",
+    "distractors": [
+      "meadow",
+      "blanket",
+      "harvest"
+    ]
+  },
+  {
+    "id": "en-5-085",
+    "language": "en",
+    "level": 5,
+    "rank": 85,
+    "word": "rift",
+    "reading": null,
+    "meaning_ko": "불화, 균열",
+    "example": "The argument caused a {{rift}} between the two friends.",
+    "example_ko": "그 말다툼은 두 친구 사이에 불화를 일으켰다.",
+    "distractors": [
+      "pillow",
+      "cherry",
+      "ladder"
+    ]
+  },
+  {
+    "id": "en-5-086",
+    "language": "en",
+    "level": 5,
+    "rank": 86,
+    "word": "sporadic",
+    "reading": null,
+    "meaning_ko": "산발적인, 드문드문 일어나는",
+    "example": "There were {{sporadic}} outbreaks of violence.",
+    "example_ko": "폭력 사태가 산발적으로 발생했다.",
+    "distractors": [
+      "fluffy",
+      "wooden",
+      "tropical"
+    ]
+  },
+  {
+    "id": "en-5-087",
+    "language": "en",
+    "level": 5,
+    "rank": 87,
+    "word": "tumultuous",
+    "reading": null,
+    "meaning_ko": "격동의, 떠들썩한",
+    "example": "It was a {{tumultuous}} period in the country's history.",
+    "example_ko": "그것은 그 나라 역사에서 격동의 시기였다.",
+    "distractors": [
+      "tasty",
+      "fluffy",
+      "rusty"
+    ]
+  },
+  {
+    "id": "en-5-088",
+    "language": "en",
+    "level": 5,
+    "rank": 88,
+    "word": "wane",
+    "reading": null,
+    "meaning_ko": "약해지다, 줄어들다",
+    "example": "Public interest began to {{wane}}.",
+    "example_ko": "대중의 관심이 시들해지기 시작했다.",
+    "distractors": [
+      "waned",
+      "wanes",
+      "waning"
+    ]
+  },
+  {
+    "id": "en-5-089",
+    "language": "en",
+    "level": 5,
+    "rank": 89,
+    "word": "vindicate",
+    "reading": null,
+    "meaning_ko": "무죄를 입증하다, 정당함을 증명하다",
+    "example": "The new evidence will {{vindicate}} him.",
+    "example_ko": "새로운 증거가 그의 결백을 입증할 것이다.",
+    "distractors": [
+      "vindicated",
+      "vindicates",
+      "vindicating"
+    ]
+  },
+  {
+    "id": "en-5-090",
+    "language": "en",
+    "level": 5,
+    "rank": 90,
+    "word": "perpetuate",
+    "reading": null,
+    "meaning_ko": "영속시키다, 계속 이어지게 하다",
+    "example": "Such stories may {{perpetuate}} stereotypes.",
+    "example_ko": "그런 이야기는 고정관념을 지속시킬 수 있다.",
+    "distractors": [
+      "perpetuated",
+      "perpetuates",
+      "perpetuating"
+    ]
+  },
+  {
+    "id": "en-5-091",
+    "language": "en",
+    "level": 5,
+    "rank": 91,
+    "word": "underscore",
+    "reading": null,
+    "meaning_ko": "강조하다",
+    "example": "The report will {{underscore}} the need for reform.",
+    "example_ko": "그 보고서는 개혁의 필요성을 강조할 것이다.",
+    "distractors": [
+      "underscored",
+      "underscores",
+      "underscoring"
+    ]
+  },
+  {
+    "id": "en-5-092",
+    "language": "en",
+    "level": 5,
+    "rank": 92,
+    "word": "epitome",
+    "reading": null,
+    "meaning_ko": "전형, 본보기",
+    "example": "She is the {{epitome}} of grace.",
+    "example_ko": "그녀는 우아함의 전형이다.",
+    "distractors": [
+      "jacket",
+      "pencil",
+      "bucket"
+    ]
+  },
+  {
+    "id": "en-5-093",
+    "language": "en",
+    "level": 5,
+    "rank": 93,
+    "word": "lament",
+    "reading": null,
+    "meaning_ko": "한탄하다, 애석해하다",
+    "example": "Critics continue to {{lament}} the decline of print.",
+    "example_ko": "비평가들은 인쇄 매체의 쇠퇴를 계속 한탄한다.",
+    "distractors": [
+      "lamented",
+      "laments",
+      "lamenting"
+    ]
+  },
+  {
+    "id": "en-5-094",
+    "language": "en",
+    "level": 5,
+    "rank": 94,
+    "word": "articulate",
+    "reading": null,
+    "meaning_ko": "말을 또렷하고 조리 있게 하는",
+    "example": "She is an {{articulate}} speaker.",
+    "example_ko": "그녀는 조리 있게 말을 잘하는 연설가이다.",
+    "distractors": [
+      "icy",
+      "edible",
+      "oval"
+    ]
+  },
+  {
+    "id": "en-5-095",
+    "language": "en",
+    "level": 5,
+    "rank": 95,
+    "word": "brevity",
+    "reading": null,
+    "meaning_ko": "간결함, 짧음",
+    "example": "The {{brevity}} of his reply surprised us.",
+    "example_ko": "그의 답변이 너무 짧아서 우리는 놀랐다.",
+    "distractors": [
+      "kitchen",
+      "harvest",
+      "ladder"
+    ]
+  },
+  {
+    "id": "en-5-096",
+    "language": "en",
+    "level": 5,
+    "rank": 96,
+    "word": "camaraderie",
+    "reading": null,
+    "meaning_ko": "동지애, 우애",
+    "example": "There was great {{camaraderie}} among the soldiers.",
+    "example_ko": "병사들 사이에는 깊은 동지애가 있었다.",
+    "distractors": [
+      "furniture",
+      "lightning",
+      "pottery"
+    ]
+  },
+  {
+    "id": "en-5-097",
+    "language": "en",
+    "level": 5,
+    "rank": 97,
+    "word": "ostentatious",
+    "reading": null,
+    "meaning_ko": "과시하는, 허세 부리는",
+    "example": "Their {{ostentatious}} mansion was full of gold statues.",
+    "example_ko": "그들의 과시적인 저택은 금 조각상으로 가득했다.",
+    "distractors": [
+      "frozen",
+      "soggy",
+      "sleepy"
+    ]
+  },
+  {
+    "id": "en-5-098",
+    "language": "en",
+    "level": 5,
+    "rank": 98,
+    "word": "fleeting",
+    "reading": null,
+    "meaning_ko": "순식간의, 잠깐 스치는",
+    "example": "We only caught a {{fleeting}} glimpse of the singer.",
+    "example_ko": "우리는 그 가수를 잠깐 스치듯 보았을 뿐이다.",
+    "distractors": [
+      "tropical",
+      "rusty",
+      "wooden"
+    ]
+  },
+  {
+    "id": "en-5-099",
+    "language": "en",
+    "level": 5,
+    "rank": 99,
+    "word": "meander",
+    "reading": null,
+    "meaning_ko": "구불구불 흐르다, 두서없이 거닐다",
+    "example": "The river {{meanders}} through the valley.",
+    "example_ko": "그 강은 계곡을 가로질러 구불구불 흐른다.",
+    "distractors": [
+      "meander",
+      "meandered",
+      "meandering"
+    ]
+  },
+  {
+    "id": "en-5-100",
+    "language": "en",
+    "level": 5,
+    "rank": 100,
+    "word": "hinge",
+    "reading": null,
+    "meaning_ko": "~에 달려 있다",
+    "example": "Everything may {{hinge}} on the final vote.",
+    "example_ko": "모든 것이 마지막 투표에 달려 있을 수 있다.",
+    "distractors": [
+      "hinged",
+      "hinges",
+      "hinging"
+    ]
+  },
+  {
+    "id": "en-5-101",
+    "language": "en",
+    "level": 5,
+    "rank": 101,
+    "word": "ameliorate",
+    "reading": null,
+    "meaning_ko": "개선하다, 완화하다",
+    "example": "The new policy aims to {{ameliorate}} living conditions.",
+    "example_ko": "새 정책은 생활 여건을 개선하는 것을 목표로 한다.",
+    "distractors": [
+      "ameliorates",
+      "ameliorated",
+      "ameliorating"
+    ]
+  },
+  {
+    "id": "en-5-102",
+    "language": "en",
+    "level": 5,
+    "rank": 102,
+    "word": "precarious",
+    "reading": null,
+    "meaning_ko": "위태로운, 불안정한",
+    "example": "He kept a {{precarious}} balance on the narrow ledge.",
+    "example_ko": "그는 좁은 선반 위에서 위태롭게 균형을 잡았다.",
+    "distractors": [
+      "cheerful",
+      "spacious",
+      "loyal"
+    ]
+  },
+  {
+    "id": "en-5-103",
+    "language": "en",
+    "level": 5,
+    "rank": 103,
+    "word": "insidious",
+    "reading": null,
+    "meaning_ko": "서서히 퍼지는, 교활한",
+    "example": "The disease is {{insidious}}, showing few early symptoms.",
+    "example_ko": "그 병은 초기 증상이 거의 없이 서서히 진행된다.",
+    "distractors": [
+      "delicious",
+      "tidy",
+      "brave"
+    ]
+  },
+  {
+    "id": "en-5-104",
+    "language": "en",
+    "level": 5,
+    "rank": 104,
+    "word": "cajole",
+    "reading": null,
+    "meaning_ko": "구슬리다, 감언이설로 꾀다",
+    "example": "She tried to {{cajole}} him into joining the trip.",
+    "example_ko": "그녀는 그를 구슬려 여행에 함께 가게 하려고 했다.",
+    "distractors": [
+      "cajoles",
+      "cajoled",
+      "cajoling"
+    ]
+  },
+  {
+    "id": "en-5-105",
+    "language": "en",
+    "level": 5,
+    "rank": 105,
+    "word": "disseminate",
+    "reading": null,
+    "meaning_ko": "퍼뜨리다, 보급하다",
+    "example": "Scientists {{disseminate}} their findings through journals.",
+    "example_ko": "과학자들은 학술지를 통해 연구 결과를 널리 알린다.",
+    "distractors": [
+      "disseminates",
+      "disseminated",
+      "disseminating"
+    ]
+  },
+  {
+    "id": "en-5-106",
+    "language": "en",
+    "level": 5,
+    "rank": 106,
+    "word": "dichotomy",
+    "reading": null,
+    "meaning_ko": "이분법, 양분",
+    "example": "There is a clear {{dichotomy}} between theory and practice.",
+    "example_ko": "이론과 실천 사이에는 뚜렷한 이분법적 대립이 있다.",
+    "distractors": [
+      "harvest",
+      "ribbon",
+      "journey"
+    ]
+  },
+  {
+    "id": "en-5-107",
+    "language": "en",
+    "level": 5,
+    "rank": 107,
+    "word": "ardent",
+    "reading": null,
+    "meaning_ko": "열렬한",
+    "example": "He remains an {{ardent}} admirer of her work.",
+    "example_ko": "그는 여전히 그녀의 작품을 열렬히 흠모한다.",
+    "distractors": [
+      "idle",
+      "awkward",
+      "icy"
+    ]
+  },
+  {
+    "id": "en-5-108",
+    "language": "en",
+    "level": 5,
+    "rank": 108,
+    "word": "lackluster",
+    "reading": null,
+    "meaning_ko": "활기 없는, 시원찮은",
+    "example": "The team gave a {{lackluster}} performance.",
+    "example_ko": "그 팀은 활기 없는 경기를 펼쳤다.",
+    "distractors": [
+      "rainy",
+      "edible",
+      "tiny"
+    ]
+  },
+  {
+    "id": "en-5-109",
+    "language": "en",
+    "level": 5,
+    "rank": 109,
+    "word": "nebulous",
+    "reading": null,
+    "meaning_ko": "모호한, 흐릿한",
+    "example": "The plan remains {{nebulous}} and poorly defined.",
+    "example_ko": "그 계획은 여전히 모호하고 구체적이지 않다.",
+    "distractors": [
+      "sturdy",
+      "frozen",
+      "cheerful"
+    ]
+  },
+  {
+    "id": "en-5-110",
+    "language": "en",
+    "level": 5,
+    "rank": 110,
+    "word": "pernicious",
+    "reading": null,
+    "meaning_ko": "치명적인, 해로운",
+    "example": "Rumors can have a {{pernicious}} effect on morale.",
+    "example_ko": "소문은 사기에 해로운 영향을 미칠 수 있다.",
+    "distractors": [
+      "tropical",
+      "fragrant",
+      "rectangular"
+    ]
+  },
+  {
+    "id": "en-5-111",
+    "language": "en",
+    "level": 5,
+    "rank": 111,
+    "word": "staunch",
+    "reading": null,
+    "meaning_ko": "확고한, 충실한",
+    "example": "He is a {{staunch}} defender of free speech.",
+    "example_ko": "그는 표현의 자유를 확고하게 옹호하는 사람이다.",
+    "distractors": [
+      "fragile",
+      "sleepy",
+      "timid"
+    ]
+  },
+  {
+    "id": "en-5-112",
+    "language": "en",
+    "level": 5,
+    "rank": 112,
+    "word": "surreptitious",
+    "reading": null,
+    "meaning_ko": "은밀한, 몰래 하는",
+    "example": "She cast a {{surreptitious}} glance at her phone.",
+    "example_ko": "그녀는 휴대폰을 몰래 힐끗 쳐다보았다.",
+    "distractors": [
+      "generous",
+      "spacious",
+      "bitter"
+    ]
+  },
+  {
+    "id": "en-5-113",
+    "language": "en",
+    "level": 5,
+    "rank": 113,
+    "word": "capricious",
+    "reading": null,
+    "meaning_ko": "변덕스러운",
+    "example": "The weather in spring is {{capricious}}.",
+    "example_ko": "봄 날씨는 변덕스럽다.",
+    "distractors": [
+      "edible",
+      "punctual",
+      "rectangular"
+    ]
+  },
+  {
+    "id": "en-5-114",
+    "language": "en",
+    "level": 5,
+    "rank": 114,
+    "word": "aloof",
+    "reading": null,
+    "meaning_ko": "거리를 두는, 냉담한",
+    "example": "He remained {{aloof}} from office gossip.",
+    "example_ko": "그는 사무실 험담과 거리를 두었다.",
+    "distractors": [
+      "famous",
+      "hungry",
+      "golden"
+    ]
+  },
+  {
+    "id": "en-5-115",
+    "language": "en",
+    "level": 5,
+    "rank": 115,
+    "word": "austere",
+    "reading": null,
+    "meaning_ko": "엄격한, 소박한",
+    "example": "They lived an {{austere}} life in the mountains.",
+    "example_ko": "그들은 산속에서 소박하고 엄격한 삶을 살았다.",
+    "distractors": [
+      "ample",
+      "eager",
+      "idle"
+    ]
+  },
+  {
+    "id": "en-5-116",
+    "language": "en",
+    "level": 5,
+    "rank": 116,
+    "word": "benevolent",
+    "reading": null,
+    "meaning_ko": "자비로운, 인자한",
+    "example": "The {{benevolent}} king gave food to the poor.",
+    "example_ko": "자비로운 왕은 가난한 이들에게 음식을 나눠 주었다.",
+    "distractors": [
+      "clumsy",
+      "frozen",
+      "rusty"
+    ]
+  },
+  {
+    "id": "en-5-117",
+    "language": "en",
+    "level": 5,
+    "rank": 117,
+    "word": "circumvent",
+    "reading": null,
+    "meaning_ko": "우회하다, 피해 가다",
+    "example": "Some firms try to {{circumvent}} the regulations.",
+    "example_ko": "일부 기업은 규정을 교묘히 피해 가려고 한다.",
+    "distractors": [
+      "circumvents",
+      "circumvented",
+      "circumventing"
+    ]
+  },
+  {
+    "id": "en-5-118",
+    "language": "en",
+    "level": 5,
+    "rank": 118,
+    "word": "cynical",
+    "reading": null,
+    "meaning_ko": "냉소적인",
+    "example": "I'm {{cynical}} about politicians' promises.",
+    "example_ko": "나는 정치인들의 약속에 냉소적이다.",
+    "distractors": [
+      "sleepy",
+      "golden",
+      "tidy"
+    ]
+  },
+  {
+    "id": "en-5-119",
+    "language": "en",
+    "level": 5,
+    "rank": 119,
+    "word": "deter",
+    "reading": null,
+    "meaning_ko": "단념시키다, 저지하다",
+    "example": "High prices may {{deter}} new customers.",
+    "example_ko": "높은 가격은 신규 고객을 단념시킬 수 있다.",
+    "distractors": [
+      "deters",
+      "deterred",
+      "deterring"
+    ]
+  },
+  {
+    "id": "en-5-120",
+    "language": "en",
+    "level": 5,
+    "rank": 120,
+    "word": "enigmatic",
+    "reading": null,
+    "meaning_ko": "수수께끼 같은",
+    "example": "Her {{enigmatic}} smile left everyone guessing.",
+    "example_ko": "그녀의 수수께끼 같은 미소에 모두가 의아해했다.",
+    "distractors": [
+      "rusty",
+      "wooden",
+      "spacious"
+    ]
+  },
+  {
+    "id": "en-5-121",
+    "language": "en",
+    "level": 5,
+    "rank": 121,
+    "word": "exuberant",
+    "reading": null,
+    "meaning_ko": "활기가 넘치는, 열광적인",
+    "example": "The children were {{exuberant}} after winning.",
+    "example_ko": "아이들은 이기고 나서 활기가 넘쳤다.",
+    "distractors": [
+      "fragile",
+      "bitter",
+      "tidy"
+    ]
+  },
+  {
+    "id": "en-5-122",
+    "language": "en",
+    "level": 5,
+    "rank": 122,
+    "word": "futile",
+    "reading": null,
+    "meaning_ko": "헛된, 소용없는",
+    "example": "All our efforts proved {{futile}}.",
+    "example_ko": "우리의 모든 노력은 헛수고로 드러났다.",
+    "distractors": [
+      "fertile",
+      "fragrant",
+      "tidy"
+    ]
+  },
+  {
+    "id": "en-5-123",
+    "language": "en",
+    "level": 5,
+    "rank": 123,
+    "word": "grueling",
+    "reading": null,
+    "meaning_ko": "녹초가 될 만큼 힘든",
+    "example": "They completed a {{grueling}} twelve-hour hike.",
+    "example_ko": "그들은 몹시 고된 12시간 하이킹을 마쳤다.",
+    "distractors": [
+      "fragrant",
+      "cozy",
+      "cheerful"
+    ]
+  },
+  {
+    "id": "en-5-124",
+    "language": "en",
+    "level": 5,
+    "rank": 124,
+    "word": "impede",
+    "reading": null,
+    "meaning_ko": "방해하다, 지연시키다",
+    "example": "Fallen trees {{impede}} traffic on the road.",
+    "example_ko": "쓰러진 나무들이 도로의 교통을 방해한다.",
+    "distractors": [
+      "impedes",
+      "impeded",
+      "impeding"
+    ]
+  },
+  {
+    "id": "en-5-125",
+    "language": "en",
+    "level": 5,
+    "rank": 125,
+    "word": "jaded",
+    "reading": null,
+    "meaning_ko": "싫증난, 무감각해진",
+    "example": "Years of fame left him {{jaded}}.",
+    "example_ko": "수년간의 명성은 그를 싫증나고 무감각하게 만들었다.",
+    "distractors": [
+      "golden",
+      "wooden",
+      "spacious"
+    ]
+  },
+  {
+    "id": "en-5-126",
+    "language": "en",
+    "level": 5,
+    "rank": 126,
+    "word": "lavish",
+    "reading": null,
+    "meaning_ko": "호화로운, 사치스러운",
+    "example": "They threw a {{lavish}} wedding party.",
+    "example_ko": "그들은 호화로운 결혼 파티를 열었다.",
+    "distractors": [
+      "rusty",
+      "sleepy",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-127",
+    "language": "en",
+    "level": 5,
+    "rank": 127,
+    "word": "placate",
+    "reading": null,
+    "meaning_ko": "달래다, 진정시키다",
+    "example": "He tried to {{placate}} the angry crowd.",
+    "example_ko": "그는 화난 군중을 달래려고 했다.",
+    "distractors": [
+      "placates",
+      "placated",
+      "placating"
+    ]
+  },
+  {
+    "id": "en-5-128",
+    "language": "en",
+    "level": 5,
+    "rank": 128,
+    "word": "quell",
+    "reading": null,
+    "meaning_ko": "진압하다, 가라앉히다",
+    "example": "Police moved to {{quell}} the riot.",
+    "example_ko": "경찰은 폭동을 진압하기 위해 움직였다.",
+    "distractors": [
+      "quells",
+      "quelled",
+      "quelling"
+    ]
+  },
+  {
+    "id": "en-5-129",
+    "language": "en",
+    "level": 5,
+    "rank": 129,
+    "word": "replete",
+    "reading": null,
+    "meaning_ko": "가득한, 풍부한",
+    "example": "The report is {{replete}} with errors.",
+    "example_ko": "그 보고서는 오류투성이다.",
+    "distractors": [
+      "angry",
+      "bored",
+      "pleased"
+    ]
+  },
+  {
+    "id": "en-5-130",
+    "language": "en",
+    "level": 5,
+    "rank": 130,
+    "word": "sanguine",
+    "reading": null,
+    "meaning_ko": "낙관적인",
+    "example": "She remains {{sanguine}} about the company's future.",
+    "example_ko": "그녀는 회사의 미래에 대해 여전히 낙관적이다.",
+    "distractors": [
+      "thirsty",
+      "wooden",
+      "rusty"
+    ]
+  },
+  {
+    "id": "en-5-131",
+    "language": "en",
+    "level": 5,
+    "rank": 131,
+    "word": "tout",
+    "reading": null,
+    "meaning_ko": "내세우다, 선전하다",
+    "example": "Companies {{tout}} their products as revolutionary.",
+    "example_ko": "기업들은 자사 제품을 혁신적이라고 내세운다.",
+    "distractors": [
+      "touts",
+      "touted",
+      "touting"
+    ]
+  },
+  {
+    "id": "en-5-132",
+    "language": "en",
+    "level": 5,
+    "rank": 132,
+    "word": "unwavering",
+    "reading": null,
+    "meaning_ko": "흔들리지 않는, 확고한",
+    "example": "She showed {{unwavering}} loyalty to her team.",
+    "example_ko": "그녀는 팀에 대한 변함없는 충성심을 보였다.",
+    "distractors": [
+      "sleepy",
+      "rusty",
+      "spacious"
+    ]
+  },
+  {
+    "id": "en-5-133",
+    "language": "en",
+    "level": 5,
+    "rank": 133,
+    "word": "venerable",
+    "reading": null,
+    "meaning_ko": "존경받는, 연로하여 덕망 있는",
+    "example": "The {{venerable}} professor retired at ninety.",
+    "example_ko": "존경받는 노교수는 아흔 살에 은퇴했다.",
+    "distractors": [
+      "hungry",
+      "wooden",
+      "clumsy"
+    ]
+  },
+  {
+    "id": "en-5-134",
+    "language": "en",
+    "level": 5,
+    "rank": 134,
+    "word": "wistful",
+    "reading": null,
+    "meaning_ko": "아련한, 그리워하는",
+    "example": "He gave a {{wistful}} look at the old photo.",
+    "example_ko": "그는 낡은 사진을 아련하게 바라보았다.",
+    "distractors": [
+      "rusty",
+      "spacious",
+      "tidy"
+    ]
+  },
+  {
+    "id": "en-5-135",
+    "language": "en",
+    "level": 5,
+    "rank": 135,
+    "word": "zealous",
+    "reading": null,
+    "meaning_ko": "열성적인, 열광적인",
+    "example": "A {{zealous}} fan waited outside all night.",
+    "example_ko": "열성적인 팬 한 명이 밤새 밖에서 기다렸다.",
+    "distractors": [
+      "tiny",
+      "wooden",
+      "rusty"
+    ]
+  },
+  {
+    "id": "en-5-136",
+    "language": "en",
+    "level": 5,
+    "rank": 136,
+    "word": "akin",
+    "reading": null,
+    "meaning_ko": "유사한, 비슷한",
+    "example": "Her feelings were {{akin}} to grief.",
+    "example_ko": "그녀의 감정은 슬픔과 비슷했다.",
+    "distractors": [
+      "opposed",
+      "loyal",
+      "addicted"
+    ]
+  },
+  {
+    "id": "en-5-137",
+    "language": "en",
+    "level": 5,
+    "rank": 137,
+    "word": "brazen",
+    "reading": null,
+    "meaning_ko": "뻔뻔한, 철면피의",
+    "example": "He told a {{brazen}} lie to the police.",
+    "example_ko": "그는 경찰에게 뻔뻔한 거짓말을 했다.",
+    "distractors": [
+      "fragrant",
+      "tidy",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-138",
+    "language": "en",
+    "level": 5,
+    "rank": 138,
+    "word": "clandestine",
+    "reading": null,
+    "meaning_ko": "비밀리에 하는, 은밀한",
+    "example": "They held a {{clandestine}} meeting at midnight.",
+    "example_ko": "그들은 자정에 비밀 회동을 가졌다.",
+    "distractors": [
+      "cheerful",
+      "rusty",
+      "spacious"
+    ]
+  },
+  {
+    "id": "en-5-139",
+    "language": "en",
+    "level": 5,
+    "rank": 139,
+    "word": "disdain",
+    "reading": null,
+    "meaning_ko": "경멸, 멸시",
+    "example": "She looked at the offer with {{disdain}}.",
+    "example_ko": "그녀는 그 제안을 경멸하며 바라보았다.",
+    "distractors": [
+      "gratitude",
+      "hunger",
+      "courage"
+    ]
+  },
+  {
+    "id": "en-5-140",
+    "language": "en",
+    "level": 5,
+    "rank": 140,
+    "word": "embellish",
+    "reading": null,
+    "meaning_ko": "미화하다, 윤색하다",
+    "example": "He tends to {{embellish}} his stories.",
+    "example_ko": "그는 자기 이야기를 부풀려 꾸미는 경향이 있다.",
+    "distractors": [
+      "embellishes",
+      "embellished",
+      "embellishing"
+    ]
+  },
+  {
+    "id": "en-5-141",
+    "language": "en",
+    "level": 5,
+    "rank": 141,
+    "word": "fervent",
+    "reading": null,
+    "meaning_ko": "열렬한, 간절한",
+    "example": "She made a {{fervent}} plea for peace.",
+    "example_ko": "그녀는 평화를 위해 간절히 호소했다.",
+    "distractors": [
+      "wooden",
+      "tiny",
+      "bitter"
+    ]
+  },
+  {
+    "id": "en-5-142",
+    "language": "en",
+    "level": 5,
+    "rank": 142,
+    "word": "gregarious",
+    "reading": null,
+    "meaning_ko": "사교적인, 어울리기 좋아하는",
+    "example": "He is {{gregarious}} and loves parties.",
+    "example_ko": "그는 사교적이고 파티를 좋아한다.",
+    "distractors": [
+      "sleepy",
+      "wooden",
+      "edible"
+    ]
+  },
+  {
+    "id": "en-5-143",
+    "language": "en",
+    "level": 5,
+    "rank": 143,
+    "word": "harbinger",
+    "reading": null,
+    "meaning_ko": "전조, 선구자",
+    "example": "Swallows are a {{harbinger}} of spring.",
+    "example_ko": "제비는 봄의 전조이다.",
+    "distractors": [
+      "prisoner",
+      "pillow",
+      "blanket"
+    ]
+  },
+  {
+    "id": "en-5-144",
+    "language": "en",
+    "level": 5,
+    "rank": 144,
+    "word": "impartial",
+    "reading": null,
+    "meaning_ko": "공정한, 편견 없는",
+    "example": "A judge must remain {{impartial}}.",
+    "example_ko": "판사는 공정함을 유지해야 한다.",
+    "distractors": [
+      "fragile",
+      "thirsty",
+      "tiny"
+    ]
+  },
+  {
+    "id": "en-5-145",
+    "language": "en",
+    "level": 5,
+    "rank": 145,
+    "word": "jovial",
+    "reading": null,
+    "meaning_ko": "쾌활한, 명랑한",
+    "example": "The host was a {{jovial}} man.",
+    "example_ko": "주인은 쾌활한 남자였다.",
+    "distractors": [
+      "sturdy",
+      "hostile",
+      "pale"
+    ]
+  },
+  {
+    "id": "en-5-146",
+    "language": "en",
+    "level": 5,
+    "rank": 146,
+    "word": "kindle",
+    "reading": null,
+    "meaning_ko": "불붙이다, 일깨우다",
+    "example": "The speech helped {{kindle}} hope in the town.",
+    "example_ko": "그 연설은 마을에 희망을 불러일으키는 데 도움이 되었다.",
+    "distractors": [
+      "kindles",
+      "kindled",
+      "kindling"
+    ]
+  },
+  {
+    "id": "en-5-147",
+    "language": "en",
+    "level": 5,
+    "rank": 147,
+    "word": "gloat",
+    "reading": null,
+    "meaning_ko": "고소해하다, 의기양양해하다",
+    "example": "He couldn't help but {{gloat}} over his victory.",
+    "example_ko": "그는 자신의 승리에 의기양양해하지 않을 수 없었다.",
+    "distractors": [
+      "gloats",
+      "gloated",
+      "gloating"
+    ]
+  },
+  {
+    "id": "en-5-148",
+    "language": "en",
+    "level": 5,
+    "rank": 148,
+    "word": "obviate",
+    "reading": null,
+    "meaning_ko": "불필요하게 만들다, 제거하다",
+    "example": "The new system will {{obviate}} the need for paperwork.",
+    "example_ko": "새 시스템은 서류 작업의 필요를 없애줄 것이다.",
+    "distractors": [
+      "obviates",
+      "obviated",
+      "obviating"
+    ]
+  },
+  {
+    "id": "en-5-149",
+    "language": "en",
+    "level": 5,
+    "rank": 149,
+    "word": "acrimonious",
+    "reading": null,
+    "meaning_ko": "험악한, 신랄한",
+    "example": "It was an {{acrimonious}} divorce.",
+    "example_ko": "그것은 험악하고 원한 어린 이혼이었다.",
+    "distractors": [
+      "ample",
+      "empty",
+      "elegant"
+    ]
+  },
+  {
+    "id": "en-5-150",
+    "language": "en",
+    "level": 5,
+    "rank": 150,
+    "word": "sycophant",
+    "reading": null,
+    "meaning_ko": "아첨꾼",
+    "example": "He was a {{sycophant}} who flattered the boss.",
+    "example_ko": "그는 상사에게 알랑거리는 아첨꾼이었다.",
+    "distractors": [
+      "carpenter",
+      "tourist",
+      "pilot"
+    ]
+  },
+  {
+    "id": "en-5-151",
+    "language": "en",
+    "level": 5,
+    "rank": 151,
+    "word": "arduous",
+    "reading": null,
+    "meaning_ko": "몹시 힘든, 고된",
+    "example": "The climb was long and {{arduous}}.",
+    "example_ko": "그 등반은 길고 힘겨웠다.",
+    "distractors": [
+      "cheerful",
+      "shallow",
+      "generous"
+    ]
+  },
+  {
+    "id": "en-5-152",
+    "language": "en",
+    "level": 5,
+    "rank": 152,
+    "word": "detrimental",
+    "reading": null,
+    "meaning_ko": "해로운",
+    "example": "Lack of sleep is {{detrimental}} to your health.",
+    "example_ko": "수면 부족은 건강에 해롭다.",
+    "distractors": [
+      "beneficial",
+      "ordinary",
+      "famous"
+    ]
+  },
+  {
+    "id": "en-5-153",
+    "language": "en",
+    "level": 5,
+    "rank": 153,
+    "word": "refute",
+    "reading": null,
+    "meaning_ko": "반박하다",
+    "example": "She tried to {{refute}} the claim with data.",
+    "example_ko": "그녀는 데이터로 그 주장을 반박하려 했다.",
+    "distractors": [
+      "refutes",
+      "refuted",
+      "refuting"
+    ]
+  },
+  {
+    "id": "en-5-154",
+    "language": "en",
+    "level": 5,
+    "rank": 154,
+    "word": "oblivious",
+    "reading": null,
+    "meaning_ko": "의식하지 못하는",
+    "example": "He was {{oblivious}} to the danger around him.",
+    "example_ko": "그는 주변의 위험을 전혀 의식하지 못했다.",
+    "distractors": [
+      "wealthy",
+      "tasty",
+      "rural"
+    ]
+  },
+  {
+    "id": "en-5-155",
+    "language": "en",
+    "level": 5,
+    "rank": 155,
+    "word": "volatile",
+    "reading": null,
+    "meaning_ko": "변동이 심한, 불안정한",
+    "example": "The oil market has been {{volatile}} lately.",
+    "example_ko": "최근 석유 시장은 변동이 심하다.",
+    "distractors": [
+      "edible",
+      "rusty",
+      "polite"
+    ]
+  },
+  {
+    "id": "en-5-156",
+    "language": "en",
+    "level": 5,
+    "rank": 156,
+    "word": "squander",
+    "reading": null,
+    "meaning_ko": "낭비하다, 허비하다",
+    "example": "Don't {{squander}} your chance.",
+    "example_ko": "기회를 허비하지 마.",
+    "distractors": [
+      "squanders",
+      "squandered",
+      "squandering"
+    ]
+  },
+  {
+    "id": "en-5-157",
+    "language": "en",
+    "level": 5,
+    "rank": 157,
+    "word": "stagnant",
+    "reading": null,
+    "meaning_ko": "정체된, 침체된",
+    "example": "The economy has remained {{stagnant}} for years.",
+    "example_ko": "경제는 수년간 정체 상태에 머물러 있다.",
+    "distractors": [
+      "delicious",
+      "tropical",
+      "athletic"
+    ]
+  },
+  {
+    "id": "en-5-158",
+    "language": "en",
+    "level": 5,
+    "rank": 158,
+    "word": "erratic",
+    "reading": null,
+    "meaning_ko": "불규칙한, 변덕스러운",
+    "example": "His sleep schedule is {{erratic}}.",
+    "example_ko": "그의 수면 일정은 불규칙하다.",
+    "distractors": [
+      "sturdy",
+      "honest",
+      "fragrant"
+    ]
+  },
+  {
+    "id": "en-5-159",
+    "language": "en",
+    "level": 5,
+    "rank": 159,
+    "word": "grapple",
+    "reading": null,
+    "meaning_ko": "씨름하다, 고심하며 맞서다",
+    "example": "Many countries {{grapple}} with inflation.",
+    "example_ko": "많은 나라가 인플레이션과 씨름하고 있다.",
+    "distractors": [
+      "grapples",
+      "grappled",
+      "grappling"
+    ]
+  },
+  {
+    "id": "en-5-160",
+    "language": "en",
+    "level": 5,
+    "rank": 160,
+    "word": "exemplary",
+    "reading": null,
+    "meaning_ko": "모범적인",
+    "example": "Her conduct was {{exemplary}}.",
+    "example_ko": "그녀의 행동은 모범적이었다.",
+    "distractors": [
+      "rude",
+      "tiny",
+      "frozen"
+    ]
+  },
+  {
+    "id": "en-5-161",
+    "language": "en",
+    "level": 5,
+    "rank": 161,
+    "word": "hypocrisy",
+    "reading": null,
+    "meaning_ko": "위선",
+    "example": "I can't stand his {{hypocrisy}}.",
+    "example_ko": "나는 그의 위선을 참을 수 없다.",
+    "distractors": [
+      "furniture",
+      "harvest",
+      "ceiling"
+    ]
+  },
+  {
+    "id": "en-5-162",
+    "language": "en",
+    "level": 5,
+    "rank": 162,
+    "word": "propensity",
+    "reading": null,
+    "meaning_ko": "성향, 경향",
+    "example": "He has a {{propensity}} for exaggeration.",
+    "example_ko": "그는 과장하는 경향이 있다.",
+    "distractors": [
+      "carpet",
+      "harbor",
+      "lecture"
+    ]
+  },
+  {
+    "id": "en-5-163",
+    "language": "en",
+    "level": 5,
+    "rank": 163,
+    "word": "scathing",
+    "reading": null,
+    "meaning_ko": "신랄한",
+    "example": "The critic wrote a {{scathing}} review.",
+    "example_ko": "그 평론가는 신랄한 평을 썼다.",
+    "distractors": [
+      "fragrant",
+      "spacious",
+      "edible"
+    ]
+  },
+  {
+    "id": "en-5-164",
+    "language": "en",
+    "level": 5,
+    "rank": 164,
+    "word": "succinct",
+    "reading": null,
+    "meaning_ko": "간결한",
+    "example": "Please keep your answer {{succinct}}.",
+    "example_ko": "답변을 간결하게 해 주세요.",
+    "distractors": [
+      "fragile",
+      "rural",
+      "jealous"
+    ]
+  },
+  {
+    "id": "en-5-165",
+    "language": "en",
+    "level": 5,
+    "rank": 165,
+    "word": "terse",
+    "reading": null,
+    "meaning_ko": "짧고 퉁명스러운",
+    "example": "His reply was {{terse}}.",
+    "example_ko": "그의 답은 짧고 퉁명스러웠다.",
+    "distractors": [
+      "fertile",
+      "bright",
+      "scenic"
+    ]
+  },
+  {
+    "id": "en-5-166",
+    "language": "en",
+    "level": 5,
+    "rank": 166,
+    "word": "tenuous",
+    "reading": null,
+    "meaning_ko": "희박한, 미약한",
+    "example": "The link between the two events is {{tenuous}}.",
+    "example_ko": "두 사건 사이의 연관성은 희박하다.",
+    "distractors": [
+      "edible",
+      "loyal",
+      "humid"
+    ]
+  },
+  {
+    "id": "en-5-167",
+    "language": "en",
+    "level": 5,
+    "rank": 167,
+    "word": "stoic",
+    "reading": null,
+    "meaning_ko": "태연한, 금욕적인",
+    "example": "He remained {{stoic}} despite the pain.",
+    "example_ko": "그는 고통에도 불구하고 태연함을 유지했다.",
+    "distractors": [
+      "fragrant",
+      "thirsty",
+      "rectangular"
+    ]
+  },
+  {
+    "id": "en-5-168",
+    "language": "en",
+    "level": 5,
+    "rank": 168,
+    "word": "wield",
+    "reading": null,
+    "meaning_ko": "(권력·영향력을) 행사하다",
+    "example": "She will {{wield}} great influence.",
+    "example_ko": "그녀는 큰 영향력을 행사할 것이다.",
+    "distractors": [
+      "wields",
+      "wielded",
+      "wielding"
+    ]
+  },
+  {
+    "id": "en-5-169",
+    "language": "en",
+    "level": 5,
+    "rank": 169,
+    "word": "solace",
+    "reading": null,
+    "meaning_ko": "위안",
+    "example": "She found {{solace}} in music.",
+    "example_ko": "그녀는 음악에서 위안을 얻었다.",
+    "distractors": [
+      "pottery",
+      "invoice",
+      "lumber"
+    ]
+  },
+  {
+    "id": "en-5-170",
+    "language": "en",
+    "level": 5,
+    "rank": 170,
+    "word": "prolific",
+    "reading": null,
+    "meaning_ko": "다작하는, 다산의",
+    "example": "He is a {{prolific}} writer.",
+    "example_ko": "그는 다작하는 작가다.",
+    "distractors": [
+      "fragile",
+      "sleepy",
+      "rural"
+    ]
+  },
+  {
+    "id": "en-5-171",
+    "language": "en",
+    "level": 5,
+    "rank": 171,
+    "word": "eradicate",
+    "reading": null,
+    "meaning_ko": "근절하다",
+    "example": "The goal is to {{eradicate}} the disease.",
+    "example_ko": "목표는 그 질병을 근절하는 것이다.",
+    "distractors": [
+      "eradicates",
+      "eradicated",
+      "eradicating"
+    ]
+  },
+  {
+    "id": "en-5-172",
+    "language": "en",
+    "level": 5,
+    "rank": 172,
+    "word": "denounce",
+    "reading": null,
+    "meaning_ko": "공개적으로 비난하다, 규탄하다",
+    "example": "World leaders {{denounced}} the violence.",
+    "example_ko": "세계 지도자들은 그 폭력을 규탄했다.",
+    "distractors": [
+      "denounce",
+      "denounces",
+      "denouncing"
+    ]
+  },
+  {
+    "id": "en-5-173",
+    "language": "en",
+    "level": 5,
+    "rank": 173,
+    "word": "deplete",
+    "reading": null,
+    "meaning_ko": "고갈시키다",
+    "example": "Overfishing can {{deplete}} fish stocks.",
+    "example_ko": "남획은 어류 자원을 고갈시킬 수 있다.",
+    "distractors": [
+      "depletes",
+      "depleted",
+      "depleting"
+    ]
+  },
+  {
+    "id": "en-5-174",
+    "language": "en",
+    "level": 5,
+    "rank": 174,
+    "word": "audacious",
+    "reading": null,
+    "meaning_ko": "대담한",
+    "example": "It was an {{audacious}} plan.",
+    "example_ko": "그것은 대담한 계획이었다.",
+    "distractors": [
+      "ordinary",
+      "icy",
+      "eager"
+    ]
+  },
+  {
+    "id": "en-5-175",
+    "language": "en",
+    "level": 5,
+    "rank": 175,
+    "word": "conundrum",
+    "reading": null,
+    "meaning_ko": "난제, 수수께끼",
+    "example": "The origin of life remains a {{conundrum}} for scientists.",
+    "example_ko": "생명의 기원은 과학자들에게 여전히 난제로 남아 있다.",
+    "distractors": [
+      "bakery",
+      "pillow",
+      "ribbon"
+    ]
+  },
+  {
+    "id": "en-5-176",
+    "language": "en",
+    "level": 5,
+    "rank": 176,
+    "word": "corroborate",
+    "reading": null,
+    "meaning_ko": "(증거로) 뒷받침하다",
+    "example": "Witnesses can {{corroborate}} his story.",
+    "example_ko": "목격자들이 그의 이야기를 뒷받침할 수 있다.",
+    "distractors": [
+      "corroborates",
+      "corroborated",
+      "corroborating"
+    ]
+  },
+  {
+    "id": "en-5-177",
+    "language": "en",
+    "level": 5,
+    "rank": 177,
+    "word": "culminate",
+    "reading": null,
+    "meaning_ko": "결국 ~으로 끝나다, 절정에 이르다",
+    "example": "The project will {{culminate}} in a final exhibition.",
+    "example_ko": "그 프로젝트는 최종 전시로 마무리될 것이다.",
+    "distractors": [
+      "culminates",
+      "culminated",
+      "culminating"
+    ]
+  },
+  {
+    "id": "en-5-178",
+    "language": "en",
+    "level": 5,
+    "rank": 178,
+    "word": "demeanor",
+    "reading": null,
+    "meaning_ko": "태도, 처신",
+    "example": "He kept a calm {{demeanor}}.",
+    "example_ko": "그는 침착한 태도를 유지했다.",
+    "distractors": [
+      "harvest",
+      "pillow",
+      "tunnel"
+    ]
+  },
+  {
+    "id": "en-5-179",
+    "language": "en",
+    "level": 5,
+    "rank": 179,
+    "word": "dormant",
+    "reading": null,
+    "meaning_ko": "휴면 상태의, 잠복한",
+    "example": "The volcano has been {{dormant}} for centuries.",
+    "example_ko": "그 화산은 수 세기 동안 휴면 상태였다.",
+    "distractors": [
+      "crowded",
+      "spicy",
+      "generous"
+    ]
+  },
+  {
+    "id": "en-5-180",
+    "language": "en",
+    "level": 5,
+    "rank": 180,
+    "word": "flagrant",
+    "reading": null,
+    "meaning_ko": "노골적인, 명백히 나쁜",
+    "example": "That was a {{flagrant}} violation of the rules.",
+    "example_ko": "그것은 노골적인 규칙 위반이었다.",
+    "distractors": [
+      "fragile",
+      "cozy",
+      "scenic"
+    ]
+  },
+  {
+    "id": "en-5-181",
+    "language": "en",
+    "level": 5,
+    "rank": 181,
+    "word": "frivolous",
+    "reading": null,
+    "meaning_ko": "하찮은, 경솔한",
+    "example": "They filed a {{frivolous}} lawsuit.",
+    "example_ko": "그들은 하찮은 소송을 제기했다.",
+    "distractors": [
+      "fragrant",
+      "hungry",
+      "rural"
+    ]
+  },
+  {
+    "id": "en-5-182",
+    "language": "en",
+    "level": 5,
+    "rank": 182,
+    "word": "glean",
+    "reading": null,
+    "meaning_ko": "(정보를) 조금씩 얻어내다",
+    "example": "We can {{glean}} useful insights from the data.",
+    "example_ko": "우리는 그 데이터에서 유용한 통찰을 얻어낼 수 있다.",
+    "distractors": [
+      "gleans",
+      "gleaned",
+      "gleaning"
+    ]
+  },
+  {
+    "id": "en-5-183",
+    "language": "en",
+    "level": 5,
+    "rank": 183,
+    "word": "illicit",
+    "reading": null,
+    "meaning_ko": "불법의, 부정한",
+    "example": "He was arrested for {{illicit}} trade.",
+    "example_ko": "그는 불법 거래로 체포되었다.",
+    "distractors": [
+      "tasty",
+      "mobile",
+      "rural"
+    ]
+  },
+  {
+    "id": "en-5-184",
+    "language": "en",
+    "level": 5,
+    "rank": 184,
+    "word": "impervious",
+    "reading": null,
+    "meaning_ko": "스며들지 않는, 영향받지 않는",
+    "example": "The coat is {{impervious}} to rain.",
+    "example_ko": "그 코트는 비가 스며들지 않는다.",
+    "distractors": [
+      "grateful",
+      "tempted",
+      "famous"
+    ]
+  },
+  {
+    "id": "en-5-185",
+    "language": "en",
+    "level": 5,
+    "rank": 185,
+    "word": "inept",
+    "reading": null,
+    "meaning_ko": "서투른, 무능한",
+    "example": "He was {{inept}} at handling money.",
+    "example_ko": "그는 돈 관리에 서툴렀다.",
+    "distractors": [
+      "dizzy",
+      "hungry",
+      "shy"
+    ]
+  },
+  {
+    "id": "en-5-186",
+    "language": "en",
+    "level": 5,
+    "rank": 186,
+    "word": "inundate",
+    "reading": null,
+    "meaning_ko": "쇄도하다, 넘쳐나게 하다",
+    "example": "Fans {{inundate}} the singer with letters every week.",
+    "example_ko": "팬들은 매주 그 가수에게 편지를 쏟아붓는다.",
+    "distractors": [
+      "inundates",
+      "inundated",
+      "inundating"
+    ]
+  },
+  {
+    "id": "en-5-187",
+    "language": "en",
+    "level": 5,
+    "rank": 187,
+    "word": "lethargic",
+    "reading": null,
+    "meaning_ko": "무기력한, 나른한",
+    "example": "I felt {{lethargic}} after the big meal.",
+    "example_ko": "나는 푸짐한 식사 후에 나른하고 무기력했다.",
+    "distractors": [
+      "fragrant",
+      "mature",
+      "crooked"
+    ]
+  },
+  {
+    "id": "en-5-188",
+    "language": "en",
+    "level": 5,
+    "rank": 188,
+    "word": "malleable",
+    "reading": null,
+    "meaning_ko": "가단성이 있는, 영향받기 쉬운",
+    "example": "Gold is a {{malleable}} metal.",
+    "example_ko": "금은 가단성이 있는 금속이다.",
+    "distractors": [
+      "fluent",
+      "hungry",
+      "foggy"
+    ]
+  },
+  {
+    "id": "en-5-189",
+    "language": "en",
+    "level": 5,
+    "rank": 189,
+    "word": "mollify",
+    "reading": null,
+    "meaning_ko": "달래다, 진정시키다",
+    "example": "He tried to {{mollify}} the angry customer.",
+    "example_ko": "그는 화난 고객을 달래려 했다.",
+    "distractors": [
+      "mollifies",
+      "mollified",
+      "mollifying"
+    ]
+  },
+  {
+    "id": "en-5-190",
+    "language": "en",
+    "level": 5,
+    "rank": 190,
+    "word": "onerous",
+    "reading": null,
+    "meaning_ko": "부담스러운, 힘든",
+    "example": "The contract imposes {{onerous}} conditions.",
+    "example_ko": "그 계약은 부담스러운 조건을 부과한다.",
+    "distractors": [
+      "tasty",
+      "cozy",
+      "sunny"
+    ]
+  },
+  {
+    "id": "en-5-191",
+    "language": "en",
+    "level": 5,
+    "rank": 191,
+    "word": "opulent",
+    "reading": null,
+    "meaning_ko": "호화로운",
+    "example": "They lived in an {{opulent}} mansion.",
+    "example_ko": "그들은 호화로운 저택에서 살았다.",
+    "distractors": [
+      "ordinary",
+      "icy",
+      "eager"
+    ]
+  },
+  {
+    "id": "en-5-192",
+    "language": "en",
+    "level": 5,
+    "rank": 192,
+    "word": "ostracize",
+    "reading": null,
+    "meaning_ko": "따돌리다, 배척하다",
+    "example": "Colleagues began to {{ostracize}} him.",
+    "example_ko": "동료들이 그를 따돌리기 시작했다.",
+    "distractors": [
+      "ostracizes",
+      "ostracized",
+      "ostracizing"
+    ]
+  },
+  {
+    "id": "en-5-193",
+    "language": "en",
+    "level": 5,
+    "rank": 193,
+    "word": "perfunctory",
+    "reading": null,
+    "meaning_ko": "형식적인, 건성의",
+    "example": "He gave a {{perfunctory}} nod.",
+    "example_ko": "그는 형식적으로 고개를 끄덕였다.",
+    "distractors": [
+      "fertile",
+      "tropical",
+      "sturdy"
+    ]
+  },
+  {
+    "id": "en-5-194",
+    "language": "en",
+    "level": 5,
+    "rank": 194,
+    "word": "permeate",
+    "reading": null,
+    "meaning_ko": "스며들다, 퍼지다",
+    "example": "The smell of smoke began to {{permeate}} the house.",
+    "example_ko": "연기 냄새가 집 안에 스며들기 시작했다.",
+    "distractors": [
+      "permeates",
+      "permeated",
+      "permeating"
+    ]
+  },
+  {
+    "id": "en-5-195",
+    "language": "en",
+    "level": 5,
+    "rank": 195,
+    "word": "relinquish",
+    "reading": null,
+    "meaning_ko": "포기하다, 넘겨주다",
+    "example": "He refused to {{relinquish}} control.",
+    "example_ko": "그는 통제권을 넘겨주기를 거부했다.",
+    "distractors": [
+      "relinquishes",
+      "relinquished",
+      "relinquishing"
+    ]
+  },
+  {
+    "id": "en-5-196",
+    "language": "en",
+    "level": 5,
+    "rank": 196,
+    "word": "repudiate",
+    "reading": null,
+    "meaning_ko": "부인하다, 거부하다",
+    "example": "The senator will {{repudiate}} the rumor.",
+    "example_ko": "그 상원의원은 그 소문을 부인할 것이다.",
+    "distractors": [
+      "repudiates",
+      "repudiated",
+      "repudiating"
+    ]
+  },
+  {
+    "id": "en-5-197",
+    "language": "en",
+    "level": 5,
+    "rank": 197,
+    "word": "spurn",
+    "reading": null,
+    "meaning_ko": "퇴짜 놓다, 일축하다",
+    "example": "She decided to {{spurn}} his offer.",
+    "example_ko": "그녀는 그의 제안을 퇴짜 놓기로 했다.",
+    "distractors": [
+      "spurns",
+      "spurned",
+      "spurning"
+    ]
+  },
+  {
+    "id": "en-5-198",
+    "language": "en",
+    "level": 5,
+    "rank": 198,
+    "word": "subvert",
+    "reading": null,
+    "meaning_ko": "전복하다, 뒤엎다",
+    "example": "They tried to {{subvert}} the government.",
+    "example_ko": "그들은 정부를 전복하려 했다.",
+    "distractors": [
+      "subverts",
+      "subverted",
+      "subverting"
+    ]
+  },
+  {
+    "id": "en-5-199",
+    "language": "en",
+    "level": 5,
+    "rank": 199,
+    "word": "vehement",
+    "reading": null,
+    "meaning_ko": "격렬한, 강경한",
+    "example": "He gave a {{vehement}} denial.",
+    "example_ko": "그는 격렬하게 부인했다.",
+    "distractors": [
+      "tropical",
+      "sleepy",
+      "tidy"
+    ]
+  },
+  {
+    "id": "en-5-200",
+    "language": "en",
+    "level": 5,
+    "rank": 200,
+    "word": "verbose",
+    "reading": null,
+    "meaning_ko": "장황한",
+    "example": "The report is too {{verbose}}.",
+    "example_ko": "그 보고서는 너무 장황하다.",
+    "distractors": [
+      "fertile",
+      "dizzy",
+      "scenic"
+    ]
+  }
+]
