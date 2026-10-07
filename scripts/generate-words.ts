@@ -149,6 +149,7 @@ function buildPrompt({ language, level, count, exclude, lowerLevelWords }: Gener
   const info = LEVEL_INFO[level];
   const lines = [
     `${name} ${info.name}(${level}/5) 레벨 학습자에게 맞는 단어 ${count}개를 이 레벨에서 자주 쓰이는 순서(빈도 순)로 골라라.`,
+    "품사(명사·동사·형용사·부사 등)를 가리지 않고 실제로 자주 쓰이는 순서대로 섞는다. 품사별로 묶지 않는다.",
     `레벨 설명: ${info.description}. 레벨은 입문(1)부터 고수(5)까지이며, 더 낮은 레벨에서 배울 기초 단어는 넣지 않는다.`,
     "아래 '이미 고른 단어'는 빈도가 더 높아 앞에 넣은 단어다. 이 단어들과 겹치지 않게 그다음으로 자주 쓰이는 단어부터 고른다.",
     "",
@@ -158,14 +159,18 @@ function buildPrompt({ language, level, count, exclude, lowerLevelWords }: Gener
     "- meaning_ko: 짧은 한국어 뜻",
     "- example: word를 쓴 짧은 예문. 문장 속 정답 표기를 {{ }}로 정확히 한 번 감싼다",
     "- example_ko: 예문의 자연스러운 한국어 번역",
-    "- distractors: 같은 단어의 다른 형태 3개. 그 문장에 넣으면 틀린다. 서로 다르고 {{ }} 안의 정답과도 다르다",
+    "- distractors: 그 문장에 넣으면 틀리는 보기 3개. 서로 다르고 {{ }} 안의 정답과도 다르다",
+    "  - 정답과 다른 형태를 3개 만들 수 있는 단어(동사 등)는 같은 단어의 다른 형태를 쓴다",
+    "  - 만들 수 없는 단어(명사·부사 등)는 example_ko의 뜻과 맞지 않는 같은 품사의 다른 단어를 쓴다. 학습자는 한국어 문장을 보고 고른다",
     "",
     "예: word go, example `I {{went}} to school.`, distractors goes, gone, going",
+    "예: word book, example `I read a {{book}} before bed.`, example_ko 나는 자기 전에 책을 읽는다., distractors chair, river, window",
   ];
   if (language === "ja") {
     lines.push(
       "일본어는 example, {{ }} 안의 정답, distractors의 모든 한자에 [漢字|かな] 형식으로 읽기를 단다.",
       "예: word 行く, reading いく, example `[学校|がっこう]に{{[行|い]った}}。`, distractors `[行|い]く`, `[行|い]って`, `[行|い]かない`",
+      "예: word 水, reading みず, example `{{[水|みず]}}を[飲|の]みたいです。`, example_ko 물을 마시고 싶어요., distractors `[本|ほん]`, `[駅|えき]`, `[先生|せんせい]`",
     );
   }
   if (lowerLevelWords.length > 0) {
