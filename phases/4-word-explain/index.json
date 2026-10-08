@@ -2,8 +2,24 @@
   "project": "Langrow",
   "phase": "4-word-explain",
   "steps": [
-    { "step": 0, "name": "explain-db", "status": "pending" },
-    { "step": 1, "name": "explain-api", "status": "pending" },
-    { "step": 2, "name": "explain-ui", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "explain-db",
+      "status": "completed",
+      "started_at": "2026-10-08T23:26:13+0900",
+      "summary": "새 마이그레이션(word_explanations, word_explained 이벤트, 예약·실패·저장 RPC). db/learning.ts: getWord(id)→ExplainWord|null; beginWordExplanation(userId,wordId,choice)→cached{explanation}|reserved{eventId}, 거부 NOT_FOUND·CONSENT_REQUIRED·ONBOARDING_REQUIRED·LIMIT_REACHED·AI_FAILURE_LIMIT; failWordExplanation(userId,eventId,reason); saveWordExplanation(wordId,choice,explanation)→NOT_FOUND 가능. 복습 choice는 \"\". FREE_DAILY_EXPLANATIONS=10(plan.ts). fakes: getWord \"I {{went}} to school.\", begin reserved eventId 1.",
+      "completed_at": "2026-10-08T23:33:03+0900"
+    },
+    {
+      "step": 1,
+      "name": "explain-api",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "explain-ui",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-08T23:26:13+0900"
 }

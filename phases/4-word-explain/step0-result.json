@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "새 마이그레이션(word_explanations, word_explained 이벤트, 예약·실패·저장 RPC). db/learning.ts: getWord(id)→ExplainWord|null; beginWordExplanation(userId,wordId,choice)→cached{explanation}|reserved{eventId}, 거부 NOT_FOUND·CONSENT_REQUIRED·ONBOARDING_REQUIRED·LIMIT_REACHED·AI_FAILURE_LIMIT; failWordExplanation(userId,eventId,reason); saveWordExplanation(wordId,choice,explanation)→NOT_FOUND 가능. 복습 choice는 \"\". FREE_DAILY_EXPLANATIONS=10(plan.ts). fakes: getWord \"I {{went}} to school.\", begin reserved eventId 1.",
+  "spec_diff": "1) 예약 RPC는 step 지시대로 check_readiness(p_user_id, 'ready', 단어 언어)를 쓴다. words.md API 2번은 '동의와 단어 언어의 레벨'만 말하지만 'ready'는 현재 언어의 레벨도 확인한다(다른 학습 RPC와 같은 규칙. 현재 언어는 레벨이 있을 때만 정해지므로 실제 차이는 없다고 본다). 2) 저장 RPC는 공용 행만 바꿔 profiles를 잠그지 않고 p_user_id도 받지 않는다(CLAUDE.md '쓰기 RPC는 profiles 잠금' 규칙의 예외. step 지시와 backend.md 데이터 모델 'user_id 없음' 근거)."
+}
