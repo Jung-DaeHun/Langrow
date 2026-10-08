@@ -22,7 +22,8 @@
     },
     {
       "dir": "4-word-explain",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-10-08T23:44:10+0900"
     }
   ]
 }
