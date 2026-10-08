@@ -14,3 +14,7 @@ export const feedbackSchema = z.object({
   improve: z.array(z.string()),
 });
 export type Feedback = z.infer<typeof feedbackSchema>;
+
+// AI 정답 설명. 빈 설명은 client.ts가 invalid_output으로 처리한다
+export const explanationSchema = z.object({ explanation: z.string() });
+export type Explanation = z.infer<typeof explanationSchema>;

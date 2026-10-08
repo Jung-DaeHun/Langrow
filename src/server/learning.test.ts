@@ -1,9 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { LEVEL_TEST_SIZE } from "@/lib/levelTest";
 import type { Language, Level } from "@/lib/levels";
 import type { DbErrorCode } from "@/server/db/types";
 import { createFakeDeps } from "@/test/fakes";
-import { saveWords, submitLevelUp } from "./learning";
+import type { Db } from "./deps";
+import {
+  EXPLAIN_FAILURE_LIMIT_MESSAGE,
+  EXPLAIN_UNAVAILABLE_MESSAGE,
+  explainWord,
+  saveWords,
+  submitLevelUp,
+} from "./learning";
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -179,5 +186,152 @@ describe("submitLevelUp", () => {
     const result = await submitLevelUp(deps, USER_ID, { language: "en", from_level: 2, answers: answers(20) });
 
     expect(result).toEqual({ ok: false, code: "CONFLICT" });
+  });
+});
+
+describe("explainWord", () => {
+  // 기본 가짜 단어(src/test/fakes.ts): "I {{went}} to school." / 보기 goes·gone·going / 뜻 가다
+  const WORD_ID = "en-1-001";
+  const GENERATED = "과거의 일이라 went를 써요.";
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("저장본이 있으면 그대로 돌려주고 AI와 저장을 부르지 않는다", async () => {
+    const deps = createFakeDeps({
+      db: { beginWordExplanation: async () => ({ ok: true, value: { state: "cached", explanation: "저장된 설명" } }) },
+    });
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({
+      ok: true,
+      value: { explanation: "저장된 설명" },
+    });
+    expect(deps.db.beginWordExplanation).toHaveBeenCalledWith(USER_ID, WORD_ID, "goes");
+    expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
+    expect(deps.db.saveWordExplanation).not.toHaveBeenCalled();
+  });
+
+  it("저장본이 없으면 DB 단어로 AI를 부르고, 성공하면 저장한 뒤 설명을 돌려준다", async () => {
+    const deps = createFakeDeps();
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({
+      ok: true,
+      value: { explanation: GENERATED },
+    });
+    expect(deps.db.getWord).toHaveBeenCalledWith(WORD_ID);
+    expect(deps.ai.generateExplanation).toHaveBeenCalledWith({
+      language: "en",
+      level: 1,
+      sentence: "I went to school.",
+      exampleKo: "나는 학교에 갔다.",
+      answer: "went",
+      meaningKo: "가다",
+      choice: "goes",
+    });
+    expect(deps.db.saveWordExplanation).toHaveBeenCalledWith(WORD_ID, "goes", GENERATED);
+    const order = [deps.db.beginWordExplanation, deps.ai.generateExplanation, deps.db.saveWordExplanation].map(
+      (fn) => fn.mock.invocationCallOrder[0],
+    );
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("복습(choice 없음)은 빈 문자열 키로 예약·저장하고, 프롬프트의 choice는 null이다", async () => {
+    const deps = createFakeDeps();
+
+    await explainWord(deps, USER_ID, { word_id: WORD_ID });
+
+    expect(deps.db.beginWordExplanation).toHaveBeenCalledWith(USER_ID, WORD_ID, "");
+    expect(deps.ai.generateExplanation).toHaveBeenCalledWith(expect.objectContaining({ choice: null }));
+    expect(deps.db.saveWordExplanation).toHaveBeenCalledWith(WORD_ID, "", GENERATED);
+  });
+
+  it("정답 보기도 받는다", async () => {
+    const deps = createFakeDeps();
+
+    expect((await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "went" })).ok).toBe(true);
+    expect(deps.db.beginWordExplanation).toHaveBeenCalledWith(USER_ID, WORD_ID, "went");
+  });
+
+  // next build가 테스트 파일도 타입 검사하므로 케이스 타입을 명시한다
+  it.each<[string, Db["saveWordExplanation"]]>([
+    ["거부돼도(NOT_FOUND)", async () => ({ ok: false, code: "NOT_FOUND" })],
+    [
+      "throw해도",
+      async () => {
+        throw new Error("RPC save_word_explanation 실패: 08006 connection");
+      },
+    ],
+  ])("저장이 %s 설명을 돌려주고, 설명 내용 없이 로그만 남긴다", async (_, saveWordExplanation) => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const deps = createFakeDeps({ db: { saveWordExplanation } });
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({
+      ok: true,
+      value: { explanation: GENERATED },
+    });
+    expect(error).toHaveBeenCalledOnce();
+    const line = String(error.mock.calls[0][0]);
+    expect(line).toContain(WORD_ID);
+    expect(line).not.toContain(GENERATED);
+    expect(line).not.toContain("goes");
+  });
+
+  it("없는 단어는 404이고 예약·AI를 부르지 않는다", async () => {
+    const deps = createFakeDeps({ db: { getWord: async () => null } });
+
+    expect(await explainWord(deps, USER_ID, { word_id: "en-1-999", choice: "goes" })).toEqual({
+      ok: false,
+      code: "NOT_FOUND",
+    });
+    expect(deps.db.beginWordExplanation).not.toHaveBeenCalled();
+    expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
+  });
+
+  it.each(["wrong", "Went", "went "])("그 단어의 보기가 아닌 choice(%j)는 400이고 예약·AI를 부르지 않는다", async (choice) => {
+    const deps = createFakeDeps();
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice })).toEqual({ ok: false, code: "INVALID_INPUT" });
+    expect(deps.db.beginWordExplanation).not.toHaveBeenCalled();
+    expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
+  });
+
+  it.each<DbErrorCode>(["LIMIT_REACHED", "CONSENT_REQUIRED", "ONBOARDING_REQUIRED", "NOT_FOUND"])(
+    "예약이 %s로 거부되면 그대로 돌려주고 AI를 부르지 않는다",
+    async (code) => {
+      const deps = createFakeDeps({ db: { beginWordExplanation: async () => ({ ok: false, code }) } });
+
+      expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({ ok: false, code });
+      expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
+      expect(deps.db.saveWordExplanation).not.toHaveBeenCalled();
+    },
+  );
+
+  it("예약이 AI_FAILURE_LIMIT로 거부되면 설명용 문구로 돌려주고 AI를 부르지 않는다", async () => {
+    const deps = createFakeDeps({
+      db: { beginWordExplanation: async () => ({ ok: false, code: "AI_FAILURE_LIMIT" }) },
+    });
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({
+      ok: false,
+      code: "AI_FAILURE_LIMIT",
+      message: EXPLAIN_FAILURE_LIMIT_MESSAGE,
+    });
+    expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
+  });
+
+  it("AI가 실패하면 예약 id와 실패 사유로 실패 RPC를 부르고 503과 설명 실패 문구를 돌려준다. 저장하지 않는다", async () => {
+    const deps = createFakeDeps({
+      db: { beginWordExplanation: async () => ({ ok: true, value: { state: "reserved", eventId: 42 } }) },
+      ai: { generateExplanation: async () => ({ ok: false, reason: "timeout" }) },
+    });
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({
+      ok: false,
+      code: "AI_UNAVAILABLE",
+      message: EXPLAIN_UNAVAILABLE_MESSAGE,
+    });
+    expect(deps.db.failWordExplanation).toHaveBeenCalledWith(USER_ID, 42, "timeout");
+    expect(deps.db.saveWordExplanation).not.toHaveBeenCalled();
   });
 });

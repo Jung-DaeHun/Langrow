@@ -79,6 +79,7 @@ function defaultAi(): Ai {
       ok: true,
       value: { good: "자기소개를 끝까지 이어 갔어요.", improve: ["I'm으로 문장을 시작해 보세요."] },
     }),
+    generateExplanation: async () => ({ ok: true, value: { explanation: "과거의 일이라 went를 써요." } }),
   };
 }
 

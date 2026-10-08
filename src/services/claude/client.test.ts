@@ -2,7 +2,14 @@ import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { scenariosForLevel } from "@/lib/scenarios";
 import { createAi, type AiClient } from "./client";
-import { buildFeedbackPrompt, buildTurnPrompt, type FeedbackPromptInput, type TurnPromptInput } from "./prompts";
+import {
+  buildExplanationPrompt,
+  buildFeedbackPrompt,
+  buildTurnPrompt,
+  type ExplanationPromptInput,
+  type FeedbackPromptInput,
+  type TurnPromptInput,
+} from "./prompts";
 import type { Feedback, TurnReply } from "./schemas";
 
 type FakeResponse = { stop_reason: Anthropic.StopReason | null; content: { type: string; text?: string }[] };
@@ -162,6 +169,41 @@ describe("generateFeedback", () => {
   it("첫 호출이 실패하면 한 번 더 부르고, 두 번 실패하면 실패를 돌려준다", async () => {
     const { ai, requests } = setup(new Anthropic.APIConnectionTimeoutError(), new Anthropic.APIConnectionTimeoutError());
     expect(await ai.generateFeedback(feedbackInput)).toEqual({ ok: false, reason: "timeout" });
+    expect(requests).toHaveLength(2);
+  });
+});
+
+describe("generateExplanation", () => {
+  const explanationInput: ExplanationPromptInput = {
+    language: "ja",
+    level: 1,
+    sentence: "[朝|あさ]ごはんを[食|た]べました。",
+    exampleKo: "아침밥을 먹었어요.",
+    answer: "[食|た]べました",
+    meaningKo: "먹다",
+    choice: "[食|た]べる",
+  };
+
+  it("성공하면 설명을 돌려주고, 같은 model·effort와 { explanation } 형식·설명 프롬프트로 한 번 부른다", async () => {
+    const { ai, requests } = setup(done({ explanation: "이미 먹은 일이라 과거형을 써요." }));
+
+    expect(await ai.generateExplanation(explanationInput)).toEqual({
+      ok: true,
+      value: { explanation: "이미 먹은 일이라 과거형을 써요." },
+    });
+    expect(requests).toHaveLength(1);
+    const prompt = buildExplanationPrompt(explanationInput);
+    expect(requests[0]).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
+    const { format, effort } = requests[0].output_config as { format: { schema: { properties: object } }; effort: string };
+    expect(effort).toBe("low");
+    expect(Object.keys(format.schema.properties)).toEqual(["explanation"]);
+  });
+
+  it("설명이 공백뿐이면 다시 부르고, 두 번 다 그러면 invalid_output이다", async () => {
+    const blank = done({ explanation: " \n" });
+    const { ai, requests } = setup(blank, blank);
+
+    expect(await ai.generateExplanation(explanationInput)).toEqual({ ok: false, reason: "invalid_output" });
     expect(requests).toHaveLength(2);
   });
 });

@@ -26,6 +26,9 @@ export type WordBatchResponse = { insertedCount: number };
 // POST /api/words/review
 export type WordReviewResponse = { reviewedCount: number };
 
+// POST /api/words/explain
+export type WordExplainResponse = { explanation: string };
+
 // POST /api/level-up. passed·level은 RPC 결과다. wrong은 틀린 순서대로이고 answer는 정답 표기다
 export type LevelUpResponse = { passed: boolean; level: Level; score: number; wrong: { wordId: string; answer: string }[] };
 

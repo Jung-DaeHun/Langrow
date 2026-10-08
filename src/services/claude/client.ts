@@ -3,8 +3,22 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
 import { getClaudeEnv } from "@/services/env";
-import { buildFeedbackPrompt, buildTurnPrompt, type FeedbackPromptInput, type TurnPromptInput } from "./prompts";
-import { feedbackSchema, turnReplySchema, type Feedback, type TurnReply } from "./schemas";
+import {
+  buildExplanationPrompt,
+  buildFeedbackPrompt,
+  buildTurnPrompt,
+  type ExplanationPromptInput,
+  type FeedbackPromptInput,
+  type TurnPromptInput,
+} from "./prompts";
+import {
+  explanationSchema,
+  feedbackSchema,
+  turnReplySchema,
+  type Explanation,
+  type Feedback,
+  type TurnReply,
+} from "./schemas";
 
 // Sonnet 5.5는 adaptive thinking이 기본이고 thinking도 max_tokens에 들어간다. 응답(약 500토큰 이하)에 여유를 둔다
 const MAX_TOKENS = 4096;
@@ -19,6 +33,7 @@ export type AiResult<T> = { ok: true; value: T } | { ok: false; reason: AiFailur
 export type Ai = {
   generateTurn(input: TurnPromptInput): Promise<AiResult<TurnReply>>;
   generateFeedback(input: FeedbackPromptInput): Promise<AiResult<Feedback>>;
+  generateExplanation(input: ExplanationPromptInput): Promise<AiResult<Explanation>>;
 };
 
 // 실제 SDK 클라이언트와 테스트의 가짜가 함께 맞추는 최소 타입
@@ -110,6 +125,12 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
           ...value,
           improve: value.improve.slice(0, IMPROVE_MAX),
         })),
+      ),
+    generateExplanation: (input) =>
+      withRetry(() =>
+        attempt(explanationSchema, () => buildExplanationPrompt(input), (value) =>
+          value.explanation.trim() ? value : null,
+        ),
       ),
   };
 }

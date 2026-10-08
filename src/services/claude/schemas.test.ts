@@ -1,6 +1,6 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { describe, expect, it } from "vitest";
-import { feedbackSchema, turnReplySchema } from "./schemas";
+import { explanationSchema, feedbackSchema, turnReplySchema } from "./schemas";
 
 describe("turnReplySchema", () => {
   it("교정이 있는 응답을 받는다", () => {
@@ -54,5 +54,21 @@ describe("구조화 출력 형식", () => {
     const format = zodOutputFormat(feedbackSchema);
     expect(format.parse('{"good":"좋아요","improve":[]}')).toEqual({ good: "좋아요", improve: [] });
     expect(() => format.parse('{"good":"좋아요"}')).toThrow();
+  });
+});
+
+describe("explanationSchema", () => {
+  it("explanation 문자열을 받는다", () => {
+    expect(explanationSchema.parse({ explanation: "과거의 일이라 went를 써요." })).toEqual({
+      explanation: "과거의 일이라 went를 써요.",
+    });
+  });
+
+  it("explanation이 없으면 거부한다", () => {
+    expect(explanationSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("길이 제약이 없어서 빈 설명도 스키마는 통과한다 (공백 검사는 client가 한다)", () => {
+    expect(explanationSchema.safeParse({ explanation: "" }).success).toBe(true);
   });
 });

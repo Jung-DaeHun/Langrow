@@ -6,8 +6,9 @@ import { getServerSupabase } from "@/services/supabase/server";
 import type { ApiError } from "@/types/api";
 import { getDeps } from "./deps";
 
-// handler 결과. server/db의 DbResult<T>도 그대로 Outcome<T>다. 202는 /end 처리 중 응답이다
-export type Outcome<T> = { ok: true; value: T; status?: 202 } | { ok: false; code: ErrorCode };
+// handler 결과. server/db의 DbResult<T>도 그대로 Outcome<T>다. 202는 /end 처리 중 응답이다.
+// message는 같은 code인데 문구가 다른 API(AI 설명 503)만 넣는다. 없으면 ERRORS의 문구다
+export type Outcome<T> = { ok: true; value: T; status?: 202 } | { ok: false; code: ErrorCode; message?: string };
 
 type Spec<B, P> = {
   requirement: Requirement; // 'login' | 'consent' | 'ready'
@@ -27,7 +28,7 @@ function isJson(contentType: string | null): boolean {
 function toResponse(outcome: Outcome<unknown>): Response {
   if (outcome.ok) return Response.json(outcome.value ?? {}, { status: outcome.status ?? 200 });
   const { status, message } = ERRORS[outcome.code];
-  return Response.json({ code: outcome.code, message } satisfies ApiError, { status });
+  return Response.json({ code: outcome.code, message: outcome.message ?? message } satisfies ApiError, { status });
 }
 
 // 로그인(401) → Content-Type(400) → params(404) → body(400) → 준비 상태(403) → handler 순서다.

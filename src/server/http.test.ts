@@ -237,6 +237,16 @@ describe("route() 응답 변환", () => {
     expect(await read(res)).toEqual({ status: 202, json: { state: "ending" } });
   });
 
+  it("실패 Outcome에 message가 있으면 그 문구로 응답한다 (code·status는 그대로)", async () => {
+    const response = await plainRoute("login", async () => ({
+      ok: false,
+      code: "AI_UNAVAILABLE",
+      message: "설명을 만들지 못했어요.",
+    }))(request(), context());
+
+    expect(await read(response)).toEqual({ status: 503, json: { code: "AI_UNAVAILABLE", message: "설명을 만들지 못했어요." } });
+  });
+
   it.each(Object.keys(ERRORS) as ErrorCode[])("에러 코드 %s는 ERRORS의 상태와 { code, message }다", async (code) => {
     const res = await plainRoute("ready", async () => ({ ok: false, code }))(request(), context());
     expect(await read(res)).toEqual({ status: ERRORS[code].status, json: errorBody(code) });
