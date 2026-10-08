@@ -1,14 +1,24 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { LEVEL_TEST_SIZE, PASS_SCORE } from "@/lib/levelTest";
 import type { Language } from "@/lib/levels";
-import { PLAN_LIMITS } from "@/lib/plan";
+import { FREE_DAILY_EXPLANATIONS, PLAN_LIMITS } from "@/lib/plan";
 import { addDays, kstDate, kstDayStart } from "@/lib/usage";
 import { BATCH_MAX } from "@/lib/wordBatch";
 import { getAdminSupabase } from "@/services/supabase/admin";
 import { createReadyUser, createTestUser, deleteTestUsers } from "@/test/db";
 import type { Database } from "@/types/database";
 import { ensureProfile, setFirstLevel, startTrial } from "./account";
-import { getWordsByIds, recordEvent, saveReview, saveWordBatch, submitLevelTest } from "./learning";
+import { beginChatTurn, createChatSession } from "./chat";
+import {
+  beginWordExplanation,
+  failWordExplanation,
+  getWordsByIds,
+  recordEvent,
+  saveReview,
+  saveWordBatch,
+  saveWordExplanation,
+  submitLevelTest,
+} from "./learning";
 import type { DbResult } from "./types";
 
 type WordInsert = Database["public"]["Tables"]["words"]["Insert"];
@@ -128,7 +138,7 @@ async function todayNewWordCount(userId: string): Promise<number> {
 
 async function eventsOf(
   userId: string,
-  name: "limit_reached" | "level_test_submitted" | "pro_clicked" | "kana_studied",
+  name: "limit_reached" | "level_test_submitted" | "pro_clicked" | "kana_studied" | "word_explained" | "chat_failed",
 ) {
   const rows = must(
     await getAdminSupabase().from("events").select("props").eq("user_id", userId).eq("name", name).order("id"),
@@ -554,5 +564,245 @@ describe("getWordsByIds", () => {
     expect([...words].sort((a, b) => a.id.localeCompare(b.id))).toEqual(
       expected.sort((a, b) => a.id.localeCompare(b.id)),
     );
+  });
+});
+
+describe("AI 정답 설명", () => {
+  // 테스트 단어: "This is {{word9101}}." / 보기 alpha·beta·gamma (testWord)
+  const WORD = EN_WORDS[0];
+  // chat 마이그레이션의 SQL 상수와 같은 값
+  const DAILY_AI_FAILURE_LIMIT = 10;
+  const AI_FAILURE_LIMIT = { ok: false, code: "AI_FAILURE_LIMIT" };
+
+  afterEach(async () => {
+    must(
+      await getAdminSupabase()
+        .from("word_explanations")
+        .delete()
+        .in(
+          "word_id",
+          ALL_WORDS.map((word) => word.id),
+        ),
+    );
+  });
+
+  async function insertExplained(
+    userId: string,
+    count: number,
+    { language = "en", at }: { language?: Language; at?: string } = {},
+  ): Promise<void> {
+    const rows = Array.from({ length: count }, () => ({
+      user_id: userId,
+      name: "word_explained",
+      props: { language, word_id: WORD.id, kind: "quiz", cached: true },
+      ...(at ? { created_at: at } : {}),
+    }));
+    must(await getAdminSupabase().from("events").insert(rows));
+  }
+
+  async function insertFailures(userId: string, count: number): Promise<void> {
+    const rows = Array.from({ length: count }, () => ({
+      user_id: userId,
+      name: "chat_failed",
+      props: { operation_token: null, kind: "turn", reason: "api_error" },
+    }));
+    must(await getAdminSupabase().from("events").insert(rows));
+  }
+
+  // 저장본이 없어 예약된 사용 기록의 id
+  async function reserve(userId: string, wordId = WORD.id, choice = "alpha"): Promise<number> {
+    const result = valueOf(await beginWordExplanation(userId, wordId, choice));
+    if (result.state !== "reserved") throw new Error("저장본이 있어 예약하지 않았다");
+    return result.eventId;
+  }
+
+  async function storedOf(wordId = WORD.id) {
+    return must(
+      await getAdminSupabase().from("word_explanations").select("choice, explanation").eq("word_id", wordId).order("choice"),
+    );
+  }
+
+  // 사람 검수 뒤 단어를 고쳐 seed한 것처럼 바꾸고, 끝나면 원래 값으로 되돌린다
+  async function withEditedWord(change: Partial<WordInsert>, run: () => Promise<void>): Promise<void> {
+    const admin = getAdminSupabase();
+    must(await admin.from("words").update(change).eq("id", WORD.id));
+    try {
+      await run();
+    } finally {
+      must(await admin.from("words").upsert(WORD));
+    }
+  }
+
+  it("저장본이 없으면 word_explained(cached false)를 남기고 그 행의 id를 돌려준다", async () => {
+    const user = await createReadyUser();
+
+    const eventId = await reserve(user.id, WORD.id, "alpha");
+
+    const rows = must(
+      await getAdminSupabase().from("events").select("id, props").eq("user_id", user.id).eq("name", "word_explained"),
+    );
+    expect(rows).toEqual([{ id: eventId, props: { language: "en", word_id: WORD.id, kind: "quiz", cached: false } }]);
+  });
+
+  it("지금 단어 기준 저장본이 있으면 돌려주고 cached true로 센다. 다시 요청해도 다시 센다", async () => {
+    const user = await createReadyUser();
+    valueOf(await saveWordExplanation(WORD.id, "", "복습 설명"));
+
+    for (let i = 0; i < 2; i++) {
+      expect(await beginWordExplanation(user.id, WORD.id, "")).toEqual({
+        ok: true,
+        value: { state: "cached", explanation: "복습 설명" },
+      });
+    }
+    expect(await eventsOf(user.id, "word_explained")).toEqual([
+      { language: "en", word_id: WORD.id, kind: "review", cached: true },
+      { language: "en", word_id: WORD.id, kind: "review", cached: true },
+    ]);
+    // 저장본은 보기마다 따로다
+    expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha")).state).toBe("reserved");
+  });
+
+  it("Free는 오늘(언어 합산) 10회면 LIMIT_REACHED이고 limit_reached를 남기지 않는다. 어제 기록은 세지 않는다", async () => {
+    const user = await createReadyUser();
+    await insertExplained(user.id, FREE_DAILY_EXPLANATIONS, { at: yesterdayAt() });
+    await insertExplained(user.id, FREE_DAILY_EXPLANATIONS - 1, { language: "ja" });
+
+    await reserve(user.id);
+    expect(await beginWordExplanation(user.id, EN[1], "alpha")).toEqual(LIMIT_REACHED);
+    expect(await eventsOf(user.id, "limit_reached")).toEqual([]);
+  });
+
+  it("저장본 요청도 Free 한도에 들어간다", async () => {
+    const user = await createReadyUser();
+    valueOf(await saveWordExplanation(WORD.id, "alpha", "저장된 설명"));
+    await insertExplained(user.id, FREE_DAILY_EXPLANATIONS);
+
+    expect(await beginWordExplanation(user.id, WORD.id, "alpha")).toEqual(LIMIT_REACHED);
+  });
+
+  it("Pro는 10회를 넘어도 허용하고 행은 남긴다", async () => {
+    const user = await createReadyUser();
+    valueOf(await startTrial(user.id));
+    await insertExplained(user.id, FREE_DAILY_EXPLANATIONS);
+
+    await reserve(user.id);
+    expect(await eventsOf(user.id, "word_explained")).toHaveLength(FREE_DAILY_EXPLANATIONS + 1);
+  });
+
+  it("Free 9회 사용 후 동시 예약 2개는 하나만 허용한다", async () => {
+    const user = await createReadyUser();
+    await insertExplained(user.id, FREE_DAILY_EXPLANATIONS - 1);
+
+    const results = await Promise.all([
+      beginWordExplanation(user.id, EN[0], "alpha"),
+      beginWordExplanation(user.id, EN[1], "beta"),
+    ]);
+
+    expect(results.filter((result) => result.ok)).toHaveLength(1);
+    expect(results.filter((result) => !result.ok)).toEqual([LIMIT_REACHED]);
+    expect(await eventsOf(user.id, "word_explained")).toHaveLength(FREE_DAILY_EXPLANATIONS);
+  });
+
+  it("오늘 실패가 10회여도 저장본은 돌려주고, 저장본이 없으면 AI_FAILURE_LIMIT이며 기록하지 않는다", async () => {
+    const user = await createReadyUser();
+    await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT);
+    valueOf(await saveWordExplanation(WORD.id, "alpha", "저장된 설명"));
+
+    expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha"))).toEqual({
+      state: "cached",
+      explanation: "저장된 설명",
+    });
+    expect(await beginWordExplanation(user.id, WORD.id, "beta")).toEqual(AI_FAILURE_LIMIT);
+    expect(await eventsOf(user.id, "word_explained")).toHaveLength(1);
+  });
+
+  it.each<[string, Partial<WordInsert>]>([
+    ["예문", { example: "This was {{word9101}}." }],
+    ["예문 번역", { example_ko: "고친 번역이에요." }],
+    ["뜻", { meaning_ko: "고친 뜻" }],
+  ])("단어의 %s을 고치면 저장본을 쓰지 않고 새로 예약한다", async (_, change) => {
+    const user = await createReadyUser();
+    valueOf(await saveWordExplanation(WORD.id, "alpha", "옛 설명"));
+
+    await withEditedWord(change, async () => {
+      expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha")).state).toBe("reserved");
+    });
+  });
+
+  it("저장 RPC는 같은 해시면 먼저 저장된 설명을 두고, 단어가 바뀌어 해시가 다르면 바꾼다", async () => {
+    valueOf(await saveWordExplanation(WORD.id, "alpha", "먼저 만든 설명"));
+    valueOf(await saveWordExplanation(WORD.id, "alpha", "동시에 만든 설명"));
+    expect(await storedOf()).toEqual([{ choice: "alpha", explanation: "먼저 만든 설명" }]);
+
+    await withEditedWord({ example_ko: "고친 번역이에요." }, async () => {
+      valueOf(await saveWordExplanation(WORD.id, "alpha", "고친 단어의 설명"));
+      expect(await storedOf()).toEqual([{ choice: "alpha", explanation: "고친 단어의 설명" }]);
+      const user = await createReadyUser();
+      expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha"))).toEqual({
+        state: "cached",
+        explanation: "고친 단어의 설명",
+      });
+    });
+  });
+
+  it("없는 단어는 예약·저장 모두 NOT_FOUND이고 기록하지 않는다", async () => {
+    const user = await createReadyUser();
+
+    expect(await beginWordExplanation(user.id, MISSING_ID, "alpha")).toEqual({ ok: false, code: "NOT_FOUND" });
+    expect(await saveWordExplanation(MISSING_ID, "alpha", "설명")).toEqual({ ok: false, code: "NOT_FOUND" });
+    expect(await eventsOf(user.id, "word_explained")).toEqual([]);
+  });
+
+  it("미동의는 CONSENT_REQUIRED, 단어 언어의 레벨이 없으면 ONBOARDING_REQUIRED이고 기록하지 않는다", async () => {
+    const fresh = await createTestUser();
+    await ensureProfile(fresh.id);
+    const user = await createReadyUser("en", 1);
+
+    expect(await beginWordExplanation(fresh.id, WORD.id, "alpha")).toEqual({ ok: false, code: "CONSENT_REQUIRED" });
+    expect(await beginWordExplanation(user.id, JA[0], "alpha")).toEqual({ ok: false, code: "ONBOARDING_REQUIRED" });
+    expect(await eventsOf(fresh.id, "word_explained")).toEqual([]);
+    expect(await eventsOf(user.id, "word_explained")).toEqual([]);
+  });
+
+  it("실패 RPC는 예약 행을 지우고 chat_failed를 한 번만 남긴다 (두 번 불러도 같다)", async () => {
+    const user = await createReadyUser();
+    const eventId = await reserve(user.id);
+
+    valueOf(await failWordExplanation(user.id, eventId, "timeout"));
+    valueOf(await failWordExplanation(user.id, eventId, "timeout"));
+
+    expect(await eventsOf(user.id, "word_explained")).toEqual([]);
+    expect(await eventsOf(user.id, "chat_failed")).toEqual([{ operation_token: null, kind: "explain", reason: "timeout" }]);
+  });
+
+  it("남의 예약 id로 부르면 아무것도 바꾸지 않는다", async () => {
+    const owner = await createReadyUser();
+    const other = await createReadyUser();
+    const eventId = await reserve(owner.id);
+
+    valueOf(await failWordExplanation(other.id, eventId, "timeout"));
+
+    expect(await eventsOf(owner.id, "word_explained")).toHaveLength(1);
+    expect(await eventsOf(owner.id, "chat_failed")).toEqual([]);
+    expect(await eventsOf(other.id, "chat_failed")).toEqual([]);
+  });
+
+  it("설명 실패도 대화의 하루 실패 10회에 들어간다", async () => {
+    const user = await createReadyUser();
+    await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT - 1);
+    valueOf(await failWordExplanation(user.id, await reserve(user.id), "api_error"));
+
+    const { sessionId } = valueOf(await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" }));
+    expect(await beginChatTurn(user.id, sessionId, "hi")).toEqual(AI_FAILURE_LIMIT);
+  });
+
+  it("예약·저장본 응답·실패는 활동일·연속일을 바꾸지 않는다", async () => {
+    const user = await createReadyUser();
+
+    valueOf(await failWordExplanation(user.id, await reserve(user.id), "api_error"));
+    valueOf(await saveWordExplanation(WORD.id, "alpha", "설명"));
+    valueOf(await beginWordExplanation(user.id, WORD.id, "alpha"));
+
+    expect(await activityOf(user.id)).toEqual(NO_ACTIVITY);
   });
 });

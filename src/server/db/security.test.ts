@@ -13,6 +13,7 @@ import {
 } from "@/test/db";
 import { agreeTerms, setFirstLevel, switchLanguage } from "./account";
 import { beginChatTurn, beginEnd, createChatSession, finishChatTurn } from "./chat";
+import { beginWordExplanation, saveWordExplanation } from "./learning";
 import type { DbResult } from "./types";
 
 // 구현 파일이 없는 보안·스키마·SQL helper 테스트 (spec/testing.md, spec/backend.md 보안 체크리스트 5·11·13)
@@ -26,7 +27,7 @@ const USER_TABLES = [
   "events",
   "user_activity_days",
 ] as const;
-const TABLES = [...USER_TABLES, "words"] as const;
+const TABLES = [...USER_TABLES, "words", "word_explanations"] as const;
 type Table = (typeof TABLES)[number];
 
 const PERMISSION_DENIED = "42501";
@@ -49,6 +50,7 @@ const WORD = {
 
 function ownerColumn(table: Table): string {
   if (table === "profiles" || table === "words") return "id";
+  if (table === "word_explanations") return "word_id";
   return "user_id";
 }
 
@@ -66,6 +68,10 @@ function expectDenied(error: { code: string; message: string } | null, target: s
 function must<T>(result: { data: T | null; error: unknown }): T {
   if (result.error) throw result.error;
   return result.data as T;
+}
+
+function valueOfSave(result: DbResult<null>): void {
+  if (!result.ok) throw new Error(`저장 실패: ${result.code}`);
 }
 
 // 권한 검사는 값보다 먼저 거부하므로 열 하나만 넣는다
@@ -157,6 +163,15 @@ describe("테이블 권한과 RLS", () => {
     const client = await signedInClient(me);
     const rows = must(await client.from("words").select("id").eq("id", WORD.id));
     expect(rows).toEqual([{ id: WORD.id }]);
+  });
+
+  it("authenticated는 word_explanations를 읽지 못한다 (서버 RPC로만 읽는다)", async () => {
+    valueOfSave(await saveWordExplanation(WORD.id, "", "복습 설명"));
+    const me = await createReadyUser();
+    const client = untyped(await signedInClient(me));
+
+    const read = await client.from("word_explanations").select("*");
+    expectDenied(read.error, "table word_explanations", "select word_explanations");
   });
 
   it("authenticated는 모든 테이블에 INSERT·UPDATE·DELETE를 하지 못한다", async () => {
@@ -323,6 +338,37 @@ describe("함수 실행 권한", () => {
       }
     }
     expect(await snapshot(ids)).toEqual(before);
+  });
+
+  it("anon·authenticated는 AI 정답 설명 함수를 부르지 못하고 상태도 바뀌지 않는다", async () => {
+    const user = await createReadyUser("en", 1);
+    const reserved = await beginWordExplanation(user.id, WORD.id, "chair");
+    if (!reserved.ok || reserved.value.state !== "reserved") throw new Error("예약하지 못했다");
+
+    // service_role이면 모두 상태를 바꾸거나 저장본을 읽는 호출이다
+    const calls: [string, Record<string, unknown>][] = [
+      ["word_hash", { p_word_id: WORD.id }],
+      ["begin_word_explanation", { p_user_id: user.id, p_word_id: WORD.id, p_choice: "" }],
+      ["fail_word_explanation", { p_user_id: user.id, p_event_id: reserved.value.eventId, p_reason: "timeout" }],
+      ["save_word_explanation", { p_word_id: WORD.id, p_choice: "river", p_explanation: "설명" }],
+    ];
+    const storedOf = async () =>
+      must(await getAdminSupabase().from("word_explanations").select("choice, explanation").eq("word_id", WORD.id));
+    const before = await snapshot([user.id]);
+    const storedBefore = await storedOf();
+    const clients: [string, SupabaseClient][] = [
+      ["anon", untyped(anonClient())],
+      ["authenticated", untyped(await signedInClient(user))],
+    ];
+
+    for (const [role, client] of clients) {
+      for (const [fn, args] of calls) {
+        const { error } = await client.rpc(fn, args);
+        expectDenied(error, `function ${fn}`, `${role} ${fn}`);
+      }
+    }
+    expect(await snapshot([user.id])).toEqual(before);
+    expect(await storedOf()).toEqual(storedBefore);
   });
 });
 

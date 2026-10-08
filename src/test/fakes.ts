@@ -49,6 +49,19 @@ function defaultDb(): Db {
     submitLevelTest: async () => ({ ok: true, value: { passed: true, level: 2 } }),
     recordEvent: async () => ({ ok: true, value: null }),
     getWordsByIds: async (ids) => ids.map((id) => ({ id, language: "en", level: 1, example: "This is a {{pen}}." })),
+    // 정답 went, 보기 goes·gone·going
+    getWord: async (id) => ({
+      id,
+      language: "en",
+      level: 1,
+      meaningKo: "가다",
+      example: "I {{went}} to school.",
+      exampleKo: "나는 학교에 갔다.",
+      distractors: ["goes", "gone", "going"],
+    }),
+    beginWordExplanation: async () => ({ ok: true, value: { state: "reserved", eventId: 1 } }),
+    failWordExplanation: async () => ({ ok: true, value: null }),
+    saveWordExplanation: async () => ({ ok: true, value: null }),
   };
 }
 

@@ -126,6 +126,25 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"word_explanations": {
+                  Row: {
+                    "choice": string,"created_at": string,"explanation": string,"word_hash": string,"word_id": string
+                  }
+                  Insert: {
+                    "choice": string,"created_at"?: string,"explanation": string,"word_hash": string,"word_id": string
+                  }
+                  Update: {
+                    "choice"?: string,"created_at"?: string,"explanation"?: string,"word_hash"?: string,"word_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "word_explanations_word_id_fkey"
+      columns: ["word_id"]
+isOneToOne: false
+      referencedRelation: "words"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"words": {
                   Row: {
                     "distractors": (string)[],"example": string,"example_ko": string,"id": string,"language": string,"level": number,"meaning_ko": string,"rank": number,"reading": string | null,"word": string
@@ -154,6 +173,9 @@ isOneToOne: false
 "begin_end":
 { Args: { "p_session_id": string,"p_user_id": string }; Returns: Json
                            },
+"begin_word_explanation":
+{ Args: { "p_choice": string,"p_user_id": string,"p_word_id": string }; Returns: Json
+                           },
 "chat_failure_limit_reached":
 { Args: { "p_user_id": string }; Returns: boolean
                            },
@@ -180,6 +202,9 @@ isOneToOne: false
                            },
 "fail_end":
 { Args: { "p_reason": string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+                           },
+"fail_word_explanation":
+{ Args: { "p_event_id": number,"p_reason": string,"p_user_id": string }; Returns: Json
                            },
 "finish_chat_turn":
 { Args: { "p_correction": Json,"p_reply": string,"p_reply_ko": string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
@@ -220,6 +245,9 @@ isOneToOne: false
 "save_word_batch":
 { Args: { "p_items": Json,"p_language": string,"p_user_id": string }; Returns: Json
                            },
+"save_word_explanation":
+{ Args: { "p_choice": string,"p_explanation": string,"p_word_id": string }; Returns: Json
+                           },
 "set_first_level":
 { Args: { "p_language": string,"p_level": number,"p_user_id": string }; Returns: Json
                            },
@@ -231,6 +259,9 @@ isOneToOne: false
                            },
 "switch_language":
 { Args: { "p_language": string,"p_user_id": string }; Returns: Json
+                           },
+"word_hash":
+{ Args: { "p_word_id": string }; Returns: string
                            }
           }
           Enums: {
