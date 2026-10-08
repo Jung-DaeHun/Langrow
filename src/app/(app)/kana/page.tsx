@@ -4,7 +4,7 @@ import { requireReady } from "@/server/page";
 
 export const metadata: Metadata = { title: "가나 익히기 · Langrow" };
 
-// 가나 익히기(spec 3-1). 상수만 쓰고 DB를 읽지 않는다. 기록(kana_studied)은 KanaDeck이 회차를 마칠 때 보낸다
+// 가나 익히기(spec/words.md). 상수만 쓰고 DB를 읽지 않는다. 기록(kana_studied)은 KanaDeck이 회차를 마칠 때 보낸다
 
 export default async function KanaPage() {
   await requireReady();

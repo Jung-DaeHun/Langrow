@@ -13,7 +13,7 @@ import { BlankQuiz } from "./BlankQuiz";
 import { Furigana } from "./Furigana";
 import { WaitingDots } from "./WaitingDots";
 
-// 레벨업 테스트. 정답은 클라이언트에 없다(spec 4장): 문제에는 빈칸 문장·번역·섞은 보기만 있고, 채점은 서버가 한다.
+// 레벨업 테스트. 정답은 클라이언트에 없다(spec/words.md "레벨업 테스트"): 문제에는 빈칸 문장·번역·섞은 보기만 있고, 채점은 서버가 한다.
 // 정답은 제출 뒤 서버가 준 wrong으로만 보여 준다. 답은 useState에만 두고, [그만하기]면 버린다.
 // 합격하면 셸의 레벨 표시도 새로 읽도록 전체 이동(window.location.assign)한다
 

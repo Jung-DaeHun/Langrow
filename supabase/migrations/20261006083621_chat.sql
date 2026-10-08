@@ -1,5 +1,5 @@
 -- 대화 RPC: 턴 예약 → 확정/실패, 종료 예약 → 완료/실패, 만료 작업 복구
--- (spec 2장 "대화 1턴 처리"·"처리 중단 복구"·"세션 종료 피드백", 6-3)
+-- (spec/chat.md "대화 1턴 처리"·"처리 중단 복구"·"세션 종료 피드백", spec/backend.md "데이터 접근과 보안")
 --
 -- 함수 규칙은 schema 마이그레이션 머리말과 같다.
 -- 세션 RPC는 profiles 잠금 → recover_expired_operations → 세션(id + user_id) FOR UPDATE 순서로 잠근다.
@@ -61,7 +61,7 @@ as $$
    where user_id = p_user_id and name = 'chat_failed' and created_at >= public.kst_today_start();
 $$;
 
--- props는 spec 1장 "지표 수집"
+-- props는 spec/metrics.md "지표 수집"
 create function public.record_limit_reached(p_user_id uuid, p_feature text)
 returns void
 language sql
@@ -287,7 +287,7 @@ begin
    where id = p_session_id and user_id = p_user_id;
   perform public.record_activity(p_user_id);
 
-  -- 이 확정으로 오늘 계정의 done 턴 수가 한도와 같아지면 기록한다 (spec 1장 "지표 수집")
+  -- 이 확정으로 오늘 계정의 done 턴 수가 한도와 같아지면 기록한다 (spec/metrics.md "지표 수집")
   if v_reserved_at >= public.kst_today_start()
      and (select count(*) from public.chat_turns
            where user_id = p_user_id and status = 'done' and created_at >= public.kst_today_start())

@@ -2,8 +2,16 @@
 
 한국인 학습자를 위한 AI 언어 학습 웹 서비스(영어·일본어). MVP의 목적은 수요 검증이다.
 - 요약 규칙: `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/ADR.md`, `docs/UI_GUIDE.md`
-- 상세 동작(상태 전이, RPC 단계, 에러 코드, 테스트 목록): `docs/spec/plan.md`. 요약 문서와 다르면 spec이 기준이며, 요약 문서를 고친다.
-- UI 상세 규격(토큰 값, 컴포넌트 클래스, 화면별 구성): `docs/spec/ui.md`. 화면·컴포넌트 step에서 읽는다.
+- 상세 동작: `docs/spec/`. 요약 문서와 다르면 spec이 기준이며, 요약 문서를 고친다. 작업에 필요한 파일만 읽는다.
+  - `journey.md` 유저 저니, 홈 구조, 연속 학습일, 예외 흐름, 화면 목록, 페이지 접근
+  - `metrics.md` 이벤트·지표 수집, 수요 검증 기준
+  - `chat.md` AI 대화: 턴 처리, 처리 중단 복구, 레벨별 조절·후리가나, 종료 피드백
+  - `words.md` 단어 학습, 오답 복습, AI 정답 설명, 가나 익히기, 레벨업 테스트
+  - `usage.md` 플랜 한도, 사용량 세는 법, 무료 체험, 비용 추정
+  - `backend.md` 레이어, 데이터 접근과 보안(RPC·잠금·권한), API, 데이터 모델, Claude 연동, 에러 코드
+  - `ops.md` 환경과 배포, 출시 최소 요건
+  - `testing.md` TDD hook 파일 규칙, 테스트 목록
+  - `ui.md` UI 상세 규격(토큰 값, 컴포넌트 클래스, 화면별 구성). 화면·컴포넌트 step에서 읽는다.
 
 ## 기술 스택
 - Next.js (App Router), TypeScript strict mode, Tailwind CSS

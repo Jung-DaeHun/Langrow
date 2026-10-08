@@ -1,6 +1,6 @@
 import { ERRORS, isErrorCode, type ErrorCode } from "@/lib/errors";
 
-// 브라우저 → /api/** 호출은 모두 이 함수로 한다(spec 6-10). 401·403 이동, 202, 네트워크 오류를 여기서 처리한다
+// 브라우저 → /api/** 호출은 모두 이 함수로 한다(spec/backend.md "에러 코드"). 401·403 이동, 202, 네트워크 오류를 여기서 처리한다
 
 export type ApiFailureCode = ErrorCode | "NETWORK";
 export type ApiResult<T> =

@@ -97,7 +97,7 @@ spec과 다르게 구현한 점은 summary가 아니라 결과 파일의 `spec_d
 
 먼저 아래 파일들을 읽고 프로젝트의 아키텍처와 설계 의도를 파악하라:
 
-- {이 step에 필요한 문서와 절만. 예: `/docs/ARCHITECTURE.md`, `/docs/spec/plan.md` 3장}
+- {이 step에 필요한 문서와 절만. 예: `/docs/ARCHITECTURE.md`, `/docs/spec/words.md` "오늘의 학습"}
 - {이전 step에서 생성/수정된 파일 경로}
 
 이전 step에서 만들어진 코드를 꼼꼼히 읽고, 설계 의도를 이해한 뒤 작업하라.

@@ -11,7 +11,7 @@ import { requireReady } from "@/server/page";
 export const metadata: Metadata = { title: "레벨업 테스트 · Langrow" };
 
 // 현재 레벨 단어에서 무작위 20문제를 낸다. 정답(예문의 {{ }} 안)은 props로 넘기지 않는다.
-// 클라이언트에는 word_id·빈칸 문장·번역·섞은 보기만 가고, 채점은 /api/level-up이 한다(spec 4장)
+// 클라이언트에는 word_id·빈칸 문장·번역·섞은 보기만 가고, 채점은 /api/level-up이 한다(spec/words.md "레벨업 테스트")
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const PRIMARY = `inline-flex h-11 items-center justify-center gap-2 self-start rounded-full bg-accent px-5 font-semibold text-white transition duration-200 hover:bg-brand active:scale-95 ${FOCUS_RING}`;

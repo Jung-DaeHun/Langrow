@@ -6,7 +6,7 @@ import { LEVEL_TEST_SIZE, PASS_SCORE } from "@/lib/levelTest";
 import { PLAN_LIMITS, PRO_PRICE_KRW, TRIAL_DAYS } from "@/lib/plan";
 import { DAILY_WORD_GOAL } from "@/lib/today";
 
-// 랜딩(공개). 로그인 여부와 무관하게 연다(spec 6-1). 면 색으로 섹션을 나눈다: 크림 → 흰색 → house → 크림 → house 푸터
+// 랜딩(공개). 로그인 여부와 무관하게 연다(spec/journey.md "페이지 접근 규칙"). 면 색으로 섹션을 나눈다: 크림 → 흰색 → house → 크림 → house 푸터
 
 const SECTION = "px-4 py-10 md:px-10 md:py-16";
 const WORDMARK = "text-h3 font-extrabold tracking-[-0.03em]";

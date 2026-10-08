@@ -20,7 +20,7 @@ export type MetricResult = {
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-// spec 1장 "수요 검증 기준"의 가설값. 관찰 전에 고정하고 결과를 보고 바꾸지 않는다
+// spec/metrics.md "수요 검증 기준"의 가설값. 관찰 전에 고정하고 결과를 보고 바꾸지 않는다
 const RECRUIT_DAYS = 28;
 const MIN_ONBOARDED_USERS = 50;
 const MIN_LIMIT_TO_TRIAL_USERS = 20;

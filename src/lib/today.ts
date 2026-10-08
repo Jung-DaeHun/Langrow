@@ -23,7 +23,7 @@ export function remainingGoalCount(word: WordGoal, chatDone: boolean): number {
   return (word.done || word.exhausted ? 0 : 1) + (chatDone ? 0 : 1);
 }
 
-// 새 단어 소진 안내 버튼(spec 3장 "새 단어 소진"). 고수는 레벨업이 없고, 오답이 없으면 복습 대신 대화로 보낸다
+// 새 단어 소진 안내 버튼(spec/words.md "새 단어 소진"). 고수는 레벨업이 없고, 오답이 없으면 복습 대신 대화로 보낸다
 export type ExhaustedAction = "level-up" | "review" | "chat";
 
 export function exhaustedActions(level: Level, reviewCount: number): ExhaustedAction[] {

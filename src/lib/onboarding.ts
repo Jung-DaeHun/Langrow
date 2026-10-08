@@ -1,7 +1,7 @@
 import { LANGUAGES, type Language } from "./levels";
 import { checkReadiness, type ReadinessState } from "./readiness";
 
-// /onboarding의 시작 단계(spec 1장 "온보딩 도중 이탈", "언어 바꿈"). 저장된 상태에서 다시 계산하므로 이탈해도 그 단계부터 이어진다
+// /onboarding의 시작 단계(spec/journey.md "예외 흐름"의 "온보딩 도중 이탈", "언어를 바꿈"). 저장된 상태에서 다시 계산하므로 이탈해도 그 단계부터 이어진다
 export type OnboardingStart =
   | { kind: "home" }
   | { kind: "consent"; language?: Language } // 동의 뒤 language가 있으면 레벨 단계로

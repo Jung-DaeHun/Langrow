@@ -2,7 +2,7 @@
 
 - 요약 규칙이다. 토큰 값, 컴포넌트 클래스, 화면별 구성은 `docs/spec/ui.md`에 있다. 화면·컴포넌트를 구현하는 step은 그 문서를 읽는다.
 - 시각 기준은 Langrow 디자인 프로토타입(크림 배경 + 초록 4단계, 저장소 밖)이고, 원칙 기준은 [Figma UI 디자인 원칙 7가지](https://www.figma.com/ko-kr/resource-library/ui-design-principles/)다.
-- 화면 동작(상태 전이, 한도, 에러 코드)은 `docs/spec/plan.md`를 따른다. 라이트 모드만 지원한다.
+- 화면 동작(상태 전이, 한도, 에러 코드)은 `docs/spec/`(`journey.md`, `chat.md`, `words.md`, `usage.md`, 에러 코드는 `backend.md`)을 따른다. 라이트 모드만 지원한다.
 
 ## 디자인 원칙
 1. **매일 쓰는 학습 도구다.** 마케팅 페이지가 아니다. 홈은 "오늘 할 일"과 진행률부터 보여 준다.
@@ -57,7 +57,7 @@
 - 폰트는 Pretendard Variable(UI 전체)과 Noto Sans JP(`lang="ja"` 텍스트만)다. 디자인 시스템의 Manrope·Lora·Kalam은 한글이 없어서 쓰지 않는다.
 - 크기는 토큰 클래스만 쓴다: `text-display`(랜딩 히어로), `text-h1`(화면 제목), `text-h3`(섹션), `text-lead`(카드 제목·퀴즈 보기), `text-base`(본문·말풍선·입력), `text-sm`(보조), `text-micro`(메타), `text-xs`(탭·태그), `text-quiz`·`text-word`·`text-kana`(학습 콘텐츠).
 - 줄바꿈은 `word-break: keep-all`, 바뀌는 숫자는 `tabular-nums`로 둔다. 입력 글자는 16px 이상이다.
-- 후리가나는 React `<ruby>` 요소로 그린다. 표시 레벨은 spec 2장을 따른다.
+- 후리가나는 React `<ruby>` 요소로 그린다. 표시 레벨은 `docs/spec/chat.md` "레벨별 조절"을 따른다.
 
 ## 레이아웃
 - 모바일 우선이다. 간격은 Tailwind 기본 스케일만 쓰고 `gap-[13px]` 같은 임의값을 쓰지 않는다. 좌우 여백은 `px-4`, `lg` 이상 `px-10`이다.
