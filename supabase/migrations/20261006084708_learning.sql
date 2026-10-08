@@ -1,5 +1,5 @@
 -- 학습 RPC: 단어 회차 저장, 오답 복습, 레벨업 테스트 결과, 클라이언트 이벤트
--- (spec 3장 "오늘의 학습"·"오답 복습", 3-1장 "기록", 4장, 5장 "세는 방법", 6-3)
+-- (spec/words.md "오늘의 학습"·"오답 복습"·"가나 익히기"·"레벨업 테스트", spec/usage.md "세는 방법", spec/backend.md "데이터 접근과 보안")
 --
 -- 함수 규칙은 schema 마이그레이션 머리말과 같다. 모든 RPC는 먼저 profiles를 FOR UPDATE로 잠근다.
 -- known/review 결정과 레벨업 채점은 2-api use-case가 lib로 하고, RPC는 판정이 끝난 status·score·passed를 받는다.
@@ -89,7 +89,7 @@ begin
   get diagnostics v_inserted = row_count;
   perform public.record_activity(p_user_id);
 
-  -- 이 저장으로 오늘 한도를 채웠다 (spec 1장 "지표 수집")
+  -- 이 저장으로 오늘 한도를 채웠다 (spec/metrics.md "지표 수집")
   if v_used + v_inserted = v_limit then
     perform public.record_limit_reached(p_user_id, 'words');
   end if;
@@ -215,7 +215,7 @@ begin
   end if;
 
   insert into public.events (user_id, name) values (p_user_id, p_name);
-  -- 가나 회차 완료는 학습한 날이다 (spec 3-1장)
+  -- 가나 회차 완료는 학습한 날이다 (spec/words.md "가나 익히기")
   if p_name = 'kana_studied' then
     perform public.record_activity(p_user_id);
   end if;

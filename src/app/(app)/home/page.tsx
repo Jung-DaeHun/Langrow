@@ -34,7 +34,7 @@ import { loadTodayUsage, requireReady } from "@/server/page";
 
 export const metadata: Metadata = { title: "홈 · Langrow" };
 
-// 홈은 "오늘 할 일"과 진행률부터 보여 준다(spec 1장 "홈 구조"). 플랜·체험·목표는 표시용으로만 계산한다.
+// 홈은 "오늘 할 일"과 진행률부터 보여 준다(spec/journey.md "홈 구조"). 플랜·체험·목표는 표시용으로만 계산한다.
 // 한도는 안내만 하고 버튼을 막지 않는다. 입력은 서버의 429 뒤에만 막는다(ADR-007)
 
 const SESSION_MAX_TURNS = 20;
@@ -82,7 +82,7 @@ export default async function HomePage() {
   const focus = firstDay ? "chat" : wordOpen ? "words" : chatDone ? null : "chat";
 
   const chatLimit = remaining(usage.chatTurns, PLAN_LIMITS[plan].chatTurns) === 0;
-  // 소진이면 새 단어를 약속하는 체험 안내를 하지 않는다(spec 3장)
+  // 소진이면 새 단어를 약속하는 체험 안내를 하지 않는다(spec/words.md "새 단어 소진")
   const wordsLimit = remaining(usage.newWords, PLAN_LIMITS[plan].newWords) === 0 && !goal.exhausted;
   // 두 한도에 모두 닿아도 안내는 하나다(primary는 화면에 하나)
   const limitFeature = chatLimit && wordsLimit ? "both" : chatLimit ? "chat" : wordsLimit ? "words" : null;

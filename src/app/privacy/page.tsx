@@ -1,4 +1,4 @@
-// 정식 출시 전에 법률 검토를 받는다 (spec 6-8)
+// 정식 출시 전에 법률 검토를 받는다 (spec/ops.md "출시 최소 요건")
 import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";

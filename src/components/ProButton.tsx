@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api } from "@/services/apiClient";
 import { Dialog } from "./Dialog";
 
-// 결제가 없으므로 누르면 "정식 출시 준비 중"을 보여 준다. 누를 때마다 pro_clicked를 한 번 기록한다(spec 5장)
+// 결제가 없으므로 누르면 "정식 출시 준비 중"을 보여 준다. 누를 때마다 pro_clicked를 한 번 기록한다(spec/usage.md)
 
 const BUTTON =
   "inline-flex items-center justify-center gap-2 rounded-full bg-accent font-semibold text-white transition duration-200 hover:bg-brand active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";

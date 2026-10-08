@@ -15,7 +15,7 @@ import { agreeTerms, setFirstLevel, switchLanguage } from "./account";
 import { beginChatTurn, beginEnd, createChatSession, finishChatTurn } from "./chat";
 import type { DbResult } from "./types";
 
-// 구현 파일이 없는 보안·스키마·SQL helper 테스트 (spec 7장, 보안 체크리스트 5·11·13)
+// 구현 파일이 없는 보안·스키마·SQL helper 테스트 (spec/testing.md, spec/backend.md 보안 체크리스트 5·11·13)
 
 const USER_TABLES = [
   "profiles",

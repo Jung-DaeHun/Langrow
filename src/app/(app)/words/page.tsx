@@ -14,7 +14,7 @@ import { loadTodayUsage, requireReady } from "@/server/page";
 export const metadata: Metadata = { title: "단어 · Langrow" };
 
 // 오늘의 학습 / 오답 복습. 회차 크기는 표시용 계산이고, 한도의 실제 판정은 저장 RPC가 DB 시각으로 한다.
-// 소진(학습할 단어 없음)을 한도 도달보다 먼저 판단한다. 소진에서는 새 단어를 약속하는 체험 안내를 두지 않는다(spec 3장)
+// 소진(학습할 단어 없음)을 한도 도달보다 먼저 판단한다. 소진에서는 새 단어를 약속하는 체험 안내를 두지 않는다(spec/words.md "새 단어 소진")
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const H1 = "text-h1 font-semibold tracking-[-0.02em] text-balance text-brand";

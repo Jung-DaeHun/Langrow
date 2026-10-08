@@ -6,7 +6,7 @@ import { KANA, KANA_ROWS, type Kana, type KanaScript } from "@/lib/kana";
 import { api } from "@/services/apiClient";
 import { Flashcard } from "./Flashcard";
 
-// 가나 익히기(spec 3-1). 상수만 쓰고 진행도는 저장하지 않는다. [모르겠어요]를 누른 글자는 회차 끝에 다시 넣는다.
+// 가나 익히기(spec/words.md). 상수만 쓰고 진행도는 저장하지 않는다. [모르겠어요]를 누른 글자는 회차 끝에 다시 넣는다.
 // 회차를 마칠 때마다 kana_studied를 한 번 보낸다. 활동일·연속일은 서버가 갱신하고, 실패는 [다시 시도]로만 다시 보낸다
 
 const SCRIPT_NAMES: Record<KanaScript, string> = { hiragana: "히라가나", katakana: "가타카나" };

@@ -1,6 +1,6 @@
 # 아키텍처
 
-상세 동작(RPC 단계, 상태 전이, 복구, 테스트 목록)은 `docs/spec/plan.md` 2~7장을 따른다.
+상세 동작(RPC 단계, 상태 전이, 복구, 테스트 목록)은 `docs/spec/`(`chat.md`, `words.md`, `usage.md`, `backend.md`, `testing.md` 등)을 따른다.
 
 ## 디렉토리 구조
 ```

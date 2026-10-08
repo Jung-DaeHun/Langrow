@@ -26,7 +26,7 @@ export function isCorrectChoice(choice: string, answer: string): boolean {
   return choice === answer;
 }
 
-// 화면에 넘기는 빈칸 문제. 레벨업 테스트는 정답을 클라이언트로 보내지 않으므로(spec 4장) 정답 필드를 두지 않는다
+// 화면에 넘기는 빈칸 문제. 레벨업 테스트는 정답을 클라이언트로 보내지 않으므로(spec/words.md "레벨업 테스트") 정답 필드를 두지 않는다
 export type BlankQuestion = { wordId: string; before: string; after: string; exampleKo: string; options: string[] };
 
 export function toBlankQuestion(

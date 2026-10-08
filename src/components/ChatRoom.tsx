@@ -24,7 +24,7 @@ import { Furigana } from "./Furigana";
 import { LimitNotice } from "./LimitNotice";
 import { WaitingDots } from "./WaitingDots";
 
-// 대화방(집중 모드). 상태 전이·한도·토큰은 서버가 지키고, 화면은 응답 코드별 동작(spec 6-10)만 따른다.
+// 대화방(집중 모드). 상태 전이·한도·토큰은 서버가 지키고, 화면은 응답 코드별 동작(spec/backend.md "에러 코드")만 따른다.
 // 표시된 남은 사용량으로 막지 않고 서버의 429 뒤에만 막는다. 실패한 전송·종료는 자동으로 다시 보내지 않는다.
 // 세션의 언어·레벨은 현재 학습 언어가 아니라 세션에 저장된 값이다
 
@@ -64,7 +64,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   const addedTurns = added.filter((t) => t.turnNo > lastTurnNo);
   const turns = [...room.turns, ...addedTurns];
   const showFeedback = room.status !== "active" || end !== null;
-  // 다른 탭이나 이전 방문에서 보낸 턴이 처리 중이면 완료를 기다린다(spec 1장 "대화 도중 이탈했다가 돌아옴")
+  // 다른 탭이나 이전 방문에서 보낸 턴이 처리 중이면 완료를 기다린다(spec/journey.md "대화 도중 이탈했다가 돌아옴")
   const otherPending = room.pendingTurn !== expiredPending ? room.pendingTurn : null;
   const shownPending = pending ?? otherPending?.userText ?? null;
 

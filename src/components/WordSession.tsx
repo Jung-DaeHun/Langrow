@@ -18,7 +18,7 @@ import { Furigana } from "./Furigana";
 import { LimitNotice } from "./LimitNotice";
 
 // 단어 회차: 오늘의 학습(플래시카드 → 빈칸) / 오답 복습(플래시카드만). 시작 카드 밖은 집중 모드다.
-// 답은 useState에만 두고 회차 끝에 한 번 저장한다. 중간에 나가면 버린다(spec 3장). 실패는 자동으로 다시 보내지 않는다.
+// 답은 useState에만 두고 회차 끝에 한 번 저장한다. 중간에 나가면 버린다(spec/words.md "오늘의 학습"). 실패는 자동으로 다시 보내지 않는다.
 // 회차 크기·한도는 서버가 정한다. 페이지가 넘긴 단어를 그대로 쓰고, body에 날짜·플랜·사용량을 넣지 않는다
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";

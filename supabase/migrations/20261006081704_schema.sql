@@ -1,4 +1,4 @@
--- Langrow 스키마: 테이블, 상태 제약, 인덱스, RLS, 권한, helper, 계정 RPC (spec 6-3, 6-5)
+-- Langrow 스키마: 테이블, 상태 제약, 인덱스, RLS, 권한, helper, 계정 RPC (spec/backend.md "데이터 접근과 보안"·"데이터 모델")
 --
 -- 함수 규칙 (step 1·2의 RPC도 같다)
 -- - SECURITY INVOKER, search_path = '' (본문은 public.을 붙인다)

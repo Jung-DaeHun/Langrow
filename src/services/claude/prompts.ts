@@ -24,7 +24,7 @@ type Prompt = { system: string; messages: Anthropic.MessageParam[] };
 
 const START_MESSAGE = "대화를 시작합니다";
 
-// spec 2장 "레벨별 조절" 표의 AI 문장·교정 강도
+// spec/chat.md "레벨별 조절" 표의 AI 문장·교정 강도
 const LEVEL_GUIDES: Record<Level, { sentence: string; correction: string }> = {
   1: {
     sentence: "아주 짧고 쉬운 표현만 쓴다. 기초 단어로 된 한 문장이면 충분하다.",
