@@ -41,6 +41,7 @@ type State =
 export function WordExplanation({ wordId, choice, label, showFurigana, trial, block, onBlock, onTrialStarted }: Props) {
   const [state, setState] = useState<State>({ kind: "idle" });
   const mounted = useRef(true);
+  const region = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -50,6 +51,8 @@ export function WordExplanation({ wordId, choice, label, showFurigana, trial, bl
   }, []);
 
   async function request() {
+    // 누른 버튼은 대기 표시로 바뀌며 사라진다. 포커스를 영역에 두어 Tab 한 번으로 [다음 문제]에 가게 한다
+    region.current?.focus({ preventScroll: true });
     setState({ kind: "waiting" });
     const body = choice === undefined ? { word_id: wordId } : { word_id: wordId, choice };
     const result = await api<WordExplainResponse>("POST", "/api/words/explain", body);
@@ -73,7 +76,7 @@ export function WordExplanation({ wordId, choice, label, showFurigana, trial, bl
     // 받은 설명은 뒤에 회차 안내가 생겨도 그대로 둔다
     content = (
       <div className="flex flex-col gap-1 rounded-xl bg-mint p-3">
-        <p className="text-micro text-ink-muted">AI 설명</p>
+        <p className="text-micro text-ink-muted">AI 해설</p>
         <p className="text-sm">
           <Furigana text={state.explanation} show={showFurigana} />
         </p>
@@ -85,8 +88,8 @@ export function WordExplanation({ wordId, choice, label, showFurigana, trial, bl
       <div className={`${NOTICE} bg-gold-wash text-on-gold ring-1 ring-gold-light ring-inset`}>
         <Sprout size={20} aria-hidden="true" className="shrink-0 text-gold" />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="font-bold">오늘 AI 설명 {FREE_DAILY_EXPLANATIONS}회를 모두 썼어요</p>
-          <p className="text-sm">Pro는 AI 설명을 제한 없이 볼 수 있어요.</p>
+          <p className="font-bold">오늘 AI 해설 {FREE_DAILY_EXPLANATIONS}회를 모두 썼어요</p>
+          <p className="text-sm">Pro는 AI 해설을 제한 없이 볼 수 있어요.</p>
           <div className="mt-2 flex flex-wrap items-start gap-2">
             {trial.kind === "available" ? (
               <TrialButton label="7일 무료 체험" size="sm" tone="outline" onStarted={onTrialStarted} />
@@ -131,5 +134,9 @@ export function WordExplanation({ wordId, choice, label, showFurigana, trial, bl
   }
 
   // 대기·설명이 읽히도록 live region은 처음부터 둔다
-  return <div aria-live="polite">{content}</div>;
+  return (
+    <div ref={region} tabIndex={-1} aria-live="polite" className="outline-none">
+      {content}
+    </div>
+  );
 }

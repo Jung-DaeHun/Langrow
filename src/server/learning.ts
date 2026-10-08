@@ -57,7 +57,7 @@ export async function submitLevelUp(
 
 export const EXPLAIN_UNAVAILABLE_MESSAGE = "설명을 만들지 못했어요. 횟수는 차감되지 않았어요.";
 // 실패 횟수는 대화와 같이 세지만, 공용 문구("대화를 잠시 쉬어요")는 설명 자리에 맞지 않아 바꾼다
-export const EXPLAIN_FAILURE_LIMIT_MESSAGE = "오늘은 응답 오류가 많아 AI 설명을 잠시 쉬어요. 내일 다시 시도해 주세요.";
+export const EXPLAIN_FAILURE_LIMIT_MESSAGE = "오늘은 응답 오류가 많아 AI 해설을 잠시 쉬어요. 내일 다시 시도해 주세요.";
 
 // AI 정답 설명(spec/words.md "AI 정답 설명"). 예문·보기는 클라이언트에서 받지 않고 DB 단어로 검증하고 프롬프트를 만든다.
 // 한도·저장본·실패 횟수는 예약 RPC가 계정을 잠근 뒤 판정한다. 예약한 이벤트 행이 곧 사용 기록이라 확정 단계는 없다

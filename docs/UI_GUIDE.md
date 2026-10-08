@@ -98,6 +98,6 @@
 ## 접근성
 - `<html lang="ko">`로 두고, 학습 언어로 된 텍스트(말풍선, 교정, 단어, 보기, 가나)에 `lang="en"` 또는 `lang="ja"`를 단다.
 - 대비는 AA(텍스트 4.5:1, 아이콘 3:1) 이상이다. 터치 영역은 44px(보조 36px) 이상이다.
-- 상호작용 요소는 `<button>`·`<a>`로만 만들고(`div onClick` 금지), 포커스는 `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`로 보인다. 시트·모달은 포커스를 가두고, Esc로 닫고, 닫으면 포커스를 돌려준다.
+- 상호작용 요소는 `<button>`·`<a>`로만 만들고(`div onClick` 금지), 포커스는 `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`로 보인다. 시트·모달은 포커스를 가두고, Esc로 닫고, 닫으면 포커스를 돌려준다. 누르면 사라지는 버튼(AI 해설)은 포커스를 감싼 영역으로 옮긴다.
 - 새 메시지는 `aria-live="polite"`, 토스트는 `role="status"`, 오류는 `role="alert"`로 알린다. 아이콘만 있는 버튼에는 `aria-label`을 단다.
 - 색만으로 상태를 전하지 않는다(정답·오답은 아이콘 + 문구). 200% 확대에서도 가로 스크롤이 없어야 한다.

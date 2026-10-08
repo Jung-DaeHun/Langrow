@@ -411,7 +411,7 @@ describe("WordSession 일본어 후리가나", () => {
 describe("WordSession AI 정답 설명", () => {
   const explained = (explanation: string) => ({ ok: true, status: 200, data: { explanation } }) as ApiResult<never>;
   const limited = failure(429, "LIMIT_REACHED", "오늘 사용량을 모두 썼어요.");
-  const LIMIT_TITLE = "오늘 AI 설명 10회를 모두 썼어요";
+  const LIMIT_TITLE = "오늘 AI 해설 10회를 모두 썼어요";
   const explainButton = () => screen.queryByRole("button", { name: "AI 해설" });
 
   async function toQuiz(user: User) {
@@ -435,6 +435,20 @@ describe("WordSession AI 정답 설명", () => {
     await user.click(screen.getByRole("button", { name: "다음 문제" }));
     await choose(user, "word2");
     expect(explainButton()).toBeInTheDocument();
+  });
+
+  it("키보드로 [AI 해설]을 누르면 설명을 받은 뒤 Tab 한 번으로 [다음 문제]에 간다", async () => {
+    apiMock.mockResolvedValue(explained("과거의 일이라 이 형태를 써요."));
+    const { user } = setup();
+    await toQuiz(user);
+    await choose(user, "x1a");
+
+    (explainButton() as HTMLElement).focus();
+    await user.keyboard("{Enter}");
+    await screen.findByText("과거의 일이라 이 형태를 써요.");
+    await user.tab();
+
+    expect(screen.getByRole("button", { name: "다음 문제" })).toHaveFocus();
   });
 
   it("오늘의 학습 플래시카드에는 [예문 설명]이 없다", async () => {

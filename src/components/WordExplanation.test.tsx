@@ -53,17 +53,17 @@ const explained = (explanation: string): ApiResult<WordExplainResponse> => ({
 const failure = (status: number | null, code: string, message: string) =>
   ({ ok: false, status, code, message }) as ApiResult<never>;
 const button = () => screen.getByRole("button", { name: "AI 해설" });
-const LIMIT_TITLE = "오늘 AI 설명 10회를 모두 썼어요";
+const LIMIT_TITLE = "오늘 AI 해설 10회를 모두 썼어요";
 
 describe("WordExplanation 요청", () => {
   it("처음에는 라벨 버튼만 보여 준다", () => {
     setup();
 
     expect(button()).toBeInTheDocument();
-    expect(screen.queryByText("AI 설명")).not.toBeInTheDocument();
+    expect(screen.queryByText("AI 해설", { selector: "p" })).not.toBeInTheDocument();
   });
 
-  it("누르면 점 3개로 기다리고, 받으면 버튼 없이 'AI 설명'과 설명을 보여 준다", async () => {
+  it("누르면 점 3개로 기다리고, 받으면 버튼 없이 'AI 해설' 이름표와 설명을 보여 준다", async () => {
     const pending = deferred<ApiResult<WordExplainResponse>>();
     apiMock.mockReturnValue(pending.promise);
     const { user } = setup();
@@ -74,7 +74,7 @@ describe("WordExplanation 요청", () => {
 
     pending.resolve(explained("이미 먹은 일이라 과거형을 써요."));
     expect(await screen.findByText("이미 먹은 일이라 과거형을 써요.")).toBeInTheDocument();
-    expect(screen.getByText("AI 설명")).toBeInTheDocument();
+    expect(screen.getByText("AI 해설", { selector: "p" })).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
@@ -97,6 +97,25 @@ describe("WordExplanation 요청", () => {
     await user.dblClick(button());
 
     expect(apiMock).toHaveBeenCalledOnce();
+  });
+
+  it("키보드로 누르면 버튼이 사라져도 포커스는 설명 영역에 남는다 ([다시 시도]도 같다)", async () => {
+    apiMock
+      .mockResolvedValueOnce(failure(503, "AI_UNAVAILABLE", "설명을 만들지 못했어요. 횟수는 차감되지 않았어요."))
+      .mockResolvedValueOnce(explained("다시 만든 설명"));
+    const { user } = setup();
+    const region = () => document.querySelector("[aria-live]");
+
+    await user.tab();
+    await user.keyboard("{Enter}");
+    await screen.findByRole("alert");
+    expect(region()).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "다시 시도" })).toHaveFocus();
+    await user.keyboard("{Enter}");
+    await screen.findByText("다시 만든 설명");
+    expect(region()).toHaveFocus();
   });
 
   it.each([
@@ -154,7 +173,7 @@ describe("WordExplanation 실패", () => {
   });
 
   it("429 AI_FAILURE_LIMIT면 서버 문구와 함께 onBlock한다", async () => {
-    const message = "오늘은 응답 오류가 많아 AI 설명을 잠시 쉬어요. 내일 다시 시도해 주세요.";
+    const message = "오늘은 응답 오류가 많아 AI 해설을 잠시 쉬어요. 내일 다시 시도해 주세요.";
     apiMock.mockResolvedValue(failure(429, "AI_FAILURE_LIMIT", message));
     const { user, onBlock } = setup();
 
@@ -182,7 +201,7 @@ describe("WordExplanation 회차 안내 (block)", () => {
     setup({ block: { kind: "limit" } });
 
     expect(screen.getByText(LIMIT_TITLE)).toBeInTheDocument();
-    expect(screen.getByText("Pro는 AI 설명을 제한 없이 볼 수 있어요.")).toBeInTheDocument();
+    expect(screen.getByText("Pro는 AI 해설을 제한 없이 볼 수 있어요.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "7일 무료 체험" })).toHaveClass("border-accent");
     expect(screen.queryByRole("button", { name: "AI 해설" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "내일 할게요" })).not.toBeInTheDocument();
