@@ -4,6 +4,7 @@ import { isPassed, LEVEL_TEST_SIZE, scoreAnswers } from "@/lib/levelTest";
 import type { Language, Level } from "@/lib/levels";
 import { wordStatus } from "@/lib/wordBatch";
 import type { LevelUpResponse, WordBatchResponse, WordExplainResponse } from "@/types/api";
+import type { ExplainWord } from "./db/learning";
 import type { Deps } from "./deps";
 import type { Outcome } from "./http";
 
@@ -99,14 +100,16 @@ export async function explainWord(
   }
 
   const { explanation } = generated.value;
-  await saveExplanation(deps, word.id, key, explanation);
+  await saveExplanation(deps, word, key, explanation);
   return { ok: true, value: { explanation } };
 }
 
-// 저장은 다음 요청을 위한 것이라 실패해도 이 응답을 막지 않는다. 로그에 설명 내용·고른 보기를 남기지 않는다
-async function saveExplanation(deps: Deps, wordId: string, choice: string, explanation: string): Promise<void> {
+// 저장은 다음 요청을 위한 것이라 실패해도 이 응답을 막지 않는다. 로그에 설명 내용·고른 보기를 남기지 않는다.
+// 프롬프트를 만든 단어 내용을 넘겨, 그사이 단어를 고쳐 seed했으면 저장 RPC가 저장하지 않게 한다
+async function saveExplanation(deps: Deps, word: ExplainWord, choice: string, explanation: string): Promise<void> {
+  const wordId = word.id;
   try {
-    const saved = await deps.db.saveWordExplanation(wordId, choice, explanation);
+    const saved = await deps.db.saveWordExplanation(word, choice, explanation);
     if (!saved.ok) console.error(JSON.stringify({ explain: "save_failed", wordId, code: saved.code }));
   } catch (error) {
     console.error(

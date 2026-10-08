@@ -193,6 +193,12 @@ describe("explainWord", () => {
   // 기본 가짜 단어(src/test/fakes.ts): "I {{went}} to school." / 보기 goes·gone·going / 뜻 가다
   const WORD_ID = "en-1-001";
   const GENERATED = "과거의 일이라 went를 써요.";
+  const SOURCE = expect.objectContaining({
+    id: WORD_ID,
+    example: "I {{went}} to school.",
+    exampleKo: "나는 학교에 갔다.",
+    meaningKo: "가다",
+  });
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -229,7 +235,8 @@ describe("explainWord", () => {
       meaningKo: "가다",
       choice: "goes",
     });
-    expect(deps.db.saveWordExplanation).toHaveBeenCalledWith(WORD_ID, "goes", GENERATED);
+    // 프롬프트를 만든 단어 내용을 넘겨, 그사이 단어가 바뀌었으면 저장하지 않게 한다
+    expect(deps.db.saveWordExplanation).toHaveBeenCalledWith(SOURCE, "goes", GENERATED);
     const order = [deps.db.beginWordExplanation, deps.ai.generateExplanation, deps.db.saveWordExplanation].map(
       (fn) => fn.mock.invocationCallOrder[0],
     );
@@ -243,7 +250,7 @@ describe("explainWord", () => {
 
     expect(deps.db.beginWordExplanation).toHaveBeenCalledWith(USER_ID, WORD_ID, "");
     expect(deps.ai.generateExplanation).toHaveBeenCalledWith(expect.objectContaining({ choice: null }));
-    expect(deps.db.saveWordExplanation).toHaveBeenCalledWith(WORD_ID, "", GENERATED);
+    expect(deps.db.saveWordExplanation).toHaveBeenCalledWith(SOURCE, "", GENERATED);
   });
 
   it("정답 보기도 받는다", async () => {

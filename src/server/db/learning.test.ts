@@ -570,6 +570,8 @@ describe("getWordsByIds", () => {
 describe("AI 정답 설명", () => {
   // 테스트 단어: "This is {{word9101}}." / 보기 alpha·beta·gamma (testWord)
   const WORD = EN_WORDS[0];
+  // 설명을 만들 때 쓴 단어 내용 (use-case가 getWord로 읽은 값)
+  const SOURCE = { id: WORD.id, example: WORD.example, exampleKo: WORD.example_ko, meaningKo: WORD.meaning_ko };
   // chat 마이그레이션의 SQL 상수와 같은 값
   const DAILY_AI_FAILURE_LIMIT = 10;
   const AI_FAILURE_LIMIT = { ok: false, code: "AI_FAILURE_LIMIT" };
@@ -646,7 +648,7 @@ describe("AI 정답 설명", () => {
 
   it("지금 단어 기준 저장본이 있으면 돌려주고 cached true로 센다. 다시 요청해도 다시 센다", async () => {
     const user = await createReadyUser();
-    valueOf(await saveWordExplanation(WORD.id, "", "복습 설명"));
+    valueOf(await saveWordExplanation(SOURCE, "", "복습 설명"));
 
     for (let i = 0; i < 2; i++) {
       expect(await beginWordExplanation(user.id, WORD.id, "")).toEqual({
@@ -674,7 +676,7 @@ describe("AI 정답 설명", () => {
 
   it("저장본 요청도 Free 한도에 들어간다", async () => {
     const user = await createReadyUser();
-    valueOf(await saveWordExplanation(WORD.id, "alpha", "저장된 설명"));
+    valueOf(await saveWordExplanation(SOURCE, "alpha", "저장된 설명"));
     await insertExplained(user.id, FREE_DAILY_EXPLANATIONS);
 
     expect(await beginWordExplanation(user.id, WORD.id, "alpha")).toEqual(LIMIT_REACHED);
@@ -706,7 +708,7 @@ describe("AI 정답 설명", () => {
   it("오늘 실패가 10회여도 저장본은 돌려주고, 저장본이 없으면 AI_FAILURE_LIMIT이며 기록하지 않는다", async () => {
     const user = await createReadyUser();
     await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT);
-    valueOf(await saveWordExplanation(WORD.id, "alpha", "저장된 설명"));
+    valueOf(await saveWordExplanation(SOURCE, "alpha", "저장된 설명"));
 
     expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha"))).toEqual({
       state: "cached",
@@ -722,7 +724,7 @@ describe("AI 정답 설명", () => {
     ["뜻", { meaning_ko: "고친 뜻" }],
   ])("단어의 %s을 고치면 저장본을 쓰지 않고 새로 예약한다", async (_, change) => {
     const user = await createReadyUser();
-    valueOf(await saveWordExplanation(WORD.id, "alpha", "옛 설명"));
+    valueOf(await saveWordExplanation(SOURCE, "alpha", "옛 설명"));
 
     await withEditedWord(change, async () => {
       expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha")).state).toBe("reserved");
@@ -730,12 +732,12 @@ describe("AI 정답 설명", () => {
   });
 
   it("저장 RPC는 같은 해시면 먼저 저장된 설명을 두고, 단어가 바뀌어 해시가 다르면 바꾼다", async () => {
-    valueOf(await saveWordExplanation(WORD.id, "alpha", "먼저 만든 설명"));
-    valueOf(await saveWordExplanation(WORD.id, "alpha", "동시에 만든 설명"));
+    valueOf(await saveWordExplanation(SOURCE, "alpha", "먼저 만든 설명"));
+    valueOf(await saveWordExplanation(SOURCE, "alpha", "동시에 만든 설명"));
     expect(await storedOf()).toEqual([{ choice: "alpha", explanation: "먼저 만든 설명" }]);
 
     await withEditedWord({ example_ko: "고친 번역이에요." }, async () => {
-      valueOf(await saveWordExplanation(WORD.id, "alpha", "고친 단어의 설명"));
+      valueOf(await saveWordExplanation({ ...SOURCE, exampleKo: "고친 번역이에요." }, "alpha", "고친 단어의 설명"));
       expect(await storedOf()).toEqual([{ choice: "alpha", explanation: "고친 단어의 설명" }]);
       const user = await createReadyUser();
       expect(valueOf(await beginWordExplanation(user.id, WORD.id, "alpha"))).toEqual({
@@ -745,11 +747,25 @@ describe("AI 정답 설명", () => {
     });
   });
 
+  it.each<[string, Partial<WordInsert>]>([
+    ["예문", { example: "This was {{word9101}}." }],
+    ["예문 번역", { example_ko: "고친 번역이에요." }],
+    ["뜻", { meaning_ko: "고친 뜻" }],
+  ])("설명을 만드는 사이 단어의 %s을 고쳐 seed했으면 옛 내용으로 만든 설명은 저장하지 않는다", async (_, change) => {
+    await withEditedWord(change, async () => {
+      valueOf(await saveWordExplanation(SOURCE, "alpha", "옛 내용으로 만든 설명"));
+      expect(await storedOf()).toEqual([]);
+    });
+  });
+
   it("없는 단어는 예약·저장 모두 NOT_FOUND이고 기록하지 않는다", async () => {
     const user = await createReadyUser();
 
     expect(await beginWordExplanation(user.id, MISSING_ID, "alpha")).toEqual({ ok: false, code: "NOT_FOUND" });
-    expect(await saveWordExplanation(MISSING_ID, "alpha", "설명")).toEqual({ ok: false, code: "NOT_FOUND" });
+    expect(await saveWordExplanation({ ...SOURCE, id: MISSING_ID }, "alpha", "설명")).toEqual({
+      ok: false,
+      code: "NOT_FOUND",
+    });
     expect(await eventsOf(user.id, "word_explained")).toEqual([]);
   });
 
@@ -800,7 +816,7 @@ describe("AI 정답 설명", () => {
     const user = await createReadyUser();
 
     valueOf(await failWordExplanation(user.id, await reserve(user.id), "api_error"));
-    valueOf(await saveWordExplanation(WORD.id, "alpha", "설명"));
+    valueOf(await saveWordExplanation(SOURCE, "alpha", "설명"));
     valueOf(await beginWordExplanation(user.id, WORD.id, "alpha"));
 
     expect(await activityOf(user.id)).toEqual(NO_ACTIVITY);

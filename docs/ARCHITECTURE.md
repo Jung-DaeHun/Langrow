@@ -45,7 +45,7 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 종료:   시작 RPC(active → ending + 토큰) → Claude 피드백 → 완료 RPC(ended, ready) / 실패·기한 만료 시 fallback
         처리 중 재요청은 202, 완료 후 재요청은 저장된 결과
 설명:   예약 RPC(계정 잠금, Free 하루 10회 확인, 저장본이면 바로 응답, 없으면 실패 10회 확인, word_explained 행)
-        → Claude 설명(잠금 밖) → 성공은 저장 RPC(word_explanations) 후 응답 / 실패는 실패 RPC(예약 행 삭제, chat_failed)
+        → Claude 설명(잠금 밖) → 성공은 저장 RPC(설명을 만든 단어 내용이 지금과 같을 때만 word_explanations) 후 응답 / 실패는 실패 RPC(예약 행 삭제, chat_failed)
 ```
 
 ## 상태 관리

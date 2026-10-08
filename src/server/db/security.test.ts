@@ -166,7 +166,13 @@ describe("테이블 권한과 RLS", () => {
   });
 
   it("authenticated는 word_explanations를 읽지 못한다 (서버 RPC로만 읽는다)", async () => {
-    valueOfSave(await saveWordExplanation(WORD.id, "", "복습 설명"));
+    valueOfSave(
+      await saveWordExplanation(
+        { id: WORD.id, example: WORD.example, exampleKo: WORD.example_ko, meaningKo: WORD.meaning_ko },
+        "",
+        "복습 설명",
+      ),
+    );
     const me = await createReadyUser();
     const client = untyped(await signedInClient(me));
 
@@ -350,7 +356,17 @@ describe("함수 실행 권한", () => {
       ["word_hash", { p_word_id: WORD.id }],
       ["begin_word_explanation", { p_user_id: user.id, p_word_id: WORD.id, p_choice: "" }],
       ["fail_word_explanation", { p_user_id: user.id, p_event_id: reserved.value.eventId, p_reason: "timeout" }],
-      ["save_word_explanation", { p_word_id: WORD.id, p_choice: "river", p_explanation: "설명" }],
+      [
+        "save_word_explanation",
+        {
+          p_word_id: WORD.id,
+          p_choice: "river",
+          p_explanation: "설명",
+          p_example: WORD.example,
+          p_example_ko: WORD.example_ko,
+          p_meaning_ko: WORD.meaning_ko,
+        },
+      ],
     ];
     const storedOf = async () =>
       must(await getAdminSupabase().from("word_explanations").select("choice, explanation").eq("word_id", WORD.id));

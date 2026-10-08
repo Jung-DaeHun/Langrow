@@ -135,16 +135,20 @@ export async function failWordExplanation(
   return result.ok ? { ok: true, value: null } : result;
 }
 
-// 사용자와 무관한 공용 저장본이라 userId를 받지 않는다. NOT_FOUND(단어 없음)
+// 사용자와 무관한 공용 저장본이라 userId를 받지 않는다. NOT_FOUND(단어 없음).
+// word는 설명을 만든 단어 내용이다. 그사이 단어를 고쳐 seed해 지금 단어와 다르면 저장하지 않고 성공한다
 export async function saveWordExplanation(
-  wordId: string,
+  word: Pick<ExplainWord, "id" | "example" | "exampleKo" | "meaningKo">,
   choice: string,
   explanation: string,
 ): Promise<DbResult<null>> {
   const result = await callRpc("save_word_explanation", {
-    p_word_id: wordId,
+    p_word_id: word.id,
     p_choice: choice,
     p_explanation: explanation,
+    p_example: word.example,
+    p_example_ko: word.exampleKo,
+    p_meaning_ko: word.meaningKo,
   });
   return result.ok ? { ok: true, value: null } : result;
 }

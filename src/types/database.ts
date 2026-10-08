@@ -246,7 +246,7 @@ isOneToOne: false
 { Args: { "p_items": Json,"p_language": string,"p_user_id": string }; Returns: Json
                            },
 "save_word_explanation":
-{ Args: { "p_choice": string,"p_explanation": string,"p_word_id": string }; Returns: Json
+{ Args: { "p_choice": string,"p_example": string,"p_example_ko": string,"p_explanation": string,"p_meaning_ko": string,"p_word_id": string }; Returns: Json
                            },
 "set_first_level":
 { Args: { "p_language": string,"p_level": number,"p_user_id": string }; Returns: Json
