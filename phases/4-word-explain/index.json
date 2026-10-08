@@ -1,0 +1,9 @@
+{
+  "project": "Langrow",
+  "phase": "4-word-explain",
+  "steps": [
+    { "step": 0, "name": "explain-db", "status": "pending" },
+    { "step": 1, "name": "explain-api", "status": "pending" },
+    { "step": 2, "name": "explain-ui", "status": "pending" }
+  ]
+}
