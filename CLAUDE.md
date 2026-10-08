@@ -37,6 +37,8 @@
 - `src/server/db/*.test.ts`는 실제 DB 통합 테스트다. `npm run test`에서 제외하고 `npm run test:db`에서 실행한다. RPC·마이그레이션·DB 접근 코드를 바꾸면 반드시 `test:db`를 돌린다.
 - Stop hook이 lint·build·test를 돌린다. 이 셋은 Docker와 env 없이 통과해야 한다.
 - 커밋 메시지는 conventional commits 형식을 따를 것 (feat:, fix:, docs:, refactor:)
+- 같은 폴더에서 여러 Claude 세션이 동시에 일할 수 있다. 브랜치를 만들거나 바꾸기 전과 커밋하기 전에 `git status -sb`로 현재 브랜치와 내가 만들지 않은 변경을 확인한다. 다른 세션이 이 폴더를 쓰고 있으면 `git worktree add ../Langrow-<브랜치> -b <브랜치> main`으로 폴더를 나누고 코드 작업은 그 폴더에서 연 세션으로 한다(hook은 세션을 연 폴더를 검사한다. 새 worktree에는 `.env.local`과 `node_modules`가 없어 복사하거나 `npm ci`를 한다. 로컬 Supabase는 하나라 `test:db`를 두 곳에서 동시에 돌리지 않는다). 이유: 폴더 하나는 브랜치를 하나만 가져서, 한 세션의 `git switch`·병합이 다른 세션이 읽고 고치던 파일을 바꾼다.
+- 기능 설계(brainstorming 등)는 `docs/superpowers/specs/`에 새 문서를 만들지 않고 `docs/spec/`의 주제 파일과 `docs/ADR.md`에 반영한다. 이유: spec이 두 곳에 생기면 어느 쪽이 기준인지 어긋난다.
 
 ## 명령어
 npm run dev         # 개발 서버

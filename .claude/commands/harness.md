@@ -143,7 +143,7 @@ python3 scripts/execute.py {task-name} --push  # 실행 후 push
 
 execute.py가 자동으로 처리하는 것:
 
-- `feat-{task-name}` 브랜치 생성/checkout
+- `feat-{task-name}` 브랜치 생성/checkout. 브랜치를 바꿔야 하는데 `phases/` 밖에 커밋하지 않은 변경이 있으면 멈춘다. step 커밋이 `git add -A`라서 같은 폴더를 쓰는 다른 세션의 변경이 섞이기 때문이다. phase를 도는 동안에는 같은 폴더에서 다른 세션이 작업하지 않는다(필요하면 git worktree로 나눈다)
 - 문서는 붙이지 않음 — CLAUDE.md는 `claude -p`가 자동으로 읽고, docs는 step 파일이 고른 것만 세션이 읽는다
 - 컨텍스트 누적 — 완료된 step의 summary(500자에서 자름)를 다음 step 프롬프트에 전달
 - 결과 반영 — 세션이 쓴 `step{N}-result.json`을 index.json에 옮긴다. 시도마다 남아 있던 결과 파일을 먼저 지운다
