@@ -44,6 +44,8 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
         → 성공 확정 RPC(토큰·기한 확인, 저장·활동일·연속일) 또는 실패 확정 RPC(pending 삭제, chat_failed)
 종료:   시작 RPC(active → ending + 토큰) → Claude 피드백 → 완료 RPC(ended, ready) / 실패·기한 만료 시 fallback
         처리 중 재요청은 202, 완료 후 재요청은 저장된 결과
+설명:   예약 RPC(계정 잠금, 실패 10회·Free 하루 20회 확인, word_explained 행) → Claude 설명(잠금 밖)
+        → 성공은 그대로 응답 / 실패는 실패 RPC(예약 행 삭제, chat_failed)
 ```
 
 ## 상태 관리
@@ -69,6 +71,7 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 | POST | `/api/chat/sessions/[id]/end` | 종료. 완료 200, 처리 중 202, 턴 처리 중 409 |
 | POST | `/api/words/batch` | 회차 저장. 기존 단어는 200, 신규분만 한도 확인 |
 | POST | `/api/words/review` | 복습 결과 저장 |
+| POST | `/api/words/explain` | AI 정답 설명 (Free 하루 20회, Pro 무제한, 저장 안 함) |
 | POST | `/api/level-up` | 서버 채점, 합격 시 `where level = from_level`로 +1 |
 | POST | `/api/trial` | 체험 시작 (`where trial_started_at is null`, 계정당 1번) |
 | POST | `/api/events` | `pro_clicked`, `kana_studied`만 (가나는 활동일·연속일도 갱신) |
