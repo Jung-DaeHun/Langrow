@@ -1,0 +1,4 @@
+{
+  "status": "completed",
+  "summary": "새 WordExplanation.tsx(+test): ExplanationBlock {limit}|{failure-limit,message}, props wordId·choice?·label·showFurigana·trial·block·onBlock·onTrialStarted. 버튼→WaitingDots→설명(bg-mint, Furigana)/오류+[다시 시도]/한도·실패10회 안내, 언마운트 뒤 응답 버림. TrialButton·ProButton tone?: primary|outline. BlankQuiz explanation?(choice)(learn 채점 뒤만), Flashcard revealed?(뒷면 본 뒤부터, 앞면이면 hidden). 회차 429는 WordSession explainBlock(start()·체험 시작에서 null). 빈칸 [왜 정답이에요?]+choice, review 카드만 [예문 설명]. API·docs·LevelTestRunner 변경 없음."
+}
