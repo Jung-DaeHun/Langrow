@@ -99,4 +99,18 @@ describe("TrialButton", () => {
     expect(apiMock).toHaveBeenCalledTimes(1);
     pending.resolve({ ok: true, status: 200, data: { proUntil: "2026-10-13T13:00:00.000Z" } });
   });
+
+  it("tone outline이면 outline 버튼이다 (기본은 primary)", () => {
+    render(
+      <>
+        <TrialButton label="체험 A" size="sm" />
+        <TrialButton label="체험 B" size="sm" tone="outline" />
+      </>,
+    );
+
+    expect(screen.getByRole("button", { name: "체험 A" })).toHaveClass("bg-accent");
+    const outline = screen.getByRole("button", { name: "체험 B" });
+    expect(outline).toHaveClass("border-accent", "text-accent");
+    expect(outline).not.toHaveClass("bg-accent");
+  });
 });

@@ -67,4 +67,18 @@ describe("ProButton", () => {
     await user.click(screen.getByRole("button", { name: "Pro 시작하기" }));
     expect(apiMock).toHaveBeenCalledTimes(2);
   });
+
+  it("tone outline이면 outline 버튼이다 (기본은 primary)", () => {
+    render(
+      <>
+        <ProButton label="Pro A" size="sm" />
+        <ProButton label="Pro B" size="sm" tone="outline" />
+      </>,
+    );
+
+    expect(screen.getByRole("button", { name: "Pro A" })).toHaveClass("bg-accent");
+    const outline = screen.getByRole("button", { name: "Pro B" });
+    expect(outline).toHaveClass("border-accent", "text-accent");
+    expect(outline).not.toHaveClass("bg-accent");
+  });
 });

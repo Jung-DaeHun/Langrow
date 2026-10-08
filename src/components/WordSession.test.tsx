@@ -407,3 +407,116 @@ describe("WordSession 일본어 후리가나", () => {
     expect(container.querySelectorAll("rt")).toHaveLength(0);
   });
 });
+
+describe("WordSession AI 정답 설명", () => {
+  const explained = (explanation: string) => ({ ok: true, status: 200, data: { explanation } }) as ApiResult<never>;
+  const limited = failure(429, "LIMIT_REACHED", "오늘 사용량을 모두 썼어요.");
+  const LIMIT_TITLE = "오늘 AI 설명 10회를 모두 썼어요";
+  const explainButton = () => screen.queryByRole("button", { name: "왜 정답이에요?" });
+
+  async function toQuiz(user: User) {
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+    await answerCards(user, [true, true, true]);
+  }
+
+  const choose = (user: User, text: string) => user.click(screen.getByText(text, { selector: "button span[lang]" }));
+
+  it("빈칸은 채점 뒤에만, 정답·오답 모두 [왜 정답이에요?]를 보여 주고 고른 보기로 요청한다", async () => {
+    apiMock.mockResolvedValue(explained("과거의 일이라 이 형태를 써요."));
+    const { user } = setup();
+    await toQuiz(user);
+    expect(explainButton()).not.toBeInTheDocument();
+
+    await choose(user, "x1a");
+    await user.click(explainButton() as HTMLElement);
+    expect(apiMock).toHaveBeenLastCalledWith("POST", "/api/words/explain", { word_id: "en-3-001", choice: "x1a" });
+    expect(await screen.findByText("과거의 일이라 이 형태를 써요.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "다음 문제" }));
+    await choose(user, "word2");
+    expect(explainButton()).toBeInTheDocument();
+  });
+
+  it("오늘의 학습 플래시카드에는 [예문 설명]이 없다", async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+
+    await user.click(flashcard());
+
+    expect(screen.queryByRole("button", { name: "예문 설명" })).not.toBeInTheDocument();
+  });
+
+  it("429 LIMIT_REACHED를 받으면 그 회차의 다음 문제에서도 버튼 대신 한도 안내를 보여 준다", async () => {
+    apiMock.mockResolvedValue(limited);
+    const { user } = setup();
+    await toQuiz(user);
+    await choose(user, "word1");
+    await user.click(explainButton() as HTMLElement);
+    expect(await screen.findByText(LIMIT_TITLE)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "다음 문제" }));
+    await choose(user, "word2");
+
+    expect(screen.getByText(LIMIT_TITLE)).toBeInTheDocument();
+    expect(explainButton()).not.toBeInTheDocument();
+  });
+
+  it("회차를 새로 시작하면 다시 버튼을 보여 준다", async () => {
+    apiMock.mockResolvedValue(limited);
+    const { user } = setup();
+    await toQuiz(user);
+    await choose(user, "word1");
+    await user.click(explainButton() as HTMLElement);
+    await screen.findByText(LIMIT_TITLE);
+
+    await user.click(screen.getByRole("button", { name: "그만하기" }));
+    await toQuiz(user);
+    await choose(user, "word1");
+
+    expect(explainButton()).toBeInTheDocument();
+  });
+
+  it("한도 안내에서 체험을 시작하면 같은 회차에서도 버튼이 다시 보인다", async () => {
+    apiMock
+      .mockResolvedValueOnce(limited)
+      .mockResolvedValueOnce({ ok: true, status: 200, data: { proUntil: "2026-10-15T00:00:00Z" } });
+    const { user } = setup();
+    await toQuiz(user);
+    await choose(user, "word1");
+    await user.click(explainButton() as HTMLElement);
+
+    await user.click(await screen.findByRole("button", { name: "7일 무료 체험" }));
+
+    expect(apiMock).toHaveBeenLastCalledWith("POST", "/api/trial");
+    expect(explainButton()).toBeInTheDocument();
+  });
+
+  it("기다리는 중에 다음 문제로 넘어가면 늦게 온 설명을 그리지 않는다", async () => {
+    const pending = deferred<ApiResult<never>>();
+    apiMock.mockReturnValueOnce(pending.promise);
+    const { user } = setup();
+    await toQuiz(user);
+    await choose(user, "word1");
+    await user.click(explainButton() as HTMLElement);
+
+    await user.click(screen.getByRole("button", { name: "다음 문제" }));
+    pending.resolve(explained("늦게 온 설명"));
+    await choose(user, "word2");
+
+    expect(screen.queryByText("늦게 온 설명")).not.toBeInTheDocument();
+    expect(explainButton()).toBeInTheDocument();
+  });
+
+  it("오답 복습 카드는 뒤집은 뒤에만 [예문 설명]을 보여 주고 choice 없이 요청한다", async () => {
+    apiMock.mockResolvedValue(explained("이 예문은 현재형이에요."));
+    const { user } = setup({ mode: "review", todayCount: undefined });
+    await user.click(screen.getByRole("button", { name: "복습 시작" }));
+    expect(screen.queryByRole("button", { name: "예문 설명" })).not.toBeInTheDocument();
+
+    await user.click(flashcard());
+    await user.click(screen.getByRole("button", { name: "예문 설명" }));
+
+    expect(apiMock).toHaveBeenLastCalledWith("POST", "/api/words/explain", { word_id: "en-3-001" });
+    expect(await screen.findByText("이 예문은 현재형이에요.")).toBeInTheDocument();
+  });
+});

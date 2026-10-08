@@ -154,3 +154,29 @@ describe("BlankQuiz 테스트(test)", () => {
     expect(screen.queryByRole("button", { name: /다음 문제|결과 보기/ })).not.toBeInTheDocument();
   });
 });
+
+describe("BlankQuiz 설명 자리", () => {
+  const following = (a: Node, b: Node) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
+  it("learn은 채점 뒤에만, 결과 문구와 [다음 문제] 사이에 explanation(고른 보기)을 그린다", async () => {
+    const explanation = vi.fn((choice: string) => <p>설명 자리 {choice}</p>);
+    const { user } = setup({ explanation });
+    expect(explanation).not.toHaveBeenCalled();
+
+    await user.click(option("goes"));
+
+    const slot = screen.getByText("설명 자리 goes");
+    expect(following(screen.getByText(/오답이에요/), slot)).toBe(true);
+    expect(following(slot, screen.getByRole("button", { name: "다음 문제" }))).toBe(true);
+  });
+
+  it("test 모드(레벨업 테스트)는 explanation을 그리지 않는다", async () => {
+    const explanation = vi.fn(() => <p>설명 자리</p>);
+    const { user } = setup({ mode: "test", answer: undefined, meaningKo: undefined, explanation });
+
+    await user.click(option("goes"));
+
+    expect(explanation).not.toHaveBeenCalled();
+    expect(screen.queryByText("설명 자리")).not.toBeInTheDocument();
+  });
+});

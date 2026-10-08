@@ -12,16 +12,22 @@ const OUTLINE = `${BUTTON} border border-accent bg-transparent text-accent hover
 const FACE =
   "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-card p-6 text-center shadow-raised backface-hidden";
 
-type Props = { front: ReactNode; back: ReactNode; onAnswer: (knew: boolean) => void };
+type Props = { front: ReactNode; back: ReactNode; revealed?: ReactNode; onAnswer: (knew: boolean) => void };
 
-export function Flashcard({ front, back, onAnswer }: Props) {
+export function Flashcard({ front, back, revealed, onAnswer }: Props) {
   const [flipped, setFlipped] = useState(false);
+  // revealed(오답 복습의 AI 설명)는 뒷면을 처음 본 뒤부터 둔다. 앞면으로 돌리면 숨기기만 해서
+  // 기다리던 요청이나 받은 설명을 잃지 않는다(다시 누르면 또 차감된다)
+  const [seenBack, setSeenBack] = useState(false);
 
   return (
     <div className="mx-auto flex w-full max-w-[440px] flex-col gap-4">
       <button
         type="button"
-        onClick={() => setFlipped((v) => !v)}
+        onClick={() => {
+          setFlipped((v) => !v);
+          setSeenBack(true);
+        }}
         className={`block aspect-[4/3.4] w-full rounded-xl perspective-distant ${FOCUS_RING}`}
       >
         {/* reduced motion이면 globals.css가 transition을 0으로 만들어 회전 없이 면만 바뀐다 */}
@@ -37,6 +43,7 @@ export function Flashcard({ front, back, onAnswer }: Props) {
           </span>
         </span>
       </button>
+      {revealed !== undefined && seenBack && <div hidden={!flipped}>{revealed}</div>}
       <div className="flex gap-2">
         <button type="button" onClick={() => onAnswer(false)} className={`${OUTLINE} flex-1`}>
           모르겠어요

@@ -16,6 +16,7 @@ import { BlankQuiz } from "./BlankQuiz";
 import { Flashcard } from "./Flashcard";
 import { Furigana } from "./Furigana";
 import { LimitNotice } from "./LimitNotice";
+import { WordExplanation, type ExplanationBlock } from "./WordExplanation";
 
 // 단어 회차: 오늘의 학습(플래시카드 → 빈칸) / 오답 복습(플래시카드만). 시작 카드 밖은 집중 모드다.
 // 답은 useState에만 두고 회차 끝에 한 번 저장한다. 중간에 나가면 버린다(spec/words.md "오늘의 학습"). 실패는 자동으로 다시 보내지 않는다.
@@ -70,6 +71,8 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
   const [body, setBody] = useState<SaveBody | null>(null);
   const [save, setSave] = useState<Save>({ kind: "saving" });
   const [trialStarted, setTrialStarted] = useState(false);
+  // AI 설명의 429 안내는 회차 전체에 건다. 새 회차를 시작하거나 체험을 시작하면 푼다
+  const [explainBlock, setExplainBlock] = useState<ExplanationBlock | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -85,6 +88,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
     setCorrect([]);
     setBody(null);
     setTrialStarted(false);
+    setExplainBlock(null);
     setPhase("cards");
   }
 
@@ -137,6 +141,22 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
   function backToStart() {
     router.refresh();
     setPhase("start");
+  }
+
+  // 문제·카드마다 새로 만들어진다(BlankQuiz·Flashcard의 key). 429 안내는 explainBlock이라 다음 문제에도 이어진다
+  function explanationFor(w: Word, label: string, choice?: string) {
+    return (
+      <WordExplanation
+        wordId={w.id}
+        choice={choice}
+        label={label}
+        showFurigana={furigana}
+        trial={trial}
+        block={explainBlock}
+        onBlock={setExplainBlock}
+        onTrialStarted={() => setExplainBlock(null)}
+      />
+    );
   }
 
   if (phase === "start") {
@@ -217,6 +237,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
               <span className="text-sm text-ink-muted">{w.exampleKo}</span>
             </>
           }
+          revealed={mode === "review" ? explanationFor(w, "예문 설명") : undefined}
           onAnswer={answerCard}
         />
       </div>
@@ -241,6 +262,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
           meaningKo={w.meaningKo}
           isLast={index === runWords.length - 1}
           onNext={answerQuiz}
+          explanation={(choice) => explanationFor(w, "왜 정답이에요?", choice)}
         />
       </div>
     );

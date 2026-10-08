@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Flashcard } from "./Flashcard";
 
@@ -57,5 +58,48 @@ describe("Flashcard", () => {
 
     expect(screen.getByRole("button", { name: "알아요" })).toHaveClass("bg-accent");
     expect(screen.getByRole("button", { name: "모르겠어요" })).toHaveClass("border-accent");
+  });
+});
+
+describe("Flashcard revealed", () => {
+  // 앞면으로 돌렸다 와도 상태가 남는지 보려고 누른 횟수를 들고 있는 자식을 쓴다
+  function Counter() {
+    const [n, setN] = useState(0);
+    return (
+      <button type="button" onClick={() => setN(n + 1)}>
+        눌림 {n}
+      </button>
+    );
+  }
+
+  function setupRevealed() {
+    const user = userEvent.setup();
+    render(<Flashcard front={<span>앞면 단어</span>} back={<span>뒷면 뜻</span>} revealed={<Counter />} onAnswer={vi.fn()} />);
+    return user;
+  }
+
+  const following = (a: Node, b: Node) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
+  it("revealed는 뒷면을 볼 때만 카드와 버튼 사이에 보인다", async () => {
+    const user = setupRevealed();
+    expect(screen.queryByRole("button", { name: "눌림 0" })).not.toBeInTheDocument();
+
+    await user.click(card());
+
+    const revealed = screen.getByRole("button", { name: "눌림 0" });
+    expect(following(card(), revealed)).toBe(true);
+    expect(following(revealed, screen.getByRole("button", { name: "알아요" }))).toBe(true);
+  });
+
+  it("앞면으로 돌리면 숨기기만 하고 상태는 그대로다", async () => {
+    const user = setupRevealed();
+    await user.click(card());
+    await user.click(screen.getByRole("button", { name: "눌림 0" }));
+
+    await user.click(card());
+    expect(screen.queryByRole("button", { name: "눌림 1" })).not.toBeInTheDocument();
+
+    await user.click(card());
+    expect(screen.getByRole("button", { name: "눌림 1" })).toBeInTheDocument();
   });
 });

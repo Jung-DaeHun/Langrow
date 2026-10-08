@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleCheck, CircleX } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { isCorrectChoice, type BlankQuestion } from "@/lib/blank";
 import type { Language } from "@/lib/levels";
 import { Furigana } from "./Furigana";
@@ -9,6 +9,7 @@ import { Furigana } from "./Furigana";
 // 빈칸 퀴즈(ui.md "빈칸 퀴즈"). 단어 학습(learn)은 고르면 바로 채점을 보여 주고, 레벨업 테스트(test)는 정답을 모르므로
 // 정답 여부 없이 바로 onNext를 부른다. 고른 뒤에는 잠기므로 다음 문제는 부모가 key로 새로 만든다.
 // index는 0부터이고 화면에는 index + 1을 보여 준다
+// explanation은 단어 학습만 넘긴다. 채점 뒤 결과 문구와 [다음 문제] 사이에 그린다(레벨업 테스트는 채점을 보여 주지 않는다)
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const PRIMARY = `inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-accent px-5 font-semibold text-white transition duration-200 hover:bg-brand active:scale-95 ${FOCUS_RING}`;
@@ -26,6 +27,7 @@ type Props = {
   meaningKo?: string;
   isLast: boolean;
   onNext: (choice: string) => void;
+  explanation?: (choice: string) => ReactNode;
 };
 
 export function BlankQuiz({
@@ -40,6 +42,7 @@ export function BlankQuiz({
   meaningKo,
   isLast,
   onNext,
+  explanation,
 }: Props) {
   const [choice, setChoice] = useState<string | null>(null);
   const graded = mode === "learn" && choice !== null;
@@ -128,6 +131,7 @@ export function BlankQuiz({
             </>
           ))}
       </p>
+      {graded && explanation?.(choice)}
       {graded && (
         <button type="button" onClick={() => onNext(choice)} className={PRIMARY}>
           {isLast ? "결과 보기" : "다음 문제"}
