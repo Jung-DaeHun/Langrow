@@ -294,7 +294,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 | 대기 | 버튼 자리에 점 3개(`WaitingDots`). `aria-live="polite"` 영역 안에 둔다 |
 | 설명 | 교정 카드와 같은 `rounded-xl bg-mint p-3`에 라벨(`text-micro text-ink-muted`: "AI 설명") → 설명(`text-sm`, 일본어 표기는 `Furigana`로 레벨 규칙대로). 버튼은 다시 보이지 않는다 |
 | 실패(503·네트워크·그 밖의 오류) | 오류 Notice: 서버 `message`(503은 "설명을 만들지 못했어요. 횟수는 차감되지 않았어요.", 네트워크는 "연결을 확인해 주세요.") + [다시 시도] pill. 404여도 홈으로 이동하지 않는다 |
-| 한도(429 `LIMIT_REACHED`, Free만) | 보상 Notice: "오늘 AI 설명 20회를 모두 썼어요" + "Pro는 AI 설명을 제한 없이 볼 수 있어요." + 체험 가능하면 [7일 무료 체험](outline sm), 체험을 썼으면 [Pro 시작하기](outline sm). 회차의 primary는 [다음 문제]이므로 버튼을 outline으로 두고 [내일 할게요]는 두지 않는다 |
+| 한도(429 `LIMIT_REACHED`, Free만) | 보상 Notice: "오늘 AI 설명 10회를 모두 썼어요" + "Pro는 AI 설명을 제한 없이 볼 수 있어요." + 체험 가능하면 [7일 무료 체험](outline sm), 체험을 썼으면 [Pro 시작하기](outline sm). 회차의 primary는 [다음 문제]이므로 버튼을 outline으로 두고 [내일 할게요]는 두지 않는다 |
 | 실패 10회(429 `AI_FAILURE_LIMIT`) | 정보 Notice로 서버 `message`를 보여 준다. 버튼 없음 |
 
 - 429를 받으면 같은 회차의 남은 문제·카드에서도 버튼 대신 같은 안내를 보여 준다. 회차를 새로 시작하면 다시 버튼을 보여 준다.
