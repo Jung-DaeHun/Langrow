@@ -9,7 +9,7 @@
 - DB 접근 파일의 `server/db/*.test.ts`는 실제 DB 통합 테스트로 작성한다. Vitest 기본 실행에서 이 경로를 제외하고 `test:db`에서 포함한다. Supabase 쿼리 체인을 mock하거나 hook 통과만을 위한 빈 테스트를 만들지 않는다.
 - 정적 UI는 `page.tsx`/`layout.tsx`에 둔다 (hook이 검사하지 않음). 컴포넌트는 꼭 필요한 것만 만든다.
   - 화면 단위: `OnboardingFlow`, `ScenarioPicker`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`
-  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `AppNav`, `UsageCard`, `Dialog`, `Toast`, `WaitingDots`, `GoogleLoginButton`, `TrialButton`(체험 시작), `ProButton`(Pro 클릭·준비 중 모달), `LimitNotice`(한도 도달 안내), `LogoutButton`. 만든 이유는 `ui.md` "공용 React 컴포넌트와 이유"에 있다
+  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `AppNav`, `UsageCard`, `Dialog`, `Toast`, `WaitingDots`, `GoogleLoginButton`, `TrialButton`(체험 시작), `ProButton`(Pro 클릭·준비 중 모달), `LimitNotice`(한도 도달 안내), `WordExplanation`(AI 정답 설명), `LogoutButton`. 만든 이유는 `ui.md` "공용 React 컴포넌트와 이유"에 있다
   - 입력·API 호출이 있는 부분만 Client Component로 만든다. 페이지의 분기 규칙은 테스트할 수 있게 `lib/`(예: `today`, `readiness`, `onboarding`)에 둔다.
   - 페이지 읽기는 `server/db/reads.ts`에 두고 `test:db`로 실제 RLS와 함께 검증한다. 운영자 정보는 설정 파일 `src/site.config.ts`에 둔다.
 - Vitest 설정에서 `server-only`를 빈 모듈로 alias한다.
@@ -37,7 +37,7 @@
   - 단어: 한도 0에서 기존 10개 재전송 성공, 기존+신규 혼합은 신규만 검사, 초과 신규분 전부 거부, 전부 중복이면 다음 날에도 활동일·연속일 변경 없음
   - 학습: 복습·가나·테스트만 한 날도 활동일 기록
   - 지표: 한도를 채우는 마지막 성공 저장에도 limit_reached 기록, 초과 요청 없이도 체험 전환 분모에 포함, 단어 재전송은 이벤트 추가 없음
-  - AI 정답 설명: 저장본이면 AI·저장 미호출, 저장본이 없으면 AI 성공 후 저장 호출, 저장 실패여도 설명 반환, 없는 단어 404, 그 단어의 보기가 아닌 `choice`는 400이고 예약·AI 미호출, 예약 거부(한도·실패 10회·403) 시 AI 미호출, AI 실패 시 실패 RPC 호출 후 503
+  - AI 정답 설명: 저장본이면 AI·저장 미호출, 저장본이 없으면 AI 성공 후 저장 호출, 저장 실패여도 설명 반환, 없는 단어 404, 그 단어의 보기가 아닌 `choice`는 400이고 예약·AI 미호출, 예약 거부(한도·실패 10회·403) 시 AI 미호출, 실패 10회는 설명용 문구, AI 실패 시 실패 RPC 호출 후 503
 - **DB 통합 테스트 (`npm run test:db`, 로컬 Supabase)**
   - supabase-js로 RPC를 호출한다. RPC는 커밋한 뒤 응답하므로 요청 순서는 순차 호출로, 동시 실행은 `Promise.all`(요청마다 별도 연결·트랜잭션)로 만든다. 처리 기한 만료는 `operation_expires_at`을 과거로 바꿔 재현한다. AI 호출 단계는 예약 RPC와 확정 RPC 사이의 간격으로 대신하며 외부 AI를 부르지 않는다.
   - A의 pending 커밋 후 완료 전에 B가 같은 세션으로 전송: B는 409, pending은 정확히 1개. turn_no UNIQUE만으로 통과하는 테스트를 만들지 않는다.
@@ -59,7 +59,7 @@
   - 종료 202 표시·재확인·fallback에서 저장된 턴 교정 확인
   - 레벨 1~4/5 단어 소진 분기, 오답 0개, 소진 뒤 미완료 10개 목표/잘못된 체험 유도 없음, 레벨·언어 변경 후 일반 화면 복귀
   - 대화 입력은 표시된 남은 횟수가 0이어도 막지 않고 429 응답 뒤에만 막음
-  - AI 정답 설명: 학습 빈칸은 정답·오답 모두 채점 뒤 버튼, 레벨업 테스트에는 없음, 복습 카드는 뒤집은 뒤에만 버튼, 대기·성공·503 [다시 시도]·429 안내, 429 뒤 같은 회차의 다음 문제도 안내, 다음 문제로 넘어가면 늦은 응답 무시
+  - AI 정답 설명: 학습 빈칸은 정답·오답 모두 채점 뒤 버튼, 레벨업 테스트에는 없음, 복습 카드는 뒤집은 뒤에만 버튼, 대기·성공·503 [다시 시도]·429 안내, 429 뒤 같은 회차의 다음 문제도 안내, 한도 안내에서 체험을 시작하면 버튼 복귀, 다음 문제로 넘어가면 늦은 응답 무시, 복습 카드를 앞면으로 돌려도 요청·설명 유지
 - **데이터 검증**
   - 단어: 언어 × 레벨 개수, 예문마다 `{{ }}` 정확히 1개, 오답 보기 3개가 서로 다르고 정답과도 다름
   - 가나: 각 71자, 중복 없음

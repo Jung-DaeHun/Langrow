@@ -23,13 +23,14 @@
 - 설명 실패는 `chat_failed` `{ operation_token: null, kind: "explain", reason }`이고, 대화와 같은 하루 실패 10회에 들어간다.
 - body는 `word_id` 1~50자, `choice` 1~50자(선택)다. 복습은 `choice`를 보내지 않고, 저장 키는 빈 문자열이다.
 - 503 문구는 `"설명을 만들지 못했어요. 횟수는 차감되지 않았어요."`이다.
+- 실패 10회(`AI_FAILURE_LIMIT`) 문구는 `"오늘은 응답 오류가 많아 AI 설명을 잠시 쉬어요. 내일 다시 시도해 주세요."`이다(대화의 공용 문구는 바꾸지 않는다).
 - 로그에는 설명 내용과 고른 보기를 남기지 않는다.
 - Claude 호출은 대화와 같은 `createAi` 설정(모델 env, effort `low`, `max_tokens` 4096, 타임아웃 20초, 직접 재시도 1번)이고, 스키마는 `{ explanation }` 하나다(길이 제약 없음). 공백뿐인 설명은 `invalid_output`이다.
 - 라우트는 `export const maxDuration = 60`이다.
 - TDD guard: 새 `.ts(x)`에는 같은 폴더의 `*.test.ts(x)`를 먼저 만든다. Supabase 쿼리 체인 mock 테스트와 hook 통과용 빈 테스트를 만들지 않는다. `src/server/db/*.test.ts`는 실제 DB 통합 테스트이고 `npm run test:db`로만 돈다.
 - `npm run lint`, `npm run build`, `npm run test`는 Docker·env 없이 통과해야 한다. DB를 바꾸면 `npm run test:db`를 반드시 돌린다(Docker + `npx supabase start`).
 - DB 타입은 **Bash로** `npx supabase gen types typescript --local > src/types/database.ts`를 실행해 만든다. PowerShell의 `>`는 UTF-16으로 저장해 파일이 깨진다.
-- 커밋은 conventional commits 형식이다. 브랜치는 `feat-word-explain`이다. 커밋 전에 `git status -sb`로 브랜치와 내가 만들지 않은 변경을 확인한다.
+- 커밋은 conventional commits 형식이다. 하네스 phase `4-word-explain`(step 0 = Task 1, step 1 = Task 2+3, step 2 = Task 4)으로 실행하며 브랜치는 `feat-4-word-explain`이다. 커밋 전에 `git status -sb`로 브랜치와 내가 만들지 않은 변경을 확인한다.
 - 화면 문구는 ui.md 그대로다: [왜 정답이에요?], [예문 설명], "AI 설명", "오늘 AI 설명 10회를 모두 썼어요", "Pro는 AI 설명을 제한 없이 볼 수 있어요.", 체험 가능하면 [7일 무료 체험](outline sm), 아니면 [Pro 시작하기](outline sm), 실패는 [다시 시도] pill, [내일 할게요]는 두지 않는다.
 
 ## Review Focus
@@ -66,7 +67,7 @@ spec이 함의하지만 다른 테스트가 건드리지 않는, 사용자가 �
 | `src/components/BlankQuiz.tsx` (+ test) | 수정 | 채점 뒤 설명 자리(`explanation` render prop) |
 | `src/components/Flashcard.tsx` (+ test) | 수정 | 뒤집은 뒤 설명 자리(`revealed`) |
 | `src/components/WordSession.tsx` (+ test) | 수정 | 회차 단위 429 상태, 빈칸·복습 카드에 연결 |
-| `docs/spec/ui.md`, `docs/spec/testing.md`, `docs/ARCHITECTURE.md` | 수정 | 네트워크 문구 표기, 공용 컴포넌트 목록에 `WordExplanation` |
+| `docs/spec/*`, `docs/ARCHITECTURE.md` | 실행 전에 수정함 | 네트워크·실패 10회 문구, 계획에만 있던 화면 동작 2개, 공용 컴포넌트 목록의 `WordExplanation` |
 
 ---
 
@@ -1097,7 +1098,7 @@ git commit -m "feat(ai): add the AI explanation prompt and client call"
 - Consumes: Task 1의 `getWord`, `beginWordExplanation`, `failWordExplanation`, `saveWordExplanation`. Task 2의 `ai.generateExplanation(ExplanationPromptInput)`. `parseBlank`(`@/lib/blank`).
 - Produces:
   - `http.ts`: `Outcome<T> = { ok: true; value: T; status?: 202 } | { ok: false; code: ErrorCode; message?: string }` — `message`가 있으면 응답 문구를 덮어쓴다
-  - `learning.ts`: `EXPLAIN_UNAVAILABLE_MESSAGE`, `explainWord(deps, userId, input: { word_id: string; choice?: string }): Promise<Outcome<WordExplainResponse>>`
+  - `learning.ts`: `EXPLAIN_UNAVAILABLE_MESSAGE`, `EXPLAIN_FAILURE_LIMIT_MESSAGE`, `explainWord(deps, userId, input: { word_id: string; choice?: string }): Promise<Outcome<WordExplainResponse>>`
   - `types/api.ts`: `type WordExplainResponse = { explanation: string }`
   - 라우트: `POST /api/words/explain`, `maxDuration = 60`
 
@@ -1126,7 +1127,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 ```
 ```ts
 import type { Db } from "./deps";
-import { EXPLAIN_UNAVAILABLE_MESSAGE, explainWord, saveWords, submitLevelUp } from "./learning";
+import {
+  EXPLAIN_FAILURE_LIMIT_MESSAGE,
+  EXPLAIN_UNAVAILABLE_MESSAGE,
+  explainWord,
+  saveWords,
+  submitLevelUp,
+} from "./learning";
 ```
 
 끝에 추가한다.
@@ -1239,7 +1246,7 @@ describe("explainWord", () => {
     expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
   });
 
-  it.each<DbErrorCode>(["LIMIT_REACHED", "AI_FAILURE_LIMIT", "CONSENT_REQUIRED", "ONBOARDING_REQUIRED", "NOT_FOUND"])(
+  it.each<DbErrorCode>(["LIMIT_REACHED", "CONSENT_REQUIRED", "ONBOARDING_REQUIRED", "NOT_FOUND"])(
     "예약이 %s로 거부되면 그대로 돌려주고 AI를 부르지 않는다",
     async (code) => {
       const deps = createFakeDeps({ db: { beginWordExplanation: async () => ({ ok: false, code }) } });
@@ -1249,6 +1256,19 @@ describe("explainWord", () => {
       expect(deps.db.saveWordExplanation).not.toHaveBeenCalled();
     },
   );
+
+  it("예약이 AI_FAILURE_LIMIT로 거부되면 설명용 문구로 돌려주고 AI를 부르지 않는다", async () => {
+    const deps = createFakeDeps({
+      db: { beginWordExplanation: async () => ({ ok: false, code: "AI_FAILURE_LIMIT" }) },
+    });
+
+    expect(await explainWord(deps, USER_ID, { word_id: WORD_ID, choice: "goes" })).toEqual({
+      ok: false,
+      code: "AI_FAILURE_LIMIT",
+      message: EXPLAIN_FAILURE_LIMIT_MESSAGE,
+    });
+    expect(deps.ai.generateExplanation).not.toHaveBeenCalled();
+  });
 
   it("AI가 실패하면 예약 id와 실패 사유로 실패 RPC를 부르고 503과 설명 실패 문구를 돌려준다. 저장하지 않는다", async () => {
     const deps = createFakeDeps({
@@ -1274,7 +1294,7 @@ describe("explainWord", () => {
 ```ts
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ERRORS, type ErrorCode } from "@/lib/errors";
-import { EXPLAIN_UNAVAILABLE_MESSAGE } from "@/server/learning";
+import { EXPLAIN_FAILURE_LIMIT_MESSAGE, EXPLAIN_UNAVAILABLE_MESSAGE } from "@/server/learning";
 import { createFakeDeps } from "@/test/fakes";
 import { maxDuration, POST } from "./route";
 
@@ -1379,6 +1399,15 @@ describe("POST /api/words/explain", () => {
 
     expect(await read(await post(VALID))).toEqual({ status: 429, json: errorBody("LIMIT_REACHED") });
   });
+
+  it("실패 10회(AI_FAILURE_LIMIT)는 429이고 설명용 문구다", async () => {
+    deps.db.beginWordExplanation.mockResolvedValue({ ok: false, code: "AI_FAILURE_LIMIT" });
+
+    expect(await read(await post(VALID))).toEqual({
+      status: 429,
+      json: { code: "AI_FAILURE_LIMIT", message: EXPLAIN_FAILURE_LIMIT_MESSAGE },
+    });
+  });
 });
 ```
 
@@ -1425,6 +1454,8 @@ import type { LevelUpResponse, WordBatchResponse, WordExplainResponse } from "@/
 
 ```ts
 export const EXPLAIN_UNAVAILABLE_MESSAGE = "설명을 만들지 못했어요. 횟수는 차감되지 않았어요.";
+// 실패 횟수는 대화와 같이 세지만, 공용 문구("대화를 잠시 쉬어요")는 설명 자리에 맞지 않아 바꾼다
+export const EXPLAIN_FAILURE_LIMIT_MESSAGE = "오늘은 응답 오류가 많아 AI 설명을 잠시 쉬어요. 내일 다시 시도해 주세요.";
 
 // AI 정답 설명(spec/words.md "AI 정답 설명"). 예문·보기는 클라이언트에서 받지 않고 DB 단어로 검증하고 프롬프트를 만든다.
 // 한도·저장본·실패 횟수는 예약 RPC가 계정을 잠근 뒤 판정한다. 예약한 이벤트 행이 곧 사용 기록이라 확정 단계는 없다
@@ -1446,7 +1477,9 @@ export async function explainWord(
   const key = choice ?? ""; // 저장 키. 복습은 빈 문자열이다
 
   const reserved = await deps.db.beginWordExplanation(userId, word.id, key);
-  if (!reserved.ok) return reserved;
+  if (!reserved.ok) {
+    return reserved.code === "AI_FAILURE_LIMIT" ? { ...reserved, message: EXPLAIN_FAILURE_LIMIT_MESSAGE } : reserved;
+  }
   if (reserved.value.state === "cached") return { ok: true, value: { explanation: reserved.value.explanation } };
 
   const generated = await deps.ai.generateExplanation({
@@ -1532,7 +1565,6 @@ git commit -m "feat(api): add POST /api/words/explain"
 - Modify: `src/components/BlankQuiz.tsx`, `src/components/BlankQuiz.test.tsx`
 - Modify: `src/components/Flashcard.tsx`, `src/components/Flashcard.test.tsx`
 - Modify: `src/components/WordSession.tsx`, `src/components/WordSession.test.tsx`
-- Modify: `docs/spec/ui.md`, `docs/spec/testing.md`, `docs/ARCHITECTURE.md`
 
 **Interfaces:**
 - Consumes: Task 3의 `POST /api/words/explain` body `{ word_id, choice? }` → `WordExplainResponse`, 실패 code `LIMIT_REACHED`·`AI_FAILURE_LIMIT`·그 밖. `api()`(`@/services/apiClient`), `FREE_DAILY_EXPLANATIONS`, `TrialState`, `Furigana`, `WaitingDots`.
@@ -1741,7 +1773,7 @@ describe("WordExplanation 실패", () => {
   });
 
   it("429 AI_FAILURE_LIMIT면 서버 문구와 함께 onBlock한다", async () => {
-    const message = "오늘은 응답 오류가 많아 대화를 잠시 쉬어요. 내일 다시 시도해 주세요.";
+    const message = "오늘은 응답 오류가 많아 AI 설명을 잠시 쉬어요. 내일 다시 시도해 주세요.";
     apiMock.mockResolvedValue(failure(429, "AI_FAILURE_LIMIT", message));
     const { user, onBlock } = setup();
 
@@ -2318,11 +2350,7 @@ state 선언(`trialStarted` 다음)에 추가한다.
 Run: `npx vitest run src/components`
 Expected: PASS (기존 컴포넌트 테스트 포함 전부).
 
-- [ ] **Step 12: 문서 맞추기**
-
-- `docs/spec/ui.md` "AI 정답 설명" 표의 실패 행: `네트워크는 "연결을 확인해 주세요."` → ``네트워크는 `apiClient`의 `NETWORK_MESSAGE` `` (대화·단어 저장과 같은 문구를 쓴다).
-- `docs/spec/testing.md` "공용" 목록의 `` `LimitNotice`(한도 도달 안내), `` 다음에 `` `WordExplanation`(AI 정답 설명), ``를 넣는다.
-- `docs/ARCHITECTURE.md` 디렉터리 트리 공용 컴포넌트 줄 `GoogleLoginButton, TrialButton, ProButton, LimitNotice, LogoutButton`에 `WordExplanation`을 넣는다(`LimitNotice, WordExplanation, LogoutButton`).
+- [ ] **Step 12: 문서 맞추기** — phase 실행 전에 반영했다(ui.md 네트워크·실패 10회 문구와 화면 동작 2개, testing.md·ARCHITECTURE.md 공용 컴포넌트 목록). 이 단계는 건너뛴다.
 
 - [ ] **Step 13: 전체 검증**
 
@@ -2333,7 +2361,7 @@ Expected: 모두 통과.
 
 ```bash
 git status -sb
-git add src/components docs/spec/ui.md docs/spec/testing.md docs/ARCHITECTURE.md
+git add src/components
 git commit -m "feat(words): show AI explanations on blanks and review cards"
 ```
 

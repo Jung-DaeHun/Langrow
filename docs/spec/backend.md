@@ -152,7 +152,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 ## 에러 코드
 
-응답 형식은 `{ code, message }`이고, `message`는 사용자에게 보여 줄 한국어 문구다.
+응답 형식은 `{ code, message }`이고, `message`는 사용자에게 보여 줄 한국어 문구다. AI 정답 설명의 `AI_UNAVAILABLE`·`AI_FAILURE_LIMIT`는 같은 code에 설명용 문구를 쓴다(`words.md` "AI 정답 설명").
 
 | code | HTTP | 언제 | 클라이언트 동작 |
 |---|---|---|---|

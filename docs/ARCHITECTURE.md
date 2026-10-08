@@ -16,7 +16,7 @@ src/
 ├── lib/                  # 순수 규칙 (I/O·환경변수·fetch 없음)
 ├── components/           # 화면 단위: OnboardingFlow, ScenarioPicker, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck
 │                         # 공용: Flashcard, BlankQuiz, Furigana, LanguageSheet, AppNav, UsageCard, Dialog, Toast, WaitingDots,
-│                         #       GoogleLoginButton, TrialButton, ProButton, LimitNotice, LogoutButton
+│                         #       GoogleLoginButton, TrialButton, ProButton, LimitNotice, WordExplanation, LogoutButton
 ├── site.config.ts        # 운영자 이름·문의 이메일·약관 시행일 (출시 전에 채운다)
 ├── types/                # database.ts (supabase gen types), api.ts (API 응답 타입)
 └── test/                 # fakes.ts (가짜 db·ai)
