@@ -412,7 +412,7 @@ describe("WordSession AI 정답 설명", () => {
   const explained = (explanation: string) => ({ ok: true, status: 200, data: { explanation } }) as ApiResult<never>;
   const limited = failure(429, "LIMIT_REACHED", "오늘 사용량을 모두 썼어요.");
   const LIMIT_TITLE = "오늘 AI 설명 10회를 모두 썼어요";
-  const explainButton = () => screen.queryByRole("button", { name: "왜 정답이에요?" });
+  const explainButton = () => screen.queryByRole("button", { name: "AI 해설" });
 
   async function toQuiz(user: User) {
     await user.click(screen.getByRole("button", { name: "시작하기" }));
@@ -421,7 +421,7 @@ describe("WordSession AI 정답 설명", () => {
 
   const choose = (user: User, text: string) => user.click(screen.getByText(text, { selector: "button span[lang]" }));
 
-  it("빈칸은 채점 뒤에만, 정답·오답 모두 [왜 정답이에요?]를 보여 주고 고른 보기로 요청한다", async () => {
+  it("빈칸은 채점 뒤에만, 정답·오답 모두 [AI 해설]을 보여 주고 고른 보기로 요청한다", async () => {
     apiMock.mockResolvedValue(explained("과거의 일이라 이 형태를 써요."));
     const { user } = setup();
     await toQuiz(user);

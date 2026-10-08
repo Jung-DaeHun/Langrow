@@ -26,7 +26,7 @@ function setup(overrides: Partial<Props> = {}) {
   const props: Props = {
     wordId: "ja-1-010",
     choice: "[食|た]べる",
-    label: "왜 정답이에요?",
+    label: "AI 해설",
     showFurigana: true,
     trial: { kind: "available" },
     block: null,
@@ -52,7 +52,7 @@ const explained = (explanation: string): ApiResult<WordExplainResponse> => ({
 });
 const failure = (status: number | null, code: string, message: string) =>
   ({ ok: false, status, code, message }) as ApiResult<never>;
-const button = () => screen.getByRole("button", { name: "왜 정답이에요?" });
+const button = () => screen.getByRole("button", { name: "AI 해설" });
 const LIMIT_TITLE = "오늘 AI 설명 10회를 모두 썼어요";
 
 describe("WordExplanation 요청", () => {
@@ -70,7 +70,7 @@ describe("WordExplanation 요청", () => {
 
     await user.click(button());
     expect(screen.getByRole("status")).toHaveTextContent("설명을 만드는 중");
-    expect(screen.queryByRole("button", { name: "왜 정답이에요?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "AI 해설" })).not.toBeInTheDocument();
 
     pending.resolve(explained("이미 먹은 일이라 과거형을 써요."));
     expect(await screen.findByText("이미 먹은 일이라 과거형을 써요.")).toBeInTheDocument();
@@ -184,7 +184,7 @@ describe("WordExplanation 회차 안내 (block)", () => {
     expect(screen.getByText(LIMIT_TITLE)).toBeInTheDocument();
     expect(screen.getByText("Pro는 AI 설명을 제한 없이 볼 수 있어요.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "7일 무료 체험" })).toHaveClass("border-accent");
-    expect(screen.queryByRole("button", { name: "왜 정답이에요?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "AI 해설" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "내일 할게요" })).not.toBeInTheDocument();
   });
 

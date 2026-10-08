@@ -24,7 +24,7 @@ const NOTICE = "flex items-start gap-3 rounded-xl p-4";
 type Props = {
   wordId: string;
   choice?: string; // 빈칸에서 고른 보기. 복습 카드는 넘기지 않는다
-  label: string; // [왜 정답이에요?] 또는 [예문 설명]
+  label: string; // [AI 해설] 또는 [예문 설명]
   showFurigana: boolean;
   trial: TrialState;
   block: ExplanationBlock | null;

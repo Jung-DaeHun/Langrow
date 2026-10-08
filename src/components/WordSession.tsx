@@ -262,7 +262,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
           meaningKo={w.meaningKo}
           isLast={index === runWords.length - 1}
           onNext={answerQuiz}
-          explanation={(choice) => explanationFor(w, "왜 정답이에요?", choice)}
+          explanation={(choice) => explanationFor(w, "AI 해설", choice)}
         />
       </div>
     );
