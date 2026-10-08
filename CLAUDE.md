@@ -8,7 +8,7 @@
 ## 기술 스택
 - Next.js (App Router), TypeScript strict mode, Tailwind CSS
 - Supabase: Auth(구글), Postgres, RLS, RPC(DB 함수)
-- Anthropic SDK: 기본 모델 `claude-haiku-4-5-20251001` (환경변수 `CLAUDE_MODEL`로 변경)
+- Anthropic SDK: 기본 모델 `claude-sonnet-5-5` (환경변수 `CLAUDE_MODEL`로 변경, `output_config.effort`를 받는 모델이어야 함)
 - zod, Vitest, Vercel(icn1)
 - 버전은 프로젝트 셋업 때 고정하고 여기에 적는다: Next.js 16.3.8, @supabase/supabase-js 2.117.2, @anthropic-ai/sdk 0.131.0
 - 미들웨어 파일은 `src/proxy.ts`, `params`·`cookies()`는 async

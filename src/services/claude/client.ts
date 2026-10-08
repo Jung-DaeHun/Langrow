@@ -6,7 +6,10 @@ import { getClaudeEnv } from "@/services/env";
 import { buildFeedbackPrompt, buildTurnPrompt, type FeedbackPromptInput, type TurnPromptInput } from "./prompts";
 import { feedbackSchema, turnReplySchema, type Feedback, type TurnReply } from "./schemas";
 
-const MAX_TOKENS = 1024;
+// Sonnet 5.5는 adaptive thinking이 기본이고 thinking도 max_tokens에 들어간다. 응답(약 500토큰 이하)에 여유를 둔다
+const MAX_TOKENS = 4096;
+// 대화는 low: 쉬운 턴은 thinking을 건너뛰고 까다로운 턴만 짧게 생각한다
+const EFFORT = "low";
 const TIMEOUT_MS = 20_000;
 const IMPROVE_MAX = 3;
 
@@ -80,7 +83,7 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
         max_tokens: MAX_TOKENS,
         system,
         messages,
-        output_config: { format },
+        output_config: { format, effort: EFFORT },
       });
       if (message.stop_reason === "refusal") return { ok: false, reason: "refusal" };
       if (message.stop_reason === "max_tokens") return { ok: false, reason: "max_tokens" };

@@ -71,14 +71,15 @@ describe("generateTurn", () => {
     expect(requests).toHaveLength(1);
   });
 
-  it("요청에 주입한 model, max_tokens 1024, 구조화 출력 형식, 대화 프롬프트만 넣는다", async () => {
+  it("요청에 주입한 model, max_tokens 4096, effort low, 구조화 출력 형식, 대화 프롬프트만 넣는다", async () => {
     const { ai, requests } = setup(done(reply));
     await ai.generateTurn(turnInput);
     const request = requests[0];
     const prompt = buildTurnPrompt(turnInput);
     expect(Object.keys(request).sort()).toEqual(["max_tokens", "messages", "model", "output_config", "system"]);
-    expect(request).toMatchObject({ model: MODEL, max_tokens: 1024, system: prompt.system, messages: prompt.messages });
-    const { format } = request.output_config as { format: { type: string; schema: { properties: object } } };
+    expect(request).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
+    const { format, effort } = request.output_config as { format: { type: string; schema: { properties: object } }; effort: string };
+    expect(effort).toBe("low");
     expect(format.type).toBe("json_schema");
     expect(Object.keys(format.schema.properties).sort()).toEqual(["correction", "reply", "reply_ko"]);
   });
@@ -147,8 +148,9 @@ describe("generateFeedback", () => {
     const { ai, requests } = setup(done(feedback));
     expect(await ai.generateFeedback(feedbackInput)).toEqual({ ok: true, value: feedback });
     const prompt = buildFeedbackPrompt(feedbackInput);
-    expect(requests[0]).toMatchObject({ model: MODEL, max_tokens: 1024, system: prompt.system, messages: prompt.messages });
-    const { format } = requests[0].output_config as { format: { schema: { properties: object } } };
+    expect(requests[0]).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
+    const { format, effort } = requests[0].output_config as { format: { schema: { properties: object } }; effort: string };
+    expect(effort).toBe("low");
     expect(Object.keys(format.schema.properties).sort()).toEqual(["good", "improve"]);
   });
 

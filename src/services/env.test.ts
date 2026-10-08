@@ -78,15 +78,15 @@ describe("env", () => {
   describe("getClaudeEnv", () => {
     it("API 키와 모델을 돌려준다", () => {
       vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-x");
-      vi.stubEnv("CLAUDE_MODEL", "claude-sonnet-5-5");
-      expect(getClaudeEnv()).toEqual({ apiKey: "sk-ant-x", model: "claude-sonnet-5-5" });
+      vi.stubEnv("CLAUDE_MODEL", "claude-opus-5-5");
+      expect(getClaudeEnv()).toEqual({ apiKey: "sk-ant-x", model: "claude-opus-5-5" });
     });
 
     it("CLAUDE_MODEL이 없거나 비면 기본 모델을 쓴다", () => {
       vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-x");
-      expect(getClaudeEnv().model).toBe("claude-haiku-4-5-20251001");
+      expect(getClaudeEnv().model).toBe("claude-sonnet-5-5");
       vi.stubEnv("CLAUDE_MODEL", "");
-      expect(getClaudeEnv().model).toBe("claude-haiku-4-5-20251001");
+      expect(getClaudeEnv().model).toBe("claude-sonnet-5-5");
     });
 
     it("API 키가 없으면 키 이름이 담긴 에러다", () => {

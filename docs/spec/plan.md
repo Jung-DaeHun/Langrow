@@ -18,7 +18,7 @@
 | 플랜 | Free / Pro를 하루 사용량으로 구분 |
 | 결제 | **없음.** Pro는 [7일 무료 체험 시작] 버튼으로 계정당 1번 체험 |
 | 로그인 | 구글만 |
-| 스택 | Next.js(App Router) + TypeScript strict + Tailwind, Supabase(Auth·Postgres·RLS), Anthropic SDK(Claude Haiku 4.5), zod, Vitest, Vercel |
+| 스택 | Next.js(App Router) + TypeScript strict + Tailwind, Supabase(Auth·Postgres·RLS), Anthropic SDK(Claude Sonnet 5.5), zod, Vitest, Vercel |
 
 ## 1. 유저 저니
 
@@ -230,7 +230,7 @@
 - 종료 응답이 유실되거나 DB 저장 전에 서버가 중단돼도 다음 `/end`가 저장 결과 또는 기한 만료 복구 결과를 반환한다. 기한 내 DB 저장을 재시도할 때에도 AI 호출부터 반복하지 않는다. 대체 결과가 확정된 세션의 종합 피드백을 다시 생성하는 기능은 MVP에서 제외한다.
 - AI가 레벨 조정을 제안하지는 않는다 (S1). 레벨을 올리려면 홈의 레벨업 테스트로, 내리려면 홈에서 직접 바꾼다.
 
-**모델**: 환경변수 `CLAUDE_MODEL`로 바꿀 수 있고, 기본값은 `claude-haiku-4-5-20251001`이다. 출시 전에 일본어 교정 품질을 샘플로 확인한다.
+**모델**: 환경변수 `CLAUDE_MODEL`로 바꿀 수 있고, 기본값은 `claude-sonnet-5-5`다. 2026-10-08 일본어 샘플 비교에서 Haiku 4.5는 후리가나 누락과 교정 누락이 잦아 바꿨다(ADR-012). `output_config.effort`를 받지 않는 모델(Haiku 4.5 등)로 바꾸면 모든 호출이 API 오류가 된다.
 
 ## 3. 단어 학습
 
@@ -330,7 +330,7 @@
   - 바뀐 행이 0개면 409를 돌려준다 (계정당 1번).
 - **체험 종료 후**: Free로 돌아간다. Pro 버튼을 누르면 "정식 출시 준비 중"을 보여 주고 `pro_clicked`를 남긴다.
 - **한도 도달**: 입력을 막고 체험 또는 Pro 안내를 보여 준다. `limit_reached`는 1장의 서버 기록 규칙을 따른다. 만료된 작업 복구를 위한 재전송 예외는 2장을 따른다.
-- **비용 추정** (가정: Haiku 4.5 가격이 입력 100만 토큰당 $1, 출력 $5): 대화 1회 약 $0.004, Free 사용자가 하루 한도를 다 쓰면 약 $0.08
+- **비용 추정** (Sonnet 5.5 가격 입력 100만 토큰당 $2, 출력 $10, 2026-10-08 실제 프롬프트의 토큰 수 기준): 일본어 대화 1턴 약 $0.007(20턴 세션 평균), 세션 1개(20턴 + 종료 피드백) 약 $0.16이다. Free 사용자가 하루 한도를 다 쓰면 약 $0.16이다. Pro 사용자가 매일 한도를 다 쓰면 월 약 $36으로 표시 가격보다 크므로, 실제 결제를 붙이기 전에 프롬프트 캐싱을 적용해 실측하고 Pro 한도를 다시 정한다
 
 ## 6. 아키텍처
 
@@ -343,7 +343,7 @@
                 └─ /api 라우트: 쓰기 + Claude 호출
                       ▼                        ▼
              [Supabase (서울)]            [Anthropic API]
-             Auth(구글) · Postgres        Claude Haiku 4.5
+             Auth(구글) · Postgres        Claude Sonnet 5.5
 
 [로컬 스크립트] generate-words → data/words/*.json (검수 후 커밋) → seed-words → Supabase
                metrics-report ← Supabase (지표 분자/분모 출력)
@@ -477,13 +477,13 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 ### 6-6. Claude 연동
 
-- **구조화 출력**: SDK의 구조화 출력을 쓴다 (`client.messages.create()` + zod 스키마, `output_config.format`). Haiku 4.5가 지원한다. deprecated된 `output_format`은 쓰지 않는다. `stop_reason`을 먼저 본 뒤 첫 text 블록을 zod로 파싱한다. `messages.parse()`는 `stop_reason`을 보기 전에 파싱하다 throw해서 실패 사유를 구분하지 못하므로 쓰지 않는다.
+- **구조화 출력**: SDK의 구조화 출력을 쓴다 (`client.messages.create()` + zod 스키마, `output_config.format`). Sonnet 5.5가 지원한다. deprecated된 `output_format`은 쓰지 않는다. `stop_reason`을 먼저 본 뒤 첫 text 블록을 zod로 파싱한다. `messages.parse()`는 `stop_reason`을 보기 전에 파싱하다 throw해서 실패 사유를 구분하지 못하므로 쓰지 않는다.
 - **실패로 처리하는 경우**(`chat_failed`의 실패 사유): refusal, `max_tokens` 도달, 파싱·스키마 검증 실패(`invalid_output`), 타임아웃, API 오류. env가 없거나 비어 있으면 API를 부르지 않고 재시도 없이 `config`로 실패하며, 키 이름만 에러 로그로 남긴다
 - **타임아웃과 재시도**: 호출당 타임아웃 20초. SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 메시지와 종료 라우트 모두 `maxDuration = 60`이며, 재시도 포함 AI 호출 전체 예산은 최대 약 40초다. 두 호출 모두 같은 작업 토큰을 사용한다. 중복 HTTP 요청이나 DB 확정 재시도 때문에 AI 호출을 새로 시작하지 않는다.
-- **토큰 상한**: `max_tokens`는 약 1024로 둔다.
+- **토큰 상한과 effort**: `max_tokens`는 4096으로 둔다. Sonnet 5.5는 adaptive thinking이 기본이고 thinking 토큰도 `max_tokens`에 들어가므로 응답(약 500토큰 이하)보다 넉넉히 잡는다. `output_config.effort`는 `low`라서 쉬운 턴은 thinking 없이 답한다.
 - **프롬프트**: 빌더는 순수 함수(`services/claude/prompts.ts`)로 단위 테스트하고, 스키마는 `schemas.ts`에 둔다.
 - **대화 기록**: 고정 user 턴("대화를 시작합니다") → 첫 마디 → `done` 턴들 → 이번 입력 순서로 보낸다. `pending` 턴은 넣지 않는다.
-- **프롬프트 캐싱은 쓰지 않는다.** 프롬프트가 짧아 최소 캐시 길이에 못 미칠 가능성이 크다. 구현할 때 확인한다.
+- **프롬프트 캐싱은 아직 쓰지 않는다.** Sonnet 5.5의 최소 캐시 길이(약 512토큰)는 넘으므로, 실제 결제를 붙이기 전에 적용하고 실측한다.
 
 ### 6-7. 환경과 배포
 

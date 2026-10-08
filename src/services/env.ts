@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // 기본 모델은 이 한 곳에만 적는다. 바꿀 때는 CLAUDE_MODEL을 쓴다
-const DEFAULT_CLAUDE_MODEL = "claude-haiku-4-5-20251001";
+const DEFAULT_CLAUDE_MODEL = "claude-sonnet-5-5";
 
 // .env.local에 빈 값(KEY=)이 들어 있으므로 빈 문자열은 없는 값으로 본다
 const required = z.string().trim().min(1);
