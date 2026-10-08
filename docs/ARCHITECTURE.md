@@ -88,17 +88,18 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 | `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, correction, created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
 | `words` | id(`en-1-001`), language, level, rank, word, reading, meaning_ko, example(`{{정답}}`), example_ko, distractors(3개) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
-| `events` | id, user_id, name, props, created_at (`limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`) |
+| `events` | id, user_id, name, props, created_at (`limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`, `word_explained`) |
+| `word_explanations` | word_id, choice(복습은 빈 문자열), explanation, word_hash, created_at — PK(word_id, choice). 사용자와 무관한 공용 저장본이라 user_id가 없다 |
 | `user_activity_days` | user_id, activity_date(한국 날짜) — 학습 성공이 있는 날만 행 |
 
-- 사용량은 별도 카운터 없이 센다: 대화 = 오늘 생성된 `chat_turns`(pending 포함), 단어 = 오늘 `first_seen_at`인 `user_words`.
+- 사용량은 별도 카운터 없이 센다: 대화 = 오늘 생성된 `chat_turns`(pending 포함), 단어 = 오늘 `first_seen_at`인 `user_words`, AI 정답 설명 = 오늘 생성된 `word_explained` 이벤트(저장본 응답 포함).
 - 모든 사용자 테이블의 FK는 `auth.users(id) on delete cascade`.
 
 ## 보안
-- RLS는 모든 public 테이블에 켜고 "자기 행 읽기" 정책만 둔다(`words`는 로그인 사용자 전체 읽기). 쓰기 정책은 두지 않는다.
+- RLS는 모든 public 테이블에 켜고 "자기 행 읽기" 정책만 둔다(`words`는 로그인 사용자 전체 읽기, `word_explanations`는 읽기 정책도 없이 RPC로만 읽기). 쓰기 정책은 두지 않는다.
 - RPC는 `SECURITY INVOKER`로 만들고, `EXECUTE`를 `PUBLIC`·`anon`·`authenticated`에서 회수한 뒤 `service_role`에만 준다(기본 권한도 같게).
 - CSRF는 SameSite=Lax 쿠키 + JSON Content-Type만 허용으로 막는다. 로그에는 에러 코드·user id·경로·응답 시간만 남기고 대화 내용·이메일은 남기지 않는다.
-- 모든 body는 zod로 검증한다: 대화 300자, 답안 50자, 테스트 20개, 단어 회차 10개 이하, 언어·이벤트 이름은 enum.
+- 모든 body는 zod로 검증한다: 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 언어·이벤트 이름은 enum.
 
 ## Claude 연동
 - `client.messages.create()` + zod 스키마(`output_config.format`)로 구조화 출력을 받는다. `stop_reason`을 먼저 보고 직접 파싱한다(`messages.parse()`는 잘린 응답도 파싱 실패로 throw한다). refusal·`max_tokens` 도달·파싱 실패는 실패로 처리하고, env 설정 오류는 API를 부르지 않고 `config`로 실패한다.
