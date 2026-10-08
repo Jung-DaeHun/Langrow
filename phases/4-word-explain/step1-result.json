@@ -1,0 +1,4 @@
+{
+  "status": "completed",
+  "summary": "POST /api/words/explain(route.ts, maxDuration 60, ready) body {word_id 1~50, choice? 1~50} → 200 {explanation}(WordExplainResponse). 400 INVALID_INPUT(zod·그 단어 보기 아님), 401, 403 CONSENT/ONBOARDING, 404 단어 없음, 429 LIMIT_REACHED(공용 문구), 429 AI_FAILURE_LIMIT(EXPLAIN_FAILURE_LIMIT_MESSAGE), 503 AI_UNAVAILABLE(EXPLAIN_UNAVAILABLE_MESSAGE). 두 문구는 server/learning.ts export. http.ts Outcome에 message? 추가. ai.generateExplanation(services/claude), fakes 기본값 {explanation:\"과거의 일이라 went를 써요.\"}."
+}
