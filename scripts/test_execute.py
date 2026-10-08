@@ -300,25 +300,31 @@ class TestRunGit:
 
 
 class TestCheckoutBranch:
+    CLEAN = MagicMock(returncode=0, stdout="", stderr="")  # git status --porcelain: 변경 없음
+
     def _mock_git(self, executor, responses):
-        call_idx = {"i": 0}
+        calls = []
         def fake_git(*args):
-            idx = call_idx["i"]
-            call_idx["i"] += 1
+            idx = len(calls)
+            calls.append(args)
             if idx < len(responses):
                 return responses[idx]
             return MagicMock(returncode=0, stdout="", stderr="")
         executor._run_git = fake_git
+        return calls
 
     def test_already_on_branch(self, executor):
-        self._mock_git(executor, [
+        calls = self._mock_git(executor, [
             MagicMock(returncode=0, stdout="feat-mvp\n", stderr=""),
         ])
         executor._checkout_branch()  # should return without checkout
+        # 에러·blocked 뒤 재실행은 phase 브랜치에서 index.json을 고친 채로 하므로 변경을 검사하지 않는다
+        assert len(calls) == 1
 
     def test_branch_exists_checkout(self, executor):
         self._mock_git(executor, [
             MagicMock(returncode=0, stdout="main\n", stderr=""),
+            self.CLEAN,
             MagicMock(returncode=0, stdout="", stderr=""),
             MagicMock(returncode=0, stdout="", stderr=""),
         ])
@@ -327,14 +333,38 @@ class TestCheckoutBranch:
     def test_branch_not_exists_create(self, executor):
         self._mock_git(executor, [
             MagicMock(returncode=0, stdout="main\n", stderr=""),
+            self.CLEAN,
             MagicMock(returncode=1, stdout="", stderr="not found"),
             MagicMock(returncode=0, stdout="", stderr=""),
         ])
         executor._checkout_branch()
 
+    def test_uncommitted_changes_outside_phases_exit_before_checkout(self, executor):
+        # step 커밋은 git add -A라서, 같은 폴더를 쓰는 다른 세션의 변경이 phase 브랜치 커밋에 섞인다
+        calls = self._mock_git(executor, [
+            MagicMock(returncode=0, stdout="main\n", stderr=""),
+            MagicMock(returncode=0, stdout=" M src/lib/plan.ts\n?? phases/1-x/step0.md\n", stderr=""),
+        ])
+        with pytest.raises(SystemExit) as exc_info:
+            executor._checkout_branch()
+        assert exc_info.value.code == 1
+        assert not any(c[0] == "checkout" for c in calls)
+
+    def test_uncommitted_changes_only_in_phases_allowed(self, executor):
+        # 방금 쓴 step 파일이나 고친 index.json은 phase 실행에 필요한 변경이다
+        calls = self._mock_git(executor, [
+            MagicMock(returncode=0, stdout="main\n", stderr=""),
+            MagicMock(returncode=0, stdout="?? phases/1-x/\n M phases/index.json\n", stderr=""),
+            MagicMock(returncode=1, stdout="", stderr="not found"),
+            MagicMock(returncode=0, stdout="", stderr=""),
+        ])
+        executor._checkout_branch()
+        assert calls[-1] == ("checkout", "-b", "feat-mvp")
+
     def test_checkout_fails_exits(self, executor):
         self._mock_git(executor, [
             MagicMock(returncode=0, stdout="main\n", stderr=""),
+            self.CLEAN,
             MagicMock(returncode=1, stdout="", stderr=""),
             MagicMock(returncode=1, stdout="", stderr="dirty tree"),
         ])

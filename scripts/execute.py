@@ -135,6 +135,7 @@ class StepExecutor:
         if r.stdout.strip() == branch:
             return
 
+        self._exit_if_uncommitted_outside_phases()
         r = self._run_git("rev-parse", "--verify", branch)
         r = self._run_git("checkout", branch) if r.returncode == 0 else self._run_git("checkout", "-b", branch)
 
@@ -145,6 +146,19 @@ class StepExecutor:
             sys.exit(1)
 
         print(f"  Branch: {branch}")
+
+    def _exit_if_uncommitted_outside_phases(self):
+        """step 커밋은 git add -A라서, 같은 폴더를 쓰는 다른 세션의 변경이 phase 브랜치에 섞인다.
+        phases/ 아래 변경(새 step 파일, 고친 index.json)은 실행에 필요하므로 허용한다."""
+        r = self._run_git("status", "--porcelain")
+        others = [line for line in r.stdout.splitlines() if not line[3:].startswith("phases/")]
+        if not others:
+            return
+        print(f"  ERROR: phases/ 밖에 커밋하지 않은 변경이 있어 브랜치를 바꾸지 않았습니다.")
+        for line in others[:10]:
+            print(f"    {line}")
+        print(f"  Hint: 직접 만든 변경이면 commit하거나 stash하세요. 다른 Claude 세션이 이 폴더를 쓰고 있으면 git worktree로 폴더를 나눠 실행하세요.")
+        sys.exit(1)
 
     def _commit_step(self, step_num: int, step_name: str):
         output_rel = f"phases/{self._phase_dir_name}/step{step_num}-output.json"
