@@ -58,7 +58,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 - 대화 입력은 표시된 남은 사용량으로 막지 않고, 서버의 429 응답 뒤에만 막는다.
 
 ## 페이지 접근
-- 공개: `/`, `/privacy`, `/terms`, `/auth/callback`. 보호: `/onboarding`, `/home`, `/chat/**`, `/words`, `/level-up`, `/kana`, `/account` (비로그인 → `/`).
+- 공개: `/`, `/privacy`, `/terms`, `/auth/callback`. 보호: `/onboarding`, `/home`, `/chat/**`, `/words`, `/level-up`, `/kana`, `/account`, `/settings` (비로그인 → `/`).
 - `/onboarding`을 뺀 보호 페이지는 동의와 현재 언어의 레벨이 없으면 `/onboarding`으로 보낸다(`(app)` route group의 레이아웃과 페이지가 `requireReady()`를 부른다).
 - `/api/**`는 리디렉션하지 않고 JSON 401/403을 반환한다. `/_next/**`와 정적 파일(이미지·`.mp3`)은 인증 가드에서 제외한다.
 
