@@ -614,3 +614,68 @@ describe("ChatRoom 스크롤", () => {
     expect(scrollTo).not.toHaveBeenCalledWith(0, PAGE_HEIGHT);
   });
 });
+
+describe("ChatRoom 음성", () => {
+  class FakeUtterance {
+    voice: unknown = null;
+    lang = "";
+    rate = 1;
+    onerror: ((event: { error: string }) => void) | null = null;
+    constructor(public text: string) {}
+  }
+
+  function stubVoices(voices: { lang: string; voiceURI: string }[]) {
+    const synth = {
+      getVoices: () => voices,
+      speak: vi.fn(),
+      cancel: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    };
+    vi.stubGlobal("speechSynthesis", synth);
+    vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+    return synth;
+  }
+
+  const listenButtons = () => screen.getAllByRole("button", { name: "듣기" });
+
+  it("첫 마디·교정 문장·AI 말풍선 아래에 [듣기]를 두고 그 문장을 읽는다", async () => {
+    const synth = stubVoices([{ lang: "en-US", voiceURI: "en" }]);
+    const { user } = setup(room({ turns: [turn(1, { correction: { corrected: "I'd like a latte.", explanation_ko: "정중해요" } })] }));
+
+    expect(listenButtons()).toHaveLength(3);
+    // 교정 카드는 고친 문장 → 재생 버튼 → 설명 순서다
+    expect(isBefore(screen.getByText("I'd like a latte."), listenButtons()[1])).toBe(true);
+    expect(isBefore(listenButtons()[1], screen.getByText("정중해요"))).toBe(true);
+    const texts: string[] = [];
+    for (const button of listenButtons()) {
+      await user.click(button);
+      texts.push((synth.speak.mock.calls.at(-1)?.[0] as FakeUtterance).text);
+    }
+    expect(texts).toEqual([SCENARIO.opening.text, "I'd like a latte.", "reply 1"]);
+  });
+
+  it("레벨 3의 말풍선(번역 버튼) 밖에 [듣기]를 둔다", () => {
+    stubVoices([{ lang: "en-US", voiceURI: "en" }]);
+    setup(room({ level: 3 }));
+
+    const bubble = screen.getByRole("button", { name: /Hi! What can I get for you\?/ });
+    expect(bubble).not.toContainElement(listenButtons()[0]);
+  });
+
+  it("일본어는 후리가나 표기를 지우고 읽는다", async () => {
+    const synth = stubVoices([{ lang: "ja-JP", voiceURI: "ja" }]);
+    const { user } = setup(room({ language: "ja", turns: [turn(1, { reply: "[今日|きょう]は[暑|あつ]いですね。" })] }));
+
+    await user.click(listenButtons()[1]);
+
+    expect((synth.speak.mock.calls.at(-1)?.[0] as FakeUtterance).text).toBe("今日は暑いですね。");
+  });
+
+  it("학습 언어 음성이 없는 기기에서는 [듣기]가 없다", () => {
+    stubVoices([{ lang: "ko-KR", voiceURI: "ko" }]);
+    setup(room({ turns: [turn(1)] }));
+
+    expect(screen.queryByRole("button", { name: "듣기" })).toBeNull();
+  });
+});

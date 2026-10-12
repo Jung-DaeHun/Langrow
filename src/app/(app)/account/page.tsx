@@ -1,4 +1,4 @@
-import { ChevronRight, Sprout } from "lucide-react";
+import { ChevronRight, Settings, Sprout } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -89,6 +89,16 @@ export default async function AccountPage() {
       </section>
 
       <div className="divide-y divide-line overflow-hidden rounded-xl bg-card shadow-card">
+        <Link href="/settings" className={ROW}>
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-mint">
+            <Settings size={20} aria-hidden="true" className="text-accent" />
+          </span>
+          <span className="flex flex-1 flex-col">
+            <span className="font-bold">설정</span>
+            <span className="text-sm text-ink-muted">음성</span>
+          </span>
+          <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-ink-muted" />
+        </Link>
         <Link href="/terms" className={ROW}>
           <span className="flex-1 font-bold">이용약관</span>
           <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-ink-muted" />

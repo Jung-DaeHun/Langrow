@@ -17,4 +17,9 @@ describe("isProtectedPage", () => {
   it.each(["/homework", "/chatty", "/level-upgrade", "/kanazawa"])("접두어만 같은 %s는 보호 페이지가 아니다", (path) => {
     expect(isProtectedPage(path)).toBe(false);
   });
+
+  it("설정 화면은 보호 페이지다", () => {
+    expect(isProtectedPage("/settings")).toBe(true);
+    expect(isProtectedPage("/settingsx")).toBe(false);
+  });
 });

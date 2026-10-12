@@ -22,6 +22,7 @@ import type { ChatEndResponse, ChatMessageResponse } from "@/types/api";
 import { ChatFeedback } from "./ChatFeedback";
 import { Furigana } from "./Furigana";
 import { LimitNotice } from "./LimitNotice";
+import { SpeakButtons } from "./SpeakButtons";
 import { WaitingDots } from "./WaitingDots";
 
 // 대화방(집중 모드). 상태 전이·한도·토큰은 서버가 지키고, 화면은 응답 코드별 동작(spec/backend.md "에러 코드")만 따른다.
@@ -230,6 +231,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
                 <p lang={room.language} className="font-bold text-brand">
                   <Furigana text={t.correction.corrected} show={furigana} />
                 </p>
+                <SpeakButtons source={{ kind: "speech", text: t.correction.corrected, language: room.language }} variant="compact" />
                 <p className="text-sm">
                   <Furigana text={t.correction.explanation_ko} show={furigana} />
                 </p>
@@ -329,7 +331,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   );
 }
 
-// 입문·초보는 번역을 항상 펼치고, 중급 이상은 말풍선 전체를 눌러 펼친다
+// 입문·초보는 번역을 항상 펼치고, 중급 이상은 말풍선 전체를 눌러 펼친다. 재생 버튼은 말풍선 밖 아래에 둔다
 function AiBubble({ line, language, level }: { line: ScenarioLine; language: Language; level: Level }) {
   const [open, setOpen] = useState(false);
   const body = (
@@ -339,20 +341,17 @@ function AiBubble({ line, language, level }: { line: ScenarioLine; language: Lan
   );
   const translation = <span className="mt-2 block border-t border-line pt-2 text-sm text-ink-muted">{line.ko}</span>;
 
-  if (opensTranslationByDefault(level)) {
-    return (
-      <div className={`max-w-[84%] self-start ${AI_BUBBLE}`}>
-        {body}
-        {translation}
-      </div>
-    );
-  }
-  return (
+  const bubble = opensTranslationByDefault(level) ? (
+    <div className={AI_BUBBLE}>
+      {body}
+      {translation}
+    </div>
+  ) : (
     <button
       type="button"
       aria-expanded={open}
       onClick={() => setOpen((v) => !v)}
-      className={`flex max-w-[84%] flex-col items-start gap-1 self-start rounded-bubble text-left ${FOCUS_RING}`}
+      className={`flex flex-col items-start gap-1 rounded-bubble text-left ${FOCUS_RING}`}
     >
       <span className={`block ${AI_BUBBLE}`}>
         {body}
@@ -363,5 +362,11 @@ function AiBubble({ line, language, level }: { line: ScenarioLine; language: Lan
         번역
       </span>
     </button>
+  );
+  return (
+    <div className="flex max-w-[84%] flex-col items-start gap-1 self-start">
+      {bubble}
+      <SpeakButtons source={{ kind: "speech", text: line.text, language }} variant="compact" />
+    </div>
   );
 }

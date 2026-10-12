@@ -49,6 +49,14 @@ describe("AppNav tabs", () => {
 
     expect(screen.getByRole("link", { name: "홈" })).not.toHaveAttribute("aria-current");
   });
+
+  it("설정 화면에서는 계정을 현재 위치로 표시한다", () => {
+    pathname.mockReturnValue("/settings");
+    render(<AppNav variant="tabs" language="en" />);
+
+    expect(screen.getByRole("link", { name: "계정" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByRole("link").filter((a) => a.hasAttribute("aria-current"))).toHaveLength(1);
+  });
 });
 
 describe("AppNav sidebar", () => {
@@ -77,6 +85,14 @@ describe("AppNav sidebar", () => {
     render(<AppNav variant="sidebar" language="en" />);
 
     expect(screen.getByRole("link", { name: "레벨업 테스트" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByRole("link").filter((a) => a.hasAttribute("aria-current"))).toHaveLength(1);
+  });
+
+  it("설정 화면에서는 계정을 현재 위치로 표시한다", () => {
+    pathname.mockReturnValue("/settings");
+    render(<AppNav variant="sidebar" language="ja" />);
+
+    expect(screen.getByRole("link", { name: "계정" })).toHaveAttribute("aria-current", "page");
     expect(screen.getAllByRole("link").filter((a) => a.hasAttribute("aria-current"))).toHaveLength(1);
   });
 });

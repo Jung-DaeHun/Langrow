@@ -7,6 +7,7 @@ export const PROTECTED_PAGES: readonly string[] = [
   "/level-up",
   "/kana",
   "/account",
+  "/settings",
 ];
 
 // 경로 세그먼트 기준으로 판정한다. /chat/abc는 보호 페이지이고 /chatty는 아니다

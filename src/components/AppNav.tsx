@@ -5,19 +5,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Language } from "@/lib/levels";
 
-type Item = { href: string; label: string; icon: LucideIcon };
+type Item = { href: string; label: string; icon: LucideIcon; also?: readonly string[] };
 
 const HOME: Item = { href: "/home", label: "홈", icon: House };
 const CHAT: Item = { href: "/chat", label: "대화", icon: MessagesSquare };
 const WORDS: Item = { href: "/words", label: "단어", icon: BookOpen };
 const LEVEL_UP: Item = { href: "/level-up", label: "레벨업 테스트", icon: TrendingUp };
 const KANA: Item = { href: "/kana", label: "가나 익히기", icon: Languages };
-const ACCOUNT: Item = { href: "/account", label: "계정", icon: CircleUserRound };
+// 설정은 계정 화면에서 들어가므로 계정을 현재 위치로 표시한다
+const ACCOUNT: Item = { href: "/account", label: "계정", icon: CircleUserRound, also: ["/settings"] };
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 function isCurrent(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function isCurrentItem(pathname: string, item: Item): boolean {
+  return [item.href, ...(item.also ?? [])].some((href) => isCurrent(pathname, href));
 }
 
 // 모바일은 하단 탭 4개, lg 이상은 사이드바(레벨업 테스트, 일본어면 가나 익히기 포함)다
@@ -28,8 +33,9 @@ export function AppNav({ variant, language }: { variant: "tabs" | "sidebar"; lan
     return (
       <nav aria-label="주 메뉴">
         <ul className="grid grid-cols-4">
-          {[HOME, CHAT, WORDS, ACCOUNT].map(({ href, label, icon: Icon }) => {
-            const current = isCurrent(pathname, href);
+          {[HOME, CHAT, WORDS, ACCOUNT].map((item) => {
+            const { href, label, icon: Icon } = item;
+            const current = isCurrentItem(pathname, item);
             return (
               <li key={href}>
                 <Link
@@ -52,8 +58,9 @@ export function AppNav({ variant, language }: { variant: "tabs" | "sidebar"; lan
   return (
     <nav aria-label="주 메뉴">
       <ul className="flex flex-col gap-1">
-        {items.map(({ href, label, icon: Icon }) => {
-          const current = isCurrent(pathname, href);
+        {items.map((item) => {
+          const { href, label, icon: Icon } = item;
+          const current = isCurrentItem(pathname, item);
           return (
             <li key={href}>
               <Link
