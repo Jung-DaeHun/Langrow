@@ -1,0 +1,4 @@
+{
+  "status": "completed",
+  "summary": "ChatRoom: AiBubble을 바깥 div(max-w-[84%] self-start)로 감싸 말풍선(버튼일 수 있음) 밖 아래에 SpeakButtons(speech, compact), 교정 카드는 고친 문장 → 재생 버튼 → 설명. 원문 그대로 text로 넘김. 새 settings/page.tsx(정적, requireReady, [계정] 뒤로 pill, 음성 radiogroup 여성 선택·남성 disabled '준비 중이에요', 기기 음성 안내). account 목록 묶음 맨 위 '설정' 행. PROTECTED_PAGES에 /settings, AppNav Item.also로 /settings에서 계정이 현재 위치. 타일은 계획의 TILE(bg-card 포함) 대신 기존 OnboardingFlow처럼 TILE + TILE_IDLE/TILE_SELECTED로 나눠 bg-card·bg-ok-wash 충돌을 피함. 저장·남성 음성 없음. 커밋 fa87e5b."
+}
