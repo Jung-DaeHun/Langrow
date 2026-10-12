@@ -1,0 +1,9 @@
+{
+  "project": "Langrow",
+  "phase": "5-tts",
+  "steps": [
+    { "step": 0, "name": "audio-core", "status": "pending" },
+    { "step": 1, "name": "speak-buttons", "status": "pending" },
+    { "step": 2, "name": "chat-settings", "status": "pending" }
+  ]
+}
