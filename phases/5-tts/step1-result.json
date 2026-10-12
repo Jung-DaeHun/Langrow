@@ -1,0 +1,4 @@
+{
+  "status": "completed",
+  "summary": "새 components/SpeakButtons.tsx(+test): SpeakButtons({source:{kind:'file',src}|{kind:'speech',text,language}, variant 'pill'|'compact', align 'start'|'center'}). 모듈 stopCurrent로 소리 하나, unmount 시 멈춤, 실패는 role=alert. 음성은 useSyncExternalStore(서버 null)+pickVoice, 구독한 synth에서 해제(테스트 unstub이 cleanup보다 먼저). Flashcard audio?:{front,back}(카드 밖, 면별 key), BlankQuiz exampleAudio?(graded만). 고지 3곳, proxy mp3. 가짜: FakeAudio(src·playbackRate·paused, static all), fakeSynth(getVoices·speak·cancel + Utterance 스텁)."
+}
