@@ -109,12 +109,17 @@ describe("proxy", () => {
 });
 
 describe("proxy matcher", () => {
-  it.each(["/api/chat/sessions", "/api/me/consent", "/_next/static/x.js", "/_next/image", "/favicon.ico", "/og.png"])(
-    "%s에서는 돌지 않는다",
-    (url) => {
-      expect(unstable_doesMiddlewareMatch({ config, url })).toBe(false);
-    },
-  );
+  it.each([
+    "/api/chat/sessions",
+    "/api/me/consent",
+    "/_next/static/x.js",
+    "/_next/image",
+    "/favicon.ico",
+    "/og.png",
+    "/audio/female/words/en-1-001.mp3",
+  ])("%s에서는 돌지 않는다", (url) => {
+    expect(unstable_doesMiddlewareMatch({ config, url })).toBe(false);
+  });
 
   it.each(["/home", "/", "/auth/callback", "/chat/abc", "/privacy"])("%s에서는 돈다", (url) => {
     expect(unstable_doesMiddlewareMatch({ config, url })).toBe(true);

@@ -42,5 +42,5 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
 // /api/**는 route 래퍼의 getUser()가 인증과 세션 갱신을 하므로 뺀다 (Auth 서버 왕복을 한 번으로)
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp3)$).*)"],
 };

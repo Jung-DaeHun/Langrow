@@ -102,4 +102,43 @@ describe("Flashcard revealed", () => {
     await user.click(card());
     expect(screen.getByRole("button", { name: "눌림 1" })).toBeInTheDocument();
   });
+
+  it("audio가 있으면 카드 바로 아래에 보이는 면의 것을 둔다", async () => {
+    const user = userEvent.setup();
+    render(
+      <Flashcard
+        front={<span>앞면 단어</span>}
+        back={<span>뒷면 뜻</span>}
+        audio={{ front: <span>앞면 소리</span>, back: <span>뒷면 소리</span> }}
+        onAnswer={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("앞면 소리")).toBeInTheDocument();
+    expect(screen.queryByText("뒷면 소리")).toBeNull();
+    const front = screen.getByText("앞면 소리");
+    expect(following(card(), front)).toBe(true);
+    expect(following(front, screen.getByRole("button", { name: "알아요" }))).toBe(true);
+
+    await user.click(card());
+    expect(screen.getByText("뒷면 소리")).toBeInTheDocument();
+    expect(screen.queryByText("앞면 소리")).toBeNull();
+  });
+
+  it("audio와 revealed가 같이 있으면 카드 → 소리 → revealed 순서다", async () => {
+    const user = userEvent.setup();
+    render(
+      <Flashcard
+        front={<span>앞면 단어</span>}
+        back={<span>뒷면 뜻</span>}
+        audio={{ front: <span>앞면 소리</span>, back: <span>뒷면 소리</span> }}
+        revealed={<Counter />}
+        onAnswer={vi.fn()}
+      />,
+    );
+
+    await user.click(card());
+
+    expect(following(screen.getByText("뒷면 소리"), screen.getByRole("button", { name: "눌림 0" }))).toBe(true);
+  });
 });

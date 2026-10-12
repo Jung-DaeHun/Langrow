@@ -28,6 +28,7 @@ type Props = {
   isLast: boolean;
   onNext: (choice: string) => void;
   explanation?: (choice: string) => ReactNode;
+  exampleAudio?: ReactNode;
 };
 
 export function BlankQuiz({
@@ -43,6 +44,7 @@ export function BlankQuiz({
   isLast,
   onNext,
   explanation,
+  exampleAudio,
 }: Props) {
   const [choice, setChoice] = useState<string | null>(null);
   const graded = mode === "learn" && choice !== null;
@@ -86,6 +88,8 @@ export function BlankQuiz({
           <Furigana text={question.after} show={showFurigana} />
         </p>
         <p className="text-sm text-ink-muted">{question.exampleKo}</p>
+        {/* 채점 전에는 정답이 드러나서 두지 않는다. 레벨업 테스트는 채점 화면이 없다 */}
+        {graded && exampleAudio}
       </div>
 
       <div className="flex flex-col gap-2">

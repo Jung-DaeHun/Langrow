@@ -9,10 +9,30 @@ vi.mock("@/services/apiClient", () => ({ api: vi.fn() }));
 const apiMock = vi.mocked(api);
 const scrollTo = vi.fn();
 
+// jsdom에는 오디오 재생이 없어서 가짜로 끼운다
+class FakeAudio {
+  static all: FakeAudio[] = [];
+  playbackRate = 1;
+  paused = true;
+  constructor(public src: string) {
+    FakeAudio.all.push(this);
+  }
+  addEventListener() {}
+  play() {
+    this.paused = false;
+    return Promise.resolve();
+  }
+  pause() {
+    this.paused = true;
+  }
+}
+
 beforeEach(() => {
   apiMock.mockReset();
   scrollTo.mockReset();
   vi.stubGlobal("scrollTo", scrollTo);
+  vi.stubGlobal("Audio", FakeAudio);
+  FakeAudio.all = [];
 });
 
 afterEach(() => {
@@ -222,5 +242,15 @@ describe("KanaDeck 완료", () => {
     for (let i = 0; i < 71; i++) fireEvent.click(screen.getByRole("button", { name: "알아요" }));
     expect(screen.getByRole("heading", { name: "가타카나 71자 완료" })).toBeInTheDocument();
     expect(apiMock).toHaveBeenCalledExactlyOnceWith("POST", "/api/events", KANA_BODY);
+  });
+});
+
+describe("KanaDeck 음성", () => {
+  it("카드 [듣기]는 글자 파일을 재생한다", async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole("button", { name: /あ행 · 5자/ }));
+
+    await user.click(screen.getByRole("button", { name: "듣기" }));
+    expect(FakeAudio.all.at(-1)?.src).toBe("/audio/female/kana/3042.mp3");
   });
 });

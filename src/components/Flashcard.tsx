@@ -12,9 +12,15 @@ const OUTLINE = `${BUTTON} border border-accent bg-transparent text-accent hover
 const FACE =
   "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-card p-6 text-center shadow-raised backface-hidden";
 
-type Props = { front: ReactNode; back: ReactNode; revealed?: ReactNode; onAnswer: (knew: boolean) => void };
+type Props = {
+  front: ReactNode;
+  back: ReactNode;
+  audio?: { front: ReactNode; back: ReactNode };
+  revealed?: ReactNode;
+  onAnswer: (knew: boolean) => void;
+};
 
-export function Flashcard({ front, back, revealed, onAnswer }: Props) {
+export function Flashcard({ front, back, audio, revealed, onAnswer }: Props) {
   const [flipped, setFlipped] = useState(false);
   // revealed(오답 복습의 AI 설명)는 뒷면을 처음 본 뒤부터 둔다. 앞면으로 돌리면 숨기기만 해서
   // 기다리던 요청이나 받은 설명을 잃지 않는다(다시 누르면 또 차감된다)
@@ -43,6 +49,8 @@ export function Flashcard({ front, back, revealed, onAnswer }: Props) {
           </span>
         </span>
       </button>
+      {/* 재생 버튼은 카드(<button>) 밖에 둔다. 면마다 key로 새로 만들어 뒤집으면 앞 소리가 멈춘다(SpeakButtons) */}
+      {audio !== undefined && <div key={flipped ? "back" : "front"}>{flipped ? audio.back : audio.front}</div>}
       {revealed !== undefined && seenBack && <div hidden={!flipped}>{revealed}</div>}
       <div className="flex gap-2">
         <button type="button" onClick={() => onAnswer(false)} className={`${OUTLINE} flex-1`}>

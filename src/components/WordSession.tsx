@@ -4,6 +4,7 @@ import { ChevronLeft, CircleAlert, CircleCheck, RotateCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+import { exampleAudioPath, wordAudioPath } from "@/lib/audio";
 import { isCorrectChoice, parseBlank, toBlankQuestion, type BlankParts, type BlankQuestion } from "@/lib/blank";
 import { LANGUAGE_NAMES, LEVEL_INFO, showsFurigana, type Language, type Level } from "@/lib/levels";
 import type { TrialState } from "@/lib/plan";
@@ -16,6 +17,7 @@ import { BlankQuiz } from "./BlankQuiz";
 import { Flashcard } from "./Flashcard";
 import { Furigana } from "./Furigana";
 import { LimitNotice } from "./LimitNotice";
+import { SpeakButtons } from "./SpeakButtons";
 import { WordExplanation, type ExplanationBlock } from "./WordExplanation";
 
 // 단어 회차: 오늘의 학습(플래시카드 → 빈칸) / 오답 복습(플래시카드만). 시작 카드 밖은 집중 모드다.
@@ -170,7 +172,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
               </li>
             ))}
           </ul>
-          <p className="text-sm text-ink-muted">복습은 하루 사용량에 포함되지 않아요.</p>
+          <p className="text-sm text-ink-muted">복습은 하루 사용량에 포함되지 않아요. 발음은 합성 음성이에요.</p>
           <button type="button" onClick={start} className={`${PRIMARY} w-full`}>
             복습 시작
           </button>
@@ -192,7 +194,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
         <h2 id={startTitleId} className="text-[28px] leading-tight font-bold tracking-[-0.02em]">
           새 단어 {words.length}개
         </h2>
-        <p className="text-sm text-ink-muted">끝까지 풀면 한 번에 저장돼요. 중간에 나가면 저장되지 않아요.</p>
+        <p className="text-sm text-ink-muted">끝까지 풀면 한 번에 저장돼요. 중간에 나가면 저장되지 않아요. 발음은 합성 음성이에요.</p>
         <button type="button" onClick={start} className={`${PRIMARY} w-full`}>
           시작하기
         </button>
@@ -237,6 +239,10 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
               <span className="text-sm text-ink-muted">{w.exampleKo}</span>
             </>
           }
+          audio={{
+            front: <SpeakButtons source={{ kind: "file", src: wordAudioPath(w.id) }} align="center" />,
+            back: <SpeakButtons source={{ kind: "file", src: exampleAudioPath(w.id) }} align="center" />,
+          }}
           revealed={mode === "review" ? explanationFor(w, "예문 설명") : undefined}
           onAnswer={answerCard}
         />
@@ -263,6 +269,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
           isLast={index === runWords.length - 1}
           onNext={answerQuiz}
           explanation={(choice) => explanationFor(w, "AI 해설", choice)}
+          exampleAudio={<SpeakButtons source={{ kind: "file", src: exampleAudioPath(w.id) }} />}
         />
       </div>
     );

@@ -180,3 +180,23 @@ describe("BlankQuiz 설명 자리", () => {
     expect(screen.queryByText("설명 자리")).not.toBeInTheDocument();
   });
 });
+
+describe("BlankQuiz 예문 소리", () => {
+  it("학습은 채점 뒤에만 문제 카드 안에 예문 소리를 둔다", async () => {
+    const { user } = setup({ exampleAudio: <span>예문 소리</span> });
+    expect(screen.queryByText("예문 소리")).toBeNull();
+
+    await user.click(option("went"));
+
+    const sound = screen.getByText("예문 소리");
+    expect(sound.closest(".shadow-card")).toContainElement(screen.getByText("나는 학교에 갔다."));
+  });
+
+  it("레벨업 테스트는 고른 뒤에도 예문 소리를 두지 않는다", async () => {
+    const { user } = setup({ mode: "test", answer: undefined, exampleAudio: <span>예문 소리</span> });
+
+    await user.click(option("went"));
+
+    expect(screen.queryByText("예문 소리")).toBeNull();
+  });
+});

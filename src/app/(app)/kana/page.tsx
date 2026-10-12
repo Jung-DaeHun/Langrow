@@ -14,7 +14,7 @@ export default async function KanaPage() {
       {/* 제목은 카드(data-focus-mode) 동안 셸처럼 숨긴다(globals.css의 data-app-chrome 규칙) */}
       <div data-app-chrome className="flex flex-col gap-1">
         <h1 className="text-h1 font-semibold tracking-[-0.02em] text-balance text-brand">가나 익히기</h1>
-        <p className="text-sm text-ink-muted">사용량에 포함되지 않아요</p>
+        <p className="text-sm text-ink-muted">사용량에 포함되지 않아요 · 발음은 합성 음성이에요</p>
       </div>
       <KanaDeck />
     </div>

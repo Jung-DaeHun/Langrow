@@ -15,12 +15,32 @@ const apiMock = vi.mocked(api);
 const refresh = vi.fn();
 const scrollTo = vi.fn();
 
+// jsdom에는 오디오 재생이 없어서 가짜로 끼운다
+class FakeAudio {
+  static all: FakeAudio[] = [];
+  playbackRate = 1;
+  paused = true;
+  constructor(public src: string) {
+    FakeAudio.all.push(this);
+  }
+  addEventListener() {}
+  play() {
+    this.paused = false;
+    return Promise.resolve();
+  }
+  pause() {
+    this.paused = true;
+  }
+}
+
 beforeEach(() => {
   apiMock.mockReset();
   refresh.mockReset();
   scrollTo.mockReset();
   vi.mocked(useRouter).mockReturnValue({ refresh, push: vi.fn() } as unknown as ReturnType<typeof useRouter>);
   vi.stubGlobal("scrollTo", scrollTo);
+  vi.stubGlobal("Audio", FakeAudio);
+  FakeAudio.all = [];
 });
 
 afterEach(() => {
@@ -112,7 +132,7 @@ describe("WordSession 오늘의 학습 시작 카드", () => {
     expect(screen.getByText("영어 · 중급")).toBeInTheDocument();
     expect(screen.getByText("오늘 3 / 10")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "새 단어 3개" })).toBeInTheDocument();
-    expect(screen.getByText("끝까지 풀면 한 번에 저장돼요. 중간에 나가면 저장되지 않아요.")).toBeInTheDocument();
+    expect(screen.getByText("끝까지 풀면 한 번에 저장돼요. 중간에 나가면 저장되지 않아요. 발음은 합성 음성이에요.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "시작하기" })).toBeEnabled();
     expect(focusRoot(container)).toBeNull();
   });
@@ -344,7 +364,7 @@ describe("WordSession 오답 복습", () => {
     const list = screen.getByRole("list", { name: "복습할 단어" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(3);
     expect(within(list).getByText("word1")).toHaveAttribute("lang", "en");
-    expect(screen.getByText("복습은 하루 사용량에 포함되지 않아요.")).toBeInTheDocument();
+    expect(screen.getByText("복습은 하루 사용량에 포함되지 않아요. 발음은 합성 음성이에요.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "복습 시작" })).toBeInTheDocument();
     expect(focusRoot(container)).toBeNull();
   });
@@ -532,5 +552,51 @@ describe("WordSession AI 정답 설명", () => {
 
     expect(apiMock).toHaveBeenLastCalledWith("POST", "/api/words/explain", { word_id: "en-3-001" });
     expect(await screen.findByText("이 예문은 현재형이에요.")).toBeInTheDocument();
+  });
+});
+
+describe("WordSession 음성", () => {
+  const listen = () => screen.getByRole("button", { name: "듣기" });
+
+  it("카드 앞면 [듣기]는 단어 파일, 뒤집으면 예문 파일을 재생한다", async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+
+    await user.click(listen());
+    expect(FakeAudio.all.at(-1)?.src).toBe("/audio/female/words/en-3-001.mp3");
+
+    await user.click(flashcard());
+    await user.click(listen());
+    expect(FakeAudio.all.at(-1)?.src).toBe("/audio/female/words/en-3-001-ex.mp3");
+  });
+
+  it("뒤집으면 앞면 소리가 멈춘다", async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+
+    await user.click(listen());
+    await user.click(flashcard());
+
+    expect(FakeAudio.all[0].paused).toBe(true);
+  });
+
+  it("빈칸은 채점 뒤에만 예문 [듣기]가 있다", async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+    await answerCards(user, [true, true, true]);
+    expect(screen.queryByRole("button", { name: "듣기" })).toBeNull();
+
+    await user.click(screen.getByText("word1", { selector: "button span[lang]" }));
+    await user.click(listen());
+
+    expect(FakeAudio.all.at(-1)?.src).toBe("/audio/female/words/en-3-001-ex.mp3");
+  });
+
+  it("오답 복습 카드도 앞면 단어·뒷면 예문 소리를 둔다", async () => {
+    const { user } = setup({ mode: "review" });
+    await user.click(screen.getByRole("button", { name: "복습 시작" }));
+
+    await user.click(listen());
+    expect(FakeAudio.all.at(-1)?.src).toBe("/audio/female/words/en-3-001.mp3");
   });
 });

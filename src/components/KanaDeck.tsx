@@ -2,9 +2,11 @@
 
 import { ChevronLeft, CircleAlert, CircleCheck } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
+import { kanaAudioPath } from "@/lib/audio";
 import { KANA, KANA_ROWS, type Kana, type KanaScript } from "@/lib/kana";
 import { api } from "@/services/apiClient";
 import { Flashcard } from "./Flashcard";
+import { SpeakButtons } from "./SpeakButtons";
 
 // 가나 익히기(spec/words.md). 상수만 쓰고 진행도는 저장하지 않는다. [모르겠어요]를 누른 글자는 회차 끝에 다시 넣는다.
 // 회차를 마칠 때마다 kana_studied를 한 번 보낸다. 활동일·연속일은 서버가 갱신하고, 실패는 [다시 시도]로만 다시 보낸다
@@ -129,6 +131,10 @@ export function KanaDeck() {
               </span>
             </>
           }
+          audio={{
+            front: <SpeakButtons source={{ kind: "file", src: kanaAudioPath(current.char) }} align="center" />,
+            back: <SpeakButtons source={{ kind: "file", src: kanaAudioPath(current.char) }} align="center" />,
+          }}
           onAnswer={answer}
         />
       </div>
