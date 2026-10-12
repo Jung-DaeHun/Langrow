@@ -26,6 +26,7 @@
 6. **주의사항은 구체적으로** — "조심해라" 대신 "X를 하지 마라. 이유: Y" 형식으로 적는다.
 7. **네이밍** — step name은 kebab-case slug로, 해당 step의 핵심 모듈/작업을 한두 단어로 표현한다 (예: `project-setup`, `api-layer`, `auth-flow`).
 8. **spec과 어긋나지 않기** — 상세 spec(`docs/spec/`)이 있으면 step 지시는 그 동작과 같아야 한다. 예외 흐름과 에러 코드별 동작도 빠뜨리지 않는다. spec과 다르게 하려면 spec을 먼저 고치고 그 결정을 step에 적는다. 이유: step 세션은 step 파일을 그대로 따르므로, step이 spec과 다르면 구현도 spec과 달라진다(예: "pending 턴을 그리지 마라"라는 지시가 spec의 "전송 중이면 완료를 기다린다"를 빠뜨리게 했다).
+9. **외부 API로 데이터를 만드는 일은 step에 넣지 않는다** — 유료·한도가 있는 API 호출, 오래 걸리는 생성(예: 음성 파일 4,071개 약 3.4시간)은 phase 밖에서 사람이 확인하며 돌린다. step 금지사항에 "그 스크립트를 실제로 실행하지 마라"를 적는다. 이유: step 커밋은 `git add -A`라서 생성물이 그대로 커밋되고, 비용이 들며, step 세션은 몇 시간을 기다리지 못한다.
 
 ### D. 파일 생성
 
@@ -140,6 +141,8 @@ npm test        # 테스트 통과
 python3 scripts/execute.py {task-name}        # 순차 실행
 python3 scripts/execute.py {task-name} --push  # 실행 후 push
 ```
+
+- Windows에서 `python3`가 아무것도 실행하지 않고 "Python"만 출력하고 끝나면(exit 49) App Installer의 Python 리디렉터가 가로챈 것이다. `py scripts/execute.py {task-name}`로 실행한다. 이유: 2026-10-12 App Installer 업데이트가 `WindowsApps/python3`를 리디렉터로 바꿨다.
 
 execute.py가 자동으로 처리하는 것:
 

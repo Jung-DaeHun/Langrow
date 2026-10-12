@@ -4,6 +4,7 @@ Harness Step Executor — phase 내 step을 순차 실행하고 자가 교정한
 
 Usage:
     python3 scripts/execute.py <phase-dir> [--push]
+    (Windows에서 python3가 App Installer 리디렉터면 py scripts/execute.py <phase-dir>)
 """
 
 import argparse
