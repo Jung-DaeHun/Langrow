@@ -16,13 +16,15 @@ src/
 ├── lib/                  # 순수 규칙 (I/O·환경변수·fetch 없음)
 ├── components/           # 화면 단위: OnboardingFlow, ScenarioPicker, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck
 │                         # 공용: Flashcard, BlankQuiz, Furigana, LanguageSheet, AppNav, UsageCard, Dialog, Toast, WaitingDots,
-│                         #       GoogleLoginButton, TrialButton, ProButton, LimitNotice, WordExplanation, LogoutButton
+│                         #       GoogleLoginButton, TrialButton, ProButton, LimitNotice, WordExplanation, LogoutButton, SpeakButtons
 ├── site.config.ts        # 운영자 이름·문의 이메일·약관 시행일 (출시 전에 채운다)
 ├── types/                # database.ts (supabase gen types), api.ts (API 응답 타입)
 └── test/                 # fakes.ts (가짜 db·ai)
 supabase/migrations/      # 스키마·제약·인덱스·RLS·RPC·실행 권한
-scripts/                  # generate-words, seed-words, metrics-report (각각 main(deps)를 export)
+scripts/                  # generate-words, seed-words, metrics-report, generate-audio (각각 main(deps)를 export)
 data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
+data/audio-manifest.json  # 음성 파일별 SSML 해시 (generate-audio가 갱신)
+public/audio/             # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포인트}.mp3 (Azure로 미리 생성해 커밋)
 ```
 - 상수 데이터: 상황 `src/lib/scenarios.ts`(20개, 첫 마디·역할은 en/ja 각각), 가나 `src/lib/kana.ts`.
 
@@ -46,6 +48,8 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
         처리 중 재요청은 202, 완료 후 재요청은 저장된 결과
 설명:   예약 RPC(계정 잠금, Free 하루 10회 확인, 저장본이면 바로 응답, 없으면 실패 10회 확인, word_explained 행)
         → Claude 설명(잠금 밖) → 성공은 저장 RPC(설명을 만든 단어 내용이 지금과 같을 때만 word_explanations) 후 응답 / 실패는 실패 RPC(예약 행 삭제, chat_failed)
+음성:   (로컬) generate-audio → Azure Speech(F0) → public/audio/*.mp3 + data/audio-manifest.json 커밋 → 배포된 정적 파일을 브라우저가 재생
+        대화 문장은 서버를 거치지 않고 브라우저 speechSynthesis로 읽는다
 ```
 
 ## 상태 관리
@@ -56,7 +60,7 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 ## 페이지 접근
 - 공개: `/`, `/privacy`, `/terms`, `/auth/callback`. 보호: `/onboarding`, `/home`, `/chat/**`, `/words`, `/level-up`, `/kana`, `/account` (비로그인 → `/`).
 - `/onboarding`을 뺀 보호 페이지는 동의와 현재 언어의 레벨이 없으면 `/onboarding`으로 보낸다(`(app)` route group의 레이아웃과 페이지가 `requireReady()`를 부른다).
-- `/api/**`는 리디렉션하지 않고 JSON 401/403을 반환한다. `/_next/**`와 정적 파일은 인증 가드에서 제외한다.
+- `/api/**`는 리디렉션하지 않고 JSON 401/403을 반환한다. `/_next/**`와 정적 파일(이미지·`.mp3`)은 인증 가드에서 제외한다.
 
 ## API
 | Method | Path | 하는 일 |
@@ -109,4 +113,4 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 ## 환경
 - 로컬: Supabase CLI(Docker) + `npm run dev`. 운영: Supabase 클라우드(서울) 1개 + Vercel Production(icn1, `main`). Vercel Preview는 끈다(prod DB 오염 방지).
 - 마이그레이션: `supabase migration new` → 로컬 `supabase db reset` → 운영 `supabase db push`.
-- 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` (`services/env.ts`에서 zod로 지연 검증). `METRICS_EXCLUDED_USER_IDS`는 로컬 `metrics-report` 전용.
+- 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` (`services/env.ts`에서 zod로 지연 검증). `METRICS_EXCLUDED_USER_IDS`는 로컬 `metrics-report` 전용, `AZURE_SPEECH_KEY`·`AZURE_SPEECH_REGION`은 로컬 `generate-audio` 전용(운영에 넣지 않는다).

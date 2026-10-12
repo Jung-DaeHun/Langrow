@@ -12,6 +12,7 @@
   - `ops.md` 환경과 배포, 출시 최소 요건
   - `testing.md` TDD hook 파일 규칙, 테스트 목록
   - `ui.md` UI 상세 규격(토큰 값, 컴포넌트 클래스, 화면별 구성). 화면·컴포넌트 step에서 읽는다.
+  - `audio.md` 음성(TTS): 미리 만드는 단어·예문·가나 음성, 대화의 브라우저 음성, 재생 규칙
 
 ## 기술 스택
 - Next.js (App Router), TypeScript strict mode, Tailwind CSS

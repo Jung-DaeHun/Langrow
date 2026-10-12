@@ -4,12 +4,12 @@
 
 - TDD guard(`scripts/hooks/tdd-guard.sh`)는 예외(설정·타입·`page`/`layout` 등 Next 파일, 경로에 `test`/`spec`이 들어간 파일)를 뺀 **모든 `.ts(x)`**에 테스트 파일을 요구한다. `route.ts`, 미들웨어, 컴포넌트, use-case, `server/db/*.ts`뿐 아니라 `lib/`, `services/`, `scripts/`도 대상이다. 같은 폴더에 `*.test.ts(x)`를 먼저 만든다.
 - `services/supabase/*.ts`와 `services/env.ts`는 env가 없어도 import만으로 throw하지 않고, 호출할 때 검증 에러가 나는지 테스트한다 (Stop hook의 `next build` 안전성).
-- `scripts/*.ts`는 입출력을 주입받는 `main(deps)`를 export하고 가짜 deps로 테스트한다 (generate-words: 가짜 AI 응답 → 검증된 JSON, seed-words: JSON → upsert 행, metrics-report: 행 → 분자/분모 출력). 계산 규칙은 `lib/`에 둔다.
+- `scripts/*.ts`는 입출력을 주입받는 `main(deps)`를 export하고 가짜 deps로 테스트한다 (generate-words: 가짜 AI 응답 → 검증된 JSON, seed-words: JSON → upsert 행, metrics-report: 행 → 분자/분모 출력, generate-audio: 가짜 fetch 응답 → 파일·manifest 쓰기). 계산 규칙은 `lib/`에 둔다.
 - guard는 경로에 `test`가 들어간 파일을 검사하지 않는다. 그래서 레벨업 테스트의 경로는 `/level-up`, `/api/level-up`으로 둔다. `src/test/fakes.ts` 같은 테스트 보조 파일은 이 규칙 덕분에 통과한다.
 - DB 접근 파일의 `server/db/*.test.ts`는 실제 DB 통합 테스트로 작성한다. Vitest 기본 실행에서 이 경로를 제외하고 `test:db`에서 포함한다. Supabase 쿼리 체인을 mock하거나 hook 통과만을 위한 빈 테스트를 만들지 않는다.
 - 정적 UI는 `page.tsx`/`layout.tsx`에 둔다 (hook이 검사하지 않음). 컴포넌트는 꼭 필요한 것만 만든다.
   - 화면 단위: `OnboardingFlow`, `ScenarioPicker`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`
-  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `AppNav`, `UsageCard`, `Dialog`, `Toast`, `WaitingDots`, `GoogleLoginButton`, `TrialButton`(체험 시작), `ProButton`(Pro 클릭·준비 중 모달), `LimitNotice`(한도 도달 안내), `WordExplanation`(AI 정답 설명), `LogoutButton`. 만든 이유는 `ui.md` "공용 React 컴포넌트와 이유"에 있다
+  - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `AppNav`, `UsageCard`, `Dialog`, `Toast`, `WaitingDots`, `GoogleLoginButton`, `TrialButton`(체험 시작), `ProButton`(Pro 클릭·준비 중 모달), `LimitNotice`(한도 도달 안내), `WordExplanation`(AI 정답 설명), `LogoutButton`, `SpeakButtons`(음성 재생). 만든 이유는 `ui.md` "공용 React 컴포넌트와 이유"에 있다
   - 입력·API 호출이 있는 부분만 Client Component로 만든다. 페이지의 분기 규칙은 테스트할 수 있게 `lib/`(예: `today`, `readiness`, `onboarding`)에 둔다.
   - 페이지 읽기는 `server/db/reads.ts`에 두고 `test:db`로 실제 RLS와 함께 검증한다. 운영자 정보는 설정 파일 `src/site.config.ts`에 둔다.
 - Vitest 설정에서 `server-only`를 빈 모듈로 alias한다.
@@ -26,6 +26,7 @@
   - wordBatch: 회차 크기(남은 단어 0/1~9 포함), known/review 결정, 신규분 계산
   - levelTest: 20개 검증, 16/20 경계
   - levels: 후리가나·번역·한국어 입력·레벨업·가나 표시 경계 / today: 목표 진행·소진·남은 할 일 수 / readiness: 요구 수준별 동의·레벨 판정 / errors: 코드별 HTTP 상태
+  - audio: SSML 문서(XML 이스케이프, 영어 예문의 `{{ }}` 제거, 일본어 단어 `reading`·예문 후리가나 → `<sub alias>`, 한자 없는 단어는 그대로), 단어·예문·가나 파일 경로, 가타카나 → 같은 히라가나 파일
   - metrics: D1/D7 한국 날짜, 관찰 완료 분모, 운영 계정 제외, 최소 표본 미달 판단 보류, 유효한 세션(성공 턴 3개 이상, 종료 여부 무관), 한도 도달 `feature`별 분리, Pro 관심은 경로 무관 체험 시작자
 - **services**: 프롬프트 빌더, 응답 스키마, 재시도 1번과 호출 예산, refusal과 `max_tokens`는 실패로 처리. 설명 프롬프트는 빈칸 정답·빈칸 오답·복습(보기 없음) 세 경우와 일본어 표기 지시, 빈 설명은 `invalid_output`
 - **use-case** (가짜 db와 ai 주입; 실제 경합 증명은 아래 DB 통합 테스트)
@@ -51,7 +52,7 @@
   - AI 정답 설명: Free 9회 사용 후 동시 예약 2개는 하나만 허용, 저장본 요청도 Free 한도에 들어감, Pro는 10회를 넘어도 허용, 저장본은 실패 10회여도 돌려줌, 단어의 예문·번역·뜻을 바꾸면 저장본을 쓰지 않음, 저장 RPC는 같은 해시면 기존 설명 유지·다른 해시면 교체, 설명을 만든 뒤 단어의 예문·번역·뜻이 바뀌었으면 저장하지 않음, `word_explanations`는 anon/authenticated가 읽지 못함, 실패 RPC는 예약 행을 지우고 `chat_failed`를 한 번만 남김(두 번 호출·남의 예약 id는 변경 없음), 설명 실패도 대화의 실패 10회 차단에 들어감, 미동의·단어 언어 레벨 없음 거부, 한도 거부 때 `limit_reached` 없음
 - **route / 페이지 접근**
   - `route()` 래퍼: 401, 403, 400, 에러 매핑, 500, JSON이 아닌 요청 거부, 202 정상 처리
-  - 미들웨어: 비로그인 `/`, `/privacy`, `/terms`, 콜백은 통과, `/home`은 이동, `/api/**`는 리디렉션하지 않음, 정적 파일 제외
+  - 미들웨어: 비로그인 `/`, `/privacy`, `/terms`, 콜백은 통과, `/home`은 이동, `/api/**`는 리디렉션하지 않음, 정적 파일(이미지·`.mp3`) 제외
   - 페이지 준비 상태: 미동의 사용자의 보호 페이지 → 온보딩, 온보딩·공개 페이지에서 이동 루프 없음
   - 각 `route.test.ts`는 연결과 해당 경로 준비 상태 확인
 - **컴포넌트**
@@ -59,11 +60,14 @@
   - 종료 202 표시·재확인·fallback에서 저장된 턴 교정 확인
   - 레벨 1~4/5 단어 소진 분기, 오답 0개, 소진 뒤 미완료 10개 목표/잘못된 체험 유도 없음, 레벨·언어 변경 후 일반 화면 복귀
   - 대화 입력은 표시된 남은 횟수가 0이어도 막지 않고 429 응답 뒤에만 막음
+  - 음성: [듣기]는 속도 1, [천천히 듣기]는 0.75로 재생, 다른 버튼을 누르면 앞 소리 멈춤, 버튼이 사라지면 그 소리 멈춤, 재생 실패 문구와 다시 누르면 지움, 우리가 멈춘 음성 중단은 오류 아님, 대화는 학습 언어 음성이 없거나 `speechSynthesis`가 없으면 버튼 없음·`voiceschanged` 뒤 표시, 카드 앞면은 단어·뒷면은 예문 파일, 빈칸은 학습 채점 뒤에만·레벨업 테스트에는 없음, 대화 말풍선(첫 마디 포함)·교정 문장은 표기를 지운 문장
   - AI 정답 설명: 학습 빈칸은 정답·오답 모두 채점 뒤 버튼, 레벨업 테스트에는 없음, 복습 카드는 뒤집은 뒤에만 버튼, 대기·성공·503 [다시 시도]·429 안내, 429 뒤 같은 회차의 다음 문제도 안내, 한도 안내에서 체험을 시작하면 버튼 복귀, 다음 문제로 넘어가면 늦은 응답 무시, 복습 카드를 앞면으로 돌려도 요청·설명 유지, 키보드로 누른 뒤 Tab 한 번으로 [다음 문제]
 - **데이터 검증**
   - 단어: 언어 × 레벨 개수, 예문마다 `{{ }}` 정확히 1개, 오답 보기 3개가 서로 다르고 정답과도 다름
   - 가나: 각 71자, 중복 없음
   - 상황: 20개, en·ja 모두 AI 역할·배경, 첫 마디와 번역이 있음
+  - 음성: 모든 단어(단어·예문)와 가나 71자의 파일이 `public/audio/`에 있고, `data/audio-manifest.json` 해시가 지금 데이터로 만든 SSML의 해시와 같음
+- **음성 생성 스크립트**(가짜 fetch): 파일이 있고 해시가 같으면 건너뜀, 해시가 다르면 다시 만듦, 429는 기다렸다가 같은 항목 재요청, 그 밖의 오류·빈 응답은 멈추고 이미 만든 파일·manifest는 남김, 파일마다 manifest 갱신, `--ids`는 그 항목만, 키·지역이 없으면 fetch 없이 실패
 - **수동 E2E**: 공개 페이지 → 로그인 → 동의 → 온보딩 → 가나 → 대화와 종료 → 단어/복습 → 레벨업 → 한도 도달 → 체험 → 재시작 거부. 추가로 두 탭 전송·전송 중 종료·단어 저장 응답 유실·레벨 5 소진·방문만 한 날·일본어 IME·비로그인 보호 페이지를 확인한다.
 - **배포 전 보안 점검**
   - Security Advisor 경고 0개, 모든 사용자 테이블 RLS 켜짐
