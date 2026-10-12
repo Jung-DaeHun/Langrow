@@ -50,6 +50,7 @@ npm run test        # 테스트 (가짜 db, Docker 불필요)
 npm run test:db     # DB 통합 테스트 (로컬 Supabase 필요: supabase start)
 npm run words:generate -- --language ja --level 1 [--model <id>]  # 단어 생성 (Anthropic API, 새 파일만 씀. 검수 후 커밋)
 npm run seed:words  # 단어 seed (data/words/*.json → Supabase)
+npm run audio:generate [-- --ids ja-1-001,あ]  # 단어·예문·가나 음성 생성 (Azure F0, 바뀐 것만, 처음 약 3.4시간. public/audio·manifest 커밋)
 npm run metrics [-- --launch 2026-11-01]  # 수요 검증 지표 (분자/분모, METRICS_EXCLUDED_USER_IDS 제외)
 
 <!-- BEGIN:nextjs-agent-rules -->

@@ -11,6 +11,7 @@
     "test:db": "vitest run -c vitest.db.config.ts",
     "words:generate": "tsx --env-file-if-exists=.env.local scripts/generate-words.ts",
     "seed:words": "tsx --env-file-if-exists=.env.local scripts/seed-words.ts",
+    "audio:generate": "tsx --env-file-if-exists=.env.local scripts/generate-audio.ts",
     "metrics": "tsx --env-file-if-exists=.env.local scripts/metrics-report.ts"
   },
   "dependencies": {
