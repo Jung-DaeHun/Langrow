@@ -2,8 +2,24 @@
   "project": "Langrow",
   "phase": "5-tts",
   "steps": [
-    { "step": 0, "name": "audio-core", "status": "pending" },
-    { "step": 1, "name": "speak-buttons", "status": "pending" },
-    { "step": 2, "name": "chat-settings", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "audio-core",
+      "status": "completed",
+      "started_at": "2026-10-12T22:55:17+0900",
+      "summary": "만든 파일: src/lib/audio.ts(+test), scripts/generate-audio.ts(+test), package.json audio:generate, CLAUDE.md 명령어 한 줄. lib/audio export: SLOW_RATE, SPEECH_LOCALE, wordAudioPath, exampleAudioPath, kanaAudioPath, escapeXml, SpeechWord, wordSpeech, exampleSpeech, ssmlDocument, AudioItem, audioItems, pickVoice(-/_·대소문자 무시, locale 일치 → en·en-* → null). 스크립트 export: MANIFEST_PATH, AZURE_VOICES, ssmlHash, plannedAudio, readWordFiles, main(deps), 옵션 --ids a,b. 실제 생성·어긋남 검사 테스트는 안 함.",
+      "completed_at": "2026-10-12T22:59:48+0900"
+    },
+    {
+      "step": 1,
+      "name": "speak-buttons",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "chat-settings",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-12T22:55:17+0900"
 }
