@@ -24,7 +24,7 @@ supabase/migrations/      # 스키마·제약·인덱스·RLS·RPC·실행 권�
 scripts/                  # generate-words, seed-words, metrics-report, generate-audio (각각 main(deps)를 export)
 data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 data/audio-manifest.json  # 음성 파일별 SSML 해시 (generate-audio가 갱신)
-public/audio/             # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포인트}.mp3 (Azure로 미리 생성해 커밋)
+public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포인트}.mp3 (Azure로 미리 생성해 커밋. 남성 음성은 나중에 male/)
 ```
 - 상수 데이터: 상황 `src/lib/scenarios.ts`(20개, 첫 마디·역할은 en/ja 각각), 가나 `src/lib/kana.ts`.
 
