@@ -35,6 +35,8 @@ export function SpeakButtons({ source, variant = "pill", align = "start" }: Prop
 function playFile(src: string, rate: number, onError: () => void): () => void {
   let stopped = false;
   const audio = new Audio(src);
+  // iOS Safari는 불러오는 중에 playbackRate를 기본 속도로 되돌릴 수 있어 둘 다 정한다
+  audio.defaultPlaybackRate = rate;
   audio.playbackRate = rate;
   // 우리가 멈춰서 거부된 play()(AbortError)는 오류가 아니다
   const fail = () => {
@@ -66,8 +68,9 @@ function SpeechButtons({ text, language, variant, align }: { text: string; langu
 
   const play: Play = (rate, onError) => {
     const synth = window.speechSynthesis;
-    const voice = synth.getVoices().find((v) => v.voiceURI === voiceURI);
-    if (voice === undefined) {
+    // voiceURI가 겹치는 기기가 있어 누를 때 다시 고른다
+    const voice = pickVoice(synth.getVoices(), language);
+    if (voice === null) {
       onError();
       return () => {};
     }

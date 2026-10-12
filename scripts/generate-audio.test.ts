@@ -145,6 +145,15 @@ describe("generate-audio main", () => {
     expect(sleeps).toContain(60000);
   });
 
+  it("Retry-After가 3초보다 짧아도 요청 간격(3초 이상)을 지킨다", async () => {
+    const { deps, sleeps } = fakeDeps({ args: ["--ids", "あ"], responses: [() => tooMany("1")] });
+
+    expect(await main(deps)).toBe(0);
+
+    expect(sleeps).toHaveLength(1);
+    expect(sleeps[0]).toBeGreaterThanOrEqual(3000);
+  });
+
   it("429가 5번 이어지면 멈춘다", async () => {
     const { deps, written } = fakeDeps({ args: ["--ids", "あ"], responses: Array.from({ length: 5 }, () => () => tooMany("1")) });
 
@@ -197,6 +206,15 @@ describe("generate-audio main", () => {
 
     expect(requests).toHaveLength(0);
     expect(logs.join("\n")).toContain("AZURE_SPEECH_KEY");
+  });
+
+  it("지역이 없어도 Azure를 부르지 않고 실패한다", async () => {
+    const { deps, requests, logs } = fakeDeps({ env: { key: "test-key", region: undefined } });
+
+    expect(await main(deps)).toBe(1);
+
+    expect(requests).toHaveLength(0);
+    expect(logs.join("\n")).toContain("AZURE_SPEECH_REGION");
   });
 
   it("모르는 옵션이면 사용법을 출력한다", async () => {

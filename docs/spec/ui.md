@@ -266,7 +266,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 | AI 말풍선 | 왼쪽, `max-w-[84%] rounded-bubble rounded-bl-md bg-card shadow-card px-3.5 py-3`. `lang`은 학습 언어로 단다 |
 | 내 말풍선 | 오른쪽, `rounded-bubble rounded-br-md bg-house text-white` |
 | 번역 | AI 말풍선 안 아래쪽에 구분선(`border-t border-line`)을 두고 `text-sm text-ink-muted`로 쓴다. 입문·초보는 항상 펼친다. 중급 이상은 말풍선 아래 "번역" 메타(Languages 14px + `text-xs font-semibold text-accent`)를 두고, 말풍선 전체를 `<button aria-expanded>`로 만들어 탭하면 펼친다 |
-| 교정 | 내 말풍선 **바로 아래, 말풍선 밖에** 오른쪽 정렬 `max-w-[84%] rounded-xl bg-mint p-3`로 둔다. 순서는 라벨(`text-micro text-ink-muted`: "이렇게 말하면 더 자연스러워요", 한국어로 입력했으면 "이렇게 말하면 돼요") → 고친 문장(`font-bold text-brand`, 학습 언어 `lang`) → 설명(`text-sm`)이다. 항상 펼쳐 둔다 |
+| 교정 | 내 말풍선 **바로 아래, 말풍선 밖에** 오른쪽 정렬 `max-w-[84%] rounded-xl bg-mint p-3`로 둔다. 순서는 라벨(`text-micro text-ink-muted`: "이렇게 말하면 더 자연스러워요", 한국어로 입력했으면 "이렇게 말하면 돼요") → 고친 문장(`font-bold text-brand`, 학습 언어 `lang`) → 재생 버튼(아래 "음성 재생" 행) → 설명(`text-sm`)이다. 항상 펼쳐 둔다 |
 | 음성 재생 | AI 말풍선(첫 마디 포함, 버튼이면 그 버튼) 바로 아래 왼쪽과 교정 카드의 고친 문장 바로 아래에 작은 재생 버튼을 둔다(아래 "음성 재생"). 학습 언어 음성이 없는 기기에서는 두지 않는다 |
 | 교정 없음 | `correction`이 `null`이면 아무것도 표시하지 않는다("자연스러워요" 배지도 없음) |
 | 응답 대기 | 내 말풍선을 바로 그리고, AI 자리에 점 3개(7px, 1초 반복)를 띄운다. 메시지 목록에 `aria-live="polite"`를 단다 |

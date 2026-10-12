@@ -78,7 +78,8 @@ async function synthesize(deps: GenerateAudioDeps, url: string, key: string, aud
       }
       const seconds = Number(res.headers.get("retry-after")) || DEFAULT_RETRY_SECONDS;
       deps.log(`429: ${seconds}초 기다렸다가 다시 보냅니다 (${audio.path})`);
-      await deps.sleep(seconds * 1000);
+      // Retry-After가 짧아도 요청 간격(분당 20회)은 지킨다
+      await deps.sleep(Math.max(seconds * 1000, REQUEST_GAP_MS));
       continue;
     }
     const bytes = new Uint8Array(await res.arrayBuffer());

@@ -8,6 +8,7 @@ class FakeAudio {
   static all: FakeAudio[] = [];
   static nextPlay: (() => Promise<void>) | null = null;
   playbackRate = 1;
+  defaultPlaybackRate = 1;
   paused = true;
   private listeners: Record<string, (() => void)[]> = {};
   constructor(public src: string) {
@@ -156,6 +157,28 @@ describe("SpeakButtons 파일", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
+  it("불러오는 중에 속도가 1로 돌아가지 않게 기본 속도도 같이 정한다(iOS Safari)", async () => {
+    const user = userEvent.setup();
+    render(<SpeakButtons source={{ kind: "file", src: "/a.mp3" }} />);
+
+    await user.click(slow());
+
+    expect(lastAudio().defaultPlaybackRate).toBe(0.75);
+  });
+
+  it("지금 소리가 아닌 버튼이 사라져도 다른 버튼의 소리는 멈추지 않는다", async () => {
+    const user = userEvent.setup();
+    const first = render(<SpeakButtons source={{ kind: "file", src: "/a.mp3" }} />);
+    render(<SpeakButtons source={{ kind: "file", src: "/b.mp3" }} />);
+
+    await user.click(listen(0));
+    await user.click(listen(1));
+    first.unmount();
+
+    expect(lastAudio().src).toBe("/b.mp3");
+    expect(lastAudio().paused).toBe(false);
+  });
+
   it("가운데 정렬과 작은 글자 버튼을 고를 수 있다", () => {
     const { container } = render(<SpeakButtons source={{ kind: "file", src: "/a.mp3" }} align="center" variant="compact" />);
 
@@ -183,6 +206,20 @@ describe("SpeakButtons 브라우저 음성", () => {
     await user.click(slow());
     expect(synth.cancel).toHaveBeenCalled();
     expect(spoken(synth).rate).toBe(0.75);
+  });
+
+  it("누를 때 학습 언어 음성을 다시 고른다(voiceURI가 겹치는 기기)", async () => {
+    const user = userEvent.setup();
+    const voices = [
+      { lang: "en-US", voiceURI: "same" },
+      { lang: "ja-JP", voiceURI: "same" },
+    ];
+    const synth = fakeSynth(voices);
+    render(<SpeakButtons source={{ kind: "speech", text: "はい", language: "ja" }} />);
+
+    await user.click(listen());
+
+    expect(spoken(synth).voice).toBe(voices[1]);
   });
 
   it("학습 언어 음성이 없으면 버튼을 그리지 않는다", () => {
