@@ -1,8 +1,18 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { exampleAudioPath, kanaAudioPath, wordAudioPath } from "@/lib/audio";
 import type { WordEntry } from "@/lib/words";
 import { validWord } from "@/test/wordFiles";
-import { main, plannedAudio, ssmlHash, type GenerateAudioDeps, type Manifest } from "./generate-audio";
+import {
+  MANIFEST_PATH,
+  main,
+  plannedAudio,
+  readWordFiles,
+  ssmlHash,
+  type GenerateAudioDeps,
+  type Manifest,
+} from "./generate-audio";
 
 const WORDS: WordEntry[] = [validWord("en", 1, 1), validWord("ja", 1, 1)];
 const ALL = plannedAudio(WORDS); // 단어 2개 × 2 + 가나 71 = 75
@@ -223,5 +233,18 @@ describe("generate-audio main", () => {
     expect(await main(deps)).toBe(1);
 
     expect(logs.join("\n")).toContain("사용법");
+  });
+});
+
+// 커밋된 데이터 검사(spec/audio.md "어긋남 검사"). 단어를 고친 뒤 음성을 다시 만들지 않으면 실패한다
+describe("커밋된 음성 파일", () => {
+  it("모든 단어·예문·가나의 파일이 있고 manifest 해시가 지금 데이터와 같다", async () => {
+    const planned = plannedAudio(await readWordFiles());
+    const manifest = JSON.parse(readFileSync(MANIFEST_PATH, "utf8")) as Manifest;
+    const hint = "npm run audio:generate로 다시 만들고 public/audio와 data/audio-manifest.json을 커밋하세요";
+
+    expect(planned).toHaveLength(4071);
+    expect(planned.filter((a) => !existsSync(join("public", a.path))).map((a) => a.path), hint).toEqual([]);
+    expect(planned.filter((a) => manifest[a.path] !== a.hash).map((a) => a.path), hint).toEqual([]);
   });
 });
