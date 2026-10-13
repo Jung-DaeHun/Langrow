@@ -12,6 +12,7 @@ import {
   type Language,
   type Level,
 } from "@/lib/levels";
+import { stripFurigana } from "@/lib/furigana";
 import type { TrialState } from "@/lib/plan";
 import type { ScenarioLine } from "@/lib/scenarios";
 import { CHAT_INPUT_MAX, countChars, hasHangul, isValidChatInput } from "@/lib/text";
@@ -62,8 +63,12 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const lastTurnNo = room.turns.at(-1)?.turnNo ?? 0;
+  // 화면을 열 때 이미 있던 턴은 낭독기에 알리지 않는다
+  const [openedTurnNo] = useState(lastTurnNo);
   const addedTurns = added.filter((t) => t.turnNo > lastTurnNo);
   const turns = [...room.turns, ...addedTurns];
+  const latest = turns.at(-1);
+  const announced = latest !== undefined && latest.turnNo > openedTurnNo ? latest : null;
   const showFeedback = room.status !== "active" || end !== null;
   // 다른 탭이나 이전 방문에서 보낸 턴이 처리 중이면 완료를 기다린다(spec/journey.md "대화 도중 이탈했다가 돌아옴")
   const otherPending = room.pendingTurn !== expiredPending ? room.pendingTurn : null;
@@ -216,7 +221,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         )}
       </header>
 
-      <div aria-live="polite" className="flex flex-1 flex-col gap-3 py-4">
+      <div className="flex flex-1 flex-col gap-3 py-4">
         <AiBubble line={{ text: scenario.opening.text, ko: scenario.opening.ko }} language={room.language} level={room.level} />
         {turns.map((t) => (
           <Fragment key={t.turnNo}>
@@ -225,9 +230,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
             </p>
             {t.correction !== null && (
               <div className="flex max-w-[84%] flex-col gap-1 self-end rounded-xl bg-mint p-3">
-                <p className="text-micro text-ink-muted">
-                  {hasHangul(t.userText) ? "이렇게 말하면 돼요" : "이렇게 말하면 더 자연스러워요"}
-                </p>
+                <p className="text-micro text-ink-muted">{correctionLabel(t.userText)}</p>
                 <p lang={room.language} className="font-bold text-brand">
                   <Furigana text={t.correction.corrected} show={furigana} />
                 </p>
@@ -272,6 +275,13 @@ export function ChatRoom({ room, scenario, trial }: Props) {
               </button>
             </div>
           </>
+        )}
+      </div>
+
+      {/* 목록 전체를 live로 두면 재생 버튼 이름과 음성 목록이 늦게 와서 붙는 버튼까지 읽혀서, 새 턴의 문장만 따로 알린다 */}
+      <div aria-live="polite" className="sr-only">
+        {announced !== null && (
+          <TurnAnnouncement key={announced.turnNo} turn={announced} language={room.language} level={room.level} />
         )}
       </div>
 
@@ -328,6 +338,26 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function correctionLabel(userText: string): string {
+  return hasHangul(userText) ? "이렇게 말하면 돼요" : "이렇게 말하면 더 자연스러워요";
+}
+
+// 낭독기용 새 턴 알림. 화면의 교정 카드와 AI 말풍선 문장을 버튼 없이 읽히고, 후리가나 표기는 지운다
+function TurnAnnouncement({ turn, language, level }: { turn: ChatTurnView; language: Language; level: Level }) {
+  return (
+    <p>
+      {turn.correction !== null && (
+        <>
+          {correctionLabel(turn.userText)} <span lang={language}>{stripFurigana(turn.correction.corrected)}</span>{" "}
+          {stripFurigana(turn.correction.explanation_ko)}{" "}
+        </>
+      )}
+      <span lang={language}>{stripFurigana(turn.reply)}</span>
+      {opensTranslationByDefault(level) && ` ${turn.replyKo}`}
+    </p>
   );
 }
 

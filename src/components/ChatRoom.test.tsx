@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -98,6 +98,8 @@ const endedReady: ApiResult<ChatEndResponse> = {
 const textbox = () => screen.getByRole("textbox");
 const sendButton = () => screen.getByRole("button", { name: "보내기" });
 const endButton = () => screen.getByRole("button", { name: "대화 끝내기" });
+// 새 턴은 낭독기 알림(sr-only)에도 같은 문장이 있어 화면의 말풍선만 찾는다
+const ON_SCREEN = { ignore: "[aria-live] *, script, style" };
 
 async function typeAndSend(user: ReturnType<typeof userEvent.setup>, text: string) {
   await user.type(textbox(), text);
@@ -303,8 +305,8 @@ describe("ChatRoom 전송", () => {
 
     await act(async () => pending.resolve(replied(2, 18, { correction: { corrected: "Fixed.", explanation_ko: "설명" } })));
 
-    expect(screen.getByText("AI 2")).toBeInTheDocument();
-    expect(screen.getByText("Fixed.")).toBeInTheDocument();
+    expect(screen.getByText("AI 2", ON_SCREEN)).toBeInTheDocument();
+    expect(screen.getByText("Fixed.", ON_SCREEN)).toBeInTheDocument();
     expect(screen.getByText("2 / 20턴")).toBeInTheDocument();
     expect(screen.queryByRole("status")).toBeNull();
     expect(endButton()).toBeEnabled();
@@ -323,7 +325,7 @@ describe("ChatRoom 전송", () => {
     await user.click(screen.getByRole("button", { name: "다시 보내기" }));
 
     expect(apiMock).toHaveBeenLastCalledWith("POST", MESSAGES_PATH, { text: "hello there" });
-    expect(screen.getByText("AI 1")).toBeInTheDocument();
+    expect(screen.getByText("AI 1", ON_SCREEN)).toBeInTheDocument();
     expect(screen.getByText("hello there")).not.toHaveClass("ring-danger");
     expect(screen.queryByRole("button", { name: "다시 보내기" })).toBeNull();
   });
@@ -362,7 +364,7 @@ describe("ChatRoom 전송", () => {
 
     rerender(room({ turns: [turn(1), turn(2, { userText: "from other tab", reply: "other reply" })] }));
 
-    expect(screen.getByText("other reply")).toBeInTheDocument();
+    expect(screen.getByText("other reply", ON_SCREEN)).toBeInTheDocument();
     expect(screen.getByText("2 / 20턴")).toBeInTheDocument();
     expect(screen.getByText("hello")).toHaveClass("ring-danger");
     expect(apiMock).toHaveBeenCalledTimes(1);
@@ -419,7 +421,7 @@ describe("ChatRoom 전송", () => {
 
     await typeAndSend(user, "bye");
 
-    expect(screen.getByText("AI 20")).toBeInTheDocument();
+    expect(screen.getByText("AI 20", ON_SCREEN)).toBeInTheDocument();
     expect(apiMock).toHaveBeenLastCalledWith("POST", END_PATH);
     expect(textbox()).toBeDisabled();
 
@@ -543,7 +545,7 @@ describe("ChatRoom 처리 중인 턴", () => {
     rerender(room({ turns: [turn(1), turn(2, { userText: "still waiting", reply: "AI 2" })], pendingTurn: null }));
     fireEvent.change(textbox(), { target: { value: "hello" } });
 
-    expect(screen.getByText("AI 2")).toBeInTheDocument();
+    expect(screen.getByText("AI 2", ON_SCREEN)).toBeInTheDocument();
     expect(screen.queryByRole("status")).toBeNull();
     expect(sendButton()).toBeEnabled();
     act(() => vi.advanceTimersByTime(10_000));
@@ -677,5 +679,32 @@ describe("ChatRoom 음성", () => {
     setup(room({ turns: [turn(1)] }));
 
     expect(screen.queryByRole("button", { name: "듣기" })).toBeNull();
+  });
+
+  it("낭독기에는 새 턴의 교정·AI 응답 문장만 알리고 재생 버튼 이름은 알리지 않는다", async () => {
+    stubVoices([{ lang: "en-US", voiceURI: "en" }]);
+    apiMock.mockResolvedValue(replied(2, 18, { correction: { corrected: "Fixed.", explanation_ko: "설명" } }));
+    const { user } = setup(room({ turns: [turn(1)] }));
+    const region = () => document.querySelector("[aria-live]");
+
+    // 처음 연 화면의 지난 턴은 알리지 않는다
+    expect(region()).toHaveTextContent(/^$/);
+
+    await typeAndSend(user, "hello");
+
+    expect(region()).toHaveTextContent("이렇게 말하면 더 자연스러워요 Fixed. 설명 AI 2");
+    expect(region()).not.toHaveTextContent("듣기");
+    for (const button of listenButtons()) expect(button.closest("[aria-live]")).toBeNull();
+  });
+
+  it("다시 읽은 room의 새 턴도 알리고, 후리가나 표기는 지우고 학습 언어 lang을 단다", () => {
+    stubVoices([{ lang: "ja-JP", voiceURI: "ja" }]);
+    const { rerender } = setup(room({ language: "ja", level: 1, turns: [turn(1)] }));
+
+    rerender(room({ language: "ja", level: 1, turns: [turn(1), turn(2, { reply: "[今日|きょう]は[暑|あつ]いですね。", replyKo: "오늘 덥네요." })] }));
+
+    const region = document.querySelector("[aria-live]");
+    expect(region).toHaveTextContent("今日は暑いですね。 오늘 덥네요.");
+    expect(within(region as HTMLElement).getByText("今日は暑いですね。")).toHaveAttribute("lang", "ja");
   });
 });
