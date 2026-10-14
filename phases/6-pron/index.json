@@ -1,0 +1,9 @@
+{
+  "project": "Langrow",
+  "phase": "6-pron",
+  "steps": [
+    { "step": 0, "name": "pron-data", "status": "pending" },
+    { "step": 1, "name": "pron-ai", "status": "pending" },
+    { "step": 2, "name": "pron-ui", "status": "pending" }
+  ]
+}
