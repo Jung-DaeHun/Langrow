@@ -1,5 +1,6 @@
 import { parseBlank } from "./blank";
 import type { Language, Level } from "./levels";
+import { cleanPron } from "./pronunciation";
 
 export const WORDS_PER_LEVEL = 200;
 
@@ -15,6 +16,8 @@ export type WordEntry = {
   example: string;
   example_ko: string;
   distractors: string[];
+  pron_ko: string | null; // 일본어 단어의 한글 발음 (spec/chat.md "한글 발음")
+  example_pron_ko: string | null; // 정답을 채운 예문의 한글 발음
 };
 
 const STRING_FIELDS = ["id", "word", "meaning_ko", "example", "example_ko"] as const;
@@ -58,6 +61,14 @@ export function wordEntryErrors(language: Language, level: Level, item: unknown)
 
   if (language === "ja" && !isFilled(w.reading)) errors.push("일본어는 reading(히라가나 읽기)이 있어야 합니다");
   if (language === "en" && w.reading !== null) errors.push("영어는 reading이 null이어야 합니다");
+  if (language === "ja") {
+    if (cleanPron(w.pron_ko) === null) errors.push("일본어는 pron_ko(단어의 한글 발음)가 있어야 합니다");
+    if (cleanPron(w.example_pron_ko) === null) errors.push("일본어는 example_pron_ko(예문의 한글 발음)가 있어야 합니다");
+  }
+  // 키가 없어도 null로 본다. 발음 기능 전에 만든 영어 파일과 generate-words 항목에는 키가 없다
+  if (language === "en" && (w.pron_ko != null || w.example_pron_ko != null)) {
+    errors.push("영어는 pron_ko·example_pron_ko가 null이어야 합니다");
+  }
   return errors;
 }
 
@@ -104,6 +115,8 @@ export function validateWordFile(
         example: w.example as string,
         example_ko: w.example_ko as string,
         distractors: w.distractors as string[],
+        pron_ko: cleanPron(w.pron_ko),
+        example_pron_ko: cleanPron(w.example_pron_ko),
       });
     }
   });

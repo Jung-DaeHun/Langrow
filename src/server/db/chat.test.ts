@@ -287,6 +287,26 @@ describe("대화 1턴", () => {
     await expect(beginChatTurn(user.id, sessionId, "hi")).resolves.toEqual({ ok: false, code: "AI_FAILURE_LIMIT" });
     expect(await turnsOf(sessionId)).toEqual([]);
   });
+
+  it("확정은 한글 발음을 저장한다: reply_pron_ko는 컬럼에, 교정 발음은 correction 안에. 없으면 null이다", async () => {
+    const user = await createReadyUser("ja", 1);
+    const { sessionId } = valueOf(await createChatSession(user.id, { language: "ja", level: 1, scenarioId: "l1-cafe" }));
+    const withPron: TurnReply = {
+      reply: "はい、どうぞ。",
+      reply_ko: "네, 여기요.",
+      reply_pron_ko: "하이, 도-조.",
+      correction: { corrected: "コーヒーをください。", explanation_ko: "を를 넣어요.", corrected_pron_ko: "코-히-오 쿠다사이." },
+    };
+    const first = valueOf(await beginChatTurn(user.id, sessionId, "コーヒーください"));
+    valueOf(await finishChatTurn(user.id, sessionId, first.token, withPron));
+    const second = valueOf(await beginChatTurn(user.id, sessionId, "ありがとう"));
+    valueOf(await finishChatTurn(user.id, sessionId, second.token, PLAIN_REPLY));
+
+    expect(await turnsOf(sessionId)).toMatchObject([
+      { turn_no: 1, reply_pron_ko: "하이, 도-조.", correction: withPron.correction },
+      { turn_no: 2, reply_pron_ko: null, correction: null },
+    ]);
+  });
 });
 
 describe("failChatTurn", () => {

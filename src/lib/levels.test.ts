@@ -9,6 +9,7 @@ import {
   opensTranslationByDefault,
   showsFurigana,
   showsKana,
+  showsPronunciation,
 } from "./levels";
 
 describe("levels", () => {
@@ -29,6 +30,11 @@ describe("levels", () => {
 
   it("후리가나는 입문~중급(1~3)만 보여 준다", () => {
     expect(LEVELS.map(showsFurigana)).toEqual([true, true, true, false, false]);
+  });
+
+  it("한글 발음은 일본어 입문~중급(1~3)만 보여 준다", () => {
+    expect(LEVELS.map((level) => showsPronunciation("ja", level))).toEqual([true, true, true, false, false]);
+    expect(LEVELS.map((level) => showsPronunciation("en", level))).toEqual([false, false, false, false, false]);
   });
 
   it("번역은 입문·초보(1~2)만 기본으로 펼친다", () => {

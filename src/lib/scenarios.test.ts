@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseFurigana } from "./furigana";
-import { LANGUAGES, LEVELS } from "./levels";
+import { LANGUAGES, LEVELS, showsPronunciation } from "./levels";
+import { cleanPron } from "./pronunciation";
 import { SCENARIOS, findScenario, scenariosForLevel } from "./scenarios";
 
 describe("SCENARIOS 데이터", () => {
@@ -55,6 +56,20 @@ describe("SCENARIOS 데이터", () => {
 
   it("영어 첫 마디에는 후리가나 표기가 없다", () => {
     for (const s of SCENARIOS) expect(s.roles.en.opening.text, s.id).not.toMatch(/[[\]|]/);
+  });
+
+  it("레벨 1~3 상황의 일본어 첫 마디에는 검사에 맞는 한글 발음이 있다", () => {
+    for (const s of SCENARIOS.filter((s) => showsPronunciation("ja", s.level))) {
+      const { pronKo } = s.roles.ja.opening;
+      expect(cleanPron(pronKo), s.id).toBe(pronKo);
+    }
+  });
+
+  it("영어 첫 마디와 상급·고수 첫 마디에는 한글 발음을 두지 않는다", () => {
+    for (const s of SCENARIOS) {
+      expect(s.roles.en.opening.pronKo, s.id).toBeUndefined();
+      if (!showsPronunciation("ja", s.level)) expect(s.roles.ja.opening.pronKo, s.id).toBeUndefined();
+    }
   });
 });
 

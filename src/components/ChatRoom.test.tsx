@@ -44,6 +44,7 @@ function turn(turnNo: number, overrides: Partial<ChatTurnView> = {}): ChatTurnVi
     userText: `user ${turnNo}`,
     reply: `reply ${turnNo}`,
     replyKo: `번역 ${turnNo}`,
+    replyPronKo: null,
     correction: null,
     ...overrides,
   };

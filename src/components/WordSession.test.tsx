@@ -59,6 +59,8 @@ function word(n: number, overrides: Partial<Word> = {}): Word {
     example: `I {{word${n}}} it.`,
     exampleKo: `번역${n}`,
     distractors: [`x${n}a`, `x${n}b`, `x${n}c`],
+    pronKo: null,
+    examplePronKo: null,
     ...overrides,
   };
 }

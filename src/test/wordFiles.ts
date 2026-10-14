@@ -12,6 +12,8 @@ export function validWord(language: Language, level: Level, rank: number): WordE
       meaning_ko: `가다${rank}`,
       example: `I {{went${rank}}} to school.`,
       distractors: [`goes${rank}`, `gone${rank}`, `going${rank}`],
+      pron_ko: null,
+      example_pron_ko: null,
     };
   }
   return {
@@ -21,6 +23,8 @@ export function validWord(language: Language, level: Level, rank: number): WordE
     meaning_ko: `가다${rank}`,
     example: `[学校|がっこう]に{{[行|い]った${rank}}}。`,
     distractors: [`[行|い]く${rank}`, `[行|い]って${rank}`, `[行|い]かない${rank}`],
+    pron_ko: "이쿠",
+    example_pron_ko: "갓코-니 잇타.",
   };
 }
 

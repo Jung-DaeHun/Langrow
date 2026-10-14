@@ -107,6 +107,28 @@ describe("validateWordFile", () => {
     expectError(errorsOf("en", 1, fileWith({ reading: "go" })), "en-1-001", "reading");
   });
 
+  it("일본어는 pron_ko·example_pron_ko가 검사(cleanPron)에 맞아야 한다", () => {
+    expectError(errorsOf("ja", 1, fileWith({ pron_ko: null }, "ja")), "ja-1-001", "pron_ko");
+    expectError(errorsOf("ja", 1, fileWith({ example_pron_ko: "갓코-니 いった." }, "ja")), "ja-1-001", "example_pron_ko");
+  });
+
+  it("영어는 pron_ko·example_pron_ko가 null이어야 한다", () => {
+    expectError(errorsOf("en", 1, fileWith({ pron_ko: "고" })), "en-1-001", "pron_ko");
+    expectError(errorsOf("en", 1, fileWith({ example_pron_ko: "아이 웬트." })), "en-1-001", "example_pron_ko");
+  });
+
+  it("발음 키가 없는 영어 단어(기능 전에 만든 파일)는 null로 돌려준다", () => {
+    const result = validateWordFile("en", 1, fileWith({ pron_ko: undefined, example_pron_ko: undefined }));
+    if (!result.ok) throw new Error(result.errors.join("\n"));
+    expect(result.words[0]).toMatchObject({ pron_ko: null, example_pron_ko: null });
+  });
+
+  it("일본어 발음은 앞뒤 공백을 지워 돌려준다", () => {
+    const result = validateWordFile("ja", 1, fileWith({ pron_ko: " 이쿠 " }, "ja"));
+    if (!result.ok) throw new Error(result.errors.join("\n"));
+    expect(result.words[0].pron_ko).toBe("이쿠");
+  });
+
   it("파일 안에서 word가 중복되면 실패한다", () => {
     expectError(errorsOf("en", 1, fileWith({ word: "go2" })), "go2", "중복");
   });

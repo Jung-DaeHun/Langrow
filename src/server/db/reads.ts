@@ -32,6 +32,8 @@ export type Word = {
   example: string;
   exampleKo: string;
   distractors: string[];
+  pronKo: string | null; // 일본어만. 영어는 null
+  examplePronKo: string | null;
 };
 export type OpenSession = {
   id: string;
@@ -47,6 +49,7 @@ export type ChatTurnView = {
   userText: string;
   reply: string;
   replyKo: string;
+  replyPronKo: string | null;
   correction: TurnReply["correction"];
 };
 export type ChatRoomData = {
@@ -63,7 +66,8 @@ export type ChatRoomData = {
   pendingTurn: { userText: string; msLeft: number } | null;
 };
 
-const WORD_COLUMNS = "id, language, level, rank, word, reading, meaning_ko, example, example_ko, distractors";
+const WORD_COLUMNS =
+  "id, language, level, rank, word, reading, meaning_ko, example, example_ko, distractors, pron_ko, example_pron_ko";
 type WordRow = Database["public"]["Tables"]["words"]["Row"];
 
 const SESSION_ID = z.uuid();
@@ -88,6 +92,8 @@ function toWord(row: WordRow): Word {
     example: row.example,
     exampleKo: row.example_ko,
     distractors: row.distractors,
+    pronKo: row.pron_ko,
+    examplePronKo: row.example_pron_ko,
   };
 }
 
@@ -268,7 +274,7 @@ export async function readChatRoom(
   const { data, error } = await sb
     .from("chat_sessions")
     .select(
-      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, chat_turns(turn_no, status, user_text, reply, reply_ko, correction, created_at)",
+      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, chat_turns(turn_no, status, user_text, reply, reply_ko, reply_pron_ko, correction, created_at)",
     )
     .eq("id", sessionId)
     .eq("user_id", userId)
@@ -296,6 +302,7 @@ export async function readChatRoom(
       userText: turn.user_text,
       reply: turn.reply as string,
       replyKo: turn.reply_ko as string,
+      replyPronKo: turn.reply_pron_ko,
       correction: turn.correction as TurnReply["correction"],
     })),
     doneTurnsToday: done.filter((turn) => {

@@ -22,6 +22,11 @@ export function showsFurigana(level: Level): boolean {
   return level <= 3;
 }
 
+// 일본어 한글 발음은 후리가나와 같은 레벨에서 보여 준다 (spec/chat.md "한글 발음")
+export function showsPronunciation(language: Language, level: Level): boolean {
+  return language === "ja" && showsFurigana(level);
+}
+
 export function opensTranslationByDefault(level: Level): boolean {
   return level <= 2;
 }

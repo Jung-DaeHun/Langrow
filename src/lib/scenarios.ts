@@ -1,6 +1,7 @@
 import type { Language, Level } from "./levels";
 
-export type ScenarioLine = { text: string; ko: string };
+// pronKo: 한글 발음(spec/chat.md "한글 발음"). 일본어 입문~중급 상황(레벨 1~3)의 첫 마디에만 둔다
+export type ScenarioLine = { text: string; ko: string; pronKo?: string };
 export type Scenario = {
   id: string;
   level: Level;
@@ -24,7 +25,7 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 일본 셰어하우스에 사는 주민입니다. 새로 이사 온 사용자를 거실에서 처음 만났습니다.",
-        opening: { text: "はじめまして！お[名前|なまえ]は[何|なん]ですか？", ko: "처음 뵙겠습니다! 이름이 뭐예요?" },
+        opening: { text: "はじめまして！お[名前|なまえ]は[何|なん]ですか？", ko: "처음 뵙겠습니다! 이름이 뭐예요?", pronKo: "하지메마시테! 오나마에와 난데스카?" },
       },
     },
   },
@@ -40,7 +41,11 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 일본 카페의 점원입니다. 계산대에서 손님인 사용자의 주문을 받습니다.",
-        opening: { text: "いらっしゃいませ。ご[注文|ちゅうもん]はお[決|き]まりですか？", ko: "어서 오세요. 주문하시겠어요?" },
+        opening: {
+          text: "いらっしゃいませ。ご[注文|ちゅうもん]はお[決|き]まりですか？",
+          ko: "어서 오세요. 주문하시겠어요?",
+          pronKo: "이랏샤이마세. 고츄-몬와 오키마리데스카?",
+        },
       },
     },
   },
@@ -56,7 +61,7 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 일본 편의점의 점원입니다. 도시락을 사는 손님인 사용자에게 도시락을 데울지, 봉투가 필요한지 묻습니다.",
-        opening: { text: "お[弁当|べんとう]、[温|あたた]めますか？", ko: "도시락 데워 드릴까요?" },
+        opening: { text: "お[弁当|べんとう]、[温|あたた]めますか？", ko: "도시락 데워 드릴까요?", pronKo: "오벤토-, 아타타메마스카?" },
       },
     },
   },
@@ -72,7 +77,7 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 도쿄 역 앞을 지나가던 친절한 행인입니다. 길을 헤매는 사용자를 보고 먼저 말을 걸었습니다.",
-        opening: { text: "あの、どこに[行|い]きたいですか？", ko: "저기요, 어디에 가고 싶으세요?" },
+        opening: { text: "あの、どこに[行|い]きたいですか？", ko: "저기요, 어디에 가고 싶으세요?", pronKo: "아노, 도코니 이키타이데스카?" },
       },
     },
   },
@@ -88,7 +93,7 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 일본 정식집(定食屋)의 점원입니다. 가게에 막 들어온 손님인 사용자를 맞이합니다.",
-        opening: { text: "いらっしゃいませ！[何名様|なんめいさま]ですか？", ko: "어서 오세요! 몇 분이세요?" },
+        opening: { text: "いらっしゃいませ！[何名様|なんめいさま]ですか？", ko: "어서 오세요! 몇 분이세요?", pronKo: "이랏샤이마세! 난메-사마데스카?" },
       },
     },
   },
@@ -110,6 +115,7 @@ export const SCENARIOS: readonly Scenario[] = [
         opening: {
           text: "いらっしゃいませ。ご[予約|よやく]のお[名前|なまえ]をお[願|ねが]いします。",
           ko: "어서 오세요. 예약하신 성함을 말씀해 주세요.",
+          pronKo: "이랏샤이마세. 고요야쿠노 오나마에오 오네가이시마스.",
         },
       },
     },
@@ -129,7 +135,7 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 일본 의류 매장의 점원입니다. 매장 안을 둘러보는 손님인 사용자에게 다가갑니다.",
-        opening: { text: "いらっしゃいませ。[何|なに]かお[探|さが]しですか？", ko: "어서 오세요. 뭐 찾으시는 거 있으세요?" },
+        opening: { text: "いらっしゃいませ。[何|なに]かお[探|さが]しですか？", ko: "어서 오세요. 뭐 찾으시는 거 있으세요?", pronKo: "이랏샤이마세. 나니카 오사가시데스카?" },
       },
     },
   },
@@ -145,7 +151,7 @@ export const SCENARIOS: readonly Scenario[] = [
       },
       ja: {
         role: "당신은 일본 기차역의 매표 창구 직원입니다. 표를 사러 창구에 온 승객인 사용자를 응대합니다.",
-        opening: { text: "こんにちは。どちらまで[行|い]かれますか？", ko: "안녕하세요. 어디까지 가세요?" },
+        opening: { text: "こんにちは。どちらまで[行|い]かれますか？", ko: "안녕하세요. 어디까지 가세요?", pronKo: "콘니치와. 도치라마데 이카레마스카?" },
       },
     },
   },
@@ -167,6 +173,7 @@ export const SCENARIOS: readonly Scenario[] = [
         opening: {
           text: "こんにちは、どうされましたか？どんな[症状|しょうじょう]か[教|おし]えていただけますか？",
           ko: "안녕하세요, 어디가 불편하세요? 어떤 증상인지 알려 주시겠어요?",
+          pronKo: "콘니치와, 도- 사레마시타카? 돈나 쇼-죠-카 오시에테 이타다케마스카?",
         },
       },
     },
@@ -189,6 +196,7 @@ export const SCENARIOS: readonly Scenario[] = [
         opening: {
           text: "お[疲|つか]れさまです。[週末|しゅうまつ]は[何|なに]をしていましたか？",
           ko: "수고 많으세요. 주말에는 뭐 했어요?",
+          pronKo: "오츠카레사마데스. 슈-마츠와 나니오 시테 이마시타카?",
         },
       },
     },
@@ -211,6 +219,7 @@ export const SCENARIOS: readonly Scenario[] = [
         opening: {
           text: "いらっしゃいませ。お[買|か]い[上|あ]げの[商品|しょうひん]に[何|なに]か[問題|もんだい]がございましたか？",
           ko: "어서 오세요. 구매하신 상품에 무슨 문제가 있으셨나요?",
+          pronKo: "이랏샤이마세. 오카이아게노 쇼-힌니 나니카 몬다이가 고자이마시타카?",
         },
       },
     },
@@ -233,6 +242,7 @@ export const SCENARIOS: readonly Scenario[] = [
         opening: {
           text: "お[電話|でんわ]ありがとうございます。ご[予約|よやく]でしょうか？",
           ko: "전화 주셔서 감사합니다. 예약하시겠어요?",
+          pronKo: "오덴와 아리가토- 고자이마스. 고요야쿠데쇼-카?",
         },
       },
     },

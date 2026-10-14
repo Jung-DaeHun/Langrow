@@ -37,6 +37,8 @@ function testWord(language: Language, level: Level, rank: number): WordRow {
     example: `This is {{word${rank}}}.`,
     example_ko: `예문${rank}`,
     distractors: ["alpha", "beta", "gamma"],
+    pron_ko: language === "ja" ? "이쿠" : null,
+    example_pron_ko: language === "ja" ? "갓코-니 잇타." : null,
   };
 }
 
@@ -96,6 +98,8 @@ function asWord(row: WordRow): Word {
     example: row.example,
     exampleKo: row.example_ko,
     distractors: row.distractors,
+    pronKo: row.pron_ko,
+    examplePronKo: row.example_pron_ko,
   };
 }
 
@@ -351,6 +355,11 @@ describe("readLevelWords", () => {
     const ranks = words.map((word) => word.rank);
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
   });
+
+  it("일본어 단어의 한글 발음을 돌려준다", async () => {
+    const words = await readLevelWords(await signedInClient(await createReadyUser("ja", 1)), "ja", 1);
+    expect(words.find((word) => word.id === JA1.id)).toMatchObject({ pronKo: "이쿠", examplePronKo: "갓코-니 잇타." });
+  });
 });
 
 describe("readOpenSessions", () => {
@@ -439,9 +448,17 @@ describe("readChatRoom", () => {
           userText: "Can I have latte?",
           reply: CORRECTED.reply,
           replyKo: CORRECTED.reply_ko,
+          replyPronKo: null,
           correction: CORRECTED.correction,
         },
-        { turnNo: 2, userText: "No, thanks.", reply: PLAIN.reply, replyKo: PLAIN.reply_ko, correction: null },
+        {
+          turnNo: 2,
+          userText: "No, thanks.",
+          reply: PLAIN.reply,
+          replyKo: PLAIN.reply_ko,
+          replyPronKo: null,
+          correction: null,
+        },
       ],
       doneTurnsToday: 2,
       pendingTurn: { userText: "still waiting", msLeft: room?.pendingTurn?.msLeft },
@@ -504,5 +521,20 @@ describe("readChatRoom", () => {
     expect(await readChatRoom(sb, other.id, othersSession, new Date())).toBeNull();
     expect(await readChatRoom(sb, me.id, randomUUID(), new Date())).toBeNull();
     expect(await readChatRoom(sb, me.id, "not-a-uuid", new Date())).toBeNull();
+  });
+
+  it("한글 발음을 돌려주고, 발음 키가 없는 옛 교정도 그대로 돌려준다", async () => {
+    const user = await createReadyUser("ja", 1);
+    const session = await newSession(user.id, "ja");
+    const correction = { ...CORRECTED.correction!, corrected_pron_ko: "코-히-오 쿠다사이." };
+    await doneTurn(user.id, session, { ...CORRECTED, reply_pron_ko: "와카리마시타.", correction });
+    // 기능을 넣기 전에 저장된 턴처럼 발음이 없다
+    await doneTurn(user.id, session, CORRECTED);
+
+    const room = await readChatRoom(await signedInClient(user), user.id, session, new Date());
+    expect(room?.turns.map((t) => ({ replyPronKo: t.replyPronKo, correction: t.correction }))).toEqual([
+      { replyPronKo: "와카리마시타.", correction },
+      { replyPronKo: null, correction: CORRECTED.correction },
+    ]);
   });
 });

@@ -124,7 +124,14 @@ export function ChatRoom({ room, scenario, trial }: Props) {
       const { turnNo, turnsLeft, reply } = result.data;
       setAdded((prev) => [
         ...prev,
-        { turnNo, userText: text, reply: reply.reply, replyKo: reply.reply_ko, correction: reply.correction },
+        {
+          turnNo,
+          userText: text,
+          reply: reply.reply,
+          replyKo: reply.reply_ko,
+          replyPronKo: reply.reply_pron_ko ?? null,
+          correction: reply.correction,
+        },
       ]);
       if (turnsLeft === 0) {
         setFull(true);
