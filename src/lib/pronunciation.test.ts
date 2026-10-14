@@ -9,6 +9,14 @@ describe("cleanPron", () => {
     expect(cleanPron("소-데스네~")).toBe("소-데스네~");
   });
 
+  it("받침을 표기 규칙대로 맞춘다: ん에 해당하는 ㅇ·ㅁ받침은 ㄴ, っ에 해당하는 ㄱ·ㄷ·ㅂ받침은 ㅅ", () => {
+    expect(cleanPron("옹가쿠오 키키마스.")).toBe("온가쿠오 키키마스.");
+    expect(cleanPron("콘니치와, 타나카 상.")).toBe("콘니치와, 타나카 산.");
+    expect(cleanPron("심분")).toBe("신분");
+    expect(cleanPron("각코-니 읻테 입파이")).toBe("갓코-니 잇테 잇파이");
+    expect(cleanPron("갓코-니 잇타.")).toBe("갓코-니 잇타.");
+  });
+
   it.each([
     ["빈 문자열", ""],
     ["공백뿐", "   "],
