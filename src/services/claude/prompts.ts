@@ -1,6 +1,14 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { stripFurigana } from "@/lib/furigana";
-import { LANGUAGE_NAMES, LEVEL_INFO, allowsKoreanInput, showsFurigana, type Language, type Level } from "@/lib/levels";
+import {
+  LANGUAGE_NAMES,
+  LEVEL_INFO,
+  allowsKoreanInput,
+  showsFurigana,
+  showsPronunciation,
+  type Language,
+  type Level,
+} from "@/lib/levels";
 import type { Scenario } from "@/lib/scenarios";
 import { hasHangul } from "@/lib/text";
 import type { TurnReply } from "./schemas";
@@ -64,6 +72,21 @@ const KOREAN_NAME_RULES: Record<Language, string> = {
   en: "로마자로 쓴다(예: 정대훈 → Jeong Daehun, 대구 → Daegu). 한글을 영어 문장에 섞지 않는다.",
 };
 
+// 한글 발음 표기 규칙(spec/chat.md "한글 발음"). 대화 프롬프트와 단어 발음 생성 스크립트가 같은 문구를 쓴다
+export const PRONUNCIATION_RULES = [
+  "- 일본어 문장을 소리 나는 대로 한글로만 쓴다. 가나·한자·로마자·숫자를 섞지 않는다.",
+  "- 한자는 [漢字|かな] 표기가 있으면 그 읽기대로 읽는다.",
+  "- か행은 카·키·쿠·케·코, た행은 타·치·츠·테·토로 쓴다. ず·づ는 즈, じ·ぢ는 지, ふ는 후, を는 오로 쓴다.",
+  "- 조사 は는 와, 조사 へ는 에로 쓴다.",
+  "- 장음은 -로 쓴다. 예: 今日は → 쿄-와, 先生 → 센세-, ありがとう → 아리가토-, コーヒー → 코-히-",
+  "- っ는 앞 글자의 ㅅ받침으로 쓴다. 예: 学校 → 갓코-, 行って → 잇테",
+  "- ん은 ㄴ받침으로 쓴다. 예: こんにちは → 콘니치와, 日本語 → 니혼고",
+  "- 요음은 きゃ 캬, しゃ 샤, ちゃ 챠, じゃ 쟈, しょ 쇼, ちょ 쵸, にゅ 뉴처럼 쓴다.",
+  "- 문절마다 띄어 쓴다. 。는 ., 、는 ,, ？는 ?, ！는 !로 바꾸고 「」 같은 그 밖의 기호는 뺀다. 가타카나 이름의 ・는 띄어 쓴다.",
+  "- 숫자는 읽는 대로 한글로 쓴다. 예: 3時 → 산지",
+  "- 예: [今日|きょう]は[何|なに]をしますか。 → 쿄-와 나니오 시마스카.",
+].join("\n");
+
 // 첫 마디 데이터는 일본어 모든 한자에 [漢字|かな] 표기가 있다. 후리가나를 쓰지 않는 레벨에서는 지운다.
 // 남겨 두면 "표기를 달지 않는다" 지시와 어긋나고, 모델이 앞 턴의 표기를 따라 쓴다
 function openingText({ language, level, scenario }: { language: Language; level: Level; scenario: Scenario }) {
@@ -113,6 +136,15 @@ export function buildTurnPrompt(input: TurnPromptInput): Prompt {
       showsFurigana(level)
         ? "- reply와 corrected의 모든 한자에 [漢字|かんじ] 형식으로 읽기를 단다. 읽기 표기는 한자에만 단다(가나·한글에는 달지 않는다). 예: [学校|がっこう]に[行|い]きます"
         : "- 한자에 [漢字|かんじ] 같은 읽기 표기를 달지 않는다.",
+    );
+  }
+  if (showsPronunciation(language, level)) {
+    lines.push(
+      "- reply_pron_ko: reply의 한글 발음. 아래 '한글 발음' 규칙을 따른다.",
+      "- correction이 있으면 corrected_pron_ko에 corrected의 한글 발음을 같은 규칙으로 쓴다.",
+      "",
+      "## 한글 발음",
+      PRONUNCIATION_RULES,
     );
   }
   lines.push(

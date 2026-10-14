@@ -1,6 +1,6 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { describe, expect, it } from "vitest";
-import { explanationSchema, feedbackSchema, turnReplySchema } from "./schemas";
+import { explanationSchema, feedbackSchema, pronTurnReplySchema, turnReplySchema } from "./schemas";
 
 describe("turnReplySchema", () => {
   it("교정이 있는 응답을 받는다", () => {
@@ -70,5 +70,27 @@ describe("explanationSchema", () => {
 
   it("길이 제약이 없어서 빈 설명도 스키마는 통과한다 (공백 검사는 client가 한다)", () => {
     expect(explanationSchema.safeParse({ explanation: "" }).success).toBe(true);
+  });
+});
+
+describe("pronTurnReplySchema", () => {
+  const value = {
+    reply: "はい。",
+    reply_ko: "네.",
+    reply_pron_ko: "하이.",
+    correction: { corrected: "はい。", explanation_ko: "설명", corrected_pron_ko: "하이." },
+  };
+
+  it("발음 필드가 있는 응답과 교정이 없는 응답을 받는다", () => {
+    expect(pronTurnReplySchema.parse(value)).toEqual(value);
+    expect(pronTurnReplySchema.parse({ ...value, correction: null })).toEqual({ ...value, correction: null });
+  });
+
+  it("reply_pron_ko나 corrected_pron_ko가 없으면 거부한다", () => {
+    const noReplyPron = { reply: value.reply, reply_ko: value.reply_ko, correction: value.correction };
+    expect(pronTurnReplySchema.safeParse(noReplyPron).success).toBe(false);
+    expect(
+      pronTurnReplySchema.safeParse({ ...value, correction: { corrected: "はい。", explanation_ko: "설명" } }).success,
+    ).toBe(false);
   });
 });

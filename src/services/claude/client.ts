@@ -2,6 +2,8 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
+import { showsPronunciation } from "@/lib/levels";
+import { cleanPron } from "@/lib/pronunciation";
 import { getClaudeEnv } from "@/services/env";
 import {
   buildExplanationPrompt,
@@ -14,9 +16,11 @@ import {
 import {
   explanationSchema,
   feedbackSchema,
+  pronTurnReplySchema,
   turnReplySchema,
   type Explanation,
   type Feedback,
+  type PronTurnReply,
   type TurnReply,
 } from "./schemas";
 
@@ -74,10 +78,10 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
   }
 
   // throw하지 않고 언제나 AiResult를 돌려준다. 프롬프트·응답 내용은 로그로 남기지 않는다
-  async function attempt<T>(
-    schema: z.ZodType<T>,
+  async function attempt<S, T>(
+    schema: z.ZodType<S>,
     buildPrompt: () => Prompt,
-    accept: (value: T) => T | null,
+    accept: (value: S) => T | null,
   ): Promise<AiResult<T>> {
     let config: { client: AiClient; model: string };
     try {
@@ -117,7 +121,11 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
   return {
     generateTurn: (input) =>
       withRetry(() =>
-        attempt(turnReplySchema, () => buildTurnPrompt(input), (value) => (value.reply.trim() ? value : null)),
+        showsPronunciation(input.language, input.level)
+          ? attempt(pronTurnReplySchema, () => buildTurnPrompt(input), acceptPronTurn)
+          : attempt(turnReplySchema, () => buildTurnPrompt(input), (value): TurnReply | null =>
+              value.reply.trim() ? value : null,
+            ),
       ),
     generateFeedback: (input) =>
       withRetry(() =>
@@ -132,6 +140,19 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
           value.explanation.trim() ? value : null,
         ),
       ),
+  };
+}
+
+// 발음이 비었거나 검사에 맞지 않으면 턴은 성공으로 두고 그 발음만 null로 숨긴다 (spec/chat.md "한글 발음")
+function acceptPronTurn(value: PronTurnReply): TurnReply | null {
+  if (!value.reply.trim()) return null;
+  return {
+    ...value,
+    reply_pron_ko: cleanPron(value.reply_pron_ko),
+    correction: value.correction && {
+      ...value.correction,
+      corrected_pron_ko: cleanPron(value.correction.corrected_pron_ko),
+    },
   };
 }
 

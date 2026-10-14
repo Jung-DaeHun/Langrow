@@ -207,3 +207,45 @@ describe("generateExplanation", () => {
     expect(requests).toHaveLength(2);
   });
 });
+
+describe("generateTurn 한글 발음", () => {
+  const jaInput: TurnPromptInput = { language: "ja", level: 1, scenario, history: [], userText: "コーヒーください" };
+  const jaReply = {
+    reply: "はい、どうぞ。",
+    reply_ko: "네, 여기요.",
+    reply_pron_ko: " 하이, 도-조. ",
+    correction: { corrected: "コーヒーをください。", explanation_ko: "を를 넣어요.", corrected_pron_ko: "코-히-오 쿠다사이." },
+  };
+  const propertiesOf = (request: Record<string, unknown>) =>
+    Object.keys((request.output_config as { format: { schema: { properties: object } } }).format.schema.properties).sort();
+
+  it("일본어 입문~중급은 발음 필드가 있는 형식으로 요청하고, 발음은 앞뒤 공백을 지워 돌려준다", async () => {
+    const { ai, requests } = setup(done(jaReply));
+    expect(await ai.generateTurn(jaInput)).toEqual({ ok: true, value: { ...jaReply, reply_pron_ko: "하이, 도-조." } });
+    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_ko", "reply_pron_ko"]);
+  });
+
+  it("발음이 비었거나 가나·한자가 섞이면 턴은 성공하고 그 발음만 null이다 (다시 부르지 않는다)", async () => {
+    const bad = { ...jaReply, reply_pron_ko: "", correction: { ...jaReply.correction, corrected_pron_ko: "코-히-を 쿠다사이." } };
+    const { ai, requests } = setup(done(bad));
+    expect(await ai.generateTurn(jaInput)).toEqual({
+      ok: true,
+      value: { ...bad, reply_pron_ko: null, correction: { ...bad.correction, corrected_pron_ko: null } },
+    });
+    expect(requests).toHaveLength(1);
+  });
+
+  it("교정이 없으면 correction은 null 그대로다", async () => {
+    const { ai } = setup(done({ ...jaReply, correction: null }));
+    expect(await ai.generateTurn(jaInput)).toEqual({
+      ok: true,
+      value: { ...jaReply, reply_pron_ko: "하이, 도-조.", correction: null },
+    });
+  });
+
+  it("일본어 상급은 발음 없는 형식으로 요청하고 받은 값을 그대로 돌려준다", async () => {
+    const { ai, requests } = setup(done(reply));
+    expect(await ai.generateTurn({ ...jaInput, level: 4, scenario: scenariosForLevel(4)[0] })).toEqual({ ok: true, value: reply });
+    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_ko"]);
+  });
+});

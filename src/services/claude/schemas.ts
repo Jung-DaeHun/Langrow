@@ -7,6 +7,14 @@ export const turnReplySchema = z.object({
   reply_ko: z.string(),
   correction: z.object({ corrected: z.string(), explanation_ko: z.string() }).nullable(),
 });
+// 일본어 입문~중급 턴(spec/chat.md "한글 발음"). 발음 검사와 정리는 client.ts가 한다
+export const pronTurnReplySchema = z.object({
+  reply: z.string(),
+  reply_ko: z.string(),
+  reply_pron_ko: z.string(),
+  correction: z.object({ corrected: z.string(), explanation_ko: z.string(), corrected_pron_ko: z.string() }).nullable(),
+});
+export type PronTurnReply = z.infer<typeof pronTurnReplySchema>;
 // 저장·API·화면이 쓰는 턴 응답. 한글 발음은 일본어 입문~중급 턴에만 있다(spec/chat.md "한글 발음").
 // 영어·상급 이상 턴과 기능을 넣기 전의 턴은 발음이 없거나 null이다
 export type TurnReply = {

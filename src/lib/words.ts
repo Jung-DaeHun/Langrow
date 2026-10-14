@@ -65,7 +65,7 @@ export function wordEntryErrors(language: Language, level: Level, item: unknown)
     if (cleanPron(w.pron_ko) === null) errors.push("일본어는 pron_ko(단어의 한글 발음)가 있어야 합니다");
     if (cleanPron(w.example_pron_ko) === null) errors.push("일본어는 example_pron_ko(예문의 한글 발음)가 있어야 합니다");
   }
-  // 키가 없어도 null로 본다. 발음 기능 전에 만든 영어 파일과 generate-words 항목에는 키가 없다
+  // 키가 없어도 null로 본다. 발음 기능 전에 만든 영어 파일에는 키가 없다
   if (language === "en" && (w.pron_ko != null || w.example_pron_ko != null)) {
     errors.push("영어는 pron_ko·example_pron_ko가 null이어야 합니다");
   }

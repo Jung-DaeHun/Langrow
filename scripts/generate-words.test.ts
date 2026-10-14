@@ -14,6 +14,21 @@ function aiWord(n: number) {
   };
 }
 
+// 일본어 항목. 두 발음은 검사(cleanPron)에 맞아야 받는다
+function aiJaWord(n: number, pron: { pron_ko?: string | null; example_pron_ko?: string | null } = {}) {
+  return {
+    word: `行く${n}`,
+    reading: `いく${n}`,
+    meaning_ko: `가다${n}`,
+    example: `[学校|がっこう]に{{[行|い]った${n}}}。`,
+    example_ko: "학교에 갔다.",
+    distractors: [`[行|い]く${n}`, `[行|い]って${n}`, `[行|い]かない${n}`],
+    pron_ko: "이쿠",
+    example_pron_ko: "갓코-니 잇타.",
+    ...pron,
+  };
+}
+
 function fakeDeps(
   options: {
     args?: string[];
@@ -60,7 +75,15 @@ describe("generate-words main", () => {
     expect(content).toContain('\n  {\n    "id": "en-1-001"');
     const words = JSON.parse(content);
     expect(validateWordFile("en", 1, words).ok).toBe(true);
-    expect(words[0]).toMatchObject({ id: "en-1-001", rank: 1, word: "go1", language: "en", level: 1 });
+    expect(words[0]).toMatchObject({
+      id: "en-1-001",
+      rank: 1,
+      word: "go1",
+      language: "en",
+      level: 1,
+      pron_ko: null,
+      example_pron_ko: null,
+    });
     expect(words[199]).toMatchObject({ id: "en-1-200", rank: 200, word: "go200" });
   });
 
@@ -175,6 +198,36 @@ describe("generate-words main", () => {
     const withoutModel = fakeDeps();
     await main(withoutModel.deps);
     expect(withoutModel.requests.every((r) => r.model === undefined)).toBe(true);
+  });
+
+  it("일본어는 두 발음이 검사에 맞는 항목만 받아 파일에 쓴다", async () => {
+    let next = 1;
+    const { deps, written } = fakeDeps({
+      args: ["--language", "ja", "--level", "1"],
+      generate: (request, call) => [
+        ...(call === 1 ? [aiJaWord(9000, { pron_ko: null }), aiJaWord(9001, { example_pron_ko: "갓코-니 いった." })] : []),
+        ...Array.from({ length: request.count }, () => aiJaWord(next++)),
+      ],
+    });
+
+    expect(await main(deps)).toBe(0);
+
+    const words = JSON.parse(written.get("data/words/ja-1.json")!) as { word: string }[];
+    expect(words[0]).toMatchObject({ word: "行く1", pron_ko: "이쿠", example_pron_ko: "갓코-니 잇타." });
+    expect(words.map((w) => w.word)).not.toContain("行く9000");
+    expect(words.map((w) => w.word)).not.toContain("行く9001");
+  });
+
+  it("영어는 AI가 발음을 줘도 null로 쓴다", async () => {
+    let next = 1;
+    const { deps, written } = fakeDeps({
+      generate: (request) => Array.from({ length: request.count }, () => ({ ...aiWord(next++), pron_ko: "고" })),
+    });
+
+    expect(await main(deps)).toBe(0);
+
+    const words = JSON.parse(written.get("data/words/en-1.json")!);
+    expect(words[0]).toMatchObject({ pron_ko: null, example_pron_ko: null });
   });
 
   it.each([
