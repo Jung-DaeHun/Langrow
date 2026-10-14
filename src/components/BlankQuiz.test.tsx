@@ -200,3 +200,34 @@ describe("BlankQuiz 예문 소리", () => {
     expect(screen.queryByText("예문 소리")).toBeNull();
   });
 });
+
+describe("BlankQuiz 한글 발음", () => {
+  const PRON = "갓코-니 잇타.";
+
+  it("학습은 채점 뒤에만 빈칸 문장 바로 아래·번역 위에 발음을 둔다", async () => {
+    const { user } = setup({ pronunciation: PRON });
+    expect(screen.queryByText(PRON)).toBeNull();
+
+    await user.click(option("goes"));
+
+    const pron = screen.getByText(PRON);
+    expect(pron).toHaveAttribute("aria-hidden", "true");
+    expect(pron.previousElementSibling).toHaveAttribute("lang", "en");
+    expect(pron.nextElementSibling).toHaveTextContent("나는 학교에 갔다.");
+  });
+
+  it("발음이 null이면 채점 뒤에도 두지 않는다", async () => {
+    const { user, container } = setup({ pronunciation: null });
+    await user.click(option("went"));
+
+    const hiddenTexts = [...container.querySelectorAll("[aria-hidden='true']")].map((el) => el.textContent).filter(Boolean);
+    expect(hiddenTexts).toEqual([]);
+  });
+
+  it("레벨업 테스트는 발음을 받아도 두지 않는다", async () => {
+    const { user } = setup({ mode: "test", answer: undefined, pronunciation: PRON });
+    await user.click(option("goes"));
+
+    expect(screen.queryByText(PRON)).toBeNull();
+  });
+});

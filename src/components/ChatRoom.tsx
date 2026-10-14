@@ -9,6 +9,7 @@ import {
   allowsKoreanInput,
   opensTranslationByDefault,
   showsFurigana,
+  showsPronunciation,
   type Language,
   type Level,
 } from "@/lib/levels";
@@ -195,6 +196,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   }
 
   const furigana = room.language === "ja" && showsFurigana(room.level);
+  const pronunciation = showsPronunciation(room.language, room.level);
   const busy = shownPending !== null || ending;
 
   return (
@@ -229,7 +231,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
       </header>
 
       <div className="flex flex-1 flex-col gap-3 py-4">
-        <AiBubble line={{ text: scenario.opening.text, ko: scenario.opening.ko }} language={room.language} level={room.level} />
+        <AiBubble line={scenario.opening} language={room.language} level={room.level} />
         {turns.map((t) => (
           <Fragment key={t.turnNo}>
             <p lang={room.language} className={`${MY_BUBBLE} bg-house text-white`}>
@@ -241,13 +243,22 @@ export function ChatRoom({ room, scenario, trial }: Props) {
                 <p lang={room.language} className="font-bold text-brand">
                   <Furigana text={t.correction.corrected} show={furigana} />
                 </p>
+                {pronunciation && t.correction.corrected_pron_ko && (
+                  <p aria-hidden="true" className="text-sm text-brand">
+                    {t.correction.corrected_pron_ko}
+                  </p>
+                )}
                 <SpeakButtons source={{ kind: "speech", text: t.correction.corrected, language: room.language }} variant="compact" />
                 <p className="text-sm">
                   <Furigana text={t.correction.explanation_ko} show={furigana} />
                 </p>
               </div>
             )}
-            <AiBubble line={{ text: t.reply, ko: t.replyKo }} language={room.language} level={room.level} />
+            <AiBubble
+              line={{ text: t.reply, ko: t.replyKo, pronKo: t.replyPronKo }}
+              language={room.language}
+              level={room.level}
+            />
           </Fragment>
         ))}
         {shownPending !== null && (
@@ -368,19 +379,36 @@ function TurnAnnouncement({ turn, language, level }: { turn: ChatTurnView; langu
   );
 }
 
-// 입문·초보는 번역을 항상 펼치고, 중급 이상은 말풍선 전체를 눌러 펼친다. 재생 버튼은 말풍선 밖 아래에 둔다
-function AiBubble({ line, language, level }: { line: ScenarioLine; language: Language; level: Level }) {
+// 입문·초보는 번역을 항상 펼치고, 중급 이상은 말풍선 전체를 눌러 펼친다. 한글 발음은 번역과 같이 펼친다.
+// 재생 버튼은 말풍선 밖 아래에 둔다
+function AiBubble({
+  line,
+  language,
+  level,
+}: {
+  line: { text: string; ko: string; pronKo?: string | null };
+  language: Language;
+  level: Level;
+}) {
   const [open, setOpen] = useState(false);
   const body = (
     <span lang={language} className="block whitespace-pre-wrap wrap-break-word">
       <Furigana text={line.text} show={language === "ja" && showsFurigana(level)} />
     </span>
   );
+  // 낭독기는 lang="ja" 문장을 읽으므로 발음은 숨긴다
+  const pronunciation =
+    showsPronunciation(language, level) && line.pronKo ? (
+      <span aria-hidden="true" className="mt-1 block text-sm text-brand">
+        {line.pronKo}
+      </span>
+    ) : null;
   const translation = <span className="mt-2 block border-t border-line pt-2 text-sm text-ink-muted">{line.ko}</span>;
 
   const bubble = opensTranslationByDefault(level) ? (
     <div className={AI_BUBBLE}>
       {body}
+      {pronunciation}
       {translation}
     </div>
   ) : (
@@ -392,6 +420,7 @@ function AiBubble({ line, language, level }: { line: ScenarioLine; language: Lan
     >
       <span className={`block ${AI_BUBBLE}`}>
         {body}
+        {open && pronunciation}
         {open && translation}
       </span>
       <span className="inline-flex items-center gap-1 px-1 text-xs font-semibold text-accent">

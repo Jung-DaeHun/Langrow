@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Level } from "@/lib/levels";
 import type { TrialState } from "@/lib/plan";
 import type { ChatRoomData, ChatTurnView } from "@/server/db/reads";
 import { api, type ApiResult } from "@/services/apiClient";
@@ -707,5 +708,83 @@ describe("ChatRoom 음성", () => {
     const region = document.querySelector("[aria-live]");
     expect(region).toHaveTextContent("今日は暑いですね。 오늘 덥네요.");
     expect(within(region as HTMLElement).getByText("今日は暑いですね。")).toHaveAttribute("lang", "ja");
+  });
+});
+
+describe("ChatRoom 한글 발음", () => {
+  const JA_SCENARIO = { title: "인사", opening: { text: "はじめまして！", ko: "처음 뵙겠습니다!", pronKo: "하지메마시테!" } };
+  const pronTurn = turn(1, {
+    reply: "[今日|きょう]は[暑|あつ]いですね。",
+    replyKo: "오늘 덥네요.",
+    replyPronKo: "쿄-와 아츠이데스네.",
+    correction: { corrected: "[暑|あつ]いです。", explanation_ko: "설명", corrected_pron_ko: "아츠이데스." },
+  });
+  const jaRoom = (level: Level, turns: ChatTurnView[] = [pronTurn]) => room({ language: "ja", level, turns });
+
+  it("입문·초보는 첫 마디·AI 말풍선의 문장 아래, 번역 위에 발음을 늘 보여 준다", () => {
+    setup(jaRoom(1), { kind: "available" }, JA_SCENARIO);
+
+    const opening = screen.getByText("하지메마시테!", ON_SCREEN);
+    expect(opening.previousElementSibling).toHaveAttribute("lang", "ja");
+    expect(isBefore(opening, screen.getByText("처음 뵙겠습니다!", ON_SCREEN))).toBe(true);
+    const reply = screen.getByText("쿄-와 아츠이데스네.", ON_SCREEN);
+    expect(isBefore(reply, screen.getByText("오늘 덥네요.", ON_SCREEN))).toBe(true);
+  });
+
+  it("교정 카드는 고친 문장 바로 아래에 발음을 둔다", () => {
+    setup(jaRoom(2), { kind: "available" }, JA_SCENARIO);
+
+    const pron = screen.getByText("아츠이데스.", ON_SCREEN);
+    expect(pron.previousElementSibling).toHaveAttribute("lang", "ja");
+    expect(pron.previousElementSibling).toHaveTextContent("いです。");
+  });
+
+  it("중급은 말풍선을 펼쳐야 발음이 번역과 함께 보인다 (교정 카드는 늘 펼쳐 둔다)", async () => {
+    const { user } = setup(jaRoom(3), { kind: "available" }, JA_SCENARIO);
+
+    expect(screen.queryByText("하지메마시테!")).toBeNull();
+    expect(screen.queryByText("쿄-와 아츠이데스네.")).toBeNull();
+    expect(screen.getByText("아츠이데스.")).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { expanded: false })[1]);
+
+    expect(screen.getByText("쿄-와 아츠이데스네.")).toBeInTheDocument();
+    expect(screen.getByText("오늘 덥네요.")).toBeInTheDocument();
+  });
+
+  it("상급과 영어 방은 첫 마디 pronKo나 저장된 발음이 있어도 그리지 않는다", async () => {
+    const { user, rerender } = setup(jaRoom(4), { kind: "available" }, JA_SCENARIO);
+
+    expect(screen.queryByText("아츠이데스.")).toBeNull();
+    for (const toggle of screen.getAllByRole("button", { expanded: false })) await user.click(toggle);
+    expect(screen.queryByText("하지메마시테!")).toBeNull();
+    expect(screen.queryByText("쿄-와 아츠이데스네.")).toBeNull();
+
+    rerender(room({ language: "en", level: 1, turns: [pronTurn] }));
+    expect(screen.queryByText("하지메마시테!")).toBeNull();
+    expect(screen.queryByText("쿄-와 아츠이데스네.")).toBeNull();
+    expect(screen.queryByText("아츠이데스.")).toBeNull();
+  });
+
+  it("발음이 없는 턴(기능 전 턴, 검사에 맞지 않아 숨긴 발음)은 발음 줄 없이 그린다", () => {
+    const old = turn(1, { reply: "はい。", replyKo: "네.", replyPronKo: null, correction: { corrected: "はい。", explanation_ko: "설명" } });
+    const { container } = setup(jaRoom(1, [old]), { kind: "available" }, { title: "인사", opening: { text: "はい。", ko: "네." } });
+
+    const hiddenTexts = [...container.querySelectorAll("[aria-hidden='true']")].map((el) => el.textContent).filter(Boolean);
+    expect(hiddenTexts).toEqual([]);
+  });
+
+  it("발음은 낭독기에서 숨기고 새 턴 알림에도 넣지 않는다", async () => {
+    apiMock.mockResolvedValue(replied(2, 18, { reply: "はい。", reply_ko: "네.", reply_pron_ko: "하이." }));
+    const { user } = setup(jaRoom(1), { kind: "available" }, JA_SCENARIO);
+
+    expect(screen.getByText("쿄-와 아츠이데스네.", ON_SCREEN)).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("아츠이데스.", ON_SCREEN)).toHaveAttribute("aria-hidden", "true");
+
+    await typeAndSend(user, "はい");
+
+    expect(screen.getByText("하이.", ON_SCREEN)).toHaveAttribute("aria-hidden", "true");
+    expect(document.querySelector("[aria-live]")).toHaveTextContent("はい。");
+    expect(document.querySelector("[aria-live]")).not.toHaveTextContent("하이.");
   });
 });

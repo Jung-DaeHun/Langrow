@@ -29,6 +29,7 @@ type Props = {
   onNext: (choice: string) => void;
   explanation?: (choice: string) => ReactNode;
   exampleAudio?: ReactNode;
+  pronunciation?: string | null; // 정답을 채운 예문의 한글 발음. 학습 채점 뒤에만 그린다
 };
 
 export function BlankQuiz({
@@ -45,6 +46,7 @@ export function BlankQuiz({
   onNext,
   explanation,
   exampleAudio,
+  pronunciation,
 }: Props) {
   const [choice, setChoice] = useState<string | null>(null);
   const graded = mode === "learn" && choice !== null;
@@ -87,6 +89,12 @@ export function BlankQuiz({
           </span>
           <Furigana text={question.after} show={showFurigana} />
         </p>
+        {/* 채점 전에는 정답의 발음이 드러나서 두지 않는다 */}
+        {graded && pronunciation && (
+          <p aria-hidden="true" className="text-sm text-brand">
+            {pronunciation}
+          </p>
+        )}
         <p className="text-sm text-ink-muted">{question.exampleKo}</p>
         {/* 채점 전에는 정답이 드러나서 두지 않는다. 레벨업 테스트는 채점 화면이 없다 */}
         {graded && exampleAudio}

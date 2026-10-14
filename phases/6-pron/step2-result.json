@@ -1,0 +1,4 @@
+{
+  "status": "completed",
+  "summary": "ChatRoom: AiBubble line을 { text; ko; pronKo?: string | null }로 바꿈. showsPronunciation(language, level)이고 값이 있을 때만 문장 아래·번역 위에 aria-hidden 발음(mt-1 block text-sm text-brand), 입문·초보 항상, 중급은 펼칠 때. 첫 마디는 scenario.opening 그대로, 턴은 replyPronKo. 교정 카드는 고친 문장 아래·재생 위에 corrected_pron_ko. TurnAnnouncement 안 바꿈. BlankQuiz: prop pronunciation?: string | null, learn 채점 뒤에만 빈칸 문장 아래·exampleKo 위. WordSession: runLanguage·level 기준, 카드 앞면 pronKo(text-lead)·뒷면 examplePronKo(text-sm), BlankQuiz에 전달."
+}

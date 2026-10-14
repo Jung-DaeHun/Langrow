@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { exampleAudioPath, wordAudioPath } from "@/lib/audio";
 import { isCorrectChoice, parseBlank, toBlankQuestion, type BlankParts, type BlankQuestion } from "@/lib/blank";
-import { LANGUAGE_NAMES, LEVEL_INFO, showsFurigana, type Language, type Level } from "@/lib/levels";
+import { LANGUAGE_NAMES, LEVEL_INFO, showsFurigana, showsPronunciation, type Language, type Level } from "@/lib/levels";
 import type { TrialState } from "@/lib/plan";
 import { DAILY_WORD_GOAL } from "@/lib/today";
 import { wordStatus } from "@/lib/wordBatch";
@@ -81,6 +81,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
   }, [phase]);
 
   const furigana = runLanguage === "ja" && showsFurigana(level);
+  const pronunciation = showsPronunciation(runLanguage, level);
 
   function start() {
     setRunLanguage(language);
@@ -224,6 +225,11 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
               <span lang={runLanguage} className="text-word font-bold text-brand">
                 {ruby ? <Furigana text={`[${w.word}|${w.reading}]`} show /> : w.word}
               </span>
+              {pronunciation && w.pronKo && (
+                <span aria-hidden="true" className="text-lead text-brand">
+                  {w.pronKo}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1 text-micro text-ink-muted">
                 <RotateCw size={13} aria-hidden="true" />
                 탭해서 뜻 보기
@@ -236,6 +242,11 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
               <span lang={runLanguage}>
                 <Furigana text={blank.before + blank.answer + blank.after} show={furigana} />
               </span>
+              {pronunciation && w.examplePronKo && (
+                <span aria-hidden="true" className="text-sm text-brand">
+                  {w.examplePronKo}
+                </span>
+              )}
               <span className="text-sm text-ink-muted">{w.exampleKo}</span>
             </>
           }
@@ -270,6 +281,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
           onNext={answerQuiz}
           explanation={(choice) => explanationFor(w, "AI 해설", choice)}
           exampleAudio={<SpeakButtons source={{ kind: "file", src: exampleAudioPath(w.id) }} />}
+          pronunciation={pronunciation ? w.examplePronKo : null}
         />
       </div>
     );

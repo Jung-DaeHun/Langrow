@@ -602,3 +602,80 @@ describe("WordSession 음성", () => {
     expect(FakeAudio.all.at(-1)?.src).toBe("/audio/female/words/en-3-001.mp3");
   });
 });
+
+describe("WordSession 일본어 한글 발음", () => {
+  const iku = word(1, {
+    id: "ja-1-001",
+    language: "ja",
+    level: 1,
+    word: "行く",
+    reading: "いく",
+    example: "[学校|がっこう]に{{[行|い]った}}。",
+    exampleKo: "학교에 갔다.",
+    distractors: ["[行|い]く", "[行|い]って", "[行|い]かない"],
+    pronKo: "이쿠",
+    examplePronKo: "갓코-니 잇타.",
+  });
+  // 보기에 후리가나가 없어 글자로 고를 수 있는 단어
+  const kore = word(2, {
+    id: "ja-1-002",
+    language: "ja",
+    level: 1,
+    word: "これ",
+    reading: "これ",
+    example: "{{これ}}はペンです。",
+    exampleKo: "이것은 펜이에요.",
+    distractors: ["それ", "あれ", "どれ"],
+    pronKo: "코레",
+    examplePronKo: "코레와 펜데스.",
+  });
+
+  it("카드 앞면은 단어 바로 아래, 뒷면은 예문 바로 아래·번역 위에 두고, 카드 이름에는 넣지 않는다", async () => {
+    const { user } = setup({ language: "ja", level: 1, words: [iku] });
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+
+    const front = screen.getByText("이쿠");
+    expect(front).toHaveAttribute("aria-hidden", "true");
+    expect(front.previousElementSibling).toHaveAttribute("lang", "ja");
+    expect(flashcard()).not.toHaveAccessibleName(/이쿠/);
+
+    await user.click(flashcard());
+
+    const back = screen.getByText("갓코-니 잇타.");
+    expect(back).toHaveAttribute("aria-hidden", "true");
+    expect(back.previousElementSibling).toHaveAttribute("lang", "ja");
+    expect(back.nextElementSibling).toHaveTextContent("학교에 갔다.");
+  });
+
+  it("오답 복습 카드도 앞면 단어·뒷면 예문 아래에 발음을 둔다", async () => {
+    const { user } = setup({ mode: "review", language: "ja", level: 2, words: [iku] });
+    await user.click(screen.getByRole("button", { name: "복습 시작" }));
+
+    expect(screen.getByText("이쿠")).toBeInTheDocument();
+    await user.click(flashcard());
+    expect(screen.getByText("갓코-니 잇타.")).toBeInTheDocument();
+  });
+
+  it("빈칸은 채점 뒤에만 정답을 채운 예문의 발음을 둔다", async () => {
+    const { user } = setup({ language: "ja", level: 3, words: [kore] });
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+    await answerCards(user, [true]);
+    expect(screen.queryByText("코레와 펜데스.")).toBeNull();
+
+    await user.click(screen.getByText("それ", { selector: "button span[lang]" }));
+
+    expect(screen.getByText("코레와 펜데스.")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("상급은 카드와 빈칸에 발음을 두지 않는다", async () => {
+    const { user } = setup({ language: "ja", level: 4, words: [kore] });
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+
+    expect(screen.queryByText("코레")).toBeNull();
+    await user.click(flashcard());
+    expect(screen.queryByText("코레와 펜데스.")).toBeNull();
+    await answerCards(user, [true]);
+    await user.click(screen.getByText("それ", { selector: "button span[lang]" }));
+    expect(screen.queryByText("코레와 펜데스.")).toBeNull();
+  });
+});
