@@ -8,6 +8,16 @@ INPUT=$(cat)
 ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
+
+# 이 폴더에서 하네스 phase가 도는 중이면 phase를 띄운 바깥 세션은 검사하지 않는다.
+# step 세션이 TDD로 테스트만 먼저 써 둔 중간 상태라 실패가 나고, 바깥 세션이 그걸 고치면 step 작업과 충돌하며,
+# 두 build가 .next를 같이 쓴다. execute.py가 step마다 phases/.running을 쓰고 끝나면 지운다.
+# step 세션은 HARNESS_STEP=1로 실행돼 그대로 검사한다. 35분(step 타임아웃 30분 + 여유)보다 오래된 표시는
+# 강제 종료된 실행의 흔적이라 무시한다
+if [ -z "$HARNESS_STEP" ] && [ -n "$(find phases/.running -mmin -35 2>/dev/null)" ]; then
+  exit 0
+fi
+
 OUTPUT=$( { npm run lint && npm run build && npm run test; } 2>&1 )
 STATUS=$?
 if [ "$STATUS" -eq 0 ]; then

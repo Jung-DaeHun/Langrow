@@ -62,6 +62,11 @@ class StepExecutor:
     TZ = timezone(timedelta(hours=9))
     # Windows STATUS_DLL_INIT_FAILED. execute.py를 띄운 Claude Code 세션이 닫히면 새 프로세스가 이 코드로 죽는다
     SPAWN_FAILED = 0xC0000142
+    # phase가 이 폴더에서 도는 중이라는 표시(gitignore). step마다 다시 쓰고 끝나면 지운다.
+    # Stop hook(scripts/hooks/stop-verify.sh)은 이 표시가 있으면 phase를 띄운 바깥 세션의 검사를 건너뛰고,
+    # HARNESS_STEP=1로 띄운 step 세션은 그대로 검사한다. step 세션의 TDD 중간 상태를 바깥 세션이 실패로 보고 고치려 들거나
+    # 두 build가 .next를 같이 쓰는 것을 막는다
+    RUNNING_MARKER = ".running"
 
     def __init__(self, phase_dir_name: str, *, auto_push: bool = False):
         self._root = str(ROOT)
@@ -87,11 +92,15 @@ class StepExecutor:
 
     def run(self):
         self._print_header()
-        self._check_blockers()
-        self._checkout_branch()
-        self._ensure_created_at()
-        self._execute_all_steps()
-        self._finalize()
+        try:
+            self._check_blockers()
+            self._checkout_branch()
+            self._ensure_created_at()
+            self._execute_all_steps()
+            self._finalize()
+        finally:
+            # 실패·blocked로 sys.exit해도 지운다. 강제 종료로 남은 표시는 hook이 시각을 보고 무시한다
+            (self._phases_dir / self.RUNNING_MARKER).unlink(missing_ok=True)
 
     # --- timestamps ---
 
@@ -259,10 +268,14 @@ class StepExecutor:
             sys.exit(1)
 
         prompt = preamble + step_file.read_text(encoding="utf-8")
+        (self._phases_dir / self.RUNNING_MARKER).write_text(
+            f"{self._phase_dir_name} step {step_num} {self._stamp()}\n", encoding="utf-8"
+        )
         # 프롬프트는 stdin으로 넘긴다. 명령줄 인자로 넘기면 Windows의 약 32,767자 상한에 걸린다
         result = subprocess.run(
             ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json"],
             input=prompt, cwd=self._root, capture_output=True, encoding="utf-8", timeout=1800,
+            env={**os.environ, "HARNESS_STEP": "1"},
         )
         self._exit_if_spawn_failed(result.returncode, "claude")
 

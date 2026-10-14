@@ -22,6 +22,14 @@ if [ ! -f "$ROOT/package.json" ]; then
   exit 0
 fi
 
+# 프로젝트 밖 파일(세션 스크래치패드의 일회성 스크립트 등)은 검사하지 않는다. 드라이브 문자 대소문자는 무시한다
+shopt -s nocasematch
+case "$FILE_PATH" in
+  "$ROOT"/*) ;;
+  *) exit 0 ;;
+esac
+shopt -u nocasematch
+
 # 테스트 파일 자체를 수정하는 건 허용
 case "$FILE_PATH" in
   *test*|*spec*|*.test.*|*.spec.*|*__tests__*)

@@ -16,6 +16,8 @@ npm-debug.log*
 # phase execution outputs
 phases/**/phase*-output.json
 phases/**/step*-output.json
+# execute.py가 phase를 도는 동안만 두는 표시 (Stop hook이 읽는다)
+phases/.running
 
 # supabase CLI
 supabase/.temp/

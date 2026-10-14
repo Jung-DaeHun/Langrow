@@ -517,6 +517,53 @@ class TestInvokeClaude:
                 executor._invoke_claude({"step": 2, "name": "ui"}, "preamble")
         assert exc_info.value.code == 1
 
+    def test_step_session_gets_harness_step_env(self, executor):
+        # Stop hook이 step 세션(검사함)과 phase를 띄운 바깥 세션(검사 안 함)을 구분하는 표시다
+        mock_result = MagicMock(returncode=0, stdout="{}", stderr="")
+
+        with patch("subprocess.run", return_value=mock_result) as mock_run:
+            executor._invoke_claude({"step": 2, "name": "ui"}, "preamble")
+
+        env = mock_run.call_args[1]["env"]
+        assert env["HARNESS_STEP"] == "1"
+        assert env["PATH"] == os.environ["PATH"]
+
+    def test_marks_phase_running_before_the_step_session_starts(self, executor):
+        marker = executor._phases_dir / ".running"
+        seen = {}
+
+        def fake_run(*args, **kwargs):
+            seen["marked"] = marker.exists()
+            return MagicMock(returncode=0, stdout="{}", stderr="")
+
+        with patch("subprocess.run", side_effect=fake_run):
+            executor._invoke_claude({"step": 2, "name": "ui"}, "preamble")
+
+        assert seen["marked"] is True
+        assert "0-mvp" in marker.read_text(encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# run
+# ---------------------------------------------------------------------------
+
+class TestRun:
+    def test_removes_running_marker_even_when_a_step_exits(self, executor):
+        marker = executor._phases_dir / ".running"
+
+        def failing_steps():
+            marker.write_text("0-mvp step 2\n", encoding="utf-8")
+            sys.exit(1)
+
+        with patch.object(executor, "_check_blockers"), patch.object(executor, "_checkout_branch"), \
+                patch.object(executor, "_ensure_created_at"), \
+                patch.object(executor, "_execute_all_steps", side_effect=failing_steps), \
+                patch.object(executor, "_finalize"):
+            with pytest.raises(SystemExit):
+                executor.run()
+
+        assert not marker.exists()
+
 
 # ---------------------------------------------------------------------------
 # _execute_single_step (mocked)
