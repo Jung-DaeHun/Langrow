@@ -2,8 +2,24 @@
   "project": "Langrow",
   "phase": "6-pron",
   "steps": [
-    { "step": 0, "name": "pron-data", "status": "pending" },
-    { "step": 1, "name": "pron-ai", "status": "pending" },
-    { "step": 2, "name": "pron-ui", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "pron-data",
+      "status": "completed",
+      "started_at": "2026-10-14T17:49:55+0900",
+      "summary": "lib/pronunciation.ts cleanPron, levels.ts showsPronunciation. WordEntry·validWord에 pron_ko·example_pron_ko(ja 필수, 반환값은 cleanPron 값, 영어는 키 없어도 null로 봄), ScenarioLine.pronKo(레벨1~3 ja 12개). 마이그레이션 20261014100000_pronunciation.sql: 발음 컬럼 3개, finish_chat_turn(uuid,uuid,uuid,text,text,jsonb,text default null). TurnReply는 타입만 바꿈(스키마 그대로). finishChatTurn은 reply_pron_ko ?? undefined. Word.pronKo·examplePronKo, ChatTurnView.replyPronKo, ChatRoom added 한 줄. generate-words toEntry는 아직 발음 키 없음(Task 5).",
+      "completed_at": "2026-10-14T17:58:39+0900"
+    },
+    {
+      "step": 1,
+      "name": "pron-ai",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "pron-ui",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-14T17:49:55+0900"
 }

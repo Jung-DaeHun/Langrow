@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "lib/pronunciation.ts cleanPron, levels.ts showsPronunciation. WordEntry·validWord에 pron_ko·example_pron_ko(ja 필수, 반환값은 cleanPron 값, 영어는 키 없어도 null로 봄), ScenarioLine.pronKo(레벨1~3 ja 12개). 마이그레이션 20261014100000_pronunciation.sql: 발음 컬럼 3개, finish_chat_turn(uuid,uuid,uuid,text,text,jsonb,text default null). TurnReply는 타입만 바꿈(스키마 그대로). finishChatTurn은 reply_pron_ko ?? undefined. Word.pronKo·examplePronKo, ChatTurnView.replyPronKo, ChatRoom added 한 줄. generate-words toEntry는 아직 발음 키 없음(Task 5).",
+  "spec_diff": "words.md·testing.md는 '영어는 pron_ko·example_pron_ko 둘 다 null'. 구현은 키가 없는 경우(undefined)도 null로 보고 통과시킨다(w.pron_ko != null 검사). 이유: 계획대로 !== null로 하면 (1) 발음 키가 없는 기존 data/words/en-*.json 5개가 seed 검사에서 막힌다(어느 Task도 영어 파일에 null 키를 넣지 않는데 Task 7은 seed:words가 10개 파일 모두 통과하기를 기대한다) (2) generate-words의 toEntry가 아직 발음 키를 넘기지 않아 scripts/generate-words.test.ts 5개가 깨진다. 값이 있는 영어 발음은 여전히 오류이고 validateWordFile은 null을 돌려준다(words.test.ts에 '발음 키가 없는 영어 단어' 테스트 추가). spec 문구를 '영어는 둘 다 null(키 없음 포함)'로 고칠지 phase 끝에 정한다."
+}
