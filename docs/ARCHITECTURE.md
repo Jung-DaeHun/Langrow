@@ -21,7 +21,7 @@ src/
 ├── types/                # database.ts (supabase gen types), api.ts (API 응답 타입)
 └── test/                 # fakes.ts (가짜 db·ai)
 supabase/migrations/      # 스키마·제약·인덱스·RLS·RPC·실행 권한
-scripts/                  # generate-words, seed-words, metrics-report, generate-audio (각각 main(deps)를 export)
+scripts/                  # generate-words, generate-pronunciation, seed-words, metrics-report, generate-audio (각각 main(deps)를 export)
 data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 data/audio-manifest.json  # 음성 파일별 SSML 해시 (generate-audio가 갱신)
 public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포인트}.mp3 (Azure로 미리 생성해 커밋. 남성 음성은 나중에 male/)
@@ -50,6 +50,8 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
         → Claude 설명(잠금 밖) → 성공은 저장 RPC(설명을 만든 단어 내용이 지금과 같을 때만 word_explanations) 후 응답 / 실패는 실패 RPC(예약 행 삭제, chat_failed)
 음성:   (로컬) generate-audio → Azure Speech(F0) → public/audio/*.mp3 + data/audio-manifest.json 커밋 → 배포된 정적 파일을 브라우저가 재생
         대화 문장은 서버를 거치지 않고 브라우저 speechSynthesis로 읽는다
+한글 발음: 대화는 일본어 입문~중급 턴에서 Claude 응답의 reply_pron_ko·corrected_pron_ko → 성공 확정 RPC가 chat_turns에 저장
+        단어는 (로컬) generate-words·generate-pronunciation → data/words/*.json의 pron_ko·example_pron_ko 커밋 → seed-words
 ```
 
 ## 상태 관리
@@ -89,8 +91,8 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 | `profiles` | id(=auth.users.id), current_language, pro_until, trial_started_at, agreed_at, onboarded_at, last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
 | `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token, operation_expires_at, feedback_status(none/pending/ready/fallback/skipped), feedback, created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, correction, created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
-| `words` | id(`en-1-001`), language, level, rank, word, reading, meaning_ko, example(`{{정답}}`), example_ko, distractors(3개) |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, correction(일본어 입문~중급은 corrected_pron_ko 포함), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
+| `words` | id(`en-1-001`), language, level, rank, word, reading, meaning_ko, example(`{{정답}}`), example_ko, distractors(3개), pron_ko·example_pron_ko(일본어 한글 발음, 영어는 null) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props, created_at (`limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`, `word_explained`) |
 | `word_explanations` | word_id, choice(복습은 빈 문자열), explanation, word_hash, created_at — PK(word_id, choice). 사용자와 무관한 공용 저장본이라 user_id가 없다 |

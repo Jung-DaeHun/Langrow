@@ -58,6 +58,7 @@
 - 크기는 토큰 클래스만 쓴다: `text-display`(랜딩 히어로), `text-h1`(화면 제목), `text-h3`(섹션), `text-lead`(카드 제목·퀴즈 보기), `text-base`(본문·말풍선·입력), `text-sm`(보조), `text-micro`(메타), `text-xs`(탭·태그), `text-quiz`·`text-word`·`text-kana`(학습 콘텐츠).
 - 줄바꿈은 `word-break: keep-all`, 바뀌는 숫자는 `tabular-nums`로 둔다. 입력 글자는 16px 이상이다.
 - 후리가나는 React `<ruby>` 요소로 그린다. 표시 레벨은 `docs/spec/chat.md` "레벨별 조절"을 따른다.
+- 일본어 한글 발음(입문~중급)은 문장·단어 바로 아래에 `text-brand`로 쓰고 `aria-hidden`을 단다. 대화 말풍선·교정 문장·단어 카드·빈칸 채점 뒤에만 두며, 중급 말풍선은 번역과 함께 펼친다(`docs/spec/ui.md`).
 
 ## 레이아웃
 - 모바일 우선이다. 간격은 Tailwind 기본 스케일만 쓰고 `gap-[13px]` 같은 임의값을 쓰지 않는다. 좌우 여백은 `px-4`, `lg` 이상 `px-10`이다.

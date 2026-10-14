@@ -266,10 +266,11 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 | AI 말풍선 | 왼쪽, `max-w-[84%] rounded-bubble rounded-bl-md bg-card shadow-card px-3.5 py-3`. `lang`은 학습 언어로 단다 |
 | 내 말풍선 | 오른쪽, `rounded-bubble rounded-br-md bg-house text-white` |
 | 번역 | AI 말풍선 안 아래쪽에 구분선(`border-t border-line`)을 두고 `text-sm text-ink-muted`로 쓴다. 입문·초보는 항상 펼친다. 중급 이상은 말풍선 아래 "번역" 메타(Languages 14px + `text-xs font-semibold text-accent`)를 두고, 말풍선 전체를 `<button aria-expanded>`로 만들어 탭하면 펼친다 |
-| 교정 | 내 말풍선 **바로 아래, 말풍선 밖에** 오른쪽 정렬 `max-w-[84%] rounded-xl bg-mint p-3`로 둔다. 순서는 라벨(`text-micro text-ink-muted`: "이렇게 말하면 더 자연스러워요", 한국어로 입력했으면 "이렇게 말하면 돼요") → 고친 문장(`font-bold text-brand`, 학습 언어 `lang`) → 재생 버튼(아래 "음성 재생" 행) → 설명(`text-sm`)이다. 항상 펼쳐 둔다 |
+| 한글 발음 | 일본어 입문~중급만(`chat.md` "한글 발음"). AI 말풍선(첫 마디 포함) 안에서 문장 바로 아래, 번역 구분선 위에 `mt-1 block text-sm text-brand`로 쓰고 `aria-hidden`을 단다. 입문·초보는 항상 보이고, 중급은 번역과 함께 펼칠 때만 보인다. 값이 `null`이면 그 줄을 두지 않는다 |
+| 교정 | 내 말풍선 **바로 아래, 말풍선 밖에** 오른쪽 정렬 `max-w-[84%] rounded-xl bg-mint p-3`로 둔다. 순서는 라벨(`text-micro text-ink-muted`: "이렇게 말하면 더 자연스러워요", 한국어로 입력했으면 "이렇게 말하면 돼요") → 고친 문장(`font-bold text-brand`, 학습 언어 `lang`) → 한글 발음(일본어 입문~중급이고 값이 있을 때, `text-sm text-brand`, `aria-hidden`) → 재생 버튼(아래 "음성 재생" 행) → 설명(`text-sm`)이다. 항상 펼쳐 둔다 |
 | 음성 재생 | AI 말풍선(첫 마디 포함, 버튼이면 그 버튼) 바로 아래 왼쪽과 교정 카드의 고친 문장 바로 아래에 작은 재생 버튼을 둔다(아래 "음성 재생"). 학습 언어 음성이 없는 기기에서는 두지 않는다 |
 | 교정 없음 | `correction`이 `null`이면 아무것도 표시하지 않는다("자연스러워요" 배지도 없음) |
-| 응답 대기 | 내 말풍선을 바로 그리고, AI 자리에 점 3개(7px, 1초 반복)를 띄운다. 새 턴은 목록 밖의 `sr-only` `aria-live="polite"` 영역에 교정(라벨·고친 문장·설명)과 AI 응답 문장(입문·초보는 번역까지)만 넣어 알린다. 후리가나 표기는 지우고 학습 언어 문장에 `lang`을 단다. 화면을 열 때 이미 있던 턴은 알리지 않는다. 목록 전체를 live로 두면 재생 버튼 이름과 음성 목록이 늦게 와서 붙는 버튼까지 읽히기 때문이다 |
+| 응답 대기 | 내 말풍선을 바로 그리고, AI 자리에 점 3개(7px, 1초 반복)를 띄운다. 새 턴은 목록 밖의 `sr-only` `aria-live="polite"` 영역에 교정(라벨·고친 문장·설명)과 AI 응답 문장(입문·초보는 번역까지)만 넣어 알린다. 후리가나 표기는 지우고 학습 언어 문장에 `lang`을 단다. 한글 발음은 넣지 않는다. 화면을 열 때 이미 있던 턴은 알리지 않는다. 목록 전체를 live로 두면 재생 버튼 이름과 음성 목록이 늦게 와서 붙는 버튼까지 읽히기 때문이다 |
 | 전송 실패(503) | 내 말풍선을 `bg-card text-ink ring-1 ring-inset ring-danger`로 바꾸고, 아래에 CircleAlert + "응답을 받지 못했어요. 턴은 차감되지 않았어요." + [다시 보내기] pill을 둔다. 입력은 지우지 않는다 |
 | 대화방 상단 | 왼쪽: [상황 목록] pill / 가운데: 상황 제목(`font-bold`) + `n / 20턴`(`text-micro`) / 오른쪽: [대화 끝내기](outline sm) |
 | 한도(429 `LIMIT_REACHED`) | 서버가 429를 준 뒤에만 입력창 자리를 체험 안내(보상 Notice)로 바꾼다. 표시된 남은 사용량만 보고 막지 않는다. [대화 끝내기]는 계속 쓸 수 있다 |
@@ -278,6 +279,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 ### 플래시카드
 - 카드: `w-full max-w-[440px] aspect-[4/3.4] mx-auto rounded-xl bg-card shadow-raised`. 내용은 가운데 정렬이고 `<button>`이다(Space·Enter로 뒤집기).
 - 단어 앞면: 단어(`text-word`, 일본어는 레벨 규칙대로 후리가나), 아래에 "탭해서 뜻 보기"(RotateCw 13px, `text-micro`). 단어 뒷면: 뜻(28px 700), 정답을 채운 예문, `example_ko`(`text-sm text-ink-muted`).
+- 한글 발음(일본어 입문~중급, `chat.md` "한글 발음"): 앞면은 단어 바로 아래에 `pron_ko`(`text-lead text-brand`), 뒷면은 예문 바로 아래·`example_ko` 위에 `example_pron_ko`(`text-sm text-brand`)를 둔다. 둘 다 `aria-hidden`이다. 오답 복습 카드도 같다.
 - 가나 앞면: 글자(`text-kana`). 가나 뒷면: 글자(56px)와 `a · 아`(32px 700 `brand`, 로마자 · 한글).
 - 뒤집기는 `rotateY` 450ms다. 카드 아래에 [모르겠어요](outline)와 [알아요](primary)를 `flex-1`로 나란히 둔다. 가나에서 [모르겠어요]를 누른 글자는 회차 끝에 다시 나온다.
 - 단어·가나 카드 바로 아래 가운데에 음성 재생 버튼을 둔다(아래 "음성 재생"). 카드가 `<button>`이라 그 안에 넣지 않는다.
@@ -287,7 +289,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 - 위에 진행(단계 이름 + `i / n` + 바)을 둔다.
 - 문제 카드(`p-6`): 문장(`text-quiz`)과 빈칸 `inline-block min-w-18 border-b-2 border-accent`, 아래에 `example_ko`를 둔다.
 - 보기 4개는 세로로 쌓는다: `w-full rounded-xl bg-card shadow-card px-4.5 py-4 text-lead font-semibold text-left`. 일본어 보기에도 레벨 규칙대로 후리가나를 단다.
-- 단어 학습은 고르면 바로 채점을 보여 준다. 정답은 `ring-2 ring-accent bg-ok-wash` + CircleCheck, 고른 오답은 `ring-2 ring-danger bg-danger-wash` + CircleX다. 그 아래에 "정답이에요." 또는 "오답이에요. 정답은 **X** (뜻)", AI 정답 설명(라벨 [AI 해설]), [다음 문제]/[결과 보기](primary, `w-full`) 순서로 둔다. 채점 뒤에는 문제 카드 안 `example_ko` 아래에 예문 재생 버튼을 둔다.
+- 단어 학습은 고르면 바로 채점을 보여 준다. 정답은 `ring-2 ring-accent bg-ok-wash` + CircleCheck, 고른 오답은 `ring-2 ring-danger bg-danger-wash` + CircleX다. 그 아래에 "정답이에요." 또는 "오답이에요. 정답은 **X** (뜻)", AI 정답 설명(라벨 [AI 해설]), [다음 문제]/[결과 보기](primary, `w-full`) 순서로 둔다. 채점 뒤에는 문제 카드 안 빈칸 문장 바로 아래에 정답을 채운 예문의 한글 발음(일본어 입문~중급, `text-sm text-brand`, `aria-hidden`)을, `example_ko` 아래에 예문 재생 버튼을 둔다.
 - 레벨업 테스트는 정답을 보여 주지 않는다. 고르면 바로 다음 문제로 넘어가고, 제출 뒤 "채점하고 있어요"(점 3개, 가운데 정렬)를 띄운다. AI 정답 설명은 두지 않는다.
 
 ### AI 정답 설명 (빈칸 퀴즈·오답 복습 카드)

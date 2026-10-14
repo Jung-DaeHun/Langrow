@@ -11,7 +11,7 @@
              [Supabase (서울)]            [Anthropic API]
              Auth(구글) · Postgres        Claude Sonnet 5.5
 
-[로컬 스크립트] generate-words → data/words/*.json (검수 후 커밋) → seed-words → Supabase
+[로컬 스크립트] generate-words(·generate-pronunciation) → data/words/*.json (검수 후 커밋) → seed-words → Supabase
                metrics-report ← Supabase (지표 분자/분모 출력)
 ```
 
@@ -123,8 +123,8 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | `profiles` | id(=auth.users.id), current_language(nullable), pro_until, trial_started_at, agreed_at, onboarded_at(nullable, 최초 완료 시각), last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
 | `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token(uuid, nullable), operation_expires_at(nullable), feedback_status(none/pending/ready/fallback/skipped), feedback(jsonb), created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, correction(jsonb), created_at — unique(session_id, turn_no) |
-| `words` | id(text, 예: `en-1-001`), language, level, rank, word, reading, meaning_ko, example, example_ko, distractors(text[]) — unique(language, level, rank) |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko` 포함), created_at — unique(session_id, turn_no) |
+| `words` | id(text, 예: `en-1-001`), language, level, rank, word, reading, meaning_ko, example, example_ko, distractors(text[]), pron_ko(nullable), example_pron_ko(nullable) — unique(language, level, rank) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props(jsonb), created_at |
 | `word_explanations` | word_id(→ words), choice(text, 복습은 빈 문자열), explanation, word_hash, created_at — PK(word_id, choice). 사용자와 무관한 공용 저장본이라 user_id가 없다 |
@@ -148,6 +148,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 - **토큰 상한과 effort**: `max_tokens`는 4096으로 둔다. Sonnet 5.5는 adaptive thinking이 기본이고 thinking 토큰도 `max_tokens`에 들어가므로 응답(약 500토큰 이하)보다 넉넉히 잡는다. `output_config.effort`는 `low`라서 쉬운 턴은 thinking 없이 답한다.
 - **프롬프트**: 빌더는 순수 함수(`services/claude/prompts.ts`)로 단위 테스트하고, 스키마는 `schemas.ts`에 둔다. AI 정답 설명(`words.md`)도 같은 모델·effort·재시도 규칙으로 부르고, 스키마는 `{ explanation }` 하나다. 입력은 DB의 예문(정답을 채운 문장), `example_ko`, 정답, 뜻, 단어 레벨, 고른 보기(없으면 복습)다.
 - **대화 기록**: 고정 user 턴("대화를 시작합니다") → 첫 마디 → `done` 턴들 → 이번 입력 순서로 보낸다. `pending` 턴은 넣지 않는다.
+- **한글 발음**(`chat.md` "한글 발음"): 일본어 입문~중급 턴만 시스템 프롬프트에 표기 규칙을 넣고 `reply_pron_ko`·`corrected_pron_ko`가 있는 스키마로 받는다. 발음이 비었거나 검사(`lib/pronunciation`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다. 성공 확정 RPC(`finish_chat_turn`)는 `reply_pron_ko`를 받아 `chat_turns`에 저장하고, 교정 발음은 `correction` jsonb 안에 그대로 저장한다. 단어 생성 스크립트(`generate-words`, `generate-pronunciation`)도 같은 표기 규칙 문구를 쓴다.
 - **프롬프트 캐싱은 아직 쓰지 않는다.** Sonnet 5.5의 최소 캐시 길이(약 512토큰)는 넘으므로, 실제 결제를 붙이기 전에 적용하고 실측한다.
 
 ## 에러 코드
