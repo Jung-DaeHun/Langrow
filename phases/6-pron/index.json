@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "pron-ai",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-14T17:58:40+0900",
+      "summary": "schemas.ts pronTurnReplySchema·PronTurnReply. prompts.ts PRONUNCIATION_RULES(export), buildTurnPrompt는 showsPronunciation일 때만 reply_pron_ko·corrected_pron_ko 지시와 '## 한글 발음' 절을 넣음. client.ts attempt<S,T>, generateTurn은 ja 1~3이면 pronTurnReplySchema+acceptPronTurn(cleanPron, 맞지 않으면 그 값만 null, 턴 성공), 그 밖은 기존 그대로(발음 키 없음). generate-words: toEntry가 ja만 AI 발음을 넘겨 wordEntryErrors가 검사(en은 null), 스키마·프롬프트에 발음 추가. 새 scripts/generate-pronunciation.ts main(deps)·PronSource·PronRequest(--language ja --level 1…",
+      "completed_at": "2026-10-14T18:04:30+0900"
     },
     {
       "step": 2,

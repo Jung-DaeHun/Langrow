@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "schemas.ts pronTurnReplySchema·PronTurnReply. prompts.ts PRONUNCIATION_RULES(export), buildTurnPrompt는 showsPronunciation일 때만 reply_pron_ko·corrected_pron_ko 지시와 '## 한글 발음' 절을 넣음. client.ts attempt<S,T>, generateTurn은 ja 1~3이면 pronTurnReplySchema+acceptPronTurn(cleanPron, 맞지 않으면 그 값만 null, 턴 성공), 그 밖은 기존 그대로(발음 키 없음). generate-words: toEntry가 ja만 AI 발음을 넘겨 wordEntryErrors가 검사(en은 null), 스키마·프롬프트에 발음 추가. 새 scripts/generate-pronunciation.ts main(deps)·PronSource·PronRequest(--language ja --level 1-5 [--model], 50개 묶음, 묶음마다 파일 씀, effort medium). package.json words:pron. lib/words.ts 주석 한 줄 정리. 실제 API·데이터 변경 없음.",
+  "spec_diff": "chat.md '대화 진행' 2번은 그 밖의 언어·레벨 턴의 발음을 '둘 다 null로 저장한다'고 했지만, step 지시(일본어 4~5·영어의 반환값은 지금과 같게)에 따라 generateTurn은 발음 키 없이 돌려준다. reply_pron_ko는 finish_chat_turn 기본값 null로 저장되고, correction jsonb에는 corrected_pron_ko 키가 없다(대화방 읽기는 없는 키를 null로 다룬다, step 0)."
+}
