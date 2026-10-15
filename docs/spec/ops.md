@@ -15,8 +15,8 @@
 - **환경변수**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`(로컬과 운영의 키를 나누고, 지출 한도를 설정), `CLAUDE_MODEL`. `services/env.ts`에서 zod로 지연 검증한다. `METRICS_EXCLUDED_USER_IDS`는 로컬 `metrics-report` 전용이다. `AZURE_SPEECH_KEY`·`AZURE_SPEECH_REGION`은 로컬 `generate-audio` 전용이며 운영 env에 넣지 않는다.
 - **구글 OAuth**
   - Google 콘솔의 리디렉션 URI에는 앱 주소가 아니라 Supabase의 `/auth/v1/callback`을 넣는다. 운영과 로컬(`http://127.0.0.1:54321/auth/v1/callback`)을 모두 등록한다.
-  - 로컬은 `supabase/config.toml`의 `[auth.external.google]`에서 설정한다.
-  - `redirectTo`는 `window.location.origin + '/auth/callback'`으로 만든다.
+  - 로컬은 `supabase/config.toml`의 `[auth.external.google]`에서 설정한다. 클라이언트 ID와 secret은 `supabase/.env.local`의 `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`·`SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET`에 둔다(CLI가 읽고 git은 무시한다). 값이 없어도 `supabase start`는 되고 구글 로그인만 실패한다. 값을 바꾸면 `supabase stop` → `supabase start`로 다시 띄운다.
+  - `redirectTo`는 `window.location.origin + '/auth/callback'`으로 만든다. Supabase Auth는 `site_url`과 호스트가 같거나 `additional_redirect_urls`에 있는 주소로만 돌려보낸다. 로컬은 `127.0.0.1`(site_url)과 `http://localhost:3000/auth/callback`을 허용하고, 운영은 대시보드의 Site URL을 운영 주소로 둔다.
 - **버전 고정**: Next.js, supabase-js, Anthropic SDK 버전을 설치할 때 고정하고 `CLAUDE.md`에 적는다. 예를 들어 Next 16이면 `proxy.ts`, async `params`/`cookies()`를 쓴다.
 
 ## 출시 최소 요건
