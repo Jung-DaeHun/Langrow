@@ -139,12 +139,20 @@ function reviewPrompt(dimension, input) {
   ].join('\n\n')
 }
 
+// 커밋 안 한 새 파일은 git diff 출력이 비어 있어, 검증자가 "변경 없음"으로 반박하지 않게 직접 읽으라고 알린다
+function diffGuide(finding, input) {
+  const untracked = input.files.some((f) => f.status === '??' && normPath(f.path) === finding.file)
+  return untracked
+    ? '이 파일은 커밋 안 한 새 파일(??)이라 git diff에 나오지 않으니 파일을 직접 읽는다.'
+    : `변경은 "git diff ${input.base} -- ${finding.file}"로 본다.`
+}
+
 function verifyPrompt(finding, dimension, input, n) {
   return [
     `너는 코드 리뷰 지적 하나를 검증하는 ${n}번째 독립 검증자다. 반박하는 쪽에서 시작한다.`,
     `지적 (${dimension.key}): ${finding.file}:${finding.line} [${finding.severity}] ${finding.title}`,
     `TL;DR: ${finding.tldr}\nGood: ${finding.good}\nFix: ${finding.fix}`,
-    `변경은 "git diff ${input.base} -- ${finding.file}"로 본다. 읽기 전용이다. 파일을 고치지 않는다.`,
+    `${diffGuide(finding, input)} 읽기 전용이다. 파일을 고치지 않는다.`,
     '코드 경로를 직접 따라가 이 문제가 실제로 생기는 상황을 세울 수 있으면 verdict는 confirmed, 세우지 못하거나 확신이 없으면 refuted다.',
     'confirmed면 severity는 아래 기준으로 네가 매긴 심각도, refuted면 리뷰어의 심각도를 그대로 적는다. reason은 근거를 한두 문장으로 쓴다.',
     SEVERITY_GUIDE,
@@ -224,12 +232,20 @@ function nextActions(verdict, findings, failed) {
   return actions
 }
 
-function titleLine(f) {
-  return `[${ICON[f.severity]} ${NAME[f.severity]}] ${f.title}${f.unverified ? ' (검증 실패)' : ''}`
+function unverifiedMark(f) {
+  return f.unverified ? ' (검증 실패)' : ''
 }
 
+function titleLine(f) {
+  return `[${ICON[f.severity]} ${NAME[f.severity]}] ${f.title}${unverifiedMark(f)}`
+}
+
+// fix 안의 백틱 연속보다 한 칸 긴 펜스로 감싼다(최소 3). 안쪽 ```가 바깥 펜스를 닫아 뒤의 지적을 삼키지 않게 한다
 function fixLine(fix) {
-  return fix.includes('\n') ? `→ Fix:\n\`\`\`\n${fix}\n\`\`\`` : `→ Fix: ${fix}`
+  if (!fix.includes('\n')) return `→ Fix: ${fix}`
+  const longest = Math.max(0, ...(fix.match(/`+/g) ?? []).map((run) => run.length))
+  const fence = '`'.repeat(Math.max(3, longest + 1))
+  return `→ Fix:\n${fence}\n${fix}\n${fence}`
 }
 
 function renderInline(f) {
@@ -302,7 +318,7 @@ function renderSummary({ verdict, findings, failed, refutedCount, walkthrough, s
     '',
     'Critical · Major',
     ...(serious.length
-      ? serious.map((f) => `- ${ICON[f.severity]} ${f.file}:${f.line} ${f.title} [${f.dimensions.join(', ')}]`)
+      ? serious.map((f) => `- ${ICON[f.severity]} ${f.file}:${f.line} ${f.title}${unverifiedMark(f)} [${f.dimensions.join(', ')}]`)
       : ['- 없음']),
     '',
     '다음 액션',

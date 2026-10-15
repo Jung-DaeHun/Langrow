@@ -19,10 +19,12 @@ disable-model-invocation: true
 
 ## 2. PR
 
-`gh pr view --json number,url,headRefOid,baseRefName`을 돌린다. 실패하면(PR 없음, gh 없음, 로그인 안 됨) PR 없음으로 본다.
+`gh pr view --json number,url,headRefOid,baseRefName,state`를 돌린다. 실패하면(PR 없음, gh 없음, 로그인 안 됨) PR 없음으로 본다.
 
 PR이 있고 아래가 모두 맞으면 "PR 게시 가능"이다.
+- `state`가 `OPEN`
 - `baseRefName`이 `main`
+- `git rev-parse main`과 `git rev-parse origin/main`이 같음
 - `git status --porcelain` 출력이 비어 있음
 - `git rev-parse HEAD`가 `headRefOid`와 같음
 
@@ -47,7 +49,7 @@ Workflow 도구를 `name: "review-code-run"`으로 부른다. `args`는 JSON 문
 { "base": "<base>", "files": [{ "path": "...", "status": "M" }], "docs": ["docs/ARCHITECTURE.md"], "walkthrough": "...", "hunks": "..." }
 ```
 
-`hunks`는 PR 게시 가능일 때만 넣는다. `git diff -U0 <base> | grep -E '^(\+\+\+ |@@ )'` 출력을 그대로 넣는다. 게시 가능이 아니면 `hunks`를 뺀다.
+`hunks`는 PR 게시 가능일 때만 넣는다. Bash 도구로(PowerShell에는 `grep`이 없다) `git diff -U0 <base> | grep -E '^(\+\+\+ |@@ )'` 출력을 그대로 넣는다. 게시 가능이 아니면 `hunks`를 뺀다.
 
 Workflow는 `{ report, review, verdict }`를 돌려준다. Workflow가 실패하거나 중단되면 에러를 그대로 알리고 끝낸다.
 

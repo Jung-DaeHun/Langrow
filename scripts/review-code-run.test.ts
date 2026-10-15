@@ -163,6 +163,30 @@ describe("review-code-run workflow", () => {
     expect(result.report).toContain("(검증에서 버린 지적 1개 · 검증 실패 0개)");
   });
 
+  it("커밋 안 한 새 파일(??)을 가리키는 지적은 검증자에게 파일을 직접 읽으라고 하고, 그 밖은 git diff를 쓰라고 한다", async () => {
+    const { calls } = await run(
+      ARGS,
+      {
+        security: {
+          findings: [
+            finding({ file: ".\\src\\lib\\fresh.ts", line: 3, severity: "minor" }),
+            finding({ line: 10, severity: "minor" }),
+          ],
+        },
+      },
+      {
+        "security:src/lib/fresh.ts:3": allConfirm("minor"),
+        "security:src/server/chat.ts:10": allConfirm("minor"),
+      },
+    );
+    const verifyPromptOf = (target: string) =>
+      calls.find((call) => call.options.label === `verify:security:${target}#1`)?.prompt ?? "";
+    expect(verifyPromptOf("src/lib/fresh.ts:3")).toContain("git diff에 나오지 않으니 파일을 직접 읽는다");
+    expect(verifyPromptOf("src/lib/fresh.ts:3")).not.toContain("git diff abc123 -- src/lib/fresh.ts");
+    expect(verifyPromptOf("src/server/chat.ts:10")).toContain('"git diff abc123 -- src/server/chat.ts"로 본다');
+    expect(verifyPromptOf("src/server/chat.ts:10")).not.toContain("파일을 직접 읽는다");
+  });
+
   it("검증자가 실패해 2표가 안 모이면 남기고 (검증 실패)를 붙이며 판정에 센다", async () => {
     const { result } = await run(
       ARGS,
@@ -320,6 +344,25 @@ describe("review-code-run workflow", () => {
       { "correctness:src/server/chat.ts:42": allConfirm("minor") },
     );
     expect(result.report).toContain("→ Fix:\n```\nif (!row) {\n  return notFound();\n}\n```");
+  });
+
+  it("Fix 안에 코드 펜스가 있으면 그보다 긴 펜스로 감싸 뒤의 지적이 삼켜지지 않는다", async () => {
+    const fix = "```ts\nconst a = 1;\n```";
+    const { result } = await run(
+      ARGS,
+      { correctness: { findings: [finding({ severity: "minor", fix })] } },
+      { "correctness:src/server/chat.ts:42": allConfirm("minor") },
+    );
+    expect(result.report).toContain(`→ Fix:\n\`\`\`\`\n${fix}\n\`\`\`\``);
+  });
+
+  it("Critical·Major 요약 목록에도 (검증 실패)를 붙인다", async () => {
+    const { result } = await run(
+      ARGS,
+      { security: { findings: [finding({ title: "확정 1표" })] } },
+      { "security:src/server/chat.ts:42": [confirm("critical"), null, null] },
+    );
+    expect(result.report).toContain("- 🔴 src/server/chat.ts:42 확정 1표 (검증 실패) [security]");
   });
 });
 
