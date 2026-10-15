@@ -19,8 +19,9 @@
 
 | 파일 | 역할 |
 |---|---|
-| `.claude/skills/review-code/SKILL.md` | 오케스트레이터 스킬. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. |
+| `.claude/skills/review-code/SKILL.md` | 오케스트레이터 스킬. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. 비용이 커서 `disable-model-invocation: true`로 Claude가 스스로 부르지 않게 한다. |
 | `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. 스킬과 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
+| `scripts/review-code-run.test.ts` | 가짜 `agent`·`parallel`·`pipeline`으로 workflow 스크립트를 돌려 조립 로직(다수결·중앙값·중복·판정·출력·hunks)을 확인하는 Vitest 테스트 |
 
 - TDD guard는 이미 `*/.claude/*`, `*/workflows/*`를 예외로 둔다. hook은 바꾸지 않는다.
 - `.claude/agents/` 정의 파일은 만들지 않는다. 리뷰어와 검증자는 workflow 기본 에이전트이고, 읽기 전용은 프롬프트로 지시한다(코드를 고칠 도구 자체는 남는다).
@@ -40,7 +41,8 @@
               + docs/spec/을 바꿨으면 대응하는 요약 문서(PRD·ARCHITECTURE·ADR·UI_GUIDE)
               CLAUDE.md는 에이전트에 자동으로 들어가므로 넘기지 않는다
  4. walkthrough  git log <base>..HEAD --oneline 과 git diff --stat <base> 로 2~3줄
- 5. Workflow review-code-run 호출  args = { base, files, docs, walkthrough }
+ 5. Workflow review-code-run 호출  args = { base, files, docs, walkthrough, hunks? }
+              hunks는 PR 게시 가능일 때만: git diff -U0 <base> 의 "+++ "·"@@ " 줄
  6. 게시      아래 "게시"
 
 review-code-run.js
@@ -125,7 +127,7 @@ VOTE = { verdict: "confirmed"|"refuted", severity, reason }
   - Approve: "병합해도 된다. Minor·Nit는 골라서 고친다"
   - 실패한 차원이 있으면 맨 앞에 "⚠ <차원> 리뷰가 실패했다. 다시 돌린다"를 넣는다
 - **정렬**: 심각도 → 파일 → 줄
-- **반환**: `{ report, review: { body, comments: [{ path, line, body }] }, verdict }`. `report`는 채팅용 마크다운 전체, `review`는 PR 게시용이다.
+- **반환**: `{ report, review: { body, comments: [{ path, line, side: "RIGHT", body }] } | null, verdict }`. `report`는 채팅용 마크다운 전체, `review`는 PR 게시용이고 `hunks`가 없으면 `null`이다.
 
 ## 출력 형식
 
@@ -165,7 +167,7 @@ Good: admin 조회는 항상 user_id를 걸고, 없으면 404
   - `body`가 요약, `comments`가 인라인이다(`path`, `line`, `side: RIGHT`).
   - 자기 PR에는 Approve·Request changes를 달 수 없으므로 event는 `COMMENT`로 고정하고 판정은 본문 텍스트로만 쓴다.
   - 채팅에는 판정 한 줄, PR 링크, 요약을 낸다.
-- **diff 밖 줄의 지적**은 인라인으로 달 수 없다. 메인이 `git diff -U0 <base>`의 hunk로 판단해서 본문의 "diff 밖 지적" 절로 옮긴다.
+- **diff 밖 줄의 지적**은 인라인으로 달 수 없다. 메인이 넘긴 `hunks`로 workflow가 판단해 본문의 "diff 밖 지적" 절로 옮긴다. 삭제만 있는 hunk와 삭제된 파일은 범위로 치지 않는다.
 - **PR은 있지만 커밋 안 한 변경이나 push 안 한 커밋이 있으면** 줄 번호가 PR과 어긋날 수 있다. 채팅으로 내고 그 이유를 말한다.
 - **게시가 실패하면** 채팅으로 내고 에러를 말한다.
 
@@ -185,9 +187,9 @@ Good: admin 조회는 항상 user_id를 걸고, 없으면 404
 
 ## 검증 방법
 
-`.md`와 `.js` 설정 파일이라 단위 테스트 대신 실제로 돌려 본다.
+조립 로직은 `scripts/review-code-run.test.ts`가 가짜 런타임으로 확인한다. 에이전트와 스킬은 실제로 돌려 본다.
 
-1. **문법과 가드**: `/review-code-run`을 args 없이 실행하면 안내 문구가 나온다.
+1. **문법과 가드**: Workflow를 `scriptPath`로 args 없이 실행하면 에이전트 없이 안내 문구가 나온다.
 2. **이름 분리**: `/review-code`가 스킬(오케스트레이터)을 실행한다.
 3. **심은 버그**: 차원마다 버그를 하나씩 심은 일회용 브랜치에서 돌린다. 4개가 모두 맞는 차원으로 잡히고 심각도가 기준에 맞으며 판정이 Blocked여야 한다. 확인 뒤 브랜치를 지운다.
 4. **대조군**: 문서 오타 하나만 고친 일회용 브랜치에서 Approve가 나오고 Critical·Major가 0개여야 한다(거짓 양성 확인).
