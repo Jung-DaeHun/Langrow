@@ -4,9 +4,9 @@
 
 **Goal:** `/review-code`를 실행하면 현재 브랜치의 변경을 4개 차원으로 병렬 리뷰하고, 지적마다 검증자 3명이 2/3 다수결로 거른 결과를 요약과 인라인 코멘트로 채팅(또는 PR)에 낸다.
 
-**Architecture:** `.claude/commands/review-code.md`(메인 세션)가 범위·PR·가드레일 문서를 모아 저장된 Workflow `review-code-run`을 부른다. `.claude/workflows/review-code-run.js`는 `pipeline(DIMENSIONS, 리뷰, 검증)`으로 리뷰어 4명과 지적마다 검증자 3명을 돌린다. 중복 합치기·판정·출력은 에이전트 없이 코드로 하고 `{ report, review, verdict }`를 돌려준다. 조립 로직은 Workflow 런타임 대신 가짜 `agent`·`parallel`·`pipeline`으로 스크립트를 돌리는 Vitest 테스트로 확인한다.
+**Architecture:** `.claude/skills/review-code/SKILL.md`(스킬, 메인 세션)가 범위·PR·가드레일 문서를 모아 저장된 Workflow `review-code-run`을 부른다. `.claude/workflows/review-code-run.js`는 `pipeline(DIMENSIONS, 리뷰, 검증)`으로 리뷰어 4명과 지적마다 검증자 3명을 돌린다. 중복 합치기·판정·출력은 에이전트 없이 코드로 하고 `{ report, review, verdict }`를 돌려준다. 조립 로직은 Workflow 런타임 대신 가짜 `agent`·`parallel`·`pipeline`으로 스크립트를 돌리는 Vitest 테스트로 확인한다.
 
-**Tech Stack:** Claude Code 저장 Workflow(plain JavaScript, `agent`/`parallel`/`pipeline` 전역), Claude Code 커스텀 명령(`.claude/commands/*.md`), Vitest 5.0.3(node 프로젝트, `scripts/**/*.test.ts`), ESLint 9.39.5(flat config), git, gh
+**Tech Stack:** Claude Code 저장 Workflow(plain JavaScript, `agent`/`parallel`/`pipeline` 전역), Claude Code 프로젝트 스킬(`.claude/skills/<이름>/SKILL.md`), Vitest 5.0.3(node 프로젝트, `scripts/**/*.test.ts`), ESLint 9.39.5(flat config), git, gh
 
 **Spec:** `docs/superpowers/specs/2026-10-15-review-code-design.md`
 
@@ -14,7 +14,7 @@
 
 - 작업 폴더는 worktree `C:/Users/정대훈/OneDrive/Desktop/eogns_claude/myProject/Langrow-review-code`(브랜치 `chore-review-code`)다. 원래 폴더 `Langrow`는 다른 세션이 `chore-google-oauth-local`로 쓰고 있으니 건드리지 않는다. 명령은 이 worktree에서 돌린다.
 - Workflow 스크립트는 plain JavaScript다. 타입 주석, import, 파일·셸 접근을 쓰지 않는다. `Date.now()`, `Math.random()`, 인자 없는 `new Date()`를 쓰지 않는다. `export const meta = {...}`는 변수·함수 호출이 없는 순수 리터럴이다.
-- `meta.name`과 파일 이름은 `review-code-run`이다. command(`review-code`)와 이름이 겹치지 않아야 한다.
+- `meta.name`과 파일 이름은 `review-code-run`이다. 스킬(`review-code`)과 이름이 겹치지 않아야 한다.
 - 차원 key와 순서: `correctness`, `security`, `architecture`, `consistency`.
 - 심각도 값: `critical` > `major` > `minor` > `nit`, 아이콘 🔴 🟠 🟡 ⚪, 표시 이름 `Critical`·`Major`·`Minor`·`Nit`. 판정 문자열: `Blocked`, `Changes Requested`, `Approve`.
 - agent label 형식(테스트가 기댄다): 리뷰어 `review:<key>`, 검증자 `verify:<key>:<file>:<line>#<n>`(n은 1~3, file은 `/` 구분으로 정규화한 경로).
@@ -919,19 +919,20 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 3: `/review-code` 오케스트레이터와 spec 맞추기
 
 **Files:**
-- Create: `.claude/commands/review-code.md`
+- Create: `.claude/skills/review-code/SKILL.md`
 - Modify: `docs/superpowers/specs/2026-10-15-review-code-design.md`
 
 **Interfaces:**
 - Consumes: Workflow `review-code-run`의 args·반환(Task 1·2 Interfaces)
 - Produces: `/review-code` 슬래시 명령
 
-- [ ] **Step 1: command 작성**
+- [ ] **Step 1: 스킬 작성**
 
-`.claude/commands/review-code.md`:
+`.claude/skills/review-code/SKILL.md`:
 
 ````markdown
 ---
+name: review-code
 description: 변경 사항을 4개 차원(correctness·security·architecture·consistency)으로 병렬 리뷰하고 지적마다 검증자 3명으로 거른다
 disable-model-invocation: true
 ---
@@ -998,17 +999,17 @@ Workflow는 `{ report, review, verdict }`를 돌려준다. Workflow가 실패하
 
 `docs/superpowers/specs/2026-10-15-review-code-design.md`에서 아래를 바꾼다.
 
-(a) 파일 표의 workflow 줄 아래에 두 줄을 추가하고, command 줄에 `disable-model-invocation`을 적는다.
+(a) 파일 표의 workflow 줄 아래에 두 줄을 추가하고, 스킬 줄에 `disable-model-invocation`을 적는다.
 
 old:
 ```
-| `.claude/commands/review-code.md` | 오케스트레이터. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. |
-| `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. command와 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
+| `.claude/skills/review-code/SKILL.md` | 오케스트레이터 스킬. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. |
+| `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. 스킬과 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
 ```
 new:
 ```
-| `.claude/commands/review-code.md` | 오케스트레이터. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. 비용이 커서 `disable-model-invocation: true`로 Claude가 스스로 부르지 않게 한다. |
-| `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. command와 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
+| `.claude/skills/review-code/SKILL.md` | 오케스트레이터 스킬. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. 비용이 커서 `disable-model-invocation: true`로 Claude가 스스로 부르지 않게 한다. |
+| `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. 스킬과 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
 | `scripts/review-code-run.test.ts` | 가짜 `agent`·`parallel`·`pipeline`으로 workflow 스크립트를 돌려 조립 로직(다수결·중앙값·중복·판정·출력·hunks)을 확인하는 Vitest 테스트 |
 | `eslint.config.mjs` | `.claude/workflows/**`를 무시한다. 런타임이 스크립트를 async 함수로 감싸 맨 위 `return`이 있어 모듈로 읽으면 문법 오류다 |
 ```
@@ -1057,7 +1058,7 @@ old:
 ```
 new:
 ```
-조립 로직은 `scripts/review-code-run.test.ts`가 가짜 런타임으로 확인한다. 에이전트와 command는 실제로 돌려 본다.
+조립 로직은 `scripts/review-code-run.test.ts`가 가짜 런타임으로 확인한다. 에이전트와 스킬은 실제로 돌려 본다.
 
 1. **문법과 가드**: Workflow를 `scriptPath`로 args 없이 실행하면 에이전트 없이 안내 문구가 나온다.
 ```
@@ -1078,8 +1079,8 @@ Expected: 셋 다 exit 0
 
 ```bash
 git status -sb
-git add .claude/commands/review-code.md docs/superpowers/specs/2026-10-15-review-code-design.md
-git commit -m "feat(review): add the /review-code orchestrator command
+git add .claude/skills/review-code/SKILL.md docs/superpowers/specs/2026-10-15-review-code-design.md
+git commit -m "feat(review): add the /review-code orchestrator skill
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
@@ -1088,7 +1089,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ### Task 4: 병합 뒤 실제 실행 시험
 
-spec "검증 방법" 2~5. 리뷰 도구 파일이 리뷰 대상에 섞이지 않게 main에 병합한 뒤 main에서 딴 일회용 브랜치에서 한다. command와 workflow는 세션을 연 폴더의 `.claude/`에서 읽으므로 사용자가 시험 폴더에서 새 Claude 세션을 연다.
+spec "검증 방법" 2~5. 리뷰 도구 파일이 리뷰 대상에 섞이지 않게 main에 병합한 뒤 main에서 딴 일회용 브랜치에서 한다. 스킬과 workflow는 세션을 연 폴더의 `.claude/`에서 읽으므로 사용자가 시험 폴더에서 새 Claude 세션을 연다.
 
 **Files:** 커밋하지 않는 일회용 변경만(시험 브랜치는 지운다)
 
@@ -1128,7 +1129,7 @@ git commit -m "chore: seed review bugs (do not merge)"
 사용자가 `Langrow-review-test` 폴더에서 새 Claude 세션을 열고 `/review-code`를 실행한다. Workflow 확인 창을 승인한다. Stop hook이 실패를 알리면 심은 버그 때문이니 고치지 말라고 답한다.
 
 통과 기준:
-- `/review-code`가 command를 실행한다(workflow가 바로 돌지 않는다)
+- `/review-code`가 스킬을 실행한다(workflow가 바로 돌지 않는다)
 - 4개가 모두 표의 차원 태그로 나온다
 - security 지적이 🔴 Critical이고 판정이 `Blocked`다
 - 출력이 spec "출력 형식"과 같다(요약 먼저, 인라인 위치 줄 + 4줄)

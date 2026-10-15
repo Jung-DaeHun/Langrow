@@ -4,7 +4,7 @@
 
 ## 목적
 
-- command → Workflow → 병렬 서브에이전트 패턴을 익히고, Langrow 병합 전 점검에 실제로 쓴다.
+- 스킬 → Workflow → 병렬 서브에이전트 패턴을 익히고, Langrow 병합 전 점검에 실제로 쓴다.
 - 차원별로 쪼개는 이유: 차원마다 다른 전문 프롬프트(전문성)와 동시 실행(속도).
 - hook이 이미 막는 것은 보지 않는다. lint·build·test는 Stop hook, 테스트 파일이 있는지는 TDD guard가 본다. 리뷰는 hook이 못 잡는 것에 집중한다.
 
@@ -19,8 +19,8 @@
 
 | 파일 | 역할 |
 |---|---|
-| `.claude/commands/review-code.md` | 오케스트레이터. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. |
-| `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. command와 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
+| `.claude/skills/review-code/SKILL.md` | 오케스트레이터 스킬. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. |
+| `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. 스킬과 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
 
 - TDD guard는 이미 `*/.claude/*`, `*/workflows/*`를 예외로 둔다. hook은 바꾸지 않는다.
 - `.claude/agents/` 정의 파일은 만들지 않는다. 리뷰어와 검증자는 workflow 기본 에이전트이고, 읽기 전용은 프롬프트로 지시한다(코드를 고칠 도구 자체는 남는다).
@@ -28,7 +28,7 @@
 ## 흐름
 
 ```
-/review-code  (메인 세션, .claude/commands/review-code.md)
+/review-code  (메인 세션, .claude/skills/review-code/SKILL.md)
  1. 범위      git status -sb
               base  = git merge-base main HEAD
               files = git diff --name-status <base>           # 커밋한 것 + 커밋 안 한 것
@@ -75,7 +75,7 @@ workflow 프롬프트에 한 번만 두고 차원 프롬프트 앞에 붙인다.
 
 user_id 규칙은 CLAUDE.md에서 아키텍처 규칙으로 분류돼 있지만 성격상 security가 맡는다. 그래도 겹치는 지적은 조립 단계에서 합친다.
 
-차원 추가는 `DIMENSIONS` 배열에 `{ key, prompt }` 하나를 넣는 것으로 끝난다. command는 바꾸지 않는다.
+차원 추가는 `DIMENSIONS` 배열에 `{ key, prompt }` 하나를 넣는 것으로 끝난다. 스킬은 바꾸지 않는다.
 
 ## 심각도
 
@@ -188,9 +188,9 @@ Good: admin 조회는 항상 user_id를 걸고, 없으면 404
 `.md`와 `.js` 설정 파일이라 단위 테스트 대신 실제로 돌려 본다.
 
 1. **문법과 가드**: `/review-code-run`을 args 없이 실행하면 안내 문구가 나온다.
-2. **이름 분리**: `/review-code`가 command(오케스트레이터)를 실행한다.
+2. **이름 분리**: `/review-code`가 스킬(오케스트레이터)을 실행한다.
 3. **심은 버그**: 차원마다 버그를 하나씩 심은 일회용 브랜치에서 돌린다. 4개가 모두 맞는 차원으로 잡히고 심각도가 기준에 맞으며 판정이 Blocked여야 한다. 확인 뒤 브랜치를 지운다.
 4. **대조군**: 문서 오타 하나만 고친 일회용 브랜치에서 Approve가 나오고 Critical·Major가 0개여야 한다(거짓 양성 확인).
 5. **PR 게시**: 사용자 확인을 받은 뒤 심은 버그 브랜치로 draft PR을 만들어 인라인과 요약이 올라가는지 본다. 끝나면 PR을 닫고 원격 브랜치를 지운다.
 
-3~5는 main에 병합한 뒤 main에서 딴 브랜치로 한다. base가 main과 갈라진 지점이라, 리뷰 도구 브랜치 위에서 시험하면 도구 파일 자체가 리뷰 대상에 섞이기 때문이다. 시험하는 세션은 그 worktree 폴더에서 연다(command와 workflow는 세션을 연 폴더의 `.claude/`에서 읽는다).
+3~5는 main에 병합한 뒤 main에서 딴 브랜치로 한다. base가 main과 갈라진 지점이라, 리뷰 도구 브랜치 위에서 시험하면 도구 파일 자체가 리뷰 대상에 섞이기 때문이다. 시험하는 세션은 그 worktree 폴더에서 연다(스킬과 workflow는 세션을 연 폴더의 `.claude/`에서 읽는다).
