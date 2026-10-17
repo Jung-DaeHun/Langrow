@@ -52,6 +52,8 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
         대화 문장은 서버를 거치지 않고 브라우저 speechSynthesis로 읽는다
 한글 발음: 대화는 일본어 입문~중급 턴에서 Claude 응답의 reply_pron_ko·corrected_pron_ko → 성공 확정 RPC가 chat_turns에 저장
         단어는 (로컬) generate-words·generate-pronunciation → data/words/*.json의 pron_ko·example_pron_ko 커밋 → seed-words
+문장 뜯어보기: 모든 턴에서 Claude 응답의 reply_breakdown·correction.breakdown → lib/breakdown 검사(실패면 null) → 성공 확정 RPC가 chat_turns에 저장
+        첫 마디는 scenarios.ts의 breakdown(AI 초안 + 사람 검수)
 ```
 
 ## 상태 관리
@@ -91,7 +93,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 | `profiles` | id(=auth.users.id), current_language, pro_until, trial_started_at, agreed_at, onboarded_at, last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
 | `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token, operation_expires_at, feedback_status(none/pending/ready/fallback/skipped), feedback, created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, correction(일본어 입문~중급은 corrected_pron_ko 포함), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction(일본어 입문~중급은 corrected_pron_ko, 뜯어보기가 있으면 breakdown 포함), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
 | `words` | id(`en-1-001`), language, level, rank, word, reading, meaning_ko, example(`{{정답}}`), example_ko, distractors(3개), pron_ko·example_pron_ko(일본어 한글 발음, 영어는 null) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props, created_at (`limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`, `word_explained`) |
@@ -104,7 +106,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 ## 보안
 - RLS는 모든 public 테이블에 켜고 "자기 행 읽기" 정책만 둔다(`words`는 로그인 사용자 전체 읽기, `word_explanations`는 읽기 정책도 없이 RPC로만 읽기). 쓰기 정책은 두지 않는다.
 - RPC는 `SECURITY INVOKER`로 만들고, `EXECUTE`를 `PUBLIC`·`anon`·`authenticated`에서 회수한 뒤 `service_role`에만 준다(기본 권한도 같게).
-- CSRF는 SameSite=Lax 쿠키 + JSON Content-Type만 허용으로 막는다. 로그에는 에러 코드·user id·경로·응답 시간만 남기고 대화 내용·이메일은 남기지 않는다.
+- CSRF는 SameSite=Lax 쿠키 + JSON Content-Type만 허용으로 막는다. 로그에는 에러 코드·user id·경로·응답 시간만 남기고 대화 내용·이메일은 남기지 않는다. Claude API 오류는 상태·에러 종류·요청 ID·에러 문장(300자)도 남긴다(ADR-017).
 - 모든 body는 zod로 검증한다: 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 언어·이벤트 이름은 enum.
 
 ## Claude 연동

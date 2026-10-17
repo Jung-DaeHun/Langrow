@@ -107,9 +107,9 @@ rt { font-size: 0.5em; }
 | 가나 글자 | `text-kana` | 96 / 1 | 500 `house` |
 
 - 눈썹 라벨(eyebrow)은 `text-micro font-bold text-ink-muted`로 쓴다. 대문자·넓은 자간은 영문(Free, Pro)에만 준다.
-- 자간은 본문 `-0.01em`, 제목 `-0.02em`이다. 줄바꿈은 `word-break: keep-all`과 `overflow-wrap: anywhere`, 제목은 `text-wrap: balance`로 한다.
+- 자간은 본문 `-0.01em`, 제목 `-0.02em`이다. 줄바꿈은 `word-break: keep-all`과 `overflow-wrap: anywhere`, 제목은 `text-wrap: balance`로 한다. 일본어(`lang="ja"`)는 띄어쓰기가 없어 `keep-all`이면 문장 전체가 한 단어처럼 묶이므로 글자 사이에서 줄을 바꾸게 둔다(`word-break: normal`). 2026-10-17 아이폰에서 긴 일본어 AI 말풍선이 줄을 바꾸지 않고 화면 밖으로 늘어나 페이지가 옆으로 밀렸다. 원인은 구현 때 확인한다. 320px 너비에서도 말풍선·교정 카드·타일이 화면 안에서 줄을 바꾸고 페이지에 가로 스크롤이 생기지 않아야 한다.
 - 바뀌는 숫자(`3 / 10`, 남은 사용량, 턴 수)는 `tabular-nums`로 둔다.
-- 일본어 문장의 행간은 1.8로 둔다(후리가나 공간). 후리가나는 `<ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>`로 그리고 `rt`는 0.5em이다. 표시 레벨(입문~중급)은 `chat.md` "레벨별 조절" 표를 따른다.
+- 일본어 문장의 행간은 1.8로 둔다(후리가나 공간). 후리가나는 `<ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>`로 그리고 `rt`는 0.5em이다. 모든 레벨에서 한자와 가타카나 위에 그린다(`chat.md` "레벨별 조절"). 읽기가 본문보다 넓어도 본문 글자 사이를 벌리지 않고 가운데에 모은다(`ruby-align: center`). 2026-10-17 브라우저 기본값 때문에 `[週末|しゅうまつ]`가 "週 末"처럼 벌어져 보였다(PC와 아이폰 모두). 이 속성을 따르지 않는 브라우저(WebKit일 수 있다)에서도 붙어 보이게 한다. 크롬은 구현하며 확인하고, WebKit은 프로젝트 밖 임시 폴더의 Playwright WebKit으로 확인한다(프로젝트 의존성은 늘리지 않는다). 실제 아이폰은 배포 뒤 사용자가 확인한다.
 
 ## 레이아웃
 - **모바일 우선.** 주 사용 맥락은 출퇴근 중 모바일 15분이다.
@@ -258,16 +258,18 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 - 입력 글자 크기는 16px 이상이다(iOS 자동 확대 방지).
 - 250자가 넘으면 오른쪽 아래에 `n / 300`을 보여 주고, 300자를 넘으면 `danger` 굵게 바꾼다. 글자 수는 `lib/text`로 센다.
 - Enter는 전송, Shift+Enter는 줄바꿈이다. IME 조합 중(`isComposing`)에 누른 Enter는 무시한다.
-- placeholder는 레벨에 따라 다르다. 입문·초보는 "영어로 답해 보세요. 한국어도 괜찮아요", 중급 이상은 "영어로 답해 보세요"(일본어도 같은 형식)로 쓴다.
+- placeholder는 두지 않는다. 한국어 입력 안내는 대화방 맨 위 안내 줄이 한다(아래 "대화 말풍선"의 "대화 안내"). 입력창 이름은 `aria-label="메시지 입력"`이다. 2026-10-17 안내 줄을 넣으면서 레벨별 placeholder("영어로 답해 보세요. 한국어도 괜찮아요" 등)를 지웠다.
 
 ### 대화 말풍선
 | 요소 | 규칙 |
 |---|---|
+| 대화 안내 | 메시지 목록 맨 위(첫 마디 위) 가운데에 `text-micro text-ink-muted text-center`로 쓰고, 아래에 좁은 구분선(`border-t border-line`, 가운데 정렬)을 둔다. 입문·초보는 "한국어로 말해도 괜찮아요" 한 줄, 중급 이상은 그 아래에 "누르면 번역이 나와요"를 더한다(입문·초보는 번역이 항상 펼쳐져 있다). 영어·일본어 같은 문구다. 닫기 없이 대화방마다 늘 보이고 메시지와 함께 스크롤된다. 2026-10-17 운영 확인에서 한국어 입력과 번역 보기를 모르고 지나칠 수 있어 넣었다 |
 | AI 말풍선 | 왼쪽, `max-w-[84%] rounded-bubble rounded-bl-md bg-card shadow-card px-3.5 py-3`. `lang`은 학습 언어로 단다 |
 | 내 말풍선 | 오른쪽, `rounded-bubble rounded-br-md bg-house text-white` |
-| 번역 | AI 말풍선 안 아래쪽에 구분선(`border-t border-line`)을 두고 `text-sm text-ink-muted`로 쓴다. 입문·초보는 항상 펼친다. 중급 이상은 말풍선 아래 "번역" 메타(Languages 14px + `text-xs font-semibold text-accent`)를 두고, 말풍선 전체를 `<button aria-expanded>`로 만들어 탭하면 펼친다 |
+| 번역 | AI 말풍선 안 아래쪽에 구분선(`border-t border-line`)을 두고 `text-sm text-ink-muted`로 쓴다. 입문·초보는 항상 펼친다. 중급 이상은 말풍선 아래 "번역" 메타(Languages 14px + `text-xs font-semibold text-accent`)를 두고, 말풍선 전체를 `<button aria-expanded>`로 만들어 탭하면 펼친다. 메타 줄 "번역" 오른쪽에 [문장 뜯어보기] 토글을 둔다(아래 "문장 뜯어보기" 행) |
 | 한글 발음 | 일본어 입문~중급만(`chat.md` "한글 발음"). AI 말풍선(첫 마디 포함) 안에서 문장 바로 아래, 번역 구분선 위에 `mt-1 block text-sm text-brand`로 쓰고 `aria-hidden`을 단다. 입문·초보는 항상 보이고, 중급은 번역과 함께 펼칠 때만 보인다. 값이 `null`이면 그 줄을 두지 않는다 |
-| 교정 | 내 말풍선 **바로 아래, 말풍선 밖에** 오른쪽 정렬 `max-w-[84%] rounded-xl bg-mint p-3`로 둔다. 순서는 라벨(`text-micro text-ink-muted`: "이렇게 말하면 더 자연스러워요", 한국어로 입력했으면 "이렇게 말하면 돼요") → 고친 문장(`font-bold text-brand`, 학습 언어 `lang`) → 한글 발음(일본어 입문~중급이고 값이 있을 때, `text-sm text-brand`, `aria-hidden`) → 재생 버튼(아래 "음성 재생" 행) → 설명(`text-sm`)이다. 항상 펼쳐 둔다 |
+| 교정 | 내 말풍선 **바로 아래, 말풍선 밖에** 오른쪽 정렬 `max-w-[84%] rounded-xl bg-mint p-3`로 둔다. 순서는 라벨(`text-micro text-ink-muted`: "이렇게 말하면 더 자연스러워요", 한국어로 입력했으면 "이렇게 말하면 돼요") → 고친 문장(`font-bold text-brand`, 학습 언어 `lang`) → 한글 발음(일본어 입문~중급이고 값이 있을 때, `text-sm text-brand`, `aria-hidden`) → 재생 버튼(아래 "음성 재생" 행) → [문장 뜯어보기]와 펼친 타일(아래 "문장 뜯어보기" 행, 값이 있을 때) → 설명(`text-sm`)이다. 카드는 항상 펼쳐 두고 뜯어보기만 접는다 |
+| 문장 뜯어보기 | `chat.md` "문장 뜯어보기". 토글은 "번역" 메타와 같은 모양(`text-xs font-semibold text-accent` + ChevronDown 14px, 열리면 ChevronUp)의 `<button aria-expanded>`이고 처음에는 닫혀 있다. AI 말풍선(첫 마디 포함)은 말풍선 아래 메타 줄에서 "번역" 오른쪽(입문·초보는 "번역" 메타가 없어 혼자)에, 교정 카드는 재생 버튼 아래에 둔다. 열면 타일을 AI 말풍선은 말풍선 안 번역 아래(번역이 닫혀 있으면 문장·발음 아래)에 구분선(`border-t border-line`)을 두고, 교정 카드는 토글 바로 아래에 둔다. 타일 영역을 눌러도 번역이 열리거나 닫히지 않는다. 버튼 안에 버튼을 넣을 수 없으므로 중급 이상 AI 말풍선은 구조를 바꾼다: 말풍선의 문장·발음·번역 부분만 번역 토글 `<button aria-expanded>`로 두고(안내 줄 "누르면 번역이 나와요"대로 문장을 누르면 번역이 열린다), 타일과 메타 줄은 그 버튼 밖에 둔다. 메타 줄의 "번역"도 같은 번역 상태를 여닫는 버튼으로 만든다. 타일은 `flex flex-wrap gap-1.5`로 문장 순서대로 잇고, 하나는 `rounded-lg bg-page px-2 py-1 text-center`(교정 카드 안은 `bg-card/70`)에 위는 조각(`text-sm font-semibold text-brand`, 학습 언어 `lang`, 일본어는 `Furigana`), 아래는 뜻(`text-xs text-ink-muted`)이다. 한글 발음은 넣지 않는다. 값이 없는 문장(기능 전 턴, 검사 실패)은 토글을 두지 않는다. 열림 상태는 저장하지 않는다 |
 | 음성 재생 | AI 말풍선(첫 마디 포함, 버튼이면 그 버튼) 바로 아래 왼쪽과 교정 카드의 고친 문장 바로 아래에 작은 재생 버튼을 둔다(아래 "음성 재생"). 학습 언어 음성이 없는 기기에서는 두지 않는다 |
 | 교정 없음 | `correction`이 `null`이면 아무것도 표시하지 않는다("자연스러워요" 배지도 없음) |
 | 응답 대기 | 내 말풍선을 바로 그리고, AI 자리에 점 3개(7px, 1초 반복)를 띄운다. 새 턴은 목록 밖의 `sr-only` `aria-live="polite"` 영역에 교정(라벨·고친 문장·설명)과 AI 응답 문장(입문·초보는 번역까지)만 넣어 알린다. 후리가나 표기는 지우고 학습 언어 문장에 `lang`을 단다. 한글 발음은 넣지 않는다. 화면을 열 때 이미 있던 턴은 알리지 않는다. 목록 전체를 live로 두면 재생 버튼 이름과 음성 목록이 늦게 와서 붙는 버튼까지 읽히기 때문이다 |
@@ -278,7 +280,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 
 ### 플래시카드
 - 카드: `w-full max-w-[440px] aspect-[4/3.4] mx-auto rounded-xl bg-card shadow-raised`. 내용은 가운데 정렬이고 `<button>`이다(Space·Enter로 뒤집기).
-- 단어 앞면: 단어(`text-word`, 일본어는 레벨 규칙대로 후리가나), 아래에 "탭해서 뜻 보기"(RotateCw 13px, `text-micro`). 단어 뒷면: 뜻(28px 700), 정답을 채운 예문, `example_ko`(`text-sm text-ink-muted`).
+- 단어 앞면: 단어(`text-word`, 일본어는 후리가나), 아래에 "탭해서 뜻 보기"(RotateCw 13px, `text-micro`). 단어 뒷면: 뜻(28px 700), 정답을 채운 예문, `example_ko`(`text-sm text-ink-muted`).
 - 한글 발음(일본어 입문~중급, `chat.md` "한글 발음"): 앞면은 단어 바로 아래에 `pron_ko`(`text-lead text-brand`), 뒷면은 예문 바로 아래·`example_ko` 위에 `example_pron_ko`(`text-sm text-brand`)를 둔다. 둘 다 `aria-hidden`이다. 오답 복습 카드도 같다.
 - 가나 앞면: 글자(`text-kana`). 가나 뒷면: 글자(56px)와 `a · 아`(32px 700 `brand`, 로마자 · 한글).
 - 뒤집기는 `rotateY` 450ms다. 카드 아래에 [모르겠어요](outline)와 [알아요](primary)를 `flex-1`로 나란히 둔다. 가나에서 [모르겠어요]를 누른 글자는 회차 끝에 다시 나온다.
@@ -288,7 +290,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 ### 빈칸 퀴즈 (단어 학습·레벨업 공용)
 - 위에 진행(단계 이름 + `i / n` + 바)을 둔다.
 - 문제 카드(`p-6`): 문장(`text-quiz`)과 빈칸 `inline-block min-w-18 border-b-2 border-accent`, 아래에 `example_ko`를 둔다.
-- 보기 4개는 세로로 쌓는다: `w-full rounded-xl bg-card shadow-card px-4.5 py-4 text-lead font-semibold text-left`. 일본어 보기에도 레벨 규칙대로 후리가나를 단다.
+- 보기 4개는 세로로 쌓는다: `w-full rounded-xl bg-card shadow-card px-4.5 py-4 text-lead font-semibold text-left`. 일본어 보기에도 후리가나를 단다.
 - 단어 학습은 고르면 바로 채점을 보여 준다. 정답은 `ring-2 ring-accent bg-ok-wash` + CircleCheck, 고른 오답은 `ring-2 ring-danger bg-danger-wash` + CircleX다. 그 아래에 "정답이에요." 또는 "오답이에요. 정답은 **X** (뜻)", AI 정답 설명(라벨 [AI 해설]), [다음 문제]/[결과 보기](primary, `w-full`) 순서로 둔다. 채점 뒤에는 문제 카드 안 빈칸 문장 바로 아래에 정답을 채운 예문의 한글 발음(일본어 입문~중급, `text-sm text-brand`, `aria-hidden`)을, `example_ko` 아래에 예문 재생 버튼을 둔다.
 - 레벨업 테스트는 정답을 보여 주지 않는다. 고르면 바로 다음 문제로 넘어가고, 제출 뒤 "채점하고 있어요"(점 3개, 가운데 정렬)를 띄운다. AI 정답 설명은 두지 않는다.
 
@@ -297,7 +299,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 |---|---|
 | 처음 | Outline Small 버튼 `w-full`: 빈칸은 [AI 해설], 복습 카드는 [예문 설명]. 보조 행동이라 primary를 쓰지 않는다 |
 | 대기 | 버튼 자리에 점 3개(`WaitingDots`). `aria-live="polite"` 영역 안에 둔다 |
-| 설명 | 교정 카드와 같은 `rounded-xl bg-mint p-3`에 라벨(`text-micro text-ink-muted`: "AI 해설") → 설명(`text-sm`, 일본어 표기는 `Furigana`로 레벨 규칙대로). 버튼은 다시 보이지 않는다 |
+| 설명 | 교정 카드와 같은 `rounded-xl bg-mint p-3`에 라벨(`text-micro text-ink-muted`: "AI 해설") → 설명(`text-sm`, 일본어 표기는 `Furigana`로). 버튼은 다시 보이지 않는다 |
 | 실패(503·네트워크·그 밖의 오류) | 오류 Notice: 서버 `message`(503은 "설명을 만들지 못했어요. 횟수는 차감되지 않았어요.", 네트워크는 대화·단어 저장과 같은 `apiClient`의 `NETWORK_MESSAGE`) + [다시 시도] pill. 404여도 홈으로 이동하지 않는다 |
 | 한도(429 `LIMIT_REACHED`, Free만) | 보상 Notice: "오늘 AI 해설 10회를 모두 썼어요" + "Pro는 AI 해설을 제한 없이 볼 수 있어요." + 체험 가능하면 [7일 무료 체험](outline sm), 체험을 썼으면 [Pro 시작하기](outline sm). 회차의 primary는 [다음 문제]이므로 버튼을 outline으로 두고 [내일 할게요]는 두지 않는다 |
 | 실패 10회(429 `AI_FAILURE_LIMIT`) | 정보 Notice로 서버 `message`("오늘은 응답 오류가 많아 AI 해설을 잠시 쉬어요. 내일 다시 시도해 주세요.")를 보여 준다. 버튼 없음 |

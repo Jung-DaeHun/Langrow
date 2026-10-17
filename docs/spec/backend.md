@@ -77,7 +77,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | 7 | XSS | `dangerouslySetInnerHTML`을 쓰지 않는다. AI 출력은 텍스트로만 그린다 |
 | 8 | 오픈 리디렉트 | `/auth/callback`은 `next` 파라미터를 받지 않는다 |
 | 9 | 입력 남용 | 모든 body를 zod로 검증한다. 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 언어와 이벤트 이름은 enum만 허용한다 |
-| 10 | 로그의 개인정보 | 로그에는 에러 코드, user id, 경로, 응답 시간만 남긴다. 대화 내용과 이메일은 남기지 않는다 |
+| 10 | 로그의 개인정보 | 로그에는 에러 코드, user id, 경로, 응답 시간만 남긴다. 대화 내용과 이메일은 남기지 않는다. Claude API 오류는 Anthropic이 돌려준 상태·에러 종류·요청 ID·에러 문장(300자까지)도 남긴다(아래 "Claude 연동", ADR-017) |
 | 11 | 계정 삭제 | `user_activity_days`를 포함해 모든 사용자 테이블의 FK를 `auth.users(id) on delete cascade`로 건다 |
 | 12 | 동의·온보딩 우회 | API별 준비 상태를 래퍼와 쓰기 RPC에서 검사한다. 미동의는 403 `CONSENT_REQUIRED`, 학습 준비 미완료는 403 `ONBOARDING_REQUIRED` |
 | 13 | RPC 직접 호출 | anon/authenticated의 함수 EXECUTE를 회수하고 실제 해당 역할로 호출 거부를 확인한다. RLS 쓰기 정책 부재만으로 함수 호출을 막았다고 가정하지 않는다 |
@@ -123,7 +123,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | `profiles` | id(=auth.users.id), current_language(nullable), pro_until, trial_started_at, agreed_at, onboarded_at(nullable, 최초 완료 시각), last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
 | `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token(uuid, nullable), operation_expires_at(nullable), feedback_status(none/pending/ready/fallback/skipped), feedback(jsonb), created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko` 포함), created_at — unique(session_id, turn_no) |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), reply_breakdown(jsonb, nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko`, 검사를 통과하면 `breakdown` 포함), created_at — unique(session_id, turn_no) |
 | `words` | id(text, 예: `en-1-001`), language, level, rank, word, reading, meaning_ko, example, example_ko, distractors(text[]), pron_ko(nullable), example_pron_ko(nullable) — unique(language, level, rank) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props(jsonb), created_at |
@@ -144,11 +144,13 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 
 - **구조화 출력**: SDK의 구조화 출력을 쓴다 (`client.messages.create()` + zod 스키마, `output_config.format`). Sonnet 5.5가 지원한다. deprecated된 `output_format`은 쓰지 않는다. `stop_reason`을 먼저 본 뒤 첫 text 블록을 zod로 파싱한다. `messages.parse()`는 `stop_reason`을 보기 전에 파싱하다 throw해서 실패 사유를 구분하지 못하므로 쓰지 않는다.
 - **실패로 처리하는 경우**(`chat_failed`의 실패 사유): refusal, `max_tokens` 도달, 파싱·스키마 검증 실패(`invalid_output`), 타임아웃, API 오류. env가 없거나 비어 있으면 API를 부르지 않고 재시도 없이 `config`로 실패하며, 키 이름만 에러 로그로 남긴다
+- **API 오류 로그**: 타임아웃이 아닌 API 오류(`api_error`)는 시도마다 `console.error`로 한 줄을 남긴다: `{ ai: "api_error", status, type, requestId, message }`. `status`는 HTTP 상태, `type`은 Anthropic 에러 종류(`invalid_request_error` 등), `requestId`는 Anthropic 요청 ID, `message`는 SDK 에러의 문장을 300자에서 자른 것이다. 연결 오류처럼 응답이 없어 없는 값은 빼고 남긴다. 프롬프트·사용자 입력·AI 응답은 남기지 않는다. 2026-10-17 운영에서 지출 한도 초과(400)로 대화가 실패했는데 `api_error`만 남아 원인을 로그로 알 수 없어 넣었다(ADR-017)
 - **타임아웃과 재시도**: 호출당 타임아웃 20초. SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 메시지·종료·설명 라우트 모두 `maxDuration = 60`이며, 재시도 포함 AI 호출 전체 예산은 최대 약 40초다. 두 호출 모두 같은 작업 토큰을 사용한다. 중복 HTTP 요청이나 DB 확정 재시도 때문에 AI 호출을 새로 시작하지 않는다.
 - **토큰 상한과 effort**: `max_tokens`는 4096으로 둔다. Sonnet 5.5는 adaptive thinking이 기본이고 thinking 토큰도 `max_tokens`에 들어가므로 응답(약 500토큰 이하)보다 넉넉히 잡는다. `output_config.effort`는 `low`라서 쉬운 턴은 thinking 없이 답한다.
 - **프롬프트**: 빌더는 순수 함수(`services/claude/prompts.ts`)로 단위 테스트하고, 스키마는 `schemas.ts`에 둔다. AI 정답 설명(`words.md`)도 같은 모델·effort·재시도 규칙으로 부르고, 스키마는 `{ explanation }` 하나다. 입력은 DB의 예문(정답을 채운 문장), `example_ko`, 정답, 뜻, 단어 레벨, 고른 보기(없으면 복습)다.
 - **대화 기록**: 고정 user 턴("대화를 시작합니다") → 첫 마디 → `done` 턴들 → 이번 입력 순서로 보낸다. `pending` 턴은 넣지 않는다.
 - **한글 발음**(`chat.md` "한글 발음"): 일본어 입문~중급 턴만 시스템 프롬프트에 표기 규칙을 넣고 `reply_pron_ko`·`corrected_pron_ko`가 있는 스키마로 받는다. 발음이 비었거나 검사(`lib/pronunciation`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다. 성공 확정 RPC(`finish_chat_turn`)는 `reply_pron_ko`를 받아 `chat_turns`에 저장하고, 교정 발음은 `correction` jsonb 안에 그대로 저장한다. 단어 생성 스크립트(`generate-words`, `generate-pronunciation`)도 같은 표기 규칙 문구를 쓴다.
+- **문장 뜯어보기**(`chat.md` "문장 뜯어보기"): 모든 턴의 스키마에 `reply_breakdown`·`correction.breakdown`을 더한다. 검사(`lib/breakdown`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다(교정은 `breakdown` 키를 뺀다). `finish_chat_turn`은 `p_reply_breakdown jsonb default null`을 받아 `chat_turns.reply_breakdown`에 저장하고, 교정 뜯어보기는 `correction` jsonb 안에 그대로 저장한다. 운영 DB에 마이그레이션을 적용해야 한다.
 - **프롬프트 캐싱은 아직 쓰지 않는다.** Sonnet 5.5의 최소 캐시 길이(약 512토큰)는 넘으므로, 실제 결제를 붙이기 전에 적용하고 실측한다.
 
 ## 에러 코드
