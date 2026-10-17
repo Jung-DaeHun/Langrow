@@ -38,13 +38,13 @@ export type Database = {
                   ]
                 },"chat_turns": {
                   Row: {
-                    "correction": Json | null,"created_at": string,"id": string,"reply": string | null,"reply_ko": string | null,"reply_pron_ko": string | null,"session_id": string,"status": string,"turn_no": number,"user_id": string,"user_text": string
+                    "correction": Json | null,"created_at": string,"id": string,"reply": string | null,"reply_breakdown": Json | null,"reply_ko": string | null,"reply_pron_ko": string | null,"session_id": string,"status": string,"turn_no": number,"user_id": string,"user_text": string
                   }
                   Insert: {
-                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id": string,"status"?: string,"turn_no": number,"user_id": string,"user_text": string
+                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id": string,"status"?: string,"turn_no": number,"user_id": string,"user_text": string
                   }
                   Update: {
-                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id"?: string,"status"?: string,"turn_no"?: number,"user_id"?: string,"user_text"?: string
+                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id"?: string,"status"?: string,"turn_no"?: number,"user_id"?: string,"user_text"?: string
                   }
                   Relationships: [
                     {
@@ -207,7 +207,7 @@ isOneToOne: false
 { Args: { "p_event_id": number,"p_reason": string,"p_user_id": string }; Returns: Json
                            },
 "finish_chat_turn":
-{ Args: { "p_correction": Json,"p_reply": string,"p_reply_ko": string,"p_reply_pron_ko"?: string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+{ Args: { "p_correction": Json,"p_reply": string,"p_reply_breakdown"?: Json,"p_reply_ko": string,"p_reply_pron_ko"?: string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
                            },
 "finish_end":
 { Args: { "p_feedback": Json,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json

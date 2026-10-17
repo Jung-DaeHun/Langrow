@@ -307,6 +307,38 @@ describe("대화 1턴", () => {
       { turn_no: 2, reply_pron_ko: null, correction: null },
     ]);
   });
+
+  it("확정은 문장 뜯어보기를 저장한다: reply_breakdown은 컬럼에, 교정 뜯어보기는 correction 안에. 없으면 null이다", async () => {
+    const user = await createReadyUser();
+    const sessionId = await newSession(user.id);
+    const withBreakdown: TurnReply = {
+      ...REPLY,
+      reply_breakdown: [
+        { text: "One latte,", meaning_ko: "라테 한 잔" },
+        { text: "coming up!", meaning_ko: "나갑니다" },
+      ],
+      correction: {
+        ...REPLY.correction!,
+        breakdown: [
+          { text: "Can I get", meaning_ko: "주시겠어요" },
+          { text: "a latte?", meaning_ko: "라테 한 잔" },
+        ],
+      },
+    };
+    const first = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
+    valueOf(await finishChatTurn(user.id, sessionId, first.token, withBreakdown));
+    // 뜯어보기가 없으면 인자를 빼고 부르고, 기존처럼 확정된다
+    const second = valueOf(await beginChatTurn(user.id, sessionId, "No, thanks."));
+    await expect(finishChatTurn(user.id, sessionId, second.token, PLAIN_REPLY)).resolves.toEqual({
+      ok: true,
+      value: { turnsLeft: SESSION_MAX_TURNS - 2 },
+    });
+
+    expect(await turnsOf(sessionId)).toMatchObject([
+      { turn_no: 1, status: "done", reply_breakdown: withBreakdown.reply_breakdown, correction: withBreakdown.correction },
+      { turn_no: 2, status: "done", reply_breakdown: null, correction: null },
+    ]);
+  });
 });
 
 describe("failChatTurn", () => {

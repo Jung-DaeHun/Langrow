@@ -131,6 +131,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
           reply: reply.reply,
           replyKo: reply.reply_ko,
           replyPronKo: reply.reply_pron_ko ?? null,
+          replyBreakdown: reply.reply_breakdown ?? null,
           correction: reply.correction,
         },
       ]);

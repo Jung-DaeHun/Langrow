@@ -95,6 +95,7 @@ export async function finishChatTurn(
     p_correction: reply.correction,
     // 발음이 없으면 인자를 빼서 기본값 null로 저장한다 (undefined 키는 요청 JSON에서 빠진다)
     p_reply_pron_ko: reply.reply_pron_ko ?? undefined,
+    p_reply_breakdown: reply.reply_breakdown ?? undefined,
   });
   return result.ok ? { ok: true, value: { turnsLeft: result.value.turns_left as number } } : result;
 }

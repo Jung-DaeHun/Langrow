@@ -449,6 +449,7 @@ describe("readChatRoom", () => {
           reply: CORRECTED.reply,
           replyKo: CORRECTED.reply_ko,
           replyPronKo: null,
+          replyBreakdown: null,
           correction: CORRECTED.correction,
         },
         {
@@ -457,6 +458,7 @@ describe("readChatRoom", () => {
           reply: PLAIN.reply,
           replyKo: PLAIN.reply_ko,
           replyPronKo: null,
+          replyBreakdown: null,
           correction: null,
         },
       ],
@@ -535,6 +537,31 @@ describe("readChatRoom", () => {
     expect(room?.turns.map((t) => ({ replyPronKo: t.replyPronKo, correction: t.correction }))).toEqual([
       { replyPronKo: "와카리마시타.", correction },
       { replyPronKo: null, correction: CORRECTED.correction },
+    ]);
+  });
+
+  it("문장 뜯어보기를 돌려주고, 뜯어보기가 없는 옛 턴은 null·키 없음 그대로 돌려준다", async () => {
+    const user = await createReadyUser("en", 1);
+    const session = await newSession(user.id);
+    const replyBreakdown = [
+      { text: "One latte,", meaning_ko: "라테 한 잔" },
+      { text: "coming up!", meaning_ko: "나갑니다" },
+    ];
+    const correction = {
+      ...CORRECTED.correction!,
+      breakdown: [
+        { text: "Can I get", meaning_ko: "주시겠어요" },
+        { text: "a latte?", meaning_ko: "라테 한 잔" },
+      ],
+    };
+    await doneTurn(user.id, session, { ...CORRECTED, reply_breakdown: replyBreakdown, correction });
+    // 기능을 넣기 전에 저장된 턴처럼 뜯어보기가 없다
+    await doneTurn(user.id, session, CORRECTED);
+
+    const room = await readChatRoom(await signedInClient(user), user.id, session, new Date());
+    expect(room?.turns.map((t) => ({ replyBreakdown: t.replyBreakdown, correction: t.correction }))).toEqual([
+      { replyBreakdown, correction },
+      { replyBreakdown: null, correction: CORRECTED.correction },
     ]);
   });
 });

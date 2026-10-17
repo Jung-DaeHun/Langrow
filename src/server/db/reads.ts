@@ -1,6 +1,7 @@
 import "server-only";
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import type { Breakdown } from "@/lib/breakdown";
 import type { Language, Level } from "@/lib/levels";
 import type { ReadinessState } from "@/lib/readiness";
 import type { StreakState } from "@/lib/streak";
@@ -50,6 +51,7 @@ export type ChatTurnView = {
   reply: string;
   replyKo: string;
   replyPronKo: string | null;
+  replyBreakdown: Breakdown | null;
   correction: TurnReply["correction"];
 };
 export type ChatRoomData = {
@@ -274,7 +276,7 @@ export async function readChatRoom(
   const { data, error } = await sb
     .from("chat_sessions")
     .select(
-      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, chat_turns(turn_no, status, user_text, reply, reply_ko, reply_pron_ko, correction, created_at)",
+      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, chat_turns(turn_no, status, user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction, created_at)",
     )
     .eq("id", sessionId)
     .eq("user_id", userId)
@@ -303,6 +305,7 @@ export async function readChatRoom(
       reply: turn.reply as string,
       replyKo: turn.reply_ko as string,
       replyPronKo: turn.reply_pron_ko,
+      replyBreakdown: turn.reply_breakdown as Breakdown | null,
       correction: turn.correction as TurnReply["correction"],
     })),
     doneTurnsToday: done.filter((turn) => {

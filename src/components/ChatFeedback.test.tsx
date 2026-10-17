@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 function turn(turnNo: number, correction: ChatTurnView["correction"] = null): ChatTurnView {
-  return { turnNo, userText: `내 문장 ${turnNo}`, reply: `reply ${turnNo}`, replyKo: `답 ${turnNo}`, replyPronKo: null, correction };
+  return { turnNo, userText: `내 문장 ${turnNo}`, reply: `reply ${turnNo}`, replyKo: `답 ${turnNo}`, replyPronKo: null, replyBreakdown: null, correction };
 }
 
 const THREE_TURNS = [turn(1), turn(2), turn(3)];

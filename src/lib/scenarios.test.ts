@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { alignBreakdown } from "./breakdown";
 import { parseFurigana } from "./furigana";
 import { LANGUAGES, LEVELS, showsPronunciation } from "./levels";
 import { cleanPron } from "./pronunciation";
@@ -62,6 +63,14 @@ describe("SCENARIOS 데이터", () => {
     for (const s of SCENARIOS.filter((s) => showsPronunciation("ja", s.level))) {
       const { pronKo } = s.roles.ja.opening;
       expect(cleanPron(pronKo), s.id).toBe(pronKo);
+    }
+  });
+
+  it.each(LANGUAGES)("모든 %s 첫 마디에 검사를 통과한 문장 뜯어보기가 있다", (language) => {
+    for (const s of SCENARIOS) {
+      const { opening } = s.roles[language];
+      expect(opening.breakdown, s.id).toBeDefined();
+      expect(alignBreakdown(opening.text, opening.breakdown ?? []), s.id).toEqual(opening.breakdown);
     }
   });
 

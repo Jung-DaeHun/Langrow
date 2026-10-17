@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseBlank } from "./blank";
-import { parseFurigana, stripFurigana } from "./furigana";
+import { parseFurigana, rubySegments, stripFurigana } from "./furigana";
 
 describe("parseFurigana", () => {
   it("[本文|읽기]를 읽기가 달린 segment로 만든다", () => {
@@ -46,6 +46,39 @@ describe("parseFurigana", () => {
       { text: "今日", reading: "きょう" },
       { text: "学校", reading: "がっこう" },
     ]);
+  });
+
+  describe("여는 괄호만 빠진 표기는 | 바로 앞의 한자 묶음에 읽기를 단다", () => {
+    it("온전한 표기 바로 뒤", () => {
+      expect(parseFurigana("[風邪|かぜ]気味|ぎみ]")).toEqual([
+        { text: "風邪", reading: "かぜ" },
+        { text: "気味", reading: "ぎみ" },
+      ]);
+    });
+
+    it("앞에 가나가 이어져도 한자 묶음만 본문이다", () => {
+      expect(parseFurigana("少し疲れ気味|ぎみ]です")).toEqual([
+        { text: "少し疲れ" },
+        { text: "気味", reading: "ぎみ" },
+        { text: "です" },
+      ]);
+    });
+
+    it("々가 든 한자 묶음도 본문이다", () => {
+      expect(parseFurigana("人々|ひとびと]が")).toEqual([{ text: "人々", reading: "ひとびと" }, { text: "が" }]);
+    });
+
+    it("| 바로 앞이 한자가 아니면 |부터 ]까지의 읽기를 버린다", () => {
+      expect(parseFurigana("コーヒー|こーひー]")).toEqual([{ text: "コーヒー" }]);
+      expect(parseFurigana("[好|す]きなコーヒー|こーひー]です")).toEqual([
+        { text: "好", reading: "す" },
+        { text: "きなコーヒーです" },
+      ]);
+    });
+
+    it("stripFurigana도 복구를 따른다", () => {
+      expect(stripFurigana("[風邪|かぜ]気味|ぎみ]です")).toBe("風邪気味です");
+    });
   });
 
   describe("깨진 표기는 [, ], |만 지우고 일반 텍스트로 둔다", () => {
@@ -110,6 +143,56 @@ describe("stripFurigana", () => {
 
   it("깨진 표기도 기호만 지운다", () => {
     expect(stripFurigana("[漢字]と[仮名|かな")).toBe("漢字と仮名かな");
+  });
+});
+
+describe("rubySegments", () => {
+  it("가타카나 묶음(장음 포함)에 같은 소리의 히라가나 읽기를 단다", () => {
+    expect(rubySegments("コーヒー")).toEqual([{ text: "コーヒー", reading: "こーひー" }]);
+    expect(rubySegments("ヴァイオリン")).toEqual([{ text: "ヴァイオリン", reading: "ゔぁいおりん" }]);
+  });
+
+  it("한자 표기와 가타카나 읽기를 함께 달고, 이웃한 일반 텍스트는 합친다", () => {
+    expect(rubySegments("[熱|あつ]いコーヒーをください。")).toEqual([
+      { text: "熱", reading: "あつ" },
+      { text: "い" },
+      { text: "コーヒー", reading: "こーひー" },
+      { text: "をください。" },
+    ]);
+  });
+
+  it("・는 묶음을 끊고 일반 텍스트로 둔다", () => {
+    expect(rubySegments("チョン・デフンです")).toEqual([
+      { text: "チョン", reading: "ちょん" },
+      { text: "・" },
+      { text: "デフン", reading: "でふん" },
+      { text: "です" },
+    ]);
+  });
+
+  it("가타카나 글자 없이 ー만 있으면 읽기를 달지 않는다", () => {
+    expect(rubySegments("えー、そうですね")).toEqual([{ text: "えー、そうですね" }]);
+    expect(rubySegments("えーコーラ")).toEqual([{ text: "えー" }, { text: "コーラ", reading: "こーら" }]);
+  });
+
+  it("한자 표기의 본문·읽기 안의 가타카나는 건드리지 않는다", () => {
+    expect(rubySegments("[ヶ月|かげつ]")).toEqual([{ text: "ヶ月", reading: "かげつ" }]);
+    expect(rubySegments("[漢字|カンジ]")).toEqual([{ text: "漢字", reading: "カンジ" }]);
+  });
+
+  it("본문에 한자가 없는 표기는 AI 읽기를 버리고 본문 가타카나에 코드가 읽기를 단다", () => {
+    expect(rubySegments("[コーヒー|こうひい]が[好|す]き")).toEqual([
+      { text: "コーヒー", reading: "こーひー" },
+      { text: "が" },
+      { text: "好", reading: "す" },
+      { text: "き" },
+    ]);
+  });
+
+  it("가타카나가 없으면 parseFurigana와 같다", () => {
+    const input = "[学校|がっこう]に[行|い]った。";
+    expect(rubySegments(input)).toEqual(parseFurigana(input));
+    expect(rubySegments("")).toEqual([]);
   });
 });
 
