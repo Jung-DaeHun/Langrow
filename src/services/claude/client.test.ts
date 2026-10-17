@@ -48,7 +48,18 @@ const feedbackInput: FeedbackPromptInput = {
 const reply: TurnReply = {
   reply: "Sure! What size?",
   reply_ko: "네! 어떤 크기로 드릴까요?",
-  correction: { corrected: "I'd like a latte.", explanation_ko: "I'd like가 더 공손해요." },
+  reply_breakdown: [
+    { text: "Sure!", meaning_ko: "그럼요!" },
+    { text: "What size?", meaning_ko: "어떤 크기로요?" },
+  ],
+  correction: {
+    corrected: "I'd like a latte.",
+    explanation_ko: "I'd like가 더 공손해요.",
+    breakdown: [
+      { text: "I'd like", meaning_ko: "주세요" },
+      { text: "a latte.", meaning_ko: "라테 하나" },
+    ],
+  },
 };
 const feedback: Feedback = { good: "주문을 끝까지 해냈어요.", improve: ["I want → I'd like"] };
 
@@ -88,7 +99,7 @@ describe("generateTurn", () => {
     const { format, effort } = request.output_config as { format: { type: string; schema: { properties: object } }; effort: string };
     expect(effort).toBe("low");
     expect(format.type).toBe("json_schema");
-    expect(Object.keys(format.schema.properties).sort()).toEqual(["correction", "reply", "reply_ko"]);
+    expect(Object.keys(format.schema.properties).sort()).toEqual(["correction", "reply", "reply_breakdown", "reply_ko"]);
   });
 
   it("첫 호출이 실패하면 한 번 더 불러 성공을 돌려준다", async () => {
@@ -214,7 +225,19 @@ describe("generateTurn 한글 발음", () => {
     reply: "はい、どうぞ。",
     reply_ko: "네, 여기요.",
     reply_pron_ko: " 하이, 도-조. ",
-    correction: { corrected: "コーヒーをください。", explanation_ko: "を를 넣어요.", corrected_pron_ko: "코-히-오 쿠다사이." },
+    reply_breakdown: [
+      { text: "はい、", meaning_ko: "네," },
+      { text: "どうぞ。", meaning_ko: "여기요." },
+    ],
+    correction: {
+      corrected: "コーヒーをください。",
+      explanation_ko: "を를 넣어요.",
+      corrected_pron_ko: "코-히-오 쿠다사이.",
+      breakdown: [
+        { text: "コーヒーを", meaning_ko: "커피를" },
+        { text: "ください。", meaning_ko: "주세요." },
+      ],
+    },
   };
   const propertiesOf = (request: Record<string, unknown>) =>
     Object.keys((request.output_config as { format: { schema: { properties: object } } }).format.schema.properties).sort();
@@ -222,7 +245,7 @@ describe("generateTurn 한글 발음", () => {
   it("일본어 입문~중급은 발음 필드가 있는 형식으로 요청하고, 발음은 앞뒤 공백을 지워 돌려준다", async () => {
     const { ai, requests } = setup(done(jaReply));
     expect(await ai.generateTurn(jaInput)).toEqual({ ok: true, value: { ...jaReply, reply_pron_ko: "하이, 도-조." } });
-    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_ko", "reply_pron_ko"]);
+    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_breakdown", "reply_ko", "reply_pron_ko"]);
   });
 
   it("발음이 비었거나 가나·한자가 섞이면 턴은 성공하고 그 발음만 null이다 (다시 부르지 않는다)", async () => {
@@ -246,6 +269,148 @@ describe("generateTurn 한글 발음", () => {
   it("일본어 상급은 발음 없는 형식으로 요청하고 받은 값을 그대로 돌려준다", async () => {
     const { ai, requests } = setup(done(reply));
     expect(await ai.generateTurn({ ...jaInput, level: 4, scenario: scenariosForLevel(4)[0] })).toEqual({ ok: true, value: reply });
-    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_ko"]);
+    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_breakdown", "reply_ko"]);
+  });
+});
+
+describe("generateTurn 문장 뜯어보기", () => {
+  const jaInput: TurnPromptInput = { language: "ja", level: 4, scenario: scenariosForLevel(4)[0], history: [], userText: "家で休みました" };
+  const jaReply = {
+    reply: "[家|いえ]で[休|やす]んでいました。",
+    reply_ko: "집에서 쉬고 있었어요.",
+    reply_breakdown: [
+      { text: "家で", meaning_ko: "집에서" },
+      { text: "休んでいました", meaning_ko: "쉬고 있었어요" },
+    ],
+    correction: {
+      corrected: "[家|いえ]で[休|やす]みました。",
+      explanation_ko: "자연스러워요.",
+      breakdown: [
+        { text: "家で", meaning_ko: "집에서" },
+        { text: "休みました", meaning_ko: "쉬었어요" },
+      ],
+    },
+  };
+  const warnings = () => vi.spyOn(console, "warn").mockImplementation(() => {});
+
+  it("통과한 뜯어보기는 원래 문장의 표기가 붙은 조각으로 돌아오고 로그가 없다", async () => {
+    const warn = warnings();
+    const { ai } = setup(done(jaReply));
+    expect(await ai.generateTurn(jaInput)).toEqual({
+      ok: true,
+      value: {
+        ...jaReply,
+        reply_breakdown: [
+          { text: "[家|いえ]で", meaning_ko: "집에서" },
+          { text: "[休|やす]んでいました。", meaning_ko: "쉬고 있었어요" },
+        ],
+        correction: {
+          ...jaReply.correction,
+          breakdown: [
+            { text: "[家|いえ]で", meaning_ko: "집에서" },
+            { text: "[休|やす]みました。", meaning_ko: "쉬었어요" },
+          ],
+        },
+      },
+    });
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("reply 뜯어보기가 맞지 않으면 턴은 성공하고 reply_breakdown만 null이며, 내용 없이 warn 한 줄을 남긴다 (다시 부르지 않는다)", async () => {
+    const warn = warnings();
+    const bad = { ...jaReply, reply_breakdown: [{ text: "家で", meaning_ko: "집에서" }, { text: "休む", meaning_ko: "쉬다" }] };
+    const { ai, requests } = setup(done(bad));
+    const result = await ai.generateTurn(jaInput);
+
+    expect(result.ok && result.value.reply_breakdown).toBeNull();
+    expect(result.ok && result.value.correction?.breakdown).toEqual([
+      { text: "[家|いえ]で", meaning_ko: "집에서" },
+      { text: "[休|やす]みました。", meaning_ko: "쉬었어요" },
+    ]);
+    expect(requests).toHaveLength(1);
+    expect(warn).toHaveBeenCalledTimes(1);
+    const line = String(warn.mock.calls[0][0]);
+    expect(JSON.parse(line)).toEqual({ ai: "breakdown_invalid", target: "reply", language: "ja", level: 4 });
+    for (const content of ["家", "休", "집에서", "쉬다"]) expect(line).not.toContain(content);
+  });
+
+  it("교정 뜯어보기가 맞지 않으면 턴은 성공하고 breakdown 키가 없으며, target corrected 로그를 남긴다 (다시 부르지 않는다)", async () => {
+    const warn = warnings();
+    const bad = { ...jaReply, correction: { ...jaReply.correction, breakdown: [{ text: "家で", meaning_ko: "집에서" }] } };
+    const { ai, requests } = setup(done(bad));
+    const result = await ai.generateTurn(jaInput);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.correction).toEqual({ corrected: jaReply.correction.corrected, explanation_ko: jaReply.correction.explanation_ko });
+    expect(result.value.correction).not.toHaveProperty("breakdown");
+    expect(result.value.reply_breakdown).toHaveLength(2);
+    expect(requests).toHaveLength(1);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(String(warn.mock.calls[0][0]))).toEqual({ ai: "breakdown_invalid", target: "corrected", language: "ja", level: 4 });
+  });
+
+  it("일본어 입문 턴도 발음과 함께 뜯어보기를 검사한다", async () => {
+    const warn = warnings();
+    const input: TurnPromptInput = { ...jaInput, level: 1, scenario: scenariosForLevel(1)[0] };
+    const pronReply = {
+      ...jaReply,
+      reply_breakdown: [{ text: "家", meaning_ko: "집" }],
+      reply_pron_ko: "이에데 야슨데이마시타.",
+      correction: { ...jaReply.correction, corrected_pron_ko: "이에데 야스미마시타." },
+    };
+    const { ai } = setup(done(pronReply));
+    const result = await ai.generateTurn(input);
+
+    expect(result.ok && result.value).toMatchObject({ reply_breakdown: null, reply_pron_ko: "이에데 야슨데이마시타." });
+    expect(result.ok && result.value.correction).toMatchObject({ corrected_pron_ko: "이에데 야스미마시타.", breakdown: [{ text: "[家|いえ]で" }, { text: "[休|やす]みました。" }] });
+    expect(JSON.parse(String(warn.mock.calls[0][0]))).toEqual({ ai: "breakdown_invalid", target: "reply", language: "ja", level: 1 });
+  });
+});
+
+describe("API 오류 로그", () => {
+  const errors = () => vi.spyOn(console, "error").mockImplementation(() => {});
+  const logged = (log: ReturnType<typeof errors>) => log.mock.calls.map((call) => JSON.parse(String(call[0])));
+
+  it("시도마다 상태·종류·요청 ID·300자에서 자른 문장을 남기고, 프롬프트·입력은 남기지 않는다", async () => {
+    const log = errors();
+    const body = { type: "error", error: { type: "invalid_request_error", message: `Your credit balance is too low. ${"x".repeat(400)}` } };
+    const error = Anthropic.APIError.generate(400, body, undefined, new Headers({ "request-id": "req_abc" }));
+    const { ai } = setup(error, error);
+
+    expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason: "api_error" });
+    expect(logged(log)).toEqual([
+      { ai: "api_error", status: 400, type: "invalid_request_error", requestId: "req_abc", message: error.message.slice(0, 300) },
+      { ai: "api_error", status: 400, type: "invalid_request_error", requestId: "req_abc", message: error.message.slice(0, 300) },
+    ]);
+    expect(logged(log)[0].message).toHaveLength(300);
+    const lines = log.mock.calls.map((call) => String(call[0])).join("\n");
+    expect(lines).not.toContain(turnInput.userText);
+    expect(lines).not.toContain(turnInput.scenario.roles.en.role);
+  });
+
+  it("연결 오류는 응답이 없어 없는 값(status·type·requestId)을 뺀다", async () => {
+    const log = errors();
+    const { ai } = setup(new Anthropic.APIConnectionError({ message: "connection failed" }), done(reply));
+
+    expect(await ai.generateTurn(turnInput)).toEqual({ ok: true, value: reply });
+    expect(logged(log)).toEqual([{ ai: "api_error", message: "connection failed" }]);
+  });
+
+  it("종료 피드백·AI 정답 설명의 API 오류도 남긴다", async () => {
+    const log = errors();
+    const overloaded = new Anthropic.InternalServerError(529, undefined, "overloaded", new Headers());
+    const { ai } = setup(overloaded, done(feedback));
+
+    expect(await ai.generateFeedback(feedbackInput)).toEqual({ ok: true, value: feedback });
+    expect(logged(log)).toEqual([{ ai: "api_error", status: 529, message: overloaded.message }]);
+  });
+
+  it("타임아웃은 api_error 로그를 남기지 않는다", async () => {
+    const log = errors();
+    const { ai } = setup(new Anthropic.APIConnectionTimeoutError(), new Anthropic.APIConnectionTimeoutError());
+
+    expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason: "timeout" });
+    expect(log).not.toHaveBeenCalled();
   });
 });

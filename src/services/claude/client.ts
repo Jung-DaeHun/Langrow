@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
+import { alignBreakdown, type Breakdown } from "@/lib/breakdown";
 import { showsPronunciation } from "@/lib/levels";
 import { cleanPron } from "@/lib/pronunciation";
 import { getClaudeEnv } from "@/services/env";
@@ -113,7 +114,20 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
     } catch (error) {
       // 타임아웃 에러는 APIError의 하위 클래스라 먼저 확인한다
       if (error instanceof Anthropic.APIConnectionTimeoutError) return { ok: false, reason: "timeout" };
-      if (error instanceof Anthropic.APIError) return { ok: false, reason: "api_error" };
+      if (error instanceof Anthropic.APIError) {
+        // 원인(지출 한도 초과 등)을 알 수 있게 Anthropic이 돌려준 값만 남긴다(ADR-017).
+        // 연결 오류처럼 응답이 없어 없는 값은 JSON.stringify가 뺀다
+        console.error(
+          JSON.stringify({
+            ai: "api_error",
+            status: error.status,
+            type: error.type ?? undefined,
+            requestId: error.requestID ?? undefined,
+            message: error.message.slice(0, 300),
+          }),
+        );
+        return { ok: false, reason: "api_error" };
+      }
       return { ok: false, reason: "invalid_output" };
     }
   }
@@ -122,10 +136,8 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
     generateTurn: (input) =>
       withRetry(() =>
         showsPronunciation(input.language, input.level)
-          ? attempt(pronTurnReplySchema, () => buildTurnPrompt(input), acceptPronTurn)
-          : attempt(turnReplySchema, () => buildTurnPrompt(input), (value): TurnReply | null =>
-              value.reply.trim() ? value : null,
-            ),
+          ? attempt(pronTurnReplySchema, () => buildTurnPrompt(input), (value) => acceptTurn(input, cleanTurnPron(value)))
+          : attempt(turnReplySchema, () => buildTurnPrompt(input), (value) => acceptTurn(input, value)),
       ),
     generateFeedback: (input) =>
       withRetry(() =>
@@ -144,8 +156,7 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
 }
 
 // 발음이 비었거나 검사에 맞지 않으면 턴은 성공으로 두고 그 발음만 null로 숨긴다 (spec/chat.md "한글 발음")
-function acceptPronTurn(value: PronTurnReply): TurnReply | null {
-  if (!value.reply.trim()) return null;
+function cleanTurnPron(value: PronTurnReply) {
   return {
     ...value,
     reply_pron_ko: cleanPron(value.reply_pron_ko),
@@ -154,6 +165,32 @@ function acceptPronTurn(value: PronTurnReply): TurnReply | null {
       corrected_pron_ko: cleanPron(value.correction.corrected_pron_ko),
     },
   };
+}
+
+// AI가 준 턴 응답. 뜯어보기는 검사 전의 조각이다
+type AiTurnReply = Omit<TurnReply, "reply_breakdown" | "correction"> & {
+  reply_breakdown: Breakdown;
+  correction: (Omit<NonNullable<TurnReply["correction"]>, "breakdown"> & { breakdown: Breakdown }) | null;
+};
+
+// reply가 공백뿐이면 null(invalid_output). 뜯어보기가 검사에 맞지 않으면 턴은 성공으로 두고 그 뜯어보기만 숨긴다:
+// reply_breakdown은 null, 교정은 breakdown 키를 뺀다 (spec/chat.md "문장 뜯어보기")
+function acceptTurn({ language, level }: TurnPromptInput, value: AiTurnReply): TurnReply | null {
+  if (!value.reply.trim()) return null;
+  // 통과율을 운영 로그로 보기 위해 남긴다. 문장·조각 내용은 남기지 않는다
+  const align = (target: "reply" | "corrected", sentence: string, pieces: Breakdown) => {
+    const aligned = alignBreakdown(sentence, pieces);
+    if (!aligned) console.warn(JSON.stringify({ ai: "breakdown_invalid", target, language, level }));
+    return aligned;
+  };
+  const replyBreakdown = align("reply", value.reply, value.reply_breakdown);
+  let correction: TurnReply["correction"] = null;
+  if (value.correction) {
+    const { breakdown, ...rest } = value.correction;
+    const aligned = align("corrected", rest.corrected, breakdown);
+    correction = aligned ? { ...rest, breakdown: aligned } : rest;
+  }
+  return { ...value, reply_breakdown: replyBreakdown, correction };
 }
 
 // JSON이 아니거나 스키마에 맞지 않으면 null

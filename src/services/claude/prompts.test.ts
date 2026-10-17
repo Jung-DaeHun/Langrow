@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { stripFurigana } from "@/lib/furigana";
 import { LANGUAGE_NAMES, LANGUAGES, LEVELS, type Language, type Level } from "@/lib/levels";
 import { scenariosForLevel } from "@/lib/scenarios";
 import {
@@ -44,18 +43,11 @@ describe("buildTurnPrompt", () => {
     ]);
   });
 
-  it.each([1, 2, 3] as const)("일본어 레벨 %i의 첫 마디는 후리가나 표기를 그대로 둔다", (level) => {
+  it.each(LEVELS)("일본어 레벨 %i의 첫 마디는 후리가나 표기를 그대로 둔다", (level) => {
     const input = turnInput("ja", level);
     const opening = buildTurnPrompt(input).messages[1].content;
     expect(opening).toBe(input.scenario.roles.ja.opening.text);
     expect(opening).toMatch(/\[[^\]|]+\|[^\]]+\]/);
-  });
-
-  it.each([4, 5] as const)("일본어 레벨 %i의 첫 마디는 후리가나 표기를 지운다", (level) => {
-    const input = turnInput("ja", level);
-    const opening = buildTurnPrompt(input).messages[1].content;
-    expect(opening).toBe(stripFurigana(input.scenario.roles.ja.opening.text));
-    expect(opening).not.toMatch(/[[|]/);
   });
 
   it("역할·배경과 사용자 목표 문장이 system에 있다", () => {
@@ -73,27 +65,26 @@ describe("buildTurnPrompt", () => {
   });
 
   it.each(LANGUAGES.flatMap((language) => LEVELS.map((level) => [language, level] as const)))(
-    "%s 레벨 %i: 후리가나 지시는 일본어 레벨 1~3에만 있다",
+    "%s 레벨 %i: 후리가나 지시는 일본어에만 있고 모든 레벨에 있다",
     (language, level) => {
       const { system } = buildTurnPrompt(turnInput(language, level));
-      const expected = language === "ja" && level <= 3;
-      expect(system.includes("모든 한자에 [漢字|かんじ]")).toBe(expected);
+      expect(system.includes("모든 한자에 [漢字|かんじ]")).toBe(language === "ja");
     },
   );
 
-  it.each([4, 5] as const)("일본어 레벨 %i에는 읽기 표기를 쓰지 말라고 한다", (level) => {
-    expect(buildTurnPrompt(turnInput("ja", level)).system).toContain("읽기 표기를 달지 않는다");
+  it.each(LEVELS)("일본어 레벨 %i에 읽기 표기를 달지 말라는 지시가 없다", (level) => {
+    expect(buildTurnPrompt(turnInput("ja", level)).system).not.toContain("한자에 [漢字|かんじ] 같은 읽기 표기를 달지 않는다");
   });
 
   it.each(LANGUAGES.flatMap((language) => LEVELS.map((level) => [language, level] as const)))(
-    "%s 레벨 %i: 한국어 입력 허용 지시는 레벨 1~2에만 있다",
+    "%s 레벨 %i: 한국어 입력 허용 지시가 있다",
     (language, level) => {
       const { system } = buildTurnPrompt(turnInput(language, level));
-      expect(system.includes("한국어로 말해도 된다")).toBe(level <= 2);
+      expect(system).toContain("한국어로 말해도 된다");
     },
   );
 
-  it.each(LANGUAGES.flatMap((language) => ([1, 2] as const).map((level) => [language, level] as const)))(
+  it.each(LANGUAGES.flatMap((language) => LEVELS.map((level) => [language, level] as const)))(
     "%s 레벨 %i: 한국어 입력이면 자연스러워도 correction을 비우지 않고, 한국어 문장 자체는 고치지 않는다",
     (language, level) => {
       const { system } = buildTurnPrompt(turnInput(language, level));
@@ -105,8 +96,10 @@ describe("buildTurnPrompt", () => {
   it.each([
     ["ja", "[韓国|かんこく]から[来|き]ました。"],
     ["en", "I'm from Korea."],
-  ] as const)("%s 레벨 1~2: 한국어 입력을 학습 언어로 옮기는 예시를 든다", (language, example) => {
-    expect(buildTurnPrompt(turnInput(language, 1)).system).toContain(example);
+  ] as const)("%s 모든 레벨: 한국어 입력을 학습 언어로 옮기는 예시를 든다", (language, example) => {
+    for (const level of LEVELS) {
+      expect(buildTurnPrompt(turnInput(language, level)).system).toContain(example);
+    }
   });
 
   it.each([
@@ -120,7 +113,7 @@ describe("buildTurnPrompt", () => {
     }
   });
 
-  it.each([1, 2, 3] as const)("일본어 레벨 %i: 읽기 표기는 한자에만 달라고 한다", (level) => {
+  it.each(LEVELS)("일본어 레벨 %i: 읽기 표기는 한자에만 달라고 한다", (level) => {
     expect(buildTurnPrompt(turnInput("ja", level)).system).toContain("읽기 표기는 한자에만 단다");
   });
 
@@ -131,11 +124,38 @@ describe("buildTurnPrompt", () => {
   it.each([
     [1, "대구에서 왔어요", true],
     [2, "コーヒー 좋아해요", true],
+    [3, "대구에서 왔어요", true],
+    [4, "会議は 다음 주 月曜日です", true],
+    [5, "대구에서 왔어요", true],
     [1, "I'm from Daegu.", false],
-    [3, "대구에서 왔어요", false],
+    [5, "テグから来ました。", false],
   ] as const)("레벨 %i 입력 %s: 이번 말에 한국어가 있다는 안내를 붙이는가 %s", (level, userText, expected) => {
     const { system } = buildTurnPrompt(turnInput("ja", level, { userText }));
     expect(system.includes("이번 사용자의 말에는 한국어가 들어 있다")).toBe(expected);
+  });
+
+  it.each(LANGUAGES.flatMap((language) => LEVELS.map((level) => [language, level] as const)))(
+    "%s 레벨 %i: reply와 corrected를 조각으로 나눈 뜯어보기를 요청한다",
+    (language, level) => {
+      const { system } = buildTurnPrompt(turnInput(language, level));
+      expect(system).toContain("reply_breakdown");
+      expect(system).toContain("correction.breakdown");
+      expect(system).toContain("빠짐없이 이으면 원래 문장이 된다");
+      expect(system).toContain("조사·어미는 앞말과 묶는다");
+    },
+  );
+
+  it("뜯어보기 예는 그 언어 것만 넣고, 일본어 조각에는 읽기 표기를 달지 말라고 한다", () => {
+    const ja = buildTurnPrompt(turnInput("ja", 4)).system;
+    const en = buildTurnPrompt(turnInput("en", 4)).system;
+    expect(ja).toContain('[{"text":"家で","meaning_ko":"집에서"},{"text":"休んでいました","meaning_ko":"쉬고 있었어요"}]');
+    expect(ja).toContain("사전형으로 바꾸거나(食べたり → 食べる)");
+    expect(ja).toContain("조각의 text에는 [漢字|かな] 읽기 표기를 달지 않는다");
+    expect(ja).not.toContain("I was resting at home.");
+    expect(en).toContain("I was resting at home.");
+    expect(en).toContain('{"text":"at home","meaning_ko":"집에서"}');
+    expect(en).not.toContain("家で");
+    expect(en).not.toContain("[漢字|かな]");
   });
 
   it("역할 변경·지시 무시·시스템 프롬프트 공개 요구에도 역할과 형식을 유지하라고 한다", () => {
@@ -183,6 +203,23 @@ describe("buildFeedbackPrompt", () => {
     expect(system).toContain("최대 3개");
     expect(system).toContain("해요체");
     expect(system).toContain("레벨을 올리거나 내리라는 제안은 하지 않는다");
+  });
+
+  it.each(LEVELS)("일본어 레벨 %i: 일본어를 인용할 때 모든 한자에 읽기 표기를 달라고 한다", (level) => {
+    const { system } = buildFeedbackPrompt({ ...input, language: "ja", level, scenario: scenariosForLevel(level)[0] });
+    expect(system).toContain("일본어를 인용할 때는 모든 한자에 [漢字|かんじ] 형식으로 읽기를 단다");
+    expect(system).toContain("읽기 표기는 한자에만 단다");
+  });
+
+  it("영어에는 읽기 표기 지시가 없다", () => {
+    expect(buildFeedbackPrompt(input).system).not.toContain("[漢字|かんじ]");
+  });
+
+  it("일본어 상급의 첫 마디도 표기를 그대로 넣는다", () => {
+    const opening = scenariosForLevel(4)[0].roles.ja.opening.text;
+    const content = buildFeedbackPrompt({ ...input, language: "ja", level: 4, scenario: scenariosForLevel(4)[0] })
+      .messages[0].content as string;
+    expect(content).toContain(`AI(첫 마디): ${opening}`);
   });
 });
 
@@ -234,7 +271,7 @@ describe("buildExplanationPrompt", () => {
     expect(system).not.toContain("틀린 이유");
   });
 
-  it.each(LEVELS)("일본어는 레벨 %i에서도 모든 한자에 [漢字|かんじ] 표기를 달라고 한다 (화면이 레벨대로 그린다)", (level) => {
+  it.each(LEVELS)("일본어는 레벨 %i에서도 모든 한자에 [漢字|かんじ] 표기를 달라고 한다", (level) => {
     expect(buildExplanationPrompt({ ...quiz, language: "ja", level }).system).toContain("모든 한자에 [漢字|かんじ]");
   });
 
