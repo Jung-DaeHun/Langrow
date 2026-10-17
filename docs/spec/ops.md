@@ -8,6 +8,7 @@
 | 운영 | Supabase 클라우드 1개 (서울) | Vercel Production (icn1), `main`, https://langrow0.vercel.app |
 
 - **마이그레이션**: `supabase migration new` → 로컬에서 `supabase db reset`으로 확인 → 운영에 `supabase db push`
+  - 운영 적용은 `main` push보다 먼저 한다. `main` push가 곧 Vercel 운영 배포라서, 새 열·인자를 쓰는 코드가 마이그레이션보다 먼저 올라가면 운영이 깨진다(2026-10-18 `reply_breakdown`). 그래서 마이그레이션은 지금 운영 코드와도 맞게(열 추가, 기본값 있는 인자) 만든다.
   - 운영 연결은 `supabase login` → `supabase link --project-ref <ref>` 순서다. login은 브라우저 인증과 코드 입력을 받아서 사용자가 직접 연 터미널에서만 된다(Claude 세션에서는 `LoginMissingTokenError`). `<ref>`는 대시보드 주소 전체가 아니라 20자 프로젝트 ID다. login 뒤에는 세션에서 `supabase migration list --linked`로 적용 상태를 볼 수 있다.
 - **단어 seed**: `npm run seed:words`를 로컬에서 실행하고, 운영에는 한 번 실행한다. 언어 × 레벨 10개 파일이 모두 있어야 넣는다. 로컬에서 일부 레벨만 넣어 화면을 볼 때만 `-- --partial`을 붙인다.
   - 운영은 `npx tsx --env-file=.env.prod scripts/seed-words.ts`로 넣는다. `.env.prod`는 운영 환경변수 5개를 담는 로컬 파일이다(`.gitignore`의 `.env*`). 이름을 `.env.production*`으로 하면 로컬 `next build`가 운영 값을 읽으므로 쓰지 않는다.
