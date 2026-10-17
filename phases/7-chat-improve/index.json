@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "chat-ui",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-18T00:37:06+0900",
+      "summary": "ChatRoom.tsx: 메시지 목록 맨 위에 안내 줄(\"한국어로 말해도 괜찮아요\", !opensTranslationByDefault면 \"누르면 번역이 나와요\" 추가, 아래 w-16 border-t 구분선), textarea placeholder 삭제. AiBubble은 line.breakdown을 받고, 말풍선 div 안에 중급 이상만 문장·발음·번역을 감싼 번역 버튼을 두며, 타일은 그 밖에, 메타 줄(중급 이상 \"번역\" 버튼 + 뜯어보기 토글)과 재생 버튼은 그 아래에 둔다. 새 컴포넌트: BreakdownToggle·BreakdownTiles(tile 배경 prop)·CorrectionBreakdown(교정 카드, 재생 버튼과 설명 사이). META_BUTTON은 SpeakButtons compact와 같은 모양. levels.ts의 allowsKoreanInput 삭제. 테스트는 번역 버튼을 이름(문장·\"번역\")으로 찾는다.",
+      "completed_at": "2026-10-18T00:44:14+0900"
     }
   ],
   "created_at": "2026-10-18T00:02:59+0900"

@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "ChatRoom.tsx: 메시지 목록 맨 위에 안내 줄(\"한국어로 말해도 괜찮아요\", !opensTranslationByDefault면 \"누르면 번역이 나와요\" 추가, 아래 w-16 border-t 구분선), textarea placeholder 삭제. AiBubble은 line.breakdown을 받고, 말풍선 div 안에 중급 이상만 문장·발음·번역을 감싼 번역 버튼을 두며, 타일은 그 밖에, 메타 줄(중급 이상 \"번역\" 버튼 + 뜯어보기 토글)과 재생 버튼은 그 아래에 둔다. 새 컴포넌트: BreakdownToggle·BreakdownTiles(tile 배경 prop)·CorrectionBreakdown(교정 카드, 재생 버튼과 설명 사이). META_BUTTON은 SpeakButtons compact와 같은 모양. levels.ts의 allowsKoreanInput 삭제. 테스트는 번역 버튼을 이름(문장·\"번역\")으로 찾는다.",
+  "spec_diff": "ui.md '번역' 행의 '말풍선 전체를 <button aria-expanded>로 만들어'는 낡은 문장이다. 지금은 말풍선 안의 문장·발음·번역 부분만 버튼이고 메타 줄 '번역'도 같은 상태를 여닫는 버튼이다(같은 표의 '문장 뜯어보기' 행과 step 지시대로). ui.md '음성 재생' 행의 'AI 말풍선(버튼이면 그 버튼) 바로 아래'와 달리, 재생 버튼은 메타 줄 아래에 있다. 입문·초보도 뜯어보기가 있으면 토글 줄이 말풍선과 재생 버튼 사이에 들어간다(step 지시). UI_GUIDE '학습 화면'의 '중급 이상이면 말풍선을 탭해서 펼친다'는 지금은 문장이나 메타 '번역'을 누르는 방식이다. 안내 줄 구분선의 '좁은' 너비는 w-16(64px)으로 정했다. 토글의 Chevron은 글자 뒤에 둔다(spec에 위치가 없다). 390px 화면 확인은 phase 뒤 메인 세션 몫이다."
+}
