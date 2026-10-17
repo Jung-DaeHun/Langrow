@@ -5,18 +5,23 @@
 | 환경 | DB | 앱 |
 |---|---|---|
 | 로컬 | Supabase CLI(`supabase start`, Docker Desktop + WSL2) | `npm run dev` |
-| 운영 | Supabase 클라우드 1개 (서울) | Vercel Production (icn1), `main` |
+| 운영 | Supabase 클라우드 1개 (서울) | Vercel Production (icn1), `main`, https://langrow0.vercel.app |
 
 - **마이그레이션**: `supabase migration new` → 로컬에서 `supabase db reset`으로 확인 → 운영에 `supabase db push`
+  - 운영 연결은 `supabase login` → `supabase link --project-ref <ref>` 순서다. login은 브라우저 인증과 코드 입력을 받아서 사용자가 직접 연 터미널에서만 된다(Claude 세션에서는 `LoginMissingTokenError`). `<ref>`는 대시보드 주소 전체가 아니라 20자 프로젝트 ID다. login 뒤에는 세션에서 `supabase migration list --linked`로 적용 상태를 볼 수 있다.
 - **단어 seed**: `npm run seed:words`를 로컬에서 실행하고, 운영에는 한 번 실행한다. 언어 × 레벨 10개 파일이 모두 있어야 넣는다. 로컬에서 일부 레벨만 넣어 화면을 볼 때만 `-- --partial`을 붙인다.
+  - 운영은 `npx tsx --env-file=.env.prod scripts/seed-words.ts`로 넣는다. `.env.prod`는 운영 환경변수 5개를 담는 로컬 파일이다(`.gitignore`의 `.env*`). 이름을 `.env.production*`으로 하면 로컬 `next build`가 운영 값을 읽으므로 쓰지 않는다.
 - **음성 생성**: `npm run audio:generate`를 로컬에서 실행하고 `public/audio/`와 `data/audio-manifest.json`을 커밋한다(`audio.md`). 단어 데이터를 고친 커밋에는 다시 만든 음성도 함께 넣는다. 운영에는 배포만 하면 되고 따로 올리는 단계가 없다. Azure 무료 체험 구독은 30일 뒤 종량제로 올려야 계속 만들 수 있다(F0 리소스만 두면 과금 없음).
-- **Vercel Preview는 끈다.** dev DB가 없어서 켜 두면 prod DB를 쓰게 되고, 지표가 오염된다.
+- **Vercel Preview는 끈다.** dev DB가 없어서 켜 두면 prod DB를 쓰게 되고, 지표가 오염된다. Settings → Build and Deployment → Ignored Build Step을 "Only build production"으로 둔다.
+- **Vercel 함수 지역**: 새 프로젝트의 기본은 `iad1`(미국)이다. Settings → Functions → Function Region에서 Seoul(`icn1`)을 고르고 새 배포를 한다. 응답 헤더 `x-vercel-id`가 `icn1::icn1::…`이면 서울에서 실행된 것이다(`icn1::iad1::…`은 서울에서 받아 미국에서 실행).
+- **Vercel 환경변수 타입**: `SUPABASE_SECRET_KEY`·`ANTHROPIC_API_KEY`만 Secret 타입·Production 전용으로 넣는다. `NEXT_PUBLIC_` 두 개와 `CLAUDE_MODEL`은 Config 타입으로 넣는다. `NEXT_PUBLIC_` 변수를 Secret으로 저장하면 Vercel이 이후 수정 저장을 막고 Config로 바꿀 수도 없다(지우고 다시 만들어야 한다). `NEXT_PUBLIC_` 값은 빌드에 박히므로 첫 Deploy 전에 넣는다.
 - **테스트와 하네스 Stop hook**(lint, build, test)은 Docker 없이 통과해야 한다. 기본 테스트는 가짜 db를 쓴다. 실제 잠금·권한 검증은 `npm run test:db`로 분리하며 로컬 Supabase가 필요하다. RPC·마이그레이션·DB 접근 코드 변경 시와 배포 전에는 이 통합 테스트를 반드시 실행한다.
-- **환경변수**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`(로컬과 운영의 키를 나누고, 지출 한도를 설정), `CLAUDE_MODEL`. `services/env.ts`에서 zod로 지연 검증한다. `METRICS_EXCLUDED_USER_IDS`는 로컬 `metrics-report` 전용이다. `AZURE_SPEECH_KEY`·`AZURE_SPEECH_REGION`은 로컬 `generate-audio` 전용이며 운영 env에 넣지 않는다.
+- **환경변수**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`(운영 키는 별도 워크스페이스에 만들어 로컬과 나누고, 지출 한도를 설정), `CLAUDE_MODEL`. 조직 월 지출 한도에 닿으면 모든 키가 400 `invalid_request_error`("You have reached your specified API usage limits")로 막히고, 앱에는 `chat_failed`의 `api_error`로만 남는다. `services/env.ts`에서 zod로 지연 검증한다. `METRICS_EXCLUDED_USER_IDS`는 로컬 `metrics-report` 전용이다. `AZURE_SPEECH_KEY`·`AZURE_SPEECH_REGION`은 로컬 `generate-audio` 전용이며 운영 env에 넣지 않는다.
 - **구글 OAuth**
   - Google 콘솔의 리디렉션 URI에는 앱 주소가 아니라 Supabase의 `/auth/v1/callback`을 넣는다. 운영과 로컬(`http://127.0.0.1:54321/auth/v1/callback`)을 모두 등록한다.
   - 로컬은 `supabase/config.toml`의 `[auth.external.google]`에서 설정한다. 클라이언트 ID와 secret은 `supabase/.env.local`의 `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`·`SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET`에 둔다(CLI가 읽고 git은 무시한다). 값이 없어도 `supabase start`는 되고 구글 로그인만 실패한다. 값을 바꾸면 `supabase stop` → `supabase start`로 다시 띄운다.
-  - `redirectTo`는 `window.location.origin + '/auth/callback'`으로 만든다. Supabase Auth는 `site_url`과 호스트가 같거나 `additional_redirect_urls`에 있는 주소로만 돌려보낸다. 로컬은 `127.0.0.1`(site_url)과 `http://localhost:3000/auth/callback`을 허용하고, 운영은 대시보드의 Site URL을 운영 주소로 둔다.
+  - `redirectTo`는 `window.location.origin + '/auth/callback'`으로 만든다. Supabase Auth는 `site_url`과 호스트가 같거나 `additional_redirect_urls`에 있는 주소로만 돌려보낸다. 로컬은 `127.0.0.1`(site_url)과 `http://localhost:3000/auth/callback`을 허용하고, 운영은 대시보드의 Site URL을 운영 주소로, Redirect URLs에 `<운영 주소>/auth/callback`을 둔다.
+  - 운영 대시보드에서 Google은 로컬과 같은 클라이언트로 켜고, **Email provider는 끈다.** 켜 두면 publishable key만으로 계정을 계속 만들어 무료 한도를 우회할 수 있다(로컬 `config.toml`은 테스트 계정 때문에 켜 둔다). 새 사용자 가입 허용은 켠다(끄면 구글 가입도 막힌다).
 - **버전 고정**: Next.js, supabase-js, Anthropic SDK 버전을 설치할 때 고정하고 `CLAUDE.md`에 적는다. 예를 들어 Next 16이면 `proxy.ts`, async `params`/`cookies()`를 쓴다.
 
 ## 출시 최소 요건
