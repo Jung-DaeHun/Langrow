@@ -3,7 +3,6 @@ import {
   LANGUAGE_NAMES,
   LEVEL_INFO,
   LEVELS,
-  allowsKoreanInput,
   canTakeLevelTest,
   isLevel,
   opensTranslationByDefault,
@@ -34,10 +33,6 @@ describe("levels", () => {
 
   it("번역은 입문·초보(1~2)만 기본으로 펼친다", () => {
     expect(LEVELS.map(opensTranslationByDefault)).toEqual([true, true, false, false, false]);
-  });
-
-  it("한국어 입력은 입문·초보(1~2)만 허용한다", () => {
-    expect(LEVELS.map(allowsKoreanInput)).toEqual([true, true, false, false, false]);
   });
 
   it("레벨업 테스트는 1~4만 볼 수 있다", () => {

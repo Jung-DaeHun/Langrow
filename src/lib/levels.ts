@@ -28,10 +28,6 @@ export function opensTranslationByDefault(level: Level): boolean {
   return level <= 2;
 }
 
-export function allowsKoreanInput(level: Level): boolean {
-  return level <= 2;
-}
-
 export function canTakeLevelTest(level: Level): boolean {
   return level <= 4;
 }

@@ -183,19 +183,36 @@ describe("ChatRoom 표시", () => {
     expect(screen.queryByRole("button", { expanded: false })).toBeNull();
   });
 
-  it("레벨 3은 말풍선을 눌러 번역을 펼친다", async () => {
+  it("레벨 3은 말풍선 문장을 눌러 번역을 펼친다", async () => {
     const { user } = setup(room({ level: 3, turns: [turn(1)] }));
 
     expect(screen.queryByText(SCENARIO.opening.ko)).toBeNull();
     expect(screen.queryByText("번역 1")).toBeNull();
-    const toggles = screen.getAllByRole("button", { expanded: false });
-    expect(toggles).toHaveLength(2);
+    const bubble = screen.getByRole("button", { name: "reply 1" });
+    expect(bubble).toHaveAttribute("aria-expanded", "false");
 
-    await user.click(toggles[1]);
+    await user.click(bubble);
 
     expect(screen.getByText("번역 1")).toBeInTheDocument();
-    expect(toggles[1]).toHaveAttribute("aria-expanded", "true");
+    expect(bubble).toHaveAttribute("aria-expanded", "true");
     expect(screen.queryByText(SCENARIO.opening.ko)).toBeNull();
+  });
+
+  it("레벨 3은 말풍선 아래 [번역]으로도 같은 번역을 여닫는다", async () => {
+    const { user } = setup(room({ level: 3, turns: [turn(1)] }));
+    const metas = screen.getAllByRole("button", { name: "번역" });
+    expect(metas).toHaveLength(2);
+
+    await user.click(metas[1]);
+
+    expect(screen.getByText("번역 1")).toBeInTheDocument();
+    expect(metas[1]).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: /^reply 1/ })).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(metas[1]);
+
+    expect(screen.queryByText("번역 1")).toBeNull();
+    expect(metas[1]).toHaveAttribute("aria-expanded", "false");
   });
 
   it.each([1, 4, 5] as const)("일본어 레벨 %i은 첫 마디·말풍선·교정에 후리가나 ruby를 그린다", (level) => {
@@ -227,15 +244,9 @@ describe("ChatRoom 입력", () => {
     expect(sendButton()).toBeEnabled();
   });
 
-  it("placeholder는 입문·초보면 한국어도 괜찮다고 알린다", () => {
-    setup(room({ level: 2 }));
-    expect(textbox()).toHaveAttribute("placeholder", "영어로 답해 보세요. 한국어도 괜찮아요");
-  });
-
-  it("placeholder는 중급 이상이면 학습 언어만 적는다", () => {
-    const ja = { title: "편의점", opening: { text: "こんにちは", ko: "안녕하세요" } };
-    setup(room({ language: "ja", level: 3 }), { kind: "available" }, ja);
-    expect(textbox()).toHaveAttribute("placeholder", "일본어로 답해 보세요");
+  it("입력창에는 placeholder 없이 이름만 단다", () => {
+    setup(room({ level: 1 }));
+    expect(screen.getByRole("textbox", { name: "메시지 입력" })).not.toHaveAttribute("placeholder");
   });
 
   it("IME 조합 중 Enter는 전송하지 않는다", async () => {
@@ -738,7 +749,7 @@ describe("ChatRoom 한글 발음", () => {
     expect(screen.queryByText("쿄-와 아츠이데스네.")).toBeNull();
     expect(screen.getByText("아츠이데스.")).toBeInTheDocument();
 
-    await user.click(screen.getAllByRole("button", { expanded: false })[1]);
+    await user.click(screen.getAllByRole("button", { name: "번역" })[1]);
 
     expect(screen.getByText("쿄-와 아츠이데스네.")).toBeInTheDocument();
     expect(screen.getByText("오늘 덥네요.")).toBeInTheDocument();
@@ -748,7 +759,7 @@ describe("ChatRoom 한글 발음", () => {
     const { user, rerender } = setup(jaRoom(4), { kind: "available" }, JA_SCENARIO);
 
     expect(screen.queryByText("아츠이데스.")).toBeNull();
-    for (const toggle of screen.getAllByRole("button", { expanded: false })) await user.click(toggle);
+    for (const toggle of screen.getAllByRole("button", { name: "번역" })) await user.click(toggle);
     expect(screen.queryByText("하지메마시테!")).toBeNull();
     expect(screen.queryByText("쿄-와 아츠이데스네.")).toBeNull();
 
@@ -778,5 +789,184 @@ describe("ChatRoom 한글 발음", () => {
     expect(screen.getByText("하이.", ON_SCREEN)).toHaveAttribute("aria-hidden", "true");
     expect(document.querySelector("[aria-live]")).toHaveTextContent("はい。");
     expect(document.querySelector("[aria-live]")).not.toHaveTextContent("하이.");
+  });
+});
+
+describe("ChatRoom 대화 안내", () => {
+  const JA = { title: "편의점", opening: { text: "いらっしゃいませ。", ko: "어서 오세요." } };
+
+  it.each([
+    ["en", 1],
+    ["ja", 2],
+  ] as const)("%s 레벨 %i은 첫 마디 위에 한국어 입력 안내 한 줄만 둔다", (language, level) => {
+    setup(room({ language, level }), { kind: "available" }, language === "ja" ? JA : SCENARIO);
+
+    const opening = language === "ja" ? JA.opening.text : SCENARIO.opening.text;
+    expect(isBefore(screen.getByText("한국어로 말해도 괜찮아요"), screen.getByText(opening))).toBe(true);
+    expect(screen.queryByText("누르면 번역이 나와요")).toBeNull();
+  });
+
+  it.each([
+    ["en", 3],
+    ["ja", 4],
+    ["en", 5],
+  ] as const)("%s 레벨 %i은 번역 보기 안내까지 두 줄을 둔다", (language, level) => {
+    setup(room({ language, level }), { kind: "available" }, language === "ja" ? JA : SCENARIO);
+
+    const korean = screen.getByText("한국어로 말해도 괜찮아요");
+    const translation = screen.getByText("누르면 번역이 나와요");
+    const opening = screen.getByText(language === "ja" ? JA.opening.text : SCENARIO.opening.text);
+    expect(isBefore(korean, translation)).toBe(true);
+    expect(isBefore(translation, opening)).toBe(true);
+  });
+});
+
+describe("ChatRoom 문장 뜯어보기", () => {
+  const WITH_OPENING = {
+    ...SCENARIO,
+    opening: {
+      ...SCENARIO.opening,
+      breakdown: [
+        { text: "Hi! ", meaning_ko: "인사" },
+        { text: "What can I get ", meaning_ko: "무엇을 드릴까요" },
+        { text: "for you?", meaning_ko: "당신에게" },
+      ],
+    },
+  };
+  const REPLY_PIECES = [
+    { text: "Sure, ", meaning_ko: "물론이죠" },
+    { text: "one latte.", meaning_ko: "라떼 하나" },
+  ];
+  const CORRECTION = {
+    corrected: "A latte, please.",
+    explanation_ko: "부탁할 때 please를 붙여요",
+    breakdown: [
+      { text: "A latte, ", meaning_ko: "라떼 한 잔" },
+      { text: "please.", meaning_ko: "주세요" },
+    ],
+  };
+  const pieceTurn = turn(1, { reply: "Sure, one latte.", replyBreakdown: REPLY_PIECES, correction: CORRECTION });
+  const toggles = () => screen.getAllByRole("button", { name: "문장 뜯어보기" });
+
+  it("첫 마디·저장된 턴의 말풍선과 교정 카드는 처음 닫혀 있고 눌러 열고 닫는다", async () => {
+    const { user } = setup(room({ level: 1, turns: [pieceTurn] }), { kind: "available" }, WITH_OPENING);
+
+    expect(toggles()).toHaveLength(3);
+    // 첫 마디 → 교정 카드 → AI 말풍선 순서다
+    for (const [i, meaning] of ["인사", "주세요", "물론이죠"].entries()) {
+      expect(toggles()[i]).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByText(meaning)).toBeNull();
+
+      await user.click(toggles()[i]);
+      expect(toggles()[i]).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByText(meaning)).toBeInTheDocument();
+
+      await user.click(toggles()[i]);
+      expect(toggles()[i]).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByText(meaning)).toBeNull();
+    }
+  });
+
+  it("이 화면에서 받은 턴도 열 수 있고, 새 턴 알림에는 조각 뜻을 넣지 않는다", async () => {
+    apiMock.mockResolvedValue(
+      replied(1, 19, { reply: "Sure, one latte.", reply_ko: "네, 라떼 한 잔이요.", reply_breakdown: REPLY_PIECES, correction: CORRECTION }),
+    );
+    const { user } = setup(room({ level: 1 }));
+
+    await typeAndSend(user, "latte please");
+
+    expect(toggles()).toHaveLength(2);
+    for (const toggle of toggles()) {
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await user.click(toggle);
+    }
+    expect(screen.getByText("물론이죠")).toBeInTheDocument();
+    expect(screen.getByText("주세요")).toBeInTheDocument();
+    const region = document.querySelector("[aria-live]");
+    expect(region).toHaveTextContent("Sure, one latte.");
+    for (const text of ["물론이죠", "라떼 하나", "주세요", "문장 뜯어보기"]) expect(region).not.toHaveTextContent(text);
+  });
+
+  it("입문·초보는 타일을 말풍선 안 번역 아래에 조각(학습 언어)·뜻 순서로 문장 순서대로 둔다", async () => {
+    const { user } = setup(room({ level: 2, turns: [pieceTurn] }));
+
+    await user.click(toggles().at(-1) as HTMLElement);
+
+    const first = screen.getByText("물론이죠");
+    const second = screen.getByText("라떼 하나");
+    expect(isBefore(screen.getByText("번역 1"), first)).toBe(true);
+    expect(isBefore(first, second)).toBe(true);
+    const piece = screen.getByText("Sure,");
+    expect(piece).toHaveAttribute("lang", "en");
+    expect(isBefore(piece, first)).toBe(true);
+  });
+
+  it("중급 이상은 타일을 눌러도 번역이 바뀌지 않고, 문장이나 [번역]을 누르면 번역이 열린다", async () => {
+    const { user } = setup(room({ level: 3, turns: [pieceTurn] }));
+    const bubble = screen.getByRole("button", { name: "Sure, one latte." });
+
+    await user.click(toggles().at(-1) as HTMLElement);
+
+    const tile = screen.getByText("물론이죠");
+    expect(tile.closest("button")).toBeNull();
+    await user.click(tile);
+    expect(screen.queryByText("번역 1")).toBeNull();
+    expect(bubble).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(bubble);
+    expect(screen.getByText("번역 1")).toBeInTheDocument();
+    expect(isBefore(screen.getByText("번역 1"), screen.getByText("물론이죠"))).toBe(true);
+    await user.click(screen.getByText("물론이죠"));
+    expect(screen.getByText("번역 1")).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: "번역" })[1]);
+    expect(screen.queryByText("번역 1")).toBeNull();
+    expect(screen.getByText("물론이죠")).toBeInTheDocument();
+  });
+
+  it("일본어 타일은 조각에 후리가나를 달고 한글 발음은 넣지 않는다", async () => {
+    const jaTurn = turn(1, {
+      reply: "[今日|きょう]は[暑|あつ]いですね。",
+      replyKo: "오늘 덥네요.",
+      replyPronKo: "쿄-와 아츠이데스네.",
+      replyBreakdown: [
+        { text: "[今日|きょう]は", meaning_ko: "오늘은" },
+        { text: "[暑|あつ]いですね。", meaning_ko: "덥네요" },
+      ],
+    });
+    const { user } = setup(room({ language: "ja", level: 1, turns: [jaTurn] }), { kind: "available" }, { title: "인사", opening: { text: "はい。", ko: "네." } });
+
+    await user.click(toggles()[0]);
+
+    const tile = screen.getByText("오늘은").parentElement as HTMLElement;
+    expect(tile.querySelector("[lang='ja'] rt")).toHaveTextContent("きょう");
+    expect(tile).not.toHaveTextContent("쿄");
+    expect(isBefore(screen.getByText("오늘은"), screen.getByText("덥네요"))).toBe(true);
+  });
+
+  it("값이 없으면(null·빈 배열·키 없음) 토글을 두지 않는다", () => {
+    setup(
+      room({
+        level: 3,
+        turns: [
+          turn(1, { replyBreakdown: null, correction: { corrected: "Fixed.", explanation_ko: "설명" } }),
+          turn(2, { replyBreakdown: [], correction: { corrected: "Fixed again.", explanation_ko: "설명 2", breakdown: [] } }),
+        ],
+      }),
+    );
+
+    expect(screen.queryByRole("button", { name: "문장 뜯어보기" })).toBeNull();
+  });
+
+  it("교정 카드는 고친 문장 아래에서 열고 설명 위에 타일을 펼친다", async () => {
+    const { user } = setup(room({ level: 1, turns: [pieceTurn] }));
+
+    const toggle = toggles()[0];
+    expect(isBefore(screen.getByText("A latte, please."), toggle)).toBe(true);
+    await user.click(toggle);
+
+    const meaning = screen.getByText("주세요");
+    expect(isBefore(toggle, meaning)).toBe(true);
+    expect(isBefore(meaning, screen.getByText(CORRECTION.explanation_ko))).toBe(true);
   });
 });

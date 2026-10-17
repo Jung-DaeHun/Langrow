@@ -1,17 +1,11 @@
 "use client";
 
-import { ArrowUp, ChevronLeft, CircleAlert, Info, Languages } from "lucide-react";
+import { ArrowUp, ChevronDown, ChevronLeft, ChevronUp, CircleAlert, Info, Languages } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import {
-  LANGUAGE_NAMES,
-  allowsKoreanInput,
-  opensTranslationByDefault,
-  showsPronunciation,
-  type Language,
-  type Level,
-} from "@/lib/levels";
+import { opensTranslationByDefault, showsPronunciation, type Language, type Level } from "@/lib/levels";
+import type { Breakdown } from "@/lib/breakdown";
 import { stripFurigana } from "@/lib/furigana";
 import type { TrialState } from "@/lib/plan";
 import type { ScenarioLine } from "@/lib/scenarios";
@@ -39,6 +33,8 @@ const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus
 const PILL = `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-line-input bg-card px-3 text-sm font-semibold text-ink hover:bg-hover disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;
 const OUTLINE_SM = `inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border border-accent bg-transparent px-4 text-sm font-semibold text-accent transition duration-200 hover:bg-black/5 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;
 const AI_BUBBLE = "rounded-bubble rounded-bl-md bg-card px-3.5 py-3 shadow-card";
+// 말풍선 아래 메타 줄의 작은 글자 버튼("번역", "문장 뜯어보기"). 재생 버튼(SpeakButtons compact)과 같은 모양이다
+const META_BUTTON = `inline-flex h-9 items-center gap-1 px-1 text-xs font-semibold text-accent ${FOCUS_RING}`;
 const MY_BUBBLE = "max-w-[84%] self-end whitespace-pre-wrap wrap-anywhere rounded-bubble rounded-br-md px-3.5 py-3";
 const ERROR_NOTICE = "flex items-start gap-3 rounded-xl bg-card p-4 ring-1 ring-danger ring-inset";
 
@@ -230,6 +226,14 @@ export function ChatRoom({ room, scenario, trial }: Props) {
       </header>
 
       <div className="flex flex-1 flex-col gap-3 py-4">
+        {/* 한국어 입력과 번역 보기를 알리는 안내. 닫지 않고 메시지와 함께 스크롤된다 */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-center text-micro text-ink-muted">
+            <p>한국어로 말해도 괜찮아요</p>
+            {!opensTranslationByDefault(room.level) && <p>누르면 번역이 나와요</p>}
+          </div>
+          <div className="w-16 border-t border-line" />
+        </div>
         <AiBubble line={scenario.opening} language={room.language} level={room.level} />
         {turns.map((t) => (
           <Fragment key={t.turnNo}>
@@ -248,13 +252,14 @@ export function ChatRoom({ room, scenario, trial }: Props) {
                   </p>
                 )}
                 <SpeakButtons source={{ kind: "speech", text: t.correction.corrected, language: room.language }} variant="compact" />
+                <CorrectionBreakdown pieces={t.correction.breakdown} language={room.language} />
                 <p className="text-sm">
                   <Furigana text={t.correction.explanation_ko} show={furigana} />
                 </p>
               </div>
             )}
             <AiBubble
-              line={{ text: t.reply, ko: t.replyKo, pronKo: t.replyPronKo }}
+              line={{ text: t.reply, ko: t.replyKo, pronKo: t.replyPronKo, breakdown: t.replyBreakdown }}
               language={room.language}
               level={room.level}
             />
@@ -327,11 +332,6 @@ export function ChatRoom({ room, scenario, trial }: Props) {
                 onKeyDown={onKeyDown}
                 disabled={inputLocked}
                 aria-label="메시지 입력"
-                placeholder={
-                  allowsKoreanInput(room.level)
-                    ? `${LANGUAGE_NAMES[room.language]}로 답해 보세요. 한국어도 괜찮아요`
-                    : `${LANGUAGE_NAMES[room.language]}로 답해 보세요`
-                }
                 className="max-h-30 flex-1 resize-none bg-transparent py-2 text-base outline-none disabled:cursor-not-allowed"
               />
               <button
@@ -378,18 +378,22 @@ function TurnAnnouncement({ turn, language, level }: { turn: ChatTurnView; langu
   );
 }
 
-// 입문·초보는 번역을 항상 펼치고, 중급 이상은 말풍선 전체를 눌러 펼친다. 한글 발음은 번역과 같이 펼친다.
-// 재생 버튼은 말풍선 밖 아래에 둔다
+// 입문·초보는 번역을 항상 펼치고, 중급 이상은 문장이나 메타 줄 "번역"을 눌러 펼친다. 한글 발음은 번역과 같이 펼친다.
+// 버튼 안에 버튼을 넣을 수 없어 번역 버튼은 말풍선의 문장·발음·번역 부분만 감싸고, 뜯어보기 타일과 메타 줄은 그 밖에 둔다.
+// 재생 버튼은 메타 줄 아래에 둔다
 function AiBubble({
   line,
   language,
   level,
 }: {
-  line: { text: string; ko: string; pronKo?: string | null };
+  line: { text: string; ko: string; pronKo?: string | null; breakdown?: Breakdown | null };
   language: Language;
   level: Level;
 }) {
   const [open, setOpen] = useState(false);
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
+  const alwaysOpen = opensTranslationByDefault(level);
+  const pieces = line.breakdown?.length ? line.breakdown : null;
   const body = (
     <span lang={language} className="block whitespace-pre-wrap wrap-anywhere">
       <Furigana text={line.text} show={language === "ja"} />
@@ -404,34 +408,84 @@ function AiBubble({
     ) : null;
   const translation = <span className="mt-2 block border-t border-line pt-2 text-sm text-ink-muted">{line.ko}</span>;
 
-  const bubble = opensTranslationByDefault(level) ? (
-    <div className={AI_BUBBLE}>
-      {body}
-      {pronunciation}
-      {translation}
-    </div>
-  ) : (
-    <button
-      type="button"
-      aria-expanded={open}
-      onClick={() => setOpen((v) => !v)}
-      className={`flex flex-col items-start gap-1 rounded-bubble text-left ${FOCUS_RING}`}
-    >
-      <span className={`block ${AI_BUBBLE}`}>
-        {body}
-        {open && pronunciation}
-        {open && translation}
-      </span>
-      <span className="inline-flex items-center gap-1 px-1 text-xs font-semibold text-accent">
-        <Languages size={14} aria-hidden="true" />
-        번역
-      </span>
-    </button>
-  );
   return (
     <div className="flex max-w-[84%] flex-col items-start gap-1 self-start">
-      {bubble}
+      <div className={AI_BUBBLE}>
+        {alwaysOpen ? (
+          <>
+            {body}
+            {pronunciation}
+            {translation}
+          </>
+        ) : (
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className={`block w-full rounded-lg text-left ${FOCUS_RING}`}
+          >
+            {body}
+            {open && pronunciation}
+            {open && translation}
+          </button>
+        )}
+        {pieces !== null && breakdownOpen && (
+          <div className="mt-2 border-t border-line pt-2">
+            <BreakdownTiles pieces={pieces} language={language} tile="bg-page" />
+          </div>
+        )}
+      </div>
+      {(!alwaysOpen || pieces !== null) && (
+        <div className="flex gap-3">
+          {!alwaysOpen && (
+            <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={META_BUTTON}>
+              <Languages size={14} aria-hidden="true" />
+              번역
+            </button>
+          )}
+          {pieces !== null && <BreakdownToggle open={breakdownOpen} onToggle={() => setBreakdownOpen((v) => !v)} />}
+        </div>
+      )}
       <SpeakButtons source={{ kind: "speech", text: line.text, language }} variant="compact" />
+    </div>
+  );
+}
+
+// 교정 카드의 뜯어보기. 토글 바로 아래에 타일을 펼친다. 값이 없으면(기능 전 턴, 검사 실패) 그리지 않는다
+function CorrectionBreakdown({ pieces, language }: { pieces?: Breakdown; language: Language }) {
+  const [open, setOpen] = useState(false);
+  if (!pieces?.length) return null;
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <BreakdownToggle open={open} onToggle={() => setOpen((v) => !v)} />
+      {open && <BreakdownTiles pieces={pieces} language={language} tile="bg-card/70" />}
+    </div>
+  );
+}
+
+// 문장 뜯어보기(spec/chat.md "문장 뜯어보기"). 처음에는 닫혀 있고 열림 상태는 저장하지 않는다
+function BreakdownToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  const Icon = open ? ChevronUp : ChevronDown;
+  return (
+    <button type="button" aria-expanded={open} onClick={onToggle} className={META_BUTTON}>
+      문장 뜯어보기
+      <Icon size={14} aria-hidden="true" />
+    </button>
+  );
+}
+
+// 조각 타일을 문장 순서대로 잇는다. 위는 조각(학습 언어), 아래는 뜻이고 한글 발음은 넣지 않는다
+function BreakdownTiles({ pieces, language, tile }: { pieces: Breakdown; language: Language; tile: string }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {pieces.map((piece, i) => (
+        <div key={i} className={`rounded-lg ${tile} px-2 py-1 text-center`}>
+          <p lang={language} className="text-sm font-semibold text-brand">
+            <Furigana text={piece.text} show={language === "ja"} />
+          </p>
+          <p className="text-xs text-ink-muted">{piece.meaning_ko}</p>
+        </div>
+      ))}
     </div>
   );
 }
