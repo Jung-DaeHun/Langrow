@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "lib/furigana: 여는 괄호 복구, rubySegments(input) 추가(화면용 가타카나 읽기. parseFurigana는 가타카나 그대로라 SSML 불변). lib/breakdown 새 파일: Breakdown·BreakdownPiece, alignBreakdown(sentence, pieces) → 문장을 조각 경계에서 자른 Breakdown | null. scenarios.ts 첫 마디 40개 breakdown 초안(검수 필요). 마이그레이션 20261017100000_breakdown.sql: chat_turns.reply_breakdown jsonb, finish_chat_turn 마지막 인자 p_reply_breakdown jsonb default null. TurnReply.reply_breakdown?·correction.breakdown? 타입만(zod는 step 1). finishChatTurn이 저장, ChatTurnView.replyBreakdown.",
+  "spec_diff": "1) 여는 괄호 복구: | 바로 앞이 |인 경우([漢字|かん|じ])와 | 앞말이 빈 경우([漢[字|じ]|かんじ]의 |かんじ])는 복구하지 않고 기존 깨진 표기 규칙(기호만 지움)을 따른다. 기존 테스트를 지키기 위해서다. spec 문장('| 바로 앞에 한자가 없으면 읽기를 버린다')은 이 둘에서 읽기를 버리는 것으로도 읽힌다. 2) 뜯어보기 검사 정규화에서 문장부호와 함께 기호(\\p{S})도 빼고, 정규화하면 빈 조각(문장부호만 있는 조각)도 거부한다(step 지시. spec은 '공백과 문장부호'·'빈 조각'만 적음). 3) 문장에 깨진 표기가 있으면 alignBreakdown의 text는 원래 문자열 대신 parseFurigana가 읽은 모양(깨진 기호 제거, 복구한 표기는 [본문|읽기], 한자 없는 표기는 본문만)으로 다시 쓴 부분이다. 온전한 표기만 있는 문장은 원래 문장의 부분 문자열과 같고, 화면에 보이는 결과는 같다."
+}

@@ -2,9 +2,29 @@
   "project": "Langrow",
   "phase": "7-chat-improve",
   "steps": [
-    { "step": 0, "name": "chat-data", "status": "pending" },
-    { "step": 1, "name": "chat-ai", "status": "pending" },
-    { "step": 2, "name": "furigana-ui", "status": "pending" },
-    { "step": 3, "name": "chat-ui", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "chat-data",
+      "status": "completed",
+      "started_at": "2026-10-18T00:02:59+0900",
+      "summary": "lib/furigana: 여는 괄호 복구, rubySegments(input) 추가(화면용 가타카나 읽기. parseFurigana는 가타카나 그대로라 SSML 불변). lib/breakdown 새 파일: Breakdown·BreakdownPiece, alignBreakdown(sentence, pieces) → 문장을 조각 경계에서 자른 Breakdown | null. scenarios.ts 첫 마디 40개 breakdown 초안(검수 필요). 마이그레이션 20261017100000_breakdown.sql: chat_turns.reply_breakdown jsonb, finish_chat_turn 마지막 인자 p_reply_breakdown jsonb default null. TurnReply.reply_breakdown?·correction.breakdown? 타입만(zod는 step 1). finishChatTurn이 저장, ChatTurnView.replyBreakdown.",
+      "completed_at": "2026-10-18T00:18:34+0900"
+    },
+    {
+      "step": 1,
+      "name": "chat-ai",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "furigana-ui",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "chat-ui",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-18T00:02:59+0900"
 }
