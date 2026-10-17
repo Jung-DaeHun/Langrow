@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "Furigana: show면 rubySegments로 한자·가타카나 루비, 본문을 <span class=inline-block>으로 묶어 벌어짐 방지(+ruby{ruby-align:center}). Chrome은 span 없으면 center여도 週末 간격 40→50px. showsFurigana 삭제, showsPronunciation=ja&&level<=3. 표시 조건은 language===\"ja\"뿐, ChatFeedback·Corrections의 level prop은 고아라 제거. 카드 앞면 가타카나 단어도 루비. 넘침 원인: AiBubble 말풍선은 fit-content(max-w는 바깥 div)인데 keep-all+wrap-break-word라 최소 너비가 문장 폭. 수정: :lang(ja){word-break:normal}, MY_BUBBLE·AiBubble 본문 wrap-anywhere. 320px scrollWidth 741→305. 테스트는 ruby span 셀렉터.",
+  "spec_diff": "ui.md 타이포그래피의 후리가나 마크업 <ruby>漢字<rp>…는 본문을 <span class=\"inline-block\">으로 감싼 <ruby><span>漢字</span><rp>(</rp><rt>…</rt><rp>)</rp></ruby>로 그린다(step 지시가 허용, ruby-align을 따르지 않는 브라우저 대비). ui.md '320px … 타일'은 step 범위대로 말풍선·교정 카드만 확인했다. ui.md '크롬은 구현하며 확인'은 프로젝트 밖 임시 폴더의 정적 HTML(빌드 CSS)과 설치된 Chrome headless로 320px 넘침·루비 글자 간격만 수치로 쟀다. 눈으로 본 확인과 WebKit은 phase 뒤 메인 세션 몫."
+}

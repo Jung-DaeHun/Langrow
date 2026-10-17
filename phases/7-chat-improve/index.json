@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "furigana-ui",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-18T00:26:29+0900",
+      "summary": "Furigana: show면 rubySegments로 한자·가타카나 루비, 본문을 <span class=inline-block>으로 묶어 벌어짐 방지(+ruby{ruby-align:center}). Chrome은 span 없으면 center여도 週末 간격 40→50px. showsFurigana 삭제, showsPronunciation=ja&&level<=3. 표시 조건은 language===\"ja\"뿐, ChatFeedback·Corrections의 level prop은 고아라 제거. 카드 앞면 가타카나 단어도 루비. 넘침 원인: AiBubble 말풍선은 fit-content(max-w는 바깥 div)인데 keep-all+wrap-break-word라 최소 너비가 문장 폭. 수정: :lang(ja){word-break:normal}, MY_BUBBLE·AiBubble 본문 wrap-anywhere. 320px scrollWidth 741→305. 테스트는 ruby span 셀렉터.",
+      "completed_at": "2026-10-18T00:37:05+0900"
     },
     {
       "step": 3,
