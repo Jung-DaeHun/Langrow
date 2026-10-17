@@ -1,0 +1,10 @@
+{
+  "project": "Langrow",
+  "phase": "7-chat-improve",
+  "steps": [
+    { "step": 0, "name": "chat-data", "status": "pending" },
+    { "step": 1, "name": "chat-ai", "status": "pending" },
+    { "step": 2, "name": "furigana-ui", "status": "pending" },
+    { "step": 3, "name": "chat-ui", "status": "pending" }
+  ]
+}
