@@ -4,7 +4,7 @@ import { ChevronLeft, CircleAlert, CircleCheck, Info, Pencil, ThumbsUp } from "l
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { showsFurigana, type Language, type Level } from "@/lib/levels";
+import type { Language } from "@/lib/levels";
 import { VALID_SESSION_TURNS, isValidSession } from "@/lib/today";
 import type { EndResult } from "@/server/db/chat";
 import type { ChatTurnView } from "@/server/db/reads";
@@ -15,7 +15,7 @@ import { WaitingDots } from "./WaitingDots";
 
 // 종료 피드백(집중 모드). result가 null이면 다른 요청이 피드백을 만드는 중(202)이라 화면이 보이는 동안 /end를 다시 확인한다.
 // 확인 실패는 자동으로 반복하지 않는다. 피드백 문장은 후리가나 표기를 요청하지 않지만, 모델이 대화 기록의 표기를 따라 쓸 수 있어서
-// 대화 말풍선과 같은 규칙으로 그린다(보이는 레벨은 ruby, 숨기는 레벨과 깨진 표기는 기호를 지움)
+// 대화 말풍선과 같은 규칙으로 그린다(일본어는 ruby, 깨진 표기는 기호를 지움)
 
 // server/chat.ts의 END_RETRY_AFTER_SECONDS와 같은 값이다(server-only라 가져오지 못한다)
 const FIRST_CHECK_SECONDS = 2;
@@ -35,21 +35,20 @@ type Props = {
   sessionId: string;
   scenarioTitle: string;
   language: Language;
-  level: Level;
   turns: ChatTurnView[];
   // 오늘(한국 날짜) 확정된 턴 수. 날짜를 넘겨 이어 한 세션도 홈의 오늘 목표와 같은 기준으로 판정한다
   doneTurnsToday: number;
   result: EndResult | null;
 };
 
-export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns, doneTurnsToday, result }: Props) {
+export function ChatFeedback({ sessionId, scenarioTitle, language, turns, doneTurnsToday, result }: Props) {
   const router = useRouter();
   const [polled, setPolled] = useState<EndResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [firstWait, setFirstWait] = useState(FIRST_CHECK_SECONDS);
   const shown = result ?? polled;
   const waiting = shown === null;
-  const furigana = language === "ja" && showsFurigana(level);
+  const furigana = language === "ja";
 
   useEffect(() => {
     if (!waiting || error !== null) return;
@@ -181,7 +180,7 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns,
             <Info size={20} aria-hidden="true" className="shrink-0 text-accent" />
             <p className="text-sm">{shown.feedback.message}</p>
           </div>
-          <Corrections turns={turns} language={language} level={level} />
+          <Corrections turns={turns} language={language} />
         </>
       )}
 
@@ -198,9 +197,9 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, level, turns,
 }
 
 // 대체 결과일 때 이미 저장된 턴별 교정을 다시 보여 준다
-function Corrections({ turns, language, level }: { turns: ChatTurnView[]; language: Language; level: Level }) {
+function Corrections({ turns, language }: { turns: ChatTurnView[]; language: Language }) {
   const corrected = turns.filter((t) => t.correction !== null);
-  const furigana = language === "ja" && showsFurigana(level);
+  const furigana = language === "ja";
   return (
     <section className="flex flex-col gap-3">
       <h2 id="feedback-corrections" className="text-h3 font-semibold">

@@ -147,6 +147,31 @@ describe("LevelTestRunner 문제", () => {
     await user.click(screen.getByRole("button", { name: "테스트 시작" }));
     expect(screen.getByText("1 / 20")).toBeInTheDocument();
   });
+
+  it("일본어는 상급(4)에서도 문장과 보기에 후리가나를 단다", async () => {
+    const user = userEvent.setup();
+    const ja: BlankQuestion = {
+      wordId: "ja-4-001",
+      before: "[会議|かいぎ]に",
+      after: "。",
+      exampleKo: "회의에 참석했다.",
+      options: ["[出席|しゅっせき]した", "[欠席|けっせき]した", "[遅刻|ちこく]した", "メモした"],
+    };
+    const { container } = render(<LevelTestRunner language="ja" fromLevel={4} questions={[ja]} />);
+    await user.click(screen.getByRole("button", { name: "테스트 시작" }));
+
+    const readings = [...container.querySelectorAll("rt")].map((rt) => rt.textContent);
+    expect(readings).toEqual(["かいぎ", "しゅっせき", "けっせき", "ちこく", "めも"]);
+  });
+
+  it("영어 문제에는 후리가나를 달지 않는다", async () => {
+    const user = userEvent.setup();
+    const en: BlankQuestion = { ...question(1), options: ["コーヒー", "b1", "c1", "d1"] };
+    const { container } = render(<LevelTestRunner language="en" fromLevel={4} questions={[en]} />);
+    await user.click(screen.getByRole("button", { name: "테스트 시작" }));
+
+    expect(container.querySelector("ruby")).toBeNull();
+  });
 });
 
 describe("LevelTestRunner 결과", () => {

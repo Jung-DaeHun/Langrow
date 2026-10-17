@@ -77,7 +77,7 @@ describe("BlankQuiz 표시", () => {
     };
     const shown = setup({ question: ja, language: "ja", showFurigana: true, answer: "[行|い]った" });
     expect(shown.container.querySelectorAll("rt")).toHaveLength(5);
-    expect(screen.getAllByText("行", { selector: "ruby" })).toHaveLength(4);
+    expect(screen.getAllByText("行", { selector: "ruby span" })).toHaveLength(4);
     shown.container.remove();
 
     const hidden = setup({ question: ja, language: "ja", showFurigana: false, answer: "[行|い]った" });

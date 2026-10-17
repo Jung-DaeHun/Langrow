@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import type { BlankQuestion } from "@/lib/blank";
-import { LANGUAGE_NAMES, LEVEL_INFO, showsFurigana, type Language, type Level } from "@/lib/levels";
+import { LANGUAGE_NAMES, LEVEL_INFO, type Language, type Level } from "@/lib/levels";
 import { LEVEL_TEST_SIZE, PASS_SCORE } from "@/lib/levelTest";
 import { api } from "@/services/apiClient";
 import type { LevelUpResponse } from "@/types/api";
@@ -48,7 +48,7 @@ export function LevelTestRunner({ language, fromLevel, questions }: Props) {
 
   const from = LEVEL_INFO[fromLevel].name;
   const to = LEVEL_INFO[(fromLevel + 1) as Level].name;
-  const furigana = language === "ja" && showsFurigana(fromLevel);
+  const furigana = language === "ja";
 
   function start() {
     setAnswers([]);

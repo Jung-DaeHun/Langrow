@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { exampleAudioPath, wordAudioPath } from "@/lib/audio";
 import { isCorrectChoice, parseBlank, toBlankQuestion, type BlankParts, type BlankQuestion } from "@/lib/blank";
-import { LANGUAGE_NAMES, LEVEL_INFO, showsFurigana, showsPronunciation, type Language, type Level } from "@/lib/levels";
+import { LANGUAGE_NAMES, LEVEL_INFO, showsPronunciation, type Language, type Level } from "@/lib/levels";
 import type { TrialState } from "@/lib/plan";
 import { DAILY_WORD_GOAL } from "@/lib/today";
 import { wordStatus } from "@/lib/wordBatch";
@@ -80,7 +80,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
     window.scrollTo(0, 0);
   }, [phase]);
 
-  const furigana = runLanguage === "ja" && showsFurigana(level);
+  const furigana = runLanguage === "ja";
   const pronunciation = showsPronunciation(runLanguage, level);
 
   function start() {
@@ -212,7 +212,8 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
 
   if (phase === "cards") {
     const w = runWords[index];
-    const ruby = furigana && w.reading !== null && w.reading !== w.word;
+    // 한자 읽기는 [단어|읽기] 표기로 넘기고, 가타카나 읽기는 Furigana가 단다
+    const front = w.reading !== null && w.reading !== w.word ? `[${w.word}|${w.reading}]` : w.word;
     const blank = blankOf(w);
     return (
       <div data-focus-mode className={FOCUS_ROOT}>
@@ -223,7 +224,7 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
           front={
             <>
               <span lang={runLanguage} className="text-word font-bold text-brand">
-                {ruby ? <Furigana text={`[${w.word}|${w.reading}]`} show /> : w.word}
+                {furigana ? <Furigana text={front} show /> : w.word}
               </span>
               {pronunciation && w.pronKo && (
                 <span aria-hidden="true" className="text-lead text-brand">

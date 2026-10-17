@@ -7,7 +7,6 @@ import {
   canTakeLevelTest,
   isLevel,
   opensTranslationByDefault,
-  showsFurigana,
   showsKana,
   showsPronunciation,
 } from "./levels";
@@ -26,10 +25,6 @@ describe("levels", () => {
   it("1~5 정수만 레벨이다", () => {
     expect([1, 2, 3, 4, 5].every(isLevel)).toBe(true);
     expect([0, 6, -1, 2.5, NaN].some(isLevel)).toBe(false);
-  });
-
-  it("후리가나는 입문~중급(1~3)만 보여 준다", () => {
-    expect(LEVELS.map(showsFurigana)).toEqual([true, true, true, false, false]);
   });
 
   it("한글 발음은 일본어 입문~중급(1~3)만 보여 준다", () => {

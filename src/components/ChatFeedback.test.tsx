@@ -40,7 +40,6 @@ function renderFeedback(overrides: Partial<Props> = {}) {
     sessionId: "s-1",
     scenarioTitle: "카페에서 주문하기",
     language: "en",
-    level: 3,
     turns: THREE_TURNS,
     doneTurnsToday: 3,
     result: { feedbackStatus: "ready", feedback: { good: "잘했어요", improve: ["관사를 챙겨요"] } },
@@ -120,10 +119,9 @@ describe("ChatFeedback ready", () => {
     expect(screen.queryByText("넷")).toBeNull();
   });
 
-  it("후리가나를 보여 주는 레벨이면 피드백의 표기를 ruby로 그린다", () => {
+  it("일본어 피드백의 표기를 ruby로 그린다", () => {
     const { container } = renderFeedback({
       language: "ja",
-      level: 1,
       result: {
         feedbackStatus: "ready",
         feedback: { good: "[注文|ちゅうもん]을 잘 했어요", improve: ["[水|みず]をください가 더 자연스러워요"] },
@@ -135,18 +133,20 @@ describe("ChatFeedback ready", () => {
     expect(container.textContent).not.toMatch(/[[\]|]/);
   });
 
-  it("후리가나를 숨기는 레벨이면 표기의 본문만 남기고, 깨진 표기는 기호를 지운다", () => {
-    const { container } = renderFeedback({
+  it("깨진 표기는 기호를 지운 일반 텍스트로 그린다", () => {
+    renderFeedback({
       language: "ja",
-      level: 4,
-      result: {
-        feedbackStatus: "ready",
-        feedback: { good: "[注文|ちゅうもん]을 잘 했어요", improve: ["[水|みず をください"] },
-      },
+      result: { feedbackStatus: "ready", feedback: { good: "좋아요", improve: ["[水|みず をください"] } },
     });
 
-    expect(screen.getByText("注文을 잘 했어요")).toBeInTheDocument();
     expect(screen.getByText("水みず をください")).toBeInTheDocument();
+  });
+
+  it("영어 피드백에는 ruby를 그리지 않는다", () => {
+    const { container } = renderFeedback({
+      result: { feedbackStatus: "ready", feedback: { good: "[注文|ちゅうもん]을 잘 했어요", improve: ["コーヒー"] } },
+    });
+
     expect(container.querySelector("ruby")).toBeNull();
   });
 });
@@ -155,7 +155,6 @@ describe("ChatFeedback fallback", () => {
   it("저장된 고정 문구와 교정이 있는 턴만 교정 목록으로 보여 준다", () => {
     const { container } = renderFeedback({
       language: "ja",
-      level: 2,
       turns: [
         turn(1, { corrected: "[水|みず]をください", explanation_ko: "물은 水예요" }),
         turn(2),
@@ -180,7 +179,6 @@ describe("ChatFeedback fallback", () => {
   it("교정 목록의 설명도 후리가나 표기를 ruby로 그린다", () => {
     const { container } = renderFeedback({
       language: "ja",
-      level: 1,
       turns: [turn(1, { corrected: "[来|き]ました。", explanation_ko: "'왔어요'는 '[来|き]ました'예요" })],
       result: { feedbackStatus: "fallback", feedback: { message: FALLBACK_MESSAGE } },
     });

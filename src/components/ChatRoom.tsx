@@ -8,7 +8,6 @@ import {
   LANGUAGE_NAMES,
   allowsKoreanInput,
   opensTranslationByDefault,
-  showsFurigana,
   showsPronunciation,
   type Language,
   type Level,
@@ -40,7 +39,7 @@ const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus
 const PILL = `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-line-input bg-card px-3 text-sm font-semibold text-ink hover:bg-hover disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;
 const OUTLINE_SM = `inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border border-accent bg-transparent px-4 text-sm font-semibold text-accent transition duration-200 hover:bg-black/5 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;
 const AI_BUBBLE = "rounded-bubble rounded-bl-md bg-card px-3.5 py-3 shadow-card";
-const MY_BUBBLE = "max-w-[84%] self-end whitespace-pre-wrap wrap-break-word rounded-bubble rounded-br-md px-3.5 py-3";
+const MY_BUBBLE = "max-w-[84%] self-end whitespace-pre-wrap wrap-anywhere rounded-bubble rounded-br-md px-3.5 py-3";
 const ERROR_NOTICE = "flex items-start gap-3 rounded-xl bg-card p-4 ring-1 ring-danger ring-inset";
 
 type Props = { room: ChatRoomData; scenario: { title: string; opening: ScenarioLine }; trial: TrialState };
@@ -104,7 +103,6 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         sessionId={room.id}
         scenarioTitle={scenario.title}
         language={room.language}
-        level={room.level}
         turns={turns}
         doneTurnsToday={room.doneTurnsToday + addedTurns.length}
         result={end?.result ?? room.result}
@@ -196,7 +194,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
     setEnd({ result: result.data.status === "ended" ? result.data : null });
   }
 
-  const furigana = room.language === "ja" && showsFurigana(room.level);
+  const furigana = room.language === "ja";
   const pronunciation = showsPronunciation(room.language, room.level);
   const busy = shownPending !== null || ending;
 
@@ -393,8 +391,8 @@ function AiBubble({
 }) {
   const [open, setOpen] = useState(false);
   const body = (
-    <span lang={language} className="block whitespace-pre-wrap wrap-break-word">
-      <Furigana text={line.text} show={language === "ja" && showsFurigana(level)} />
+    <span lang={language} className="block whitespace-pre-wrap wrap-anywhere">
+      <Furigana text={line.text} show={language === "ja"} />
     </span>
   );
   // 낭독기는 lang="ja" 문장을 읽으므로 발음은 숨긴다

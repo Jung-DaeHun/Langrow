@@ -406,27 +406,39 @@ describe("WordSession 일본어 후리가나", () => {
       ...overrides,
     });
 
-  it("후리가나 레벨이고 읽기가 단어와 다르면 단어 위에 읽기를 단다", async () => {
+  it("읽기가 단어와 다르면 단어 위에 읽기를 단다", async () => {
     const { user } = setup({ language: "ja", level: 1, words: [ja({})] });
     await user.click(screen.getByRole("button", { name: "시작하기" }));
 
-    expect(screen.getByText("行く", { selector: "ruby" })).toHaveTextContent("行く(いく)");
-    expect(screen.getByText("行く", { selector: "ruby" }).closest("[lang]")).toHaveAttribute("lang", "ja");
+    const ruby = screen.getByText("行く", { selector: "ruby span" }).closest("ruby");
+    expect(ruby).toHaveTextContent("行く(いく)");
+    expect(ruby?.closest("[lang]")).toHaveAttribute("lang", "ja");
   });
 
   it("읽기가 단어와 같으면 읽기를 달지 않는다", async () => {
     const { user } = setup({ language: "ja", level: 1, words: [ja({ word: "これ", reading: "これ" })] });
     await user.click(screen.getByRole("button", { name: "시작하기" }));
 
-    expect(screen.queryByText("これ", { selector: "ruby" })).not.toBeInTheDocument();
-    expect(screen.getByText("これ")).toBeInTheDocument();
+    expect(screen.getByText("これ").closest("ruby")).toBeNull();
   });
 
-  it("후리가나를 보이지 않는 레벨이면 앞면·예문 모두 읽기를 달지 않는다", async () => {
-    const { user, container } = setup({ language: "ja", level: 4, words: [ja({})] });
+  it.each(["こーひー", "コーヒー"])("가타카나 단어는 읽기가 %s여도 히라가나 읽기를 단다", async (reading) => {
+    const { user } = setup({ language: "ja", level: 1, words: [ja({ word: "コーヒー", reading })] });
     await user.click(screen.getByRole("button", { name: "시작하기" }));
 
-    expect(container.querySelectorAll("rt")).toHaveLength(0);
+    expect(screen.getByText("コーヒー", { selector: "ruby span" }).closest("ruby")).toHaveTextContent("コーヒー(こーひー)");
+  });
+
+  it.each([4, 5] as const)("레벨 %i도 앞면 단어·뒷면 예문·빈칸 문장과 보기에 읽기를 단다", async (level) => {
+    const distractors = ["[来|く]る", "[見|み]る", "[食|た]べる"];
+    const { user, container } = setup({ language: "ja", level, words: [ja({ level, distractors })] });
+    const readings = () => [...container.querySelectorAll("rt")].map((rt) => rt.textContent).sort();
+    await user.click(screen.getByRole("button", { name: "시작하기" }));
+
+    expect(readings()).toEqual(["い", "いく", "がっこう"]);
+
+    await answerCards(user, [true]);
+    expect(readings()).toEqual(["い", "がっこう", "く", "た", "み"]);
   });
 });
 

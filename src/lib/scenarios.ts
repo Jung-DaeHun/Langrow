@@ -13,7 +13,7 @@ export type Scenario = {
 };
 
 // 첫 마디(opening)와 그 뜯어보기(breakdown)는 AI 초안이라 출시 전에 사람이 검수한다.
-// 일본어 첫 마디는 레벨과 무관하게 모든 한자에 [漢字|かな] 표기를 단다. 표시 여부는 showsFurigana(level)가 정한다
+// 일본어 첫 마디는 레벨과 무관하게 모든 한자에 [漢字|かな] 표기를 단다. 일본어는 모든 레벨에서 후리가나를 그린다(spec/chat.md "후리가나")
 export const SCENARIOS: readonly Scenario[] = [
   {
     id: "l1-greeting",
