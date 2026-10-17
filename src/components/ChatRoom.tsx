@@ -237,7 +237,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         <AiBubble line={scenario.opening} language={room.language} level={room.level} />
         {turns.map((t) => (
           <Fragment key={t.turnNo}>
-            <p lang={room.language} className={`${MY_BUBBLE} bg-house text-white`}>
+            <p lang={userTextLang(t.userText, room.language)} className={`${MY_BUBBLE} bg-house text-white`}>
               {t.userText}
             </p>
             {t.correction !== null && (
@@ -267,7 +267,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         ))}
         {shownPending !== null && (
           <>
-            <p lang={room.language} className={`${MY_BUBBLE} bg-house text-white`}>
+            <p lang={userTextLang(shownPending, room.language)} className={`${MY_BUBBLE} bg-house text-white`}>
               {shownPending}
             </p>
             <div className={`self-start ${AI_BUBBLE}`}>
@@ -277,7 +277,10 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         )}
         {failed !== null && (
           <>
-            <p lang={room.language} className={`${MY_BUBBLE} bg-card text-ink ring-1 ring-danger ring-inset`}>
+            <p
+              lang={userTextLang(failed.text, room.language)}
+              className={`${MY_BUBBLE} bg-card text-ink ring-1 ring-danger ring-inset`}
+            >
               {failed.text}
             </p>
             <div className="flex max-w-[84%] flex-wrap items-center justify-end gap-2 self-end">
@@ -360,6 +363,11 @@ export function ChatRoom({ room, scenario, trial }: Props) {
 
 function correctionLabel(userText: string): string {
   return hasHangul(userText) ? "이렇게 말하면 돼요" : "이렇게 말하면 더 자연스러워요";
+}
+
+// 내 말은 한국어일 수 있다. 한글이 있으면 ko로 달아 일본어 줄바꿈(:lang(ja)의 word-break: normal)이 한국어 어절을 자르지 않게 한다
+function userTextLang(userText: string, language: Language): string {
+  return hasHangul(userText) ? "ko" : language;
 }
 
 // 낭독기용 새 턴 알림. 화면의 교정 카드와 AI 말풍선 문장을 버튼 없이 읽히고, 후리가나 표기는 지운다

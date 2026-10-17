@@ -8,9 +8,10 @@ const BROKEN_MARKS = /[[\]|]/g;
 const KANJI = /\p{Script=Han}/u;
 // 여는 괄호만 빠진 표기의 본문은 | 바로 앞의 한자 묶음이다
 const KANJI_TAIL = /\p{Script=Han}+$/u;
-// 가타카나 묶음: 가타카나 글자(ァ~ヶ)로 시작해 가타카나 글자와 장음 ー가 이어진 부분. ・는 묶음을 끊는다
-const KATAKANA_RUN = /[ァ-ヶ][ァ-ヶー]*/g;
-const KATAKANA = /[ァ-ヶ]/g;
+// 가타카나 묶음: 가타카나 글자(ァ~ヴ)로 시작해 가타카나 글자와 장음 ー가 이어진 부분. ・는 묶음을 끊는다.
+// ヵ·ヶ는 뺀다. 3ヶ月처럼 か·が·こ로 읽어서 같은 소리의 히라가나(ゕ·ゖ)가 읽기가 되지 않는다
+const KATAKANA_RUN = /[ァ-ヴ][ァ-ヴー]*/g;
+const KATAKANA = /[ァ-ヴ]/g;
 
 // HTML을 만들지 않고 segment만 돌려준다. 그리기는 Furigana 컴포넌트가 <ruby>로 한다
 export function parseFurigana(input: string): FuriganaSegment[] {

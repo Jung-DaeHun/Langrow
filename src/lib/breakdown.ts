@@ -6,6 +6,8 @@ export type Breakdown = BreakdownPiece[];
 
 // 비교할 때 빼는 글자: 공백, 문장부호, 기호
 const IGNORED = /[\s\p{P}\p{S}]/gu;
+// 조각 사이에서 뒤 조각에 붙는 글자: 여는 괄호·따옴표(「, (, “)와 통화 기호($)
+const OPENING = /^[\p{Ps}\p{Pi}\p{Sc}]$/u;
 
 function normalize(text: string): string {
   return stripFurigana(text).replace(IGNORED, "").toLowerCase();
@@ -22,21 +24,23 @@ function unitsOf(sentence: string): { source: string; key: string }[] {
 }
 
 // 조각을 이으면 문장과 같은지 검사한다. 통과하면 AI가 준 글자 대신 원래 문장을 조각 경계에서 자른 부분을 돌려준다.
-// 조각 사이와 문장 끝의 공백·문장부호는 앞 조각에, 문장 맨 앞의 것은 첫 조각에 붙는다
+// 조각 사이와 문장 끝의 공백·문장부호는 앞 조각에(여는 괄호·따옴표·통화 기호는 뒤 조각에), 문장 맨 앞의 것은 첫 조각에 붙는다.
+// 공백·문장부호만 있는 조각은 문장에서 자를 자리가 없어 빼고 검사한다
 export function alignBreakdown(sentence: string, pieces: readonly BreakdownPiece[]): Breakdown | null {
-  if (pieces.length === 0) return null;
-  const meanings = pieces.map((piece) => piece.meaning_ko.trim());
-  const keys = pieces.map((piece) => normalize(piece.text));
-  if (meanings.some((meaning) => !meaning) || keys.some((key) => !key)) return null;
+  const kept = pieces.filter((piece) => normalize(piece.text));
+  if (kept.length === 0) return null;
+  const meanings = kept.map((piece) => piece.meaning_ko.trim());
+  const keys = kept.map((piece) => normalize(piece.text));
+  if (meanings.some((meaning) => !meaning)) return null;
   const units = unitsOf(sentence);
   if (keys.join("") !== units.map((unit) => unit.key).join("")) return null;
 
-  const texts = pieces.map(() => "");
+  const texts = kept.map(() => "");
   let index = 0;
   let filled = 0;
   let end = keys[0].length;
   for (const unit of units) {
-    if (unit.key && filled === end) {
+    if (filled === end && index < keys.length - 1 && (unit.key || OPENING.test(unit.source))) {
       index += 1;
       end += keys[index].length;
     }

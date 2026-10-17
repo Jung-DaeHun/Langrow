@@ -134,6 +134,15 @@ describe("buildTurnPrompt", () => {
     expect(system.includes("이번 사용자의 말에는 한국어가 들어 있다")).toBe(expected);
   });
 
+  it.each([
+    [1, "대구에서 왔어요", true],
+    [5, "I'm from 대구.", true],
+    [5, "I'm from Daegu.", false],
+  ] as const)("영어 레벨 %i 입력 %s: 이번 말에 한국어가 있다는 안내를 붙이는가 %s", (level, userText, expected) => {
+    const { system } = buildTurnPrompt(turnInput("en", level, { userText }));
+    expect(system.includes("이번 사용자의 말에는 한국어가 들어 있다")).toBe(expected);
+  });
+
   it.each(LANGUAGES.flatMap((language) => LEVELS.map((level) => [language, level] as const)))(
     "%s 레벨 %i: reply와 corrected를 조각으로 나눈 뜯어보기를 요청한다",
     (language, level) => {
@@ -142,8 +151,14 @@ describe("buildTurnPrompt", () => {
       expect(system).toContain("correction.breakdown");
       expect(system).toContain("빠짐없이 이으면 원래 문장이 된다");
       expect(system).toContain("조사·어미는 앞말과 묶는다");
+      expect(system).toContain("문장부호는 앞 조각에 붙이고 문장부호만으로 조각을 만들지 않는다");
     },
   );
+
+  it("일본어 뜯어보기는 읽기 표기 하나로 묶인 말을 두 조각으로 나누지 말라고 한다", () => {
+    expect(buildTurnPrompt(turnInput("ja", 3)).system).toContain("[漢字|かな] 표기 하나로 묶인 말은 한 조각 안에 둔다");
+    expect(buildTurnPrompt(turnInput("en", 3)).system).not.toContain("표기 하나로 묶인 말");
+  });
 
   it("뜯어보기 예는 그 언어 것만 넣고, 일본어 조각에는 읽기 표기를 달지 말라고 한다", () => {
     const ja = buildTurnPrompt(turnInput("ja", 4)).system;

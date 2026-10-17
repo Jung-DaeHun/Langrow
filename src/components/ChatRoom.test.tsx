@@ -153,6 +153,26 @@ describe("ChatRoom 표시", () => {
     expect(screen.getByText("Fixed.").closest("[lang]")).toHaveAttribute("lang", "en");
   });
 
+  it("내 말풍선에 한글이 있으면 lang을 ko로 단다 (일본어 줄바꿈이 한국어 어절을 음절 사이에서 자르지 않게)", async () => {
+    apiMock.mockResolvedValueOnce(failure(503, "AI_UNAVAILABLE", UNAVAILABLE));
+    const { user } = setup(
+      room({
+        language: "ja",
+        turns: [turn(1, { userText: "노래방에 가고 싶어요" }), turn(2, { userText: "はい" })],
+      }),
+    );
+    expect(screen.getByText("노래방에 가고 싶어요")).toHaveAttribute("lang", "ko");
+    expect(screen.getByText("はい")).toHaveAttribute("lang", "ja");
+
+    await typeAndSend(user, "커피 주세요");
+    expect(await screen.findByText("커피 주세요")).toHaveAttribute("lang", "ko");
+  });
+
+  it("다른 곳에서 보낸 처리 중인 한국어 말풍선도 lang이 ko다", () => {
+    setup(room({ language: "ja", pendingTurn: { userText: "잠깐만요", msLeft: 1000 } }));
+    expect(screen.getByText("잠깐만요")).toHaveAttribute("lang", "ko");
+  });
+
   it("correction이 null이면 교정 카드를 그리지 않는다", () => {
     setup(room({ turns: [turn(1)] }));
 

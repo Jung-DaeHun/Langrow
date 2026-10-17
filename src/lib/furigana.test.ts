@@ -178,6 +178,12 @@ describe("rubySegments", () => {
   it("한자 표기의 본문·읽기 안의 가타카나는 건드리지 않는다", () => {
     expect(rubySegments("[ヶ月|かげつ]")).toEqual([{ text: "ヶ月", reading: "かげつ" }]);
     expect(rubySegments("[漢字|カンジ]")).toEqual([{ text: "漢字", reading: "カンジ" }]);
+    expect(rubySegments("[山田・太郎|やまだ・たろう]")).toEqual([{ text: "山田・太郎", reading: "やまだ・たろう" }]);
+  });
+
+  it("따로 쓰인 ヶ·ヵ는 か·が·こ로 읽어 같은 소리 히라가나가 아니므로 읽기를 달지 않는다", () => {
+    expect(rubySegments("3ヶ[月|げつ]")).toEqual([{ text: "3ヶ" }, { text: "月", reading: "げつ" }]);
+    expect(rubySegments("1ヵ所")).toEqual([{ text: "1ヵ所" }]);
   });
 
   it("본문에 한자가 없는 표기는 AI 읽기를 버리고 본문 가타카나에 코드가 읽기를 단다", () => {

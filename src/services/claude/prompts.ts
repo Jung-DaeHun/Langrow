@@ -84,6 +84,7 @@ const BREAKDOWN_RULES: Record<Language, string[]> = {
   ja: [
     "  - 사전형으로 바꾸거나(食べたり → 食べる) 한자를 가나로 바꾸지 않는다.",
     "  - 조각의 text에는 [漢字|かな] 읽기 표기를 달지 않는다(reply와 corrected에는 위 규칙대로 단다).",
+    "  - reply와 corrected에서 [漢字|かな] 표기 하나로 묶인 말은 한 조각 안에 둔다.",
     '  - 예: reply가 [家|いえ]で[休|やす]んでいました。이면 reply_breakdown은 [{"text":"家で","meaning_ko":"집에서"},{"text":"休んでいました","meaning_ko":"쉬고 있었어요"}]이다.',
   ],
   en: [
@@ -137,6 +138,7 @@ export function buildTurnPrompt(input: TurnPromptInput): Prompt {
     "- correction이 있으면 correction.breakdown에 corrected를 같은 방식으로 나눈다.",
     "  - 조각은 문장 순서대로 쓰고, 빠짐없이 이으면 원래 문장이 된다. text는 문장에 나온 글자 그대로 쓰고 조각을 빼먹지 않는다.",
     "  - 조사·어미는 앞말과 묶는다. meaning_ko는 그 조각의 문장 속 뜻을 짧은 한국어로 쓴다.",
+    "  - 문장부호는 앞 조각에 붙이고 문장부호만으로 조각을 만들지 않는다.",
     ...BREAKDOWN_RULES[language],
   );
   if (showsPronunciation(language, level)) {

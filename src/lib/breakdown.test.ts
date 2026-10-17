@@ -71,6 +71,45 @@ describe("alignBreakdown", () => {
         { text: "[温|あたた]めますか？", meaning_ko: "데울까요" },
       ]);
     });
+
+    it("조각 사이의 여는 괄호·따옴표와 통화 기호는 뒤 조각에 붙인다", () => {
+      expect(
+        alignBreakdown("[彼|かれ]は「[行|い]く」と[言|い]った。", [
+          { text: "彼は", meaning_ko: "그는" },
+          { text: "行くと", meaning_ko: "간다고" },
+          { text: "言った", meaning_ko: "말했다" },
+        ]),
+      ).toEqual([
+        { text: "[彼|かれ]は", meaning_ko: "그는" },
+        { text: "「[行|い]く」と", meaning_ko: "간다고" },
+        { text: "[言|い]った。", meaning_ko: "말했다" },
+      ]);
+      expect(
+        alignBreakdown("I paid $5 (in cash).", [
+          { text: "I paid", meaning_ko: "냈어요" },
+          { text: "$5", meaning_ko: "5달러를" },
+          { text: "in cash", meaning_ko: "현금으로" },
+        ]),
+      ).toEqual([
+        { text: "I paid", meaning_ko: "냈어요" },
+        { text: "$5", meaning_ko: "5달러를" },
+        { text: "(in cash).", meaning_ko: "현금으로" },
+      ]);
+    });
+
+    it("공백·문장부호만 있는 조각은 빼고 검사한다 (그 글자는 문장대로 이웃 조각에 붙는다)", () => {
+      expect(
+        alignBreakdown("Hi! What's up?", [
+          { text: "hi", meaning_ko: "안녕" },
+          { text: "!", meaning_ko: "느낌표" },
+          { text: "what's up", meaning_ko: "잘 지내?" },
+          { text: " ? ", meaning_ko: "" },
+        ]),
+      ).toEqual([
+        { text: "Hi!", meaning_ko: "안녕" },
+        { text: "What's up?", meaning_ko: "잘 지내?" },
+      ]);
+    });
   });
 
   describe("맞지 않으면 null이다", () => {
@@ -114,23 +153,12 @@ describe("alignBreakdown", () => {
       expect(alignBreakdown("", [])).toBeNull();
     });
 
-    it("text나 meaning_ko가 공백뿐이다", () => {
+    it("글자가 있는 조각의 meaning_ko가 공백뿐이다", () => {
       expect(alignBreakdown("Hi!", [{ text: "hi", meaning_ko: "  " }])).toBeNull();
-      expect(
-        alignBreakdown("Hi!", [
-          { text: "hi", meaning_ko: "안녕" },
-          { text: " ", meaning_ko: "공백" },
-        ]),
-      ).toBeNull();
     });
 
-    it("문장부호만 있는 조각이 있다", () => {
-      expect(
-        alignBreakdown("Hi!", [
-          { text: "hi", meaning_ko: "안녕" },
-          { text: "!", meaning_ko: "느낌표" },
-        ]),
-      ).toBeNull();
+    it("공백·문장부호만 있는 조각을 빼면 남는 조각이 없다", () => {
+      expect(alignBreakdown("Hi!", [{ text: " ! ", meaning_ko: "느낌표" }])).toBeNull();
     });
   });
 });
