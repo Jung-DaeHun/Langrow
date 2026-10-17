@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "chat-ai",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-18T00:18:34+0900",
+      "summary": "schemas: 조각 스키마 하나(breakdownSchema)를 turnReplySchema·pronTurnReplySchema의 reply_breakdown과 correction.breakdown에 씀(JSON 스키마는 $defs/$ref, 구조화 출력이 지원). prompts: 한국어 입력 규칙·일본어 후리가나 지시를 모든 레벨에, '이번 입력'은 hasHangul만으로, 첫 마디는 표기 그대로(openingText 제거), 뜯어보기 지시와 언어별 예(BREAKDOWN_RULES), 종료 피드백 일본어 표기 지시. client: acceptTurn이 alignBreakdown 통과분만 넣고 실패면 reply_breakdown null·교정은 breakdown 키 삭제, console.warn {ai:\"breakdown_invalid\",target,language,level}. 턴은 성공, 재호출 없음. 발음은 cleanTurnPron(일본어 1~3 그대로). API 오류는 시도…",
+      "completed_at": "2026-10-18T00:26:29+0900"
     },
     {
       "step": 2,

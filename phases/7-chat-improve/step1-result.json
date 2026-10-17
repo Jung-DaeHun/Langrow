@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "schemas: 조각 스키마 하나(breakdownSchema)를 turnReplySchema·pronTurnReplySchema의 reply_breakdown과 correction.breakdown에 씀(JSON 스키마는 $defs/$ref, 구조화 출력이 지원). prompts: 한국어 입력 규칙·일본어 후리가나 지시를 모든 레벨에, '이번 입력'은 hasHangul만으로, 첫 마디는 표기 그대로(openingText 제거), 뜯어보기 지시와 언어별 예(BREAKDOWN_RULES), 종료 피드백 일본어 표기 지시. client: acceptTurn이 alignBreakdown 통과분만 넣고 실패면 reply_breakdown null·교정은 breakdown 키 삭제, console.warn {ai:\"breakdown_invalid\",target,language,level}. 턴은 성공, 재호출 없음. 발음은 cleanTurnPron(일본어 1~3 그대로). API 오류는 시도마다 console.error {ai:\"api_error\",status,type,requestId,message(300자)}, 없는 값은 뺌, 타임아웃은 로그 없음. levels.ts 함수는 그대로 둠(화면이 씀).",
+  "spec_diff": "spec과 어긋나는 점은 없다. step 지시와의 차이 1건: 뜯어보기 지시의 '사전형으로 바꾸거나(食べたり → 食べる), 한자를 가나로 바꾸거나'를 공통 문구가 아니라 일본어에만 넣었고, 영어에는 '기본형으로 바꾸지 않는다(was resting → rest)'를 넣었다. '예는 그 언어 것만 넣는다' 지시에 맞추려고 했다."
+}
