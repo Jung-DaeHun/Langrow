@@ -12,7 +12,7 @@ describe("onboardingStart: 미동의", () => {
     expect(onboardingStart(fresh, undefined)).toEqual({ kind: "consent" });
   });
 
-  it("유효한 language가 있으면 동의 뒤 레벨 단계로 가도록 담는다", () => {
+  it("유효한 language가 있으면 동의 뒤 그 언어를 미리 고르도록 담는다", () => {
     expect(onboardingStart(fresh, "ja")).toEqual({ kind: "consent", language: "ja" });
   });
 
@@ -27,12 +27,12 @@ describe("onboardingStart: language 파라미터", () => {
     expect(onboardingStart(ready, "en")).toEqual({ kind: "home" });
   });
 
-  it("다른 언어의 레벨이 있으면 언어 추가 모드로 레벨 단계다", () => {
-    expect(onboardingStart(ready, "ja")).toEqual({ kind: "level", language: "ja", mode: "add" });
+  it("다른 언어의 레벨이 있으면 새 언어의 시작 확인 단계다", () => {
+    expect(onboardingStart(ready, "ja")).toEqual({ kind: "add", language: "ja" });
   });
 
-  it("레벨이 하나도 없으면 첫 레벨 모드로 레벨 단계다", () => {
-    expect(onboardingStart(agreed, "ja")).toEqual({ kind: "level", language: "ja", mode: "first" });
+  it("레벨이 하나도 없으면 그 언어를 미리 고른 언어 단계다", () => {
+    expect(onboardingStart(agreed, "ja")).toEqual({ kind: "language", language: "ja" });
   });
 
   it("모르는 language는 없는 것으로 본다", () => {

@@ -5,6 +5,7 @@ import { LogoutButton } from "@/components/LogoutButton";
 import { ProButton } from "@/components/ProButton";
 import { TrialButton } from "@/components/TrialButton";
 import { PLAN_LIMITS, PRO_PRICE_KRW, TRIAL_DAYS, trialState } from "@/lib/plan";
+import { FREE_SCENARIOS_PER_LEVEL, SCENARIOS_PER_LEVEL } from "@/lib/scenarios";
 import { requireReady } from "@/server/page";
 import { SITE } from "@/site.config";
 
@@ -49,7 +50,7 @@ export default async function AccountPage() {
               {!trialActive && <span className={MINT_TAG}>현재</span>}
             </div>
             <p className="text-sm text-ink-muted">
-              대화 하루 {free.chatTurns}턴 · 새 단어 하루 {free.newWords}개
+              대화 하루 {free.chatTurns}턴 · 새 단어 하루 {free.newWords}개 · 상황 레벨마다 {FREE_SCENARIOS_PER_LEVEL}개
             </p>
             <p className="text-h1 font-bold">무료</p>
           </div>
@@ -59,7 +60,7 @@ export default async function AccountPage() {
               {trialActive && <span className={GOLD_TAG}>체험 중</span>}
             </div>
             <p className="text-sm text-ink-muted">
-              대화 하루 {pro.chatTurns}턴 · 새 단어 하루 {pro.newWords}개
+              대화 하루 {pro.chatTurns}턴 · 새 단어 하루 {pro.newWords}개 · 상황 레벨마다 {SCENARIOS_PER_LEVEL}개
             </p>
             <p className="text-h1 font-bold">{price}</p>
           </div>

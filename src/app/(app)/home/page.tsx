@@ -116,6 +116,7 @@ export default async function HomePage() {
               <p className="text-sm">
                 대화부터 해 보세요. 상황을 골라 {VALID_SESSION_TURNS}턴만 주고받으면 오늘 대화 목표를 채워요.
               </p>
+              <p className="text-sm">모두 입문에서 시작해요. 이미 아는 단계는 레벨업 테스트로 바로 올릴 수 있어요.</p>
             </div>
           </div>
         )}

@@ -10,7 +10,7 @@ import type { LevelResponse } from "@/types/api";
 import { Dialog } from "./Dialog";
 import { showToast } from "./Toast";
 
-// 상단바의 언어·레벨 메뉴. 레벨이 있는 언어로 전환하고, 새 언어는 온보딩 레벨 단계로 보내고, 레벨을 내린다
+// 상단바의 언어·레벨 메뉴. 레벨이 있는 언어로 전환하고, 새 언어는 온보딩 시작 확인 단계로 보내고, 레벨을 내린다
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const TILE = `flex w-full items-center gap-3.5 rounded-xl p-4 text-left shadow-card transition disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;

@@ -1,18 +1,18 @@
 "use client";
 
-import { Check, ChevronLeft, ChevronRight, CircleAlert, X } from "lucide-react";
+import { Check, ChevronLeft, CircleAlert, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { LANGUAGE_NAMES, LANGUAGES, LEVEL_INFO, LEVELS, showsKana, type Language, type Level } from "@/lib/levels";
+import { LANGUAGE_NAMES, LANGUAGES, type Language } from "@/lib/levels";
 import type { OnboardingStart } from "@/lib/onboarding";
 import { api } from "@/services/apiClient";
 
-// 동의 → 언어 → 레벨. 시작 단계는 페이지가 onboardingStart로 정한다. 날짜·userId는 서버가 정하므로 보내지 않는다
+// 동의 → 언어. 언어 추가는 시작 확인 단계 하나다. 시작 단계는 페이지가 onboardingStart로 정한다.
+// 모든 언어는 입문으로 저장한다(ADR-019). 날짜·userId·레벨은 서버가 정하므로 보내지 않는다
 
-type Step = "consent" | "language" | "level";
-const STEP_NO: Record<Step, number> = { consent: 1, language: 2, level: 3 };
-const STEP_COUNT = 3;
+type Step = "consent" | "language" | "add";
+const STEP_COUNT = 2;
 
 const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const H1 = "text-h1 font-semibold tracking-[-0.02em] text-balance text-brand";
@@ -22,18 +22,15 @@ const TILE = `flex w-full items-center gap-3.5 rounded-xl p-4 text-left shadow-c
 const TILE_IDLE = "bg-card hover:ring-1 hover:ring-line-input";
 const TILE_SELECTED = "bg-ok-wash ring-2 ring-accent";
 const NUMBER = "grid size-9 shrink-0 place-items-center rounded-full font-bold";
-const TAG = "inline-flex items-center gap-1 rounded-full bg-mint px-2.5 py-0.5 text-xs font-bold text-brand";
 const LINK = `font-semibold text-accent underline underline-offset-2 ${FOCUS_RING}`;
 
 type Props = { start: Exclude<OnboardingStart, { kind: "home" }> };
 
 export function OnboardingFlow({ start }: Props) {
   const router = useRouter();
-  const mode = start.kind === "level" ? start.mode : "first";
   const [step, setStep] = useState<Step>(start.kind);
-  const [language, setLanguage] = useState<Language | null>(start.kind === "language" ? null : (start.language ?? null));
+  const [language, setLanguage] = useState<Language | null>(start.language ?? null);
   const [agreed, setAgreed] = useState(false);
-  const [level, setLevel] = useState<Level | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,19 +49,13 @@ export function OnboardingFlow({ start }: Props) {
       setError(result.message);
       return;
     }
-    go(language === null ? "language" : "level");
+    go("language");
   }
 
-  function chooseLanguage(target: Language) {
-    if (target !== language) setLevel(null);
-    setLanguage(target);
-    go("level");
-  }
-
-  async function startLearning(target: Language, chosen: Level) {
+  async function startLearning(target: Language) {
     setBusy(true);
     setError(null);
-    const result = await api("POST", "/api/levels", { language: target, level: chosen });
+    const result = await api("POST", "/api/levels", { language: target });
     if (!result.ok) {
       setBusy(false);
       setError(result.message);
@@ -74,11 +65,11 @@ export function OnboardingFlow({ start }: Props) {
     router.replace("/home");
   }
 
-  const showProgress = mode === "first";
-  const stepNo = STEP_NO[step];
+  const showProgress = step !== "add";
+  const stepNo = step === "consent" ? 1 : 2;
 
   let back;
-  if (step === "level" && mode === "add") {
+  if (step === "add") {
     back = (
       <Link href="/home" className={PILL}>
         <X size={16} aria-hidden="true" />
@@ -89,9 +80,8 @@ export function OnboardingFlow({ start }: Props) {
     back = <p className="text-h3 font-extrabold tracking-[-0.03em] text-brand">Langrow</p>;
   } else {
     // 동의 단계로 돌아가 다시 동의해도 agree_terms는 최초 동의 시각을 유지한다
-    const previous = step === "level" ? "language" : "consent";
     back = (
-      <button type="button" onClick={() => go(previous)} className={PILL}>
+      <button type="button" onClick={() => go("consent")} className={PILL}>
         <ChevronLeft size={16} aria-hidden="true" />
         이전
       </button>
@@ -103,6 +93,22 @@ export function OnboardingFlow({ start }: Props) {
       <CircleAlert size={20} aria-hidden="true" className="shrink-0 text-danger" />
       <p className="text-sm">{error}</p>
     </div>
+  );
+
+  // 언어 단계와 시작 확인 단계가 같이 쓰는 안내 문구, 오류 안내, [학습 시작]
+  const startActions = (
+    <>
+      <p className="text-sm text-ink-muted">모두 입문에서 시작해요. 이미 아는 단계는 레벨업 테스트로 바로 올릴 수 있어요.</p>
+      {errorNotice}
+      <button
+        type="button"
+        onClick={language === null ? undefined : () => startLearning(language)}
+        disabled={language === null || busy}
+        className={PRIMARY}
+      >
+        학습 시작
+      </button>
+    </>
   );
 
   return (
@@ -194,63 +200,27 @@ export function OnboardingFlow({ start }: Props) {
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  onClick={() => chooseLanguage(lang)}
+                  disabled={busy}
+                  onClick={() => setLanguage(lang)}
                   className={`${TILE} ${selected ? TILE_SELECTED : TILE_IDLE}`}
                 >
                   <span aria-hidden="true" className={`${NUMBER} ${selected ? "bg-accent text-white" : "bg-zone"}`}>
                     {lang.toUpperCase()}
                   </span>
                   <span className="flex-1 font-bold">{LANGUAGE_NAMES[lang]}</span>
-                  <ChevronRight size={20} aria-hidden="true" className="shrink-0 text-ink-muted" />
                 </button>
               );
             })}
           </div>
+          {startActions}
         </div>
       )}
 
-      {step === "level" && language !== null && (
-        <div key="level" className="flex flex-col gap-6 animate-enter">
-          <h1 id="onboarding-level" className={H1}>
-            {LANGUAGE_NAMES[language]} 레벨을 골라 주세요
-          </h1>
-          <div role="radiogroup" aria-labelledby="onboarding-level" className="flex flex-col gap-3">
-            {LEVELS.map((lv) => {
-              const selected = lv === level;
-              return (
-                <button
-                  key={lv}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  disabled={busy}
-                  onClick={() => setLevel(lv)}
-                  className={`${TILE} ${selected ? TILE_SELECTED : TILE_IDLE}`}
-                >
-                  <span aria-hidden="true" className={`${NUMBER} ${selected ? "bg-accent text-white" : "bg-zone"}`}>
-                    {lv}
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold">{LEVEL_INFO[lv].name}</span>
-                      {showsKana(language, lv) && <span className={TAG}>가나 익히기 포함</span>}
-                    </span>
-                    <span className="text-sm text-ink-muted">{LEVEL_INFO[lv].description}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-sm text-ink-muted">이후 올리기는 레벨업 테스트로, 내리기는 상단 언어 메뉴에서 할 수 있어요.</p>
-          {errorNotice}
-          <button
-            type="button"
-            onClick={level === null ? undefined : () => startLearning(language, level)}
-            disabled={level === null || busy}
-            className={PRIMARY}
-          >
-            학습 시작
-          </button>
+      {step === "add" && language !== null && (
+        <div key="add" className="flex flex-col gap-6 animate-enter">
+          {/* 언어 이름이 모두 받침 없이 끝나("영어", "일본어") 조사는 "를"이다 */}
+          <h1 className={H1}>{LANGUAGE_NAMES[language]}를 시작해요</h1>
+          {startActions}
         </div>
       )}
     </div>
