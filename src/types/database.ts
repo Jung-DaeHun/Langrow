@@ -186,7 +186,7 @@ isOneToOne: false
 { Args: { "p_language"?: string,"p_requirement": string,"p_user_id": string }; Returns: string
                            },
 "create_chat_session":
-{ Args: { "p_language": string,"p_level": number,"p_scenario_id": string,"p_user_id": string }; Returns: Json
+{ Args: { "p_language": string,"p_level": number,"p_pro_only"?: boolean,"p_scenario_id": string,"p_user_id": string }; Returns: Json
                            },
 "current_plan":
 { Args: { "p_user_id": string }; Returns: string

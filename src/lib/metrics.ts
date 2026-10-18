@@ -144,6 +144,16 @@ export function computeMetrics(
     (proClicks.get(profile.id) ?? []).some((at) => within(trialEnd, at, PRO_CLICK_WINDOW_MS)),
   );
 
+  // 체험 시작자 중 체험 시작 전에 limit_reached가 없는 사용자. 체험 시작 뒤의 도달과 props는 보지 않는다
+  const reachedBefore = (userId: string, trialStartedAt: Date) =>
+    rows.events.some(
+      (e) => e.name === "limit_reached" && e.userId === userId && e.createdAt.getTime() < trialStartedAt.getTime(),
+    );
+  const trialBeforeLimit = tally(
+    onboarded.flatMap((p) => (p.trialStartedAt === null ? [] : [{ id: p.id, trialStartedAt: p.trialStartedAt }])),
+    ({ id, trialStartedAt }) => !reachedBefore(id, trialStartedAt),
+  );
+
   const judged = (key: string, label: string, count: Count, threshold: number, minDenominator = 1): MetricResult => {
     const verdict =
       !enoughUsers || count.denominator < minDenominator
@@ -175,5 +185,6 @@ export function computeMetrics(
     reference("limit_to_trial_words", "단어 한도(목표 완료) → 체험", tally(reachersOf("words"), startedTrial)),
     reference("limit_to_trial_chat", "대화 한도(목표 이상 사용) → 체험", tally(reachersOf("chat"), startedTrial)),
     reference("pro_after_trial", "체험 후 7일 안 Pro 클릭", proInterest),
+    reference("trial_before_limit", "한도 도달 전 체험 시작", trialBeforeLimit),
   ];
 }

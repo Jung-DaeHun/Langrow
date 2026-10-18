@@ -63,6 +63,7 @@ describe("computeMetrics", () => {
       "limit_to_trial_words",
       "limit_to_trial_chat",
       "pro_after_trial",
+      "trial_before_limit",
     ]);
     for (const m of compute(rows({}))) expect(m.label).not.toBe("");
   });
@@ -307,6 +308,43 @@ describe("computeMetrics", () => {
     });
   });
 
+  describe("한도 도달 전 체험 시작", () => {
+    const trialStartedAt = after(T0, 2 * DAY);
+
+    it("체험을 시작한 사용자 중 체험 시작 전에 limit_reached가 없는 사용자가 분자다", () => {
+      const result = compute(
+        rows({
+          profiles: [
+            user("clean", { trialStartedAt }),
+            user("reached", { trialStartedAt }),
+            user("reached_after", { trialStartedAt }),
+            user("no_trial"),
+          ],
+          events: [
+            limitReached("reached", after(trialStartedAt, -HOUR)),
+            limitReached("reached_after", after(trialStartedAt, HOUR)),
+            limitReached("no_trial", after(T0, DAY)),
+            proClicked("clean", after(T0, DAY)),
+          ],
+        }),
+      );
+      expect(metric(result, "trial_before_limit")).toMatchObject({ numerator: 2, denominator: 3, verdict: "reference" });
+    });
+
+    it("plan·feature·trial_eligible과 상관없이 체험 전의 limit_reached면 분자에서 뺀다", () => {
+      const result = compute(
+        rows({
+          profiles: [user("pro", { trialStartedAt }), user("chat", { trialStartedAt })],
+          events: [
+            limitReached("pro", after(trialStartedAt, -DAY), { plan: "pro", trial_eligible: false }),
+            limitReached("chat", after(trialStartedAt, -DAY), { feature: "chat" }),
+          ],
+        }),
+      );
+      expect(counts(metric(result, "trial_before_limit"))).toEqual([0, 2]);
+    });
+  });
+
   describe("판단 보류와 제외", () => {
     it("온보딩 완료 사용자가 50명 미만이면 기준이 있는 지표는 모두 판단 보류다", () => {
       const result = compute(rows({ profiles: crowd(49, "u") }));
@@ -337,6 +375,7 @@ describe("computeMetrics", () => {
       expect(counts(metric(result, "d1"))).toEqual([0, 49]);
       expect(counts(metric(result, "limit_to_trial"))).toEqual([0, 0]);
       expect(counts(metric(result, "pro_after_trial"))).toEqual([0, 0]);
+      expect(counts(metric(result, "trial_before_limit"))).toEqual([0, 0]);
     });
   });
 

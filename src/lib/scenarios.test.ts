@@ -3,7 +3,23 @@ import { alignBreakdown } from "./breakdown";
 import { parseFurigana } from "./furigana";
 import { LANGUAGES, LEVELS, showsPronunciation } from "./levels";
 import { cleanPron } from "./pronunciation";
-import { SCENARIOS, findScenario, scenariosForLevel } from "./scenarios";
+import {
+  FREE_SCENARIOS_PER_LEVEL,
+  SCENARIOS,
+  SCENARIOS_PER_LEVEL,
+  findScenario,
+  isProScenario,
+  isScenarioLocked,
+  scenarioOrder,
+  scenariosForLevel,
+  type Scenario,
+} from "./scenarios";
+
+function scenario(id: string): Scenario {
+  const found = findScenario(id);
+  if (!found) throw new Error(`${id} 상황이 없다`);
+  return found;
+}
 
 describe("SCENARIOS 데이터", () => {
   it("35개이고 레벨마다 7개다", () => {
@@ -112,6 +128,52 @@ describe("scenariosForLevel", () => {
     expect(scenariosForLevel(5).map((s) => s.id)).toEqual([
       "l5-salary", "l5-qa", "l5-debate", "l5-apology", "l5-resignation", "l5-angry-customer", "l5-culture",
     ]);
+  });
+});
+
+describe("scenarioOrder", () => {
+  it("레벨 안 순번(1~7)을 목록 순서대로 돌려준다", () => {
+    expect(SCENARIOS_PER_LEVEL).toBe(7);
+    for (const level of LEVELS) {
+      expect(scenariosForLevel(level).map((s) => scenarioOrder(s)), `레벨 ${level}`).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    }
+  });
+});
+
+// 레벨 안 순서로 정한다. 앞 3개가 Free 상황이다(spec/usage.md "Pro 상황")
+describe("isProScenario", () => {
+  it("레벨마다 앞 3개만 Free이고 4~7번째는 Pro 상황이다", () => {
+    expect(FREE_SCENARIOS_PER_LEVEL).toBe(3);
+    for (const level of LEVELS) {
+      expect(scenariosForLevel(level).map((s) => isProScenario(s)), `레벨 ${level}`).toEqual([
+        false, false, false, true, true, true, true,
+      ]);
+    }
+  });
+
+  it("Free 상황은 기존 4개 중 앞 3개다", () => {
+    expect(SCENARIOS.filter((s) => !isProScenario(s)).map((s) => s.id)).toEqual([
+      "l1-greeting", "l1-cafe", "l1-checkout",
+      "l2-restaurant", "l2-hotel", "l2-clothes",
+      "l3-pharmacy", "l3-weekend", "l3-return",
+      "l4-interview", "l4-meeting", "l4-repair",
+      "l5-salary", "l5-qa", "l5-debate",
+    ]);
+  });
+});
+
+describe("isScenarioLocked", () => {
+  it("상황 레벨이 지금 레벨보다 위일 때만 잠긴다", () => {
+    expect(isScenarioLocked(scenario("l3-pharmacy"), 2)).toBe(true);
+    expect(isScenarioLocked(scenario("l5-culture"), 4)).toBe(true);
+    expect(isScenarioLocked(scenario("l2-hotel"), 1)).toBe(true);
+  });
+
+  it("같은 레벨과 아래 레벨의 상황은 열린다", () => {
+    expect(isScenarioLocked(scenario("l3-pharmacy"), 3)).toBe(false);
+    expect(isScenarioLocked(scenario("l3-lost-item"), 3)).toBe(false);
+    expect(isScenarioLocked(scenario("l3-pharmacy"), 4)).toBe(false);
+    expect(isScenarioLocked(scenario("l1-greeting"), 5)).toBe(false);
   });
 });
 

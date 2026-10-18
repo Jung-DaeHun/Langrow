@@ -11,7 +11,7 @@ vi.mock("@/server/deps", () => ({ getDeps: () => deps }));
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 const AGREED_AT = new Date("2026-10-01T00:00:00Z");
-const VALID = { language: "ja", level: 3 };
+const VALID = { language: "ja" };
 
 function post(body: unknown) {
   return POST(
@@ -58,21 +58,26 @@ describe("POST /api/levels", () => {
     expect(deps.db.setFirstLevel).not.toHaveBeenCalled();
   });
 
-  it("동의만 하고 레벨이 없는 사용자는 로그인 사용자 ID로 첫 레벨을 만들고 200 {}를 돌려준다", async () => {
+  it("동의만 하고 레벨이 없는 사용자는 로그인 사용자 ID로 입문(1) 레벨을 만들고 200 {}를 돌려준다", async () => {
     deps.db.getReadiness.mockResolvedValue({ agreedAt: AGREED_AT, currentLanguage: null, levels: {} });
 
     const response = await post({ ...VALID, userId: "99999999-9999-4999-8999-999999999999" });
 
     expect(await read(response)).toEqual({ status: 200, json: {} });
-    expect(deps.db.setFirstLevel).toHaveBeenCalledWith(USER_ID, "ja", 3);
+    expect(deps.db.setFirstLevel).toHaveBeenCalledWith(USER_ID, "ja", 1);
+  });
+
+  // 첫 레벨은 늘 입문(1)이다(ADR-019). 온보딩 화면이 바뀌기 전에는 level을 함께 보낸다
+  it("body에 level이 있어도 받지 않고 레벨 1로 만든다", async () => {
+    deps.db.getReadiness.mockResolvedValue({ agreedAt: AGREED_AT, currentLanguage: null, levels: {} });
+
+    expect(await read(await post({ ...VALID, level: 3 }))).toEqual({ status: 200, json: {} });
+    expect(deps.db.setFirstLevel).toHaveBeenCalledWith(USER_ID, "ja", 1);
   });
 
   it.each([
-    ["없는 언어", { ...VALID, language: "fr" }],
-    ["level 0", { ...VALID, level: 0 }],
-    ["level 6", { ...VALID, level: 6 }],
-    ['level "3"', { ...VALID, level: "3" }],
-    ["level 1.5", { ...VALID, level: 1.5 }],
+    ["없는 언어", { language: "fr" }],
+    ["언어 누락", { level: 1 }],
   ])("%s는 400이고 레벨을 만들지 않는다", async (_label, body) => {
     expect(await read(await post(body))).toEqual({ status: 400, json: errorBody("INVALID_INPUT") });
     expect(deps.db.setFirstLevel).not.toHaveBeenCalled();

@@ -17,6 +17,7 @@ describe("toDbResult", () => {
   it("예상된 거부는 code를 돌려준다", () => {
     expect(toDbResult("f", { ok: false, code: "CONFLICT" })).toEqual({ ok: false, code: "CONFLICT" });
     expect(toDbResult("f", { ok: false, code: "CONSENT_REQUIRED" })).toEqual({ ok: false, code: "CONSENT_REQUIRED" });
+    expect(toDbResult("f", { ok: false, code: "PRO_REQUIRED" })).toEqual({ ok: false, code: "PRO_REQUIRED" });
   });
 
   it("DB가 돌려줄 수 없는 code는 throw한다", () => {

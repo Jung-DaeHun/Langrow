@@ -17,6 +17,7 @@ import {
   finishEnd,
   type BeginEndResult,
 } from "./chat";
+import { callRpc } from "./rpc";
 import type { DbResult } from "./types";
 
 // chat 마이그레이션의 SQL 상수와 같은 값 (lib에 상수가 없는 규칙)
@@ -31,6 +32,8 @@ const FREE_LIMIT = PLAN_LIMITS.free.chatTurns;
 const PRO_LIMIT = PLAN_LIMITS.pro.chatTurns;
 
 const SESSION = { language: "en", level: 1, scenarioId: "l1-cafe" } as const;
+// 입문 5번째 상황 (Pro 상황)
+const PRO_SESSION = { language: "en", level: 1, scenarioId: "l1-taxi" } as const;
 const REPLY: TurnReply = {
   reply: "One latte, coming up!",
   reply_ko: "라테 한 잔 나갑니다!",
@@ -66,7 +69,7 @@ const today = () => kstDate(new Date());
 const yesterday = () => new Date(kstDayStart(today()).getTime() - 60_000).toISOString();
 
 async function newSession(userId: string): Promise<string> {
-  return valueOf(await createChatSession(userId, SESSION)).sessionId;
+  return valueOf(await createChatSession(userId, SESSION, false)).sessionId;
 }
 
 // 예약 → 확정으로 성공한 턴 하나
@@ -183,24 +186,58 @@ describe("createChatSession", () => {
     });
   });
 
-  it("실제 레벨과 다른 레벨이면 CONFLICT이고 세션을 만들지 않는다", async () => {
+  it("실제 레벨과 다른 레벨이면 Pro 상황 여부와 상관없이 CONFLICT이고 세션을 만들지 않는다", async () => {
     const user = await createReadyUser("en", 2);
-    await expect(createChatSession(user.id, SESSION)).resolves.toEqual(CONFLICT);
+    await expect(createChatSession(user.id, SESSION, false)).resolves.toEqual(CONFLICT);
+    await expect(createChatSession(user.id, PRO_SESSION, true)).resolves.toEqual(CONFLICT);
     expect(await sessionsOf(user.id)).toEqual([]);
   });
 
   it("미동의는 CONSENT_REQUIRED, 레벨이 없는 언어는 ONBOARDING_REQUIRED이고 세션을 만들지 않는다", async () => {
     const fresh = await createTestUser();
     await ensureProfile(fresh.id);
-    await expect(createChatSession(fresh.id, SESSION)).resolves.toEqual({ ok: false, code: "CONSENT_REQUIRED" });
+    await expect(createChatSession(fresh.id, SESSION, false)).resolves.toEqual({ ok: false, code: "CONSENT_REQUIRED" });
     expect(await sessionsOf(fresh.id)).toEqual([]);
 
     const user = await createReadyUser("en", 1);
-    await expect(createChatSession(user.id, { ...SESSION, language: "ja" })).resolves.toEqual({
+    await expect(createChatSession(user.id, { ...SESSION, language: "ja" }, false)).resolves.toEqual({
       ok: false,
       code: "ONBOARDING_REQUIRED",
     });
     expect(await sessionsOf(user.id)).toEqual([]);
+  });
+
+  it("Free(체험 안 함)가 Pro 상황이면 PRO_REQUIRED이고 세션도 limit_reached도 남기지 않는다", async () => {
+    const user = await createReadyUser("en", 1);
+    await expect(createChatSession(user.id, PRO_SESSION, true)).resolves.toEqual({ ok: false, code: "PRO_REQUIRED" });
+    expect(await sessionsOf(user.id)).toEqual([]);
+    expect(await eventsOf(user.id, "limit_reached")).toEqual([]);
+  });
+
+  it("체험 중이면 Pro 상황 세션을 만들고, 체험이 끝난 뒤에도 그 세션의 턴 예약과 종료가 된다", async () => {
+    const user = await createReadyUser("en", 1);
+    valueOf(await startTrial(user.id));
+    const { sessionId } = valueOf(await createChatSession(user.id, PRO_SESSION, true));
+    expect(await sessionRow(sessionId)).toMatchObject({ scenario_id: PRO_SESSION.scenarioId, level: 1, status: "active" });
+
+    // 체험 종료: 새 Pro 상황 세션은 막히고, 이미 만든 세션은 이어서 하고 끝낼 수 있다
+    must(await getAdminSupabase().from("profiles").update({ pro_until: new Date(Date.now() - 60_000).toISOString() }).eq("id", user.id));
+    await expect(createChatSession(user.id, PRO_SESSION, true)).resolves.toEqual({ ok: false, code: "PRO_REQUIRED" });
+    await doneTurn(user.id, sessionId);
+    expect(reserved(await beginEnd(user.id, sessionId)).session).toEqual(PRO_SESSION);
+  });
+
+  // 지금 운영 코드는 p_pro_only 없이 인자 4개로 부른다. 마이그레이션을 먼저 적용해도 깨지지 않아야 한다
+  it("p_pro_only를 빼고 부르면 기존처럼 세션을 만든다", async () => {
+    const user = await createReadyUser("en", 1);
+    const result = await callRpc("create_chat_session", {
+      p_user_id: user.id,
+      p_language: "en",
+      p_level: 1,
+      p_scenario_id: PRO_SESSION.scenarioId,
+    });
+    expect(result.ok).toBe(true);
+    expect(await sessionsOf(user.id)).toHaveLength(1);
   });
 });
 
@@ -290,7 +327,7 @@ describe("대화 1턴", () => {
 
   it("확정은 한글 발음을 저장한다: reply_pron_ko는 컬럼에, 교정 발음은 correction 안에. 없으면 null이다", async () => {
     const user = await createReadyUser("ja", 1);
-    const { sessionId } = valueOf(await createChatSession(user.id, { language: "ja", level: 1, scenarioId: "l1-cafe" }));
+    const { sessionId } = valueOf(await createChatSession(user.id, { language: "ja", level: 1, scenarioId: "l1-cafe" }, false));
     const withPron: TurnReply = {
       reply: "はい、どうぞ。",
       reply_ko: "네, 여기요.",

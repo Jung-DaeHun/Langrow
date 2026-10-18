@@ -247,7 +247,7 @@ describe("함수 실행 권한", () => {
     };
     const user = await createReadyUser("en", 1);
     const newSession = async () =>
-      valueOf(await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" })).sessionId;
+      valueOf(await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" }, false)).sessionId;
 
     const idle = await newSession(); // 예약 없음
     const turning = await newSession(); // 턴 예약 중

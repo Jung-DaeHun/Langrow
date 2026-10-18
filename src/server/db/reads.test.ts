@@ -135,7 +135,7 @@ async function insertUserWords(
 
 // 레벨 1 세션 (상황 id는 언어와 무관하다)
 async function newSession(userId: string, language: Language = "en", scenarioId = "l1-cafe"): Promise<string> {
-  return valueOf(await createChatSession(userId, { language, level: 1, scenarioId })).sessionId;
+  return valueOf(await createChatSession(userId, { language, level: 1, scenarioId }, false)).sessionId;
 }
 
 async function doneTurn(userId: string, sessionId: string, reply: TurnReply = PLAIN, userText = "hi"): Promise<void> {

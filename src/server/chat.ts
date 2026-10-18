@@ -1,6 +1,6 @@
 import "server-only";
 import type { Language, Level } from "@/lib/levels";
-import { findScenario, type Scenario } from "@/lib/scenarios";
+import { findScenario, isProScenario, isScenarioLocked, type Scenario } from "@/lib/scenarios";
 import type { ChatEndResponse, ChatMessageResponse, ChatSessionCreated } from "@/types/api";
 import type { Deps } from "./deps";
 import type { Outcome } from "./http";
@@ -23,9 +23,11 @@ export async function startChatSession(
   userId: string,
   input: { language: Language; level: Level; scenarioId: string },
 ): Promise<Outcome<ChatSessionCreated>> {
-  // 다른 레벨의 상황은 400이다. 요청 레벨이 실제 레벨과 다른지는 RPC가 잠근 뒤 확인한다(CONFLICT)
-  if (findScenario(input.scenarioId)?.level !== input.level) return { ok: false, code: "INVALID_INPUT" };
-  return deps.db.createChatSession(userId, input);
+  // 위 레벨의 상황은 400이다. 요청 레벨이 실제 레벨과 다른지는 RPC가 잠근 뒤 확인한다(CONFLICT).
+  // 세션 레벨은 상황 레벨이 아니라 요청 레벨(지금 레벨)이다. Pro 상황이면 RPC가 플랜을 판정한다(PRO_REQUIRED)
+  const scenario = findScenario(input.scenarioId);
+  if (!scenario || isScenarioLocked(scenario, input.level)) return { ok: false, code: "INVALID_INPUT" };
+  return deps.db.createChatSession(userId, input, isProScenario(scenario));
 }
 
 export async function sendChatMessage(

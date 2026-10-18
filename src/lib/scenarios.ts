@@ -1496,3 +1496,21 @@ export function scenariosForLevel(level: Level): Scenario[] {
 export function findScenario(id: string): Scenario | undefined {
   return SCENARIOS.find((s) => s.id === id);
 }
+
+export const SCENARIOS_PER_LEVEL = 7;
+export const FREE_SCENARIOS_PER_LEVEL = 3;
+
+// 레벨 안 순번(1~7). SCENARIOS의 순서로 정한다
+export function scenarioOrder(scenario: Scenario): number {
+  return scenariosForLevel(scenario.level).findIndex((s) => s.id === scenario.id) + 1;
+}
+
+// 레벨마다 앞 3개는 Free, 4~7번째는 체험·Pro 사용자만 새 세션을 만든다(spec/usage.md "Pro 상황")
+export function isProScenario(scenario: Scenario): boolean {
+  return scenarioOrder(scenario) > FREE_SCENARIOS_PER_LEVEL;
+}
+
+// 지금 레벨보다 위 레벨의 상황은 잠긴다. 같은 레벨·아래 레벨은 열린다(spec/chat.md "대화 진행")
+export function isScenarioLocked(scenario: Scenario, currentLevel: Level): boolean {
+  return scenario.level > currentLevel;
+}

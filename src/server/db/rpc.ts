@@ -12,6 +12,7 @@ export type RpcValue = Record<string, unknown>;
 const DB_ERROR_CODES: readonly DbErrorCode[] = [
   "CONSENT_REQUIRED",
   "ONBOARDING_REQUIRED",
+  "PRO_REQUIRED",
   "INVALID_INPUT",
   "NOT_FOUND",
   "LIMIT_REACHED",

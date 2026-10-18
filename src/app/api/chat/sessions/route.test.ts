@@ -74,7 +74,7 @@ describe("POST /api/chat/sessions", () => {
     expect(deps.db.createChatSession).not.toHaveBeenCalled();
   });
 
-  it("다른 레벨의 상황은 400이다", async () => {
+  it("위 레벨의 상황은 400이다", async () => {
     expect(await read(await post({ ...VALID, scenario_id: "l2-hotel" }))).toEqual({
       status: 400,
       json: errorBody("INVALID_INPUT"),
@@ -88,7 +88,7 @@ describe("POST /api/chat/sessions", () => {
     const response = await post({ ...VALID, userId: "99999999-9999-4999-8999-999999999999" });
 
     expect(await read(response)).toEqual({ status: 200, json: { sessionId: SESSION_ID } });
-    expect(deps.db.createChatSession).toHaveBeenCalledWith(USER_ID, { language: "en", level: 1, scenarioId: "l1-cafe" });
+    expect(deps.db.createChatSession).toHaveBeenCalledWith(USER_ID, { language: "en", level: 1, scenarioId: "l1-cafe" }, false);
   });
 
   it("RPC가 CONFLICT면 409다", async () => {

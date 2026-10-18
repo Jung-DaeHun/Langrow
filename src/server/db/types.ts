@@ -5,6 +5,7 @@ export type DbErrorCode = Extract<
   ErrorCode,
   | "CONSENT_REQUIRED"
   | "ONBOARDING_REQUIRED"
+  | "PRO_REQUIRED"
   | "INVALID_INPUT"
   | "NOT_FOUND"
   | "LIMIT_REACHED"

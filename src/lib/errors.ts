@@ -2,6 +2,7 @@ export type ErrorCode =
   | "UNAUTHORIZED"
   | "CONSENT_REQUIRED"
   | "ONBOARDING_REQUIRED"
+  | "PRO_REQUIRED"
   | "INVALID_INPUT"
   | "NOT_FOUND"
   | "LIMIT_REACHED"
@@ -15,7 +16,8 @@ export type ErrorCode =
 export const ERRORS: Record<ErrorCode, { status: number; message: string }> = {
   UNAUTHORIZED: { status: 401, message: "로그인이 필요해요." },
   CONSENT_REQUIRED: { status: 403, message: "약관에 동의한 뒤 이용할 수 있어요." },
-  ONBOARDING_REQUIRED: { status: 403, message: "학습할 언어와 레벨을 먼저 골라 주세요." },
+  ONBOARDING_REQUIRED: { status: 403, message: "학습할 언어를 먼저 골라 주세요." },
+  PRO_REQUIRED: { status: 403, message: "Pro 상황은 7일 무료 체험이나 Pro에서 할 수 있어요." },
   INVALID_INPUT: { status: 400, message: "입력한 내용을 다시 확인해 주세요." },
   NOT_FOUND: { status: 404, message: "찾을 수 없어요." },
   LIMIT_REACHED: { status: 429, message: "오늘 사용량을 모두 썼어요." },

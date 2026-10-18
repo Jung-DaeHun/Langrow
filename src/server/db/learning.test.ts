@@ -808,7 +808,7 @@ describe("AI 정답 설명", () => {
     await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT - 1);
     valueOf(await failWordExplanation(user.id, await reserve(user.id), "api_error"));
 
-    const { sessionId } = valueOf(await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" }));
+    const { sessionId } = valueOf(await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" }, false));
     expect(await beginChatTurn(user.id, sessionId, "hi")).toEqual(AI_FAILURE_LIMIT);
   });
 

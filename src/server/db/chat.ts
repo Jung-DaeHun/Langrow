@@ -33,17 +33,19 @@ function endResult(value: RpcValue): EndResult {
   return { feedbackStatus: value.feedback_status, feedback: value.feedback } as EndResult;
 }
 
-// CONSENT_REQUIRED, ONBOARDING_REQUIRED, CONFLICT(실제 레벨과 다름).
-// 상황이 그 레벨의 것인지는 use-case가 lib/scenarios로 검사한다
+// CONSENT_REQUIRED, ONBOARDING_REQUIRED, CONFLICT(실제 레벨과 다름), PRO_REQUIRED(proOnly인데 Free).
+// 상황이 열린 레벨의 것인지와 Pro 상황인지는 use-case가 lib/scenarios로 정한다. 플랜은 RPC가 판정한다
 export async function createChatSession(
   userId: string,
   input: ChatSessionInfo,
+  proOnly: boolean,
 ): Promise<DbResult<{ sessionId: string }>> {
   const result = await callRpc("create_chat_session", {
     p_user_id: userId,
     p_language: input.language,
     p_level: input.level,
     p_scenario_id: input.scenarioId,
+    p_pro_only: proOnly,
   });
   return result.ok ? { ok: true, value: { sessionId: result.value.session_id as string } } : result;
 }

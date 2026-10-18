@@ -4,7 +4,8 @@ import { ERRORS, type ErrorCode, isErrorCode } from "./errors";
 const TABLE: [ErrorCode, number, string][] = [
   ["UNAUTHORIZED", 401, "로그인이 필요해요."],
   ["CONSENT_REQUIRED", 403, "약관에 동의한 뒤 이용할 수 있어요."],
-  ["ONBOARDING_REQUIRED", 403, "학습할 언어와 레벨을 먼저 골라 주세요."],
+  ["ONBOARDING_REQUIRED", 403, "학습할 언어를 먼저 골라 주세요."],
+  ["PRO_REQUIRED", 403, "Pro 상황은 7일 무료 체험이나 Pro에서 할 수 있어요."],
   ["INVALID_INPUT", 400, "입력한 내용을 다시 확인해 주세요."],
   ["NOT_FOUND", 404, "찾을 수 없어요."],
   ["LIMIT_REACHED", 429, "오늘 사용량을 모두 썼어요."],

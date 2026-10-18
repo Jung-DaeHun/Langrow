@@ -48,11 +48,11 @@ function reservedEnd() {
 describe("startChatSession", () => {
   it.each([
     ["없는 상황", "l9-unknown"],
-    ["다른 레벨의 상황", "l2-hotel"],
+    ["위 레벨의 상황", "l3-pharmacy"],
   ])("%s이면 INVALID_INPUT이고 세션을 만들지 않는다", async (_label, scenarioId) => {
     const deps = createFakeDeps();
 
-    const result = await startChatSession(deps, USER_ID, { language: "en", level: 1, scenarioId });
+    const result = await startChatSession(deps, USER_ID, { language: "en", level: 2, scenarioId });
 
     expect(result).toEqual({ ok: false, code: "INVALID_INPUT" });
     expect(deps.db.createChatSession).not.toHaveBeenCalled();
@@ -65,7 +65,39 @@ describe("startChatSession", () => {
     const result = await startChatSession(deps, USER_ID, input);
 
     expect(result).toEqual({ ok: true, value: { sessionId: SESSION_ID } });
-    expect(deps.db.createChatSession).toHaveBeenCalledWith(USER_ID, input);
+    expect(deps.db.createChatSession).toHaveBeenCalledWith(USER_ID, input, false);
+  });
+
+  // 세션 레벨은 상황 레벨이 아니라 지금 레벨이다(spec/chat.md "대화 진행")
+  it("아래 레벨의 상황이면 요청 레벨을 그대로 넘긴다", async () => {
+    const deps = createFakeDeps();
+    const input = { language: "ja", level: 3, scenarioId: "l1-cafe" } as const;
+
+    expect((await startChatSession(deps, USER_ID, input)).ok).toBe(true);
+    expect(deps.db.createChatSession).toHaveBeenCalledWith(USER_ID, input, false);
+  });
+
+  it.each([
+    ["l2-restaurant", false],
+    ["l2-clothes", false],
+    ["l2-train", true],
+    ["l2-hair-salon", true],
+    ["l1-plans", true],
+  ])("%s는 Pro 상황 인자를 %s로 넘긴다", async (scenarioId, proOnly) => {
+    const deps = createFakeDeps();
+    const input = { language: "en", level: 2, scenarioId } as const;
+
+    await startChatSession(deps, USER_ID, input);
+
+    expect(deps.db.createChatSession).toHaveBeenCalledWith(USER_ID, input, proOnly);
+  });
+
+  it("RPC가 PRO_REQUIRED(Free의 Pro 상황)면 그대로 돌려준다", async () => {
+    const deps = createFakeDeps({ db: { createChatSession: async () => ({ ok: false, code: "PRO_REQUIRED" }) } });
+
+    const result = await startChatSession(deps, USER_ID, { language: "en", level: 1, scenarioId: "l1-taxi" });
+
+    expect(result).toEqual({ ok: false, code: "PRO_REQUIRED" });
   });
 
   it("RPC가 CONFLICT(실제 레벨과 다름)면 그대로 돌려준다", async () => {

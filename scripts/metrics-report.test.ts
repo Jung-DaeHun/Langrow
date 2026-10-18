@@ -36,7 +36,7 @@ describe("metrics-report main", () => {
 
     expect(await main(deps)).toBe(0);
 
-    expect(logs.filter((line) => LINE.test(line))).toHaveLength(8);
+    expect(logs.filter((line) => LINE.test(line))).toHaveLength(9);
     expect(lineOf(logs, "온보딩 완료율")).toMatch(/: 1\/2 \(50\.0%\) 판단 보류$/);
   });
 
