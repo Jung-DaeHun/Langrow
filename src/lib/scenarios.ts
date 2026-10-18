@@ -1,5 +1,5 @@
 import type { Breakdown } from "./breakdown";
-import type { Language, Level } from "./levels";
+import { LEVEL_INFO, LEVELS, type Language, type Level } from "./levels";
 
 // pronKo: 한글 발음(spec/chat.md "한글 발음"). 일본어 입문~중급 상황(레벨 1~3)의 첫 마디에만 둔다
 // breakdown: 문장 뜯어보기(spec/chat.md "문장 뜯어보기"). text는 alignBreakdown이 돌려주는 모양(첫 마디를 조각 경계에서 자른 부분)이다
@@ -1513,4 +1513,44 @@ export function isProScenario(scenario: Scenario): boolean {
 // 지금 레벨보다 위 레벨의 상황은 잠긴다. 같은 레벨·아래 레벨은 열린다(spec/chat.md "대화 진행")
 export function isScenarioLocked(scenario: Scenario, currentLevel: Level): boolean {
   return scenario.level > currentLevel;
+}
+
+export type ScenarioTile = {
+  scenarioId: string;
+  index: number; // 레벨 안 순번(1~7)
+  title: string;
+  goal: string;
+  pro: boolean;
+  locked: boolean;
+  open: { id: string; status: "active" | "ending"; doneTurns: number } | null;
+  completed: boolean;
+};
+export type ScenarioGroup = { level: Level; name: string; locked: boolean; items: ScenarioTile[] };
+
+// 상황 목록(/chat)의 레벨 묶음. 입문 → 고수 5개에 상황을 모두 담는다(spec/ui.md "상황 목록").
+// 열린 세션·끝낸 세션은 그 언어 전체에서 상황 id로 맞춘다. 아래 레벨 상황의 열린 세션은 만들 때의 레벨로 이어 간다
+export function scenarioGroups(
+  currentLevel: Level,
+  openSessions: readonly { id: string; scenarioId: string; status: "active" | "ending"; doneTurns: number }[],
+  endedScenarioIds: readonly string[],
+): ScenarioGroup[] {
+  return LEVELS.map((level) => ({
+    level,
+    name: LEVEL_INFO[level].name,
+    locked: level > currentLevel,
+    items: scenariosForLevel(level).map((scenario, i) => {
+      // openSessions는 최신순이라 find가 그 상황의 가장 최근 열린 세션을 고른다
+      const open = openSessions.find((s) => s.scenarioId === scenario.id);
+      return {
+        scenarioId: scenario.id,
+        index: i + 1,
+        title: scenario.title,
+        goal: scenario.goal,
+        pro: isProScenario(scenario),
+        locked: isScenarioLocked(scenario, currentLevel),
+        open: open === undefined ? null : { id: open.id, status: open.status, doneTurns: open.doneTurns },
+        completed: endedScenarioIds.includes(scenario.id),
+      };
+    }),
+  }));
 }

@@ -206,7 +206,7 @@ export function LevelTestRunner({ language, fromLevel, questions }: Props) {
         <div className="flex items-start gap-3 rounded-xl bg-gold-wash p-4 text-on-gold ring-1 ring-gold-light ring-inset">
           <Award size={20} aria-hidden="true" className="shrink-0 text-gold" />
           <div className="flex flex-col gap-1">
-            <p className="font-bold">새 상황 4개가 열렸어요</p>
+            <p className="font-bold">{LEVEL_INFO[result.level].name} 상황이 열렸어요</p>
             <p className="text-sm">이제 {LEVEL_INFO[result.level].name} 단어와 상황으로 학습해요.</p>
           </div>
         </div>

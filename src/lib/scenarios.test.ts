@@ -10,6 +10,7 @@ import {
   findScenario,
   isProScenario,
   isScenarioLocked,
+  scenarioGroups,
   scenarioOrder,
   scenariosForLevel,
   type Scenario,
@@ -174,6 +175,65 @@ describe("isScenarioLocked", () => {
     expect(isScenarioLocked(scenario("l3-lost-item"), 3)).toBe(false);
     expect(isScenarioLocked(scenario("l3-pharmacy"), 4)).toBe(false);
     expect(isScenarioLocked(scenario("l1-greeting"), 5)).toBe(false);
+  });
+});
+
+describe("scenarioGroups", () => {
+  it("입문 → 고수 묶음 5개에 레벨 이름과 상황 7개를 순서대로 담고, 지금 레벨보다 위 묶음만 잠근다", () => {
+    const groups = scenarioGroups(3, [], []);
+
+    expect(groups.map((g) => [g.level, g.name, g.locked])).toEqual([
+      [1, "입문", false],
+      [2, "초보", false],
+      [3, "중급", false],
+      [4, "상급", true],
+      [5, "고수", true],
+    ]);
+    for (const group of groups) {
+      expect(group.items.map((item) => item.scenarioId)).toEqual(scenariosForLevel(group.level).map((s) => s.id));
+      expect(group.items.map((item) => item.index)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    }
+  });
+
+  it("상황마다 제목·목표와 Pro 상황(4~7번째)·잠김(위 레벨) 여부를 담는다", () => {
+    const groups = scenarioGroups(2, [], []);
+    const items = groups.flatMap((g) => g.items);
+    const byId = (id: string) => items.find((item) => item.scenarioId === id);
+
+    expect(byId("l2-hotel")).toEqual({
+      scenarioId: "l2-hotel",
+      index: 2,
+      title: scenario("l2-hotel").title,
+      goal: scenario("l2-hotel").goal,
+      pro: false,
+      locked: false,
+      open: null,
+      completed: false,
+    });
+    expect(byId("l1-taxi")).toMatchObject({ index: 5, pro: true, locked: false });
+    expect(byId("l3-pharmacy")).toMatchObject({ index: 1, pro: false, locked: true });
+    expect(byId("l5-culture")).toMatchObject({ index: 7, pro: true, locked: true });
+  });
+
+  it("열린 세션·끝낸 세션은 레벨과 상관없이 상황 id로 맞추고, 같은 상황이면 앞(최신) 세션을 고른다", () => {
+    const groups = scenarioGroups(
+      3,
+      [
+        { id: "s-new", scenarioId: "l1-cafe", status: "ending", doneTurns: 6 },
+        { id: "s-old", scenarioId: "l1-cafe", status: "active", doneTurns: 2 },
+        { id: "s-upper", scenarioId: "l4-interview", status: "active", doneTurns: 1 },
+      ],
+      ["l1-cafe", "l3-return"],
+    );
+    const items = groups.flatMap((g) => g.items);
+    const byId = (id: string) => items.find((item) => item.scenarioId === id);
+
+    // 아래 레벨 상황의 열린 세션은 만들 때의 레벨로 이어 가므로 그 세션을 연다(spec/chat.md "대화 진행")
+    expect(byId("l1-cafe")).toMatchObject({ open: { id: "s-new", status: "ending", doneTurns: 6 }, completed: true });
+    // 레벨을 내린 뒤 남은 위 레벨 상황의 세션도 연다
+    expect(byId("l4-interview")).toMatchObject({ open: { id: "s-upper", status: "active", doneTurns: 1 }, locked: true });
+    expect(byId("l3-return")).toMatchObject({ open: null, completed: true });
+    expect(byId("l3-pharmacy")).toMatchObject({ open: null, completed: false });
   });
 });
 

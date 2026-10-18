@@ -188,7 +188,8 @@ describe("LevelTestRunner 결과", () => {
     expect(bar).toHaveAttribute("aria-valuenow", "18");
     expect(bar).toHaveAttribute("aria-valuemax", "20");
     expect(bar.firstElementChild).toHaveClass("bg-accent");
-    expect(screen.getByText("새 상황 4개가 열렸어요")).toBeInTheDocument();
+    expect(screen.getByText("상급 상황이 열렸어요")).toBeInTheDocument();
+    expect(screen.getByText("이제 상급 단어와 상황으로 학습해요.")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "새 상황 보기" }));
     expect(assign).toHaveBeenLastCalledWith("/chat");
@@ -208,7 +209,7 @@ describe("LevelTestRunner 결과", () => {
     const bar = screen.getByRole("progressbar", { name: "점수" });
     expect(bar.firstElementChild).toHaveClass("bg-ink-muted");
     expect(bar.firstElementChild).not.toHaveClass("bg-danger");
-    expect(screen.queryByText("새 상황 4개가 열렸어요")).not.toBeInTheDocument();
+    expect(screen.queryByText(/상황이 열렸어요/)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "홈으로" })).toHaveAttribute("href", "/home");
   });
 
