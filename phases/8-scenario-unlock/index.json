@@ -2,8 +2,24 @@
   "project": "Langrow",
   "phase": "8-scenario-unlock",
   "steps": [
-    { "step": 0, "name": "unlock-rules", "status": "pending" },
-    { "step": 1, "name": "scenario-list", "status": "pending" },
-    { "step": 2, "name": "start-at-level-one", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "unlock-rules",
+      "status": "completed",
+      "started_at": "2026-10-18T20:42:43+0900",
+      "summary": "scenarios.ts: SCENARIOS_PER_LEVEL=7, FREE_SCENARIOS_PER_LEVEL=3, scenarioOrder(s)(레벨 안 순번 1~7), isProScenario(s)(순번>3), isScenarioLocked(s, level)(s.level>level). PRO_REQUIRED 403(apiClient는 이동 안 함), ONBOARDING_REQUIRED 문구 \"학습할 언어를 먼저 골라 주세요.\". RPC create_chat_session(..., p_pro_only boolean default false): 레벨 확인 뒤 Free면 PRO_REQUIRED. db.createChatSession(userId,input,proOnly). startChatSession: 없는·위 레벨 상황 400, 세션 레벨=요청 레벨. /api/levels는 {language}만, 레벨 1. 지표 trial_before_limit.",
+      "completed_at": "2026-10-18T20:53:18+0900"
+    },
+    {
+      "step": 1,
+      "name": "scenario-list",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "start-at-level-one",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-18T20:42:43+0900"
 }

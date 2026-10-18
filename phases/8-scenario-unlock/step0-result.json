@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "scenarios.ts: SCENARIOS_PER_LEVEL=7, FREE_SCENARIOS_PER_LEVEL=3, scenarioOrder(s)(레벨 안 순번 1~7), isProScenario(s)(순번>3), isScenarioLocked(s, level)(s.level>level). PRO_REQUIRED 403(apiClient는 이동 안 함), ONBOARDING_REQUIRED 문구 \"학습할 언어를 먼저 골라 주세요.\". RPC create_chat_session(..., p_pro_only boolean default false): 레벨 확인 뒤 Free면 PRO_REQUIRED. db.createChatSession(userId,input,proOnly). startChatSession: 없는·위 레벨 상황 400, 세션 레벨=요청 레벨. /api/levels는 {language}만, 레벨 1. 지표 trial_before_limit.",
+  "spec_diff": "metrics.md '한도 도달 전 체험 시작'은 분모를 '체험을 시작한 사용자'로만 적었다. step 지시대로 다른 지표와 같은 대상(모집 기간 안 온보딩 완료, 제외 계정 뺌) 중 trialStartedAt이 있는 사용자로 한정했다."
+}
