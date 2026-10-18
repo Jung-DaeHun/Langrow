@@ -42,7 +42,8 @@
     },
     {
       "dir": "8-scenario-unlock",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-10-18T21:09:51+0900"
     }
   ]
 }
