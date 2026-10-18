@@ -26,7 +26,7 @@ data/words/               # {en,ja}-{1..5}.json (검수 후 커밋)
 data/audio-manifest.json  # 음성 파일별 SSML 해시 (generate-audio가 갱신)
 public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포인트}.mp3 (Azure로 미리 생성해 커밋. 남성 음성은 나중에 male/)
 ```
-- 상수 데이터: 상황 `src/lib/scenarios.ts`(20개, 첫 마디·역할은 en/ja 각각), 가나 `src/lib/kana.ts`.
+- 상수 데이터: 상황 `src/lib/scenarios.ts`(35개, 레벨마다 7개이고 앞 3개는 Free·4~7번째는 Pro 상황, 첫 마디·역할은 en/ja 각각), 가나 `src/lib/kana.ts`.
 
 ## 패턴
 - Server Components가 기본이다. 입력·진행 상태가 필요한 화면 단위 컴포넌트만 Client Component로 만든다. 정적 UI는 `page.tsx`/`layout.tsx`에 둔다.
@@ -41,6 +41,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 쓰기: Client Component → services/apiClient → /api route → server use-case → server/db → RPC(admin client)
      성공 뒤 화면 갱신은 router.refresh()로 페이지를 다시 읽는다
 
+세션 생성: use-case(위 레벨 상황 400, 상황 상수로 Pro 상황인지 정함) → RPC(계정 잠금, 만료 작업 복구, 지금 레벨 확인, Pro 상황이면 DB 시각의 플랜 확인, 세션 삽입)
 대화 1턴: 예약 RPC(계정 잠금, 만료 작업 복구, 한도·상태 확인, pending 행 + 작업 토큰 90초) → 커밋
         → Claude 호출(잠금 밖, 호출당 20초, 직접 재시도 1번)
         → 성공 확정 RPC(토큰·기한 확인, 저장·활동일·연속일) 또는 실패 확정 RPC(pending 삭제, chat_failed)
@@ -72,9 +73,9 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 | GET | `/auth/callback` | OAuth 코드 교환, `profiles`가 없으면 생성. `next` 파라미터를 받지 않는다 |
 | POST | `/api/me/consent` | 약관 동의 (`agreed_at`, 최초 시각 유지) |
 | PUT | `/api/me/language` | 레벨이 있는 언어로 전환 |
-| POST | `/api/levels` | 언어의 첫 레벨 + 언어 전환 + 최초 `onboarded_at`. 이미 있으면 409 |
+| POST | `/api/levels` | `language`만 받아 입문(1)으로 첫 레벨 + 언어 전환 + 최초 `onboarded_at`. 이미 있으면 409 |
 | PATCH | `/api/levels/[language]` | 레벨 내리기 |
-| POST | `/api/chat/sessions` | 세션 생성 (Claude 호출 없음, 다른 레벨의 상황은 400) |
+| POST | `/api/chat/sessions` | 세션 생성 (Claude 호출 없음, 위 레벨 상황은 400, Free의 Pro 상황은 403 `PRO_REQUIRED`) |
 | POST | `/api/chat/sessions/[id]/messages` | 대화 1턴 |
 | POST | `/api/chat/sessions/[id]/end` | 종료. 완료 200, 처리 중 202, 턴 처리 중 409 |
 | POST | `/api/words/batch` | 회차 저장. 기존 단어는 200, 신규분만 한도 확인 |
@@ -85,7 +86,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 | POST | `/api/events` | `pro_clicked`, `kana_studied`만 (가나는 활동일·연속일도 갱신) |
 
 - 기본 준비 상태: 로그인 + 동의 + 현재 언어 레벨. 예외는 3개뿐: consent(로그인), levels(로그인 + 동의), language(로그인 + 동의 + 대상 언어 레벨). 부족하면 403이며 학습 데이터 변경·AI 호출을 하지 않는다.
-- 에러 형식은 `{ code, message }`(한국어 문구): `UNAUTHORIZED` 401, `CONSENT_REQUIRED`/`ONBOARDING_REQUIRED` 403, `INVALID_INPUT` 400, `NOT_FOUND` 404, `LIMIT_REACHED`/`AI_FAILURE_LIMIT` 429, `AI_UNAVAILABLE` 503, `SESSION_FULL`/`CONFLICT` 409, `INTERNAL` 500.
+- 에러 형식은 `{ code, message }`(한국어 문구): `UNAUTHORIZED` 401, `CONSENT_REQUIRED`/`ONBOARDING_REQUIRED`/`PRO_REQUIRED` 403, `INVALID_INPUT` 400, `NOT_FOUND` 404, `LIMIT_REACHED`/`AI_FAILURE_LIMIT` 429, `AI_UNAVAILABLE` 503, `SESSION_FULL`/`CONFLICT` 409, `INTERNAL` 500.
 
 ## 데이터 모델
 | 테이블 | 주요 컬럼 |

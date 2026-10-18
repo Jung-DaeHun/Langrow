@@ -52,7 +52,8 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
   - 단어 회차: 기존 단어 제외 + 신규 개수로 한도 확인 + 신규 삽입 + 활동일/연속일 갱신
   - 복습·가나·레벨업 테스트: 결과/이벤트 저장과 활동일/연속일 갱신을 함께 처리한다.
   - AI 정답 설명: 예약은 설명 한도 확인 + 저장본 조회(없으면 실패 횟수 확인) + `word_explained` 저장, 실패는 그 예약 행 삭제 + `chat_failed` 기록, 저장은 설명을 만든 단어 내용이 지금 단어와 같을 때만 해시를 계산해 `word_explanations`에 넣기다. AI 호출 중에는 잠금을 유지하지 않는다.
-  - 첫 레벨: 동의 확인 후 언어별 PK insert, `current_language` 전환, 최초 `onboarded_at` 설정을 함께 처리한다. 이미 해당 언어의 레벨이 있으면 409이며 다른 언어를 처음 추가하는 것은 허용한다.
+  - 첫 레벨: 동의 확인 후 언어별 PK insert, `current_language` 전환, 최초 `onboarded_at` 설정을 함께 처리한다. 이미 해당 언어의 레벨이 있으면 409이며 다른 언어를 처음 추가하는 것은 허용한다. 레벨은 늘 입문(1)이다. API는 레벨을 받지 않고 use-case가 1을 넘긴다(ADR-019).
+  - 대화 세션 생성: 만료 작업 복구 + 준비 상태 + 요청 레벨이 지금 레벨인지 확인 + (Pro 상황이면) 플랜 확인 + 세션 삽입. Pro 상황인지는 use-case가 상황 상수(`lib/scenarios`)로 정해 인자(`p_pro_only boolean default false`)로 넘기고, 플랜은 RPC가 잠금 뒤 DB 시각(`current_plan`)으로 정한다. Free면 `PRO_REQUIRED`를 결과 코드로 돌려준다. 인자에 기본값을 둬서 지금 운영 코드(인자 4개로 부름)와도 맞게 한다. 같은 이름의 4개 인자 함수는 지우고 새로 만든다(둘 다 두면 이름 호출이 모호해진다).
   - 체험 시작은 `trial_started_at is null`, 레벨업은 `level = from_level`, 레벨 내리기는 `level > new` 조건을 유지한다. 모두 해당 계정 잠금 규칙을 따른다.
   - 한도 초과 등 예상된 거부는 결과 코드로 반환해 이미 수행한 만료 복구·이벤트 기록을 커밋한다. 예상하지 못한 SQL 오류는 트랜잭션 전체를 롤백한다.
 - **RPC 실행 권한**: `SECURITY INVOKER`로 만들고 함수별 `EXECUTE`를 `PUBLIC`, `anon`, `authenticated`에서 회수한 뒤 `service_role`에만 부여한다. 새 함수에도 같은 기본 권한을 적용한다. HTTP에서 검증한 사용자 ID를 서버가 전달하며 body의 userId는 받지 않는다. 내부 helper에도 같은 권한 규칙을 적용한다.
@@ -69,7 +70,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | # | 위협 | 규칙 |
 |---|---|---|
 | 1 | 남의 리소스 접근 (IDOR) | admin 클라이언트로 하는 모든 조회·변경에 `id`와 `user_id`를 함께 건다. 남의 리소스는 404를 돌려준다. use-case 테스트와 수동 점검으로 확인한다 |
-| 2 | 첫 레벨 API로 레벨업 우회 | 이미 그 언어의 레벨이 있으면 409를 돌려준다 |
+| 2 | 첫 레벨 API로 레벨업 우회 | 이미 그 언어의 레벨이 있으면 409를 돌려준다. 첫 레벨은 요청과 상관없이 입문(1)이다 |
 | 3 | 위조된 인증 | 서버에서는 `getUser()`로 판단한다. `getSession()`은 토큰을 검증하지 않으므로 쓰지 않는다 |
 | 4 | CSRF | Supabase 쿠키가 SameSite=Lax이고, 래퍼가 JSON Content-Type만 받는다. Origin 검사는 하지 않는다 |
 | 5 | RLS 누락 | 모든 테이블에 RLS를 켜고, 배포 전에 Supabase Security Advisor로 확인한다 |
@@ -81,6 +82,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | 11 | 계정 삭제 | `user_activity_days`를 포함해 모든 사용자 테이블의 FK를 `auth.users(id) on delete cascade`로 건다 |
 | 12 | 동의·온보딩 우회 | API별 준비 상태를 래퍼와 쓰기 RPC에서 검사한다. 미동의는 403 `CONSENT_REQUIRED`, 학습 준비 미완료는 403 `ONBOARDING_REQUIRED` |
 | 13 | RPC 직접 호출 | anon/authenticated의 함수 EXECUTE를 회수하고 실제 해당 역할로 호출 거부를 확인한다. RLS 쓰기 정책 부재만으로 함수 호출을 막았다고 가정하지 않는다 |
+| 14 | 잠긴 상황·Pro 상황 우회 | 세션 생성 API가 위 레벨 상황을 400으로 막고, Free의 Pro 상황은 세션 생성 RPC가 DB 시각의 플랜으로 403 `PRO_REQUIRED`를 돌려준다. 화면 표시만으로 막았다고 보지 않는다 |
 
 ## API
 
@@ -91,9 +93,9 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | GET | `/auth/callback` | 공개 OAuth 콜백. 코드 교환 후 `profiles`가 없으면 생성 |
 | POST | `/api/me/consent` | 약관 동의 (`agreed_at`, 최초 시각 유지) |
 | PUT | `/api/me/language` | 대상 언어에 레벨이 있을 때 전환 |
-| POST | `/api/levels` | 언어의 첫 레벨 설정 + 해당 언어 전환 + 최초 온보딩 완료 시각. 이미 레벨이 있으면 409 |
+| POST | `/api/levels` | `language`만 받는다. 그 언어를 입문(1)으로 처음 설정 + 해당 언어 전환 + 최초 온보딩 완료 시각. 이미 레벨이 있으면 409 |
 | PATCH | `/api/levels/[language]` | 레벨 내리기 |
-| POST | `/api/chat/sessions` | 만료 작업 복구 + 세션 생성 (Claude 호출 없음) |
+| POST | `/api/chat/sessions` | 만료 작업 복구 + 세션 생성 (Claude 호출 없음). 위 레벨 상황은 400, 레벨이 바뀌었으면 409, Free의 Pro 상황은 403 `PRO_REQUIRED` |
 | POST | `/api/chat/sessions/[id]/messages` | 대화 1턴 (예약 RPC → Claude → 확정 RPC) |
 | POST | `/api/chat/sessions/[id]/end` | 종료 예약·피드백 확정/대체 결과. 완료 200, 처리 중 202, 턴 처리 중 409 |
 | POST | `/api/words/batch` | language + items. 신규분만 한도 확인하고 원자적으로 저장, 중복은 200 |
@@ -161,8 +163,9 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 |---|---|---|---|
 | `UNAUTHORIZED` | 401 | 로그인 안 됨·만료 | `/`로 이동 |
 | `CONSENT_REQUIRED` | 403 | 약관 동의 없음 | `/onboarding` 동의 단계로 이동 |
-| `ONBOARDING_REQUIRED` | 403 | 필요한 언어·레벨 미설정 | `/onboarding` 레벨 단계로 이동 |
-| `INVALID_INPUT` | 400 | zod 실패, 다른 레벨의 상황, 잘못된 시험 제출 | 문구 표시 |
+| `ONBOARDING_REQUIRED` | 403 | 필요한 언어·레벨 미설정 | `/onboarding` 언어 단계로 이동 |
+| `PRO_REQUIRED` | 403 | Free 사용자가 Pro 상황으로 새 세션 생성 | 래퍼가 이동시키지 않는다. 상황 목록을 다시 읽고 체험 또는 "정식 출시 준비 중" 안내 |
+| `INVALID_INPUT` | 400 | zod 실패, 지금 레벨보다 위 레벨의 상황, 잘못된 시험 제출 | 문구 표시 |
 | `NOT_FOUND` | 404 | 없거나 남의 리소스 | 홈으로 이동 |
 | `LIMIT_REACHED` | 429 | 플랜 한도 초과 | 체험 또는 Pro 안내 |
 | `AI_FAILURE_LIMIT` | 429 | 하루 실패 10회 | 대화 입력·AI 설명 버튼 비활성화 |
