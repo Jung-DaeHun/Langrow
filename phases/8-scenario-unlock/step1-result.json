@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "lib/scenarios: scenarioGroups(지금 레벨, 열린 세션, 끝낸 id)→ScenarioGroup[] {level,name,locked,items: ScenarioTile{scenarioId,index,title,goal,pro,locked,open,completed}}. ProButton.tsx의 useProComingSoon()→{show,dialog}(pro_clicked+준비 중 모달)를 ProButton·ScenarioPicker가 같이 씀. ScenarioPicker props {language,level,groups,access:\"pro\"|\"trial-available\"|\"trial-ended\"}: 묶음 펼침, 위 레벨·체험 모달, 체험 끝은 준비 중, PRO_REQUIRED는 refresh+준비 중. /chat은 planAt·trialState로 access 계산. 합격 문구 \"{새 레벨} 상황이 열렸어요\".",
+  "spec_diff": "1) testing.md는 'PRO_REQUIRED 응답이면 목록을 다시 읽고 체험 안내'인데 step 지시대로 refresh 후 pro_clicked+준비 중 모달을 띄운다. ui.md '3번 안내'와는 같다(그 응답은 체험이 끝난 사용자에게만 나와 3번이 준비 중). testing.md 문구를 '준비 중 안내'로 고치는 게 맞아 보인다. 2) ui.md는 묶음 머리 'aria-label에 잠김을 더함'인데 aria-label 대신 sr-only '잠김' 텍스트로 접근 이름에 넣었다(결과 같음). 타일도 같은 방식이고, Free의 Pro 타일도 접근 이름에 '잠김'을 넣었다(자물쇠가 둘이어도 한 번만). 3) 태그 '여러 개면 이 순서': 열린 세션이 있는 완료 상황은 기존 테스트 의도대로 열린 세션 태그만 단다('완료'는 열린 세션이 없을 때만). 4) ui.md '상황 목록' 절 끝의 '숫자 열은 오른쪽 정렬하고 Pro 값은 굵게…' 문장은 플랜 비교표 규칙으로 보여 이 화면에 적용하지 않았다."
+}

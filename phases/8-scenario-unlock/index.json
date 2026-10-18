@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "scenario-list",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-18T20:53:18+0900",
+      "summary": "lib/scenarios: scenarioGroups(지금 레벨, 열린 세션, 끝낸 id)→ScenarioGroup[] {level,name,locked,items: ScenarioTile{scenarioId,index,title,goal,pro,locked,open,completed}}. ProButton.tsx의 useProComingSoon()→{show,dialog}(pro_clicked+준비 중 모달)를 ProButton·ScenarioPicker가 같이 씀. ScenarioPicker props {language,level,groups,access:\"pro\"|\"trial-available\"|\"trial-ended\"}: 묶음 펼침, 위 레벨·체험 모달, 체험 끝은 준비 중, PRO_REQUIRED는 refresh+준비 중. /chat은 planAt·trialState로 access 계산. 합격 문구 \"{새 레벨} 상황이 열렸어요\".",
+      "completed_at": "2026-10-18T21:04:41+0900"
     },
     {
       "step": 2,
