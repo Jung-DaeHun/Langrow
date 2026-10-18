@@ -1,0 +1,9 @@
+{
+  "project": "Langrow",
+  "phase": "8-scenario-unlock",
+  "steps": [
+    { "step": 0, "name": "unlock-rules", "status": "pending" },
+    { "step": 1, "name": "scenario-list", "status": "pending" },
+    { "step": 2, "name": "start-at-level-one", "status": "pending" }
+  ]
+}
