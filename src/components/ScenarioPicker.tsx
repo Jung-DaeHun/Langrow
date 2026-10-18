@@ -131,7 +131,8 @@ export function ScenarioPicker({ language, level, groups, access }: Props) {
 
       <Dialog open={modal === "locked"} onClose={closeModal} title="레벨업 테스트에 합격하면 열려요" variant="modal">
         <p className="mt-2 text-ink-muted">지금 레벨보다 높은 상황이에요. 레벨업 테스트로 한 단계씩 올릴 수 있어요.</p>
-        <div className="mt-6 flex justify-end gap-2">
+        {/* 320px에서는 두 버튼이 한 줄에 들어가지 않아 줄을 바꾼다(버튼 글자가 꺾이지 않게) */}
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
           <button type="button" onClick={closeModal} className={OUTLINE}>
             닫기
           </button>
@@ -145,7 +146,7 @@ export function ScenarioPicker({ language, level, groups, access }: Props) {
         <p className="mt-2 text-ink-muted">
           Pro는 레벨마다 상황 7개를 모두 할 수 있어요. 7일 무료 체험으로 써 보세요. 결제 정보는 받지 않아요.
         </p>
-        <div className="mt-6 flex items-start justify-end gap-2">
+        <div className="mt-6 flex flex-wrap items-start justify-end gap-2">
           <button type="button" onClick={closeModal} className={OUTLINE}>
             닫기
           </button>
