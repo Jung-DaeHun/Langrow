@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "start-at-level-one",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-18T21:04:41+0900",
+      "summary": "lib/onboarding: OnboardingStart = home|consent{language?}|language{language?}|add{language}. 동의+파라미터: 그 언어 레벨 있음 home, 다른 언어 레벨 있음 add, 없음 language(미리 고름). OnboardingFlow: 동의→언어(n / 2), 타일은 고르기만 → 안내 문구 → 오류 → [학습 시작]이 POST /api/levels {language}만. add는 [취소]·\"{언어}를 시작해요\"·안내·[학습 시작]. 레벨 단계·가나 태그·level state·LEVELS·TAG·STEP_NO 등 제거, LEVEL_INFO.description은 generate-words가 써서 남김. 홈 첫날 Notice에 문구 p 추가, 계정 플랜 카드에 상황 개수(상수 사용).",
+      "completed_at": "2026-10-18T21:09:50+0900"
     }
   ],
   "created_at": "2026-10-18T20:42:43+0900"

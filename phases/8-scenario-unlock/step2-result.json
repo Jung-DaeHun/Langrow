@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "lib/onboarding: OnboardingStart = home|consent{language?}|language{language?}|add{language}. 동의+파라미터: 그 언어 레벨 있음 home, 다른 언어 레벨 있음 add, 없음 language(미리 고름). OnboardingFlow: 동의→언어(n / 2), 타일은 고르기만 → 안내 문구 → 오류 → [학습 시작]이 POST /api/levels {language}만. add는 [취소]·\"{언어}를 시작해요\"·안내·[학습 시작]. 레벨 단계·가나 태그·level state·LEVELS·TAG·STEP_NO 등 제거, LEVEL_INFO.description은 generate-words가 써서 남김. 홈 첫날 Notice에 문구 p 추가, 계정 플랜 카드에 상황 개수(상수 사용).",
+  "spec_diff": "1) step 지시대로 언어 단계와 시작 확인 단계에 오류 안내를 안내 문구와 [학습 시작] 사이에 두었다(ui.md /onboarding 행에는 오류 안내 위치가 없다). 2) 언어 단계 제목 \"어떤 언어를 배울까요?\"는 기존대로 두었다(ui.md 행은 제목을 적지 않는다). 3) 언어 타일이 더는 다음 단계로 넘어가지 않아 끝의 ChevronRight를 지웠다(ui.md \"선택 타일\" 규격에도 화살표가 없다). 4) 시작 확인 제목의 조사는 언어 이름이 모두 받침 없이 끝나(영어·일본어) \"를\"로 고정했다."
+}
