@@ -1,0 +1,8 @@
+{
+  "project": "Langrow",
+  "phase": "10-feedback-pron",
+  "steps": [
+    { "step": 0, "name": "feedback-pron", "status": "pending" },
+    { "step": 1, "name": "chat-refresh", "status": "pending" }
+  ]
+}
