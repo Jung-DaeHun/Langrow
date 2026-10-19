@@ -273,6 +273,56 @@ describe("WordSession 오늘의 학습 회차", () => {
   });
 });
 
+describe("WordSession [대화하러 가기]", () => {
+  const chatLink = () => screen.queryByRole("link", { name: "대화하러 가기" });
+
+  it.each([3, 0])("오늘의 학습 저장에 성공하면(insertedCount %i) [홈으로] → [대화하러 가기] → [단어 화면으로] 순서로 둔다", async (insertedCount) => {
+    apiMock.mockResolvedValue(saved(insertedCount));
+    const { user } = setup();
+
+    await finishLearn(user);
+
+    const link = await screen.findByRole("link", { name: "대화하러 가기" });
+    expect(link).toHaveAttribute("href", "/chat");
+    const buttons = link.parentElement?.children ?? [];
+    expect([...buttons].map((b) => b.textContent)).toEqual(["홈으로", "대화하러 가기", "단어 화면으로"]);
+  });
+
+  it("저장 중에는 없다", async () => {
+    apiMock.mockReturnValue(deferred<ApiResult<WordBatchResponse>>().promise);
+    const { user } = setup();
+
+    await finishLearn(user);
+
+    expect(screen.getByRole("button", { name: "저장 중…" })).toBeInTheDocument();
+    expect(chatLink()).toBeNull();
+  });
+
+  it.each([
+    ["한도", failure(429, "LIMIT_REACHED", "오늘 사용량을 모두 썼어요.")],
+    ["실패", failure(null, "NETWORK", "인터넷 연결을 확인해 주세요.")],
+  ])("저장 %s면 없다", async (_, result) => {
+    apiMock.mockResolvedValue(result);
+    const { user } = setup();
+
+    await finishLearn(user);
+
+    expect(await screen.findByRole("button", { name: "다시 시도" })).toBeInTheDocument();
+    expect(chatLink()).toBeNull();
+  });
+
+  it("오답 복습은 저장에 성공해도 없다", async () => {
+    apiMock.mockResolvedValue(reviewed);
+    const { user } = setup({ mode: "review", todayCount: undefined });
+    await user.click(screen.getByRole("button", { name: "복습 시작" }));
+
+    await answerCards(user, [true, false, true]);
+
+    expect(await screen.findByText("복습 결과를 저장했어요")).toBeInTheDocument();
+    expect(chatLink()).toBeNull();
+  });
+});
+
 describe("WordSession 저장 실패", () => {
   it("429 LIMIT_REACHED면 결과를 그대로 두고 한도 안내와 [다시 시도]를 보여 준다", async () => {
     apiMock.mockResolvedValue(failure(429, "LIMIT_REACHED", "오늘 사용량을 모두 썼어요."));

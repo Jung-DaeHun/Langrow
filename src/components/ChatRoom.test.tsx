@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Level } from "@/lib/levels";
 import type { TrialState } from "@/lib/plan";
+import type { TargetSource, TargetWord } from "@/lib/targetWords";
 import type { ChatRoomData, ChatTurnView } from "@/server/db/reads";
 import { api, type ApiResult } from "@/services/apiClient";
 import type { ChatEndResponse, ChatMessageResponse } from "@/types/api";
@@ -996,5 +997,153 @@ describe("ChatRoom 문장 뜯어보기", () => {
     const meaning = screen.getByText("주세요");
     expect(isBefore(toggle, meaning)).toBe(true);
     expect(isBefore(meaning, screen.getByText(CORRECTION.explanation_ko))).toBe(true);
+  });
+});
+
+describe("ChatRoom 배운 단어", () => {
+  const target = (id: string, word: string, meaningKo: string, used = false, reading: string | null = null): TargetWord => ({
+    id,
+    word,
+    reading,
+    meaningKo,
+    used,
+  });
+  const SUKOSHI = target("ja-1-005", "少し", "조금", false, "すこし");
+  const ISSHONI = target("ja-1-006", "一緒に", "함께", false, "いっしょに");
+  const TOTEMO = target("ja-1-004", "とても", "아주", false, "とても");
+  const used = (w: TargetWord): TargetWord => ({ ...w, used: true });
+  const jaRoom = (overrides: Partial<ChatRoomData> = {}) => room({ language: "ja", level: 1, ...overrides });
+  const wordsLine = (name = "오늘 단어") => screen.getByRole("list", { name });
+  const region = () => document.querySelector("[aria-live]") as HTMLElement;
+
+  function repliedWith(
+    turnNo: number,
+    targetWords: TargetWord[] | null,
+    targetSource: TargetSource | null = "today",
+    overrides: Partial<ChatMessageResponse["reply"]> = {},
+  ) {
+    const result = replied(turnNo, 20 - turnNo, overrides);
+    return { ...result, data: { ...result.data, targetWords, targetSource } } satisfies ApiResult<ChatMessageResponse>;
+  }
+
+  it("목표 단어가 없으면(null·빈 배열) 줄이 없다", () => {
+    const { rerender } = setup(jaRoom({ turns: [turn(1)] }));
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.queryByText(/단어 \d+\/\d+/)).toBeNull();
+
+    rerender(jaRoom({ turns: [turn(1)], targetWords: [], targetSource: "today" }));
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.queryByText(/단어 \d+\/\d+/)).toBeNull();
+  });
+
+  it("줄은 sticky 상단의 제목 줄 아래에 한 줄로 두고, 라벨은 출처 이름과 쓴 수/전체다", () => {
+    const { container } = setup(
+      jaRoom({ turns: [turn(1)], targetWords: [used(ISSHONI), SUKOSHI, TOTEMO], targetSource: "today" }),
+    );
+
+    const list = wordsLine();
+    expect(container.querySelector("header")).toContainElement(list);
+    expect(isBefore(endButton(), list)).toBe(true);
+    expect(screen.getByText("오늘 단어 1/3")).toBeInTheDocument();
+    expect(within(list).getAllByRole("listitem")).toHaveLength(3);
+    // 키보드가 열린 화면에서 상단이 높아지지 않게 감싸지 않고 가로로 밀어 본다
+    expect(list).toHaveClass("overflow-x-auto");
+    expect(list).not.toHaveClass("flex-wrap");
+  });
+
+  it("출처가 recent면 최근 단어다", () => {
+    setup(jaRoom({ turns: [turn(1)], targetWords: [SUKOSHI, TOTEMO], targetSource: "recent" }));
+
+    expect(screen.getByText("최근 단어 0/2")).toBeInTheDocument();
+    expect(wordsLine("최근 단어")).toBeInTheDocument();
+  });
+
+  it("칩은 단어(학습 언어 lang)와 뜻이고 버튼이 아니며, 쓴 칩만 Check와 썼음을 단다", () => {
+    setup(jaRoom({ turns: [turn(1)], targetWords: [used(ISSHONI), SUKOSHI], targetSource: "today" }));
+
+    const [usedChip, notYetChip] = within(wordsLine()).getAllByRole("listitem");
+    expect(within(wordsLine()).queryByRole("button")).toBeNull();
+    expect(usedChip).toHaveTextContent("썼음");
+    expect(usedChip.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(within(usedChip).getByText("함께")).toBeInTheDocument();
+    expect(notYetChip).not.toHaveTextContent("썼음");
+    expect(notYetChip.querySelector("svg")).toBeNull();
+    expect(within(notYetChip).getByText("少し", { selector: "ruby span" }).closest("[lang]")).toHaveAttribute("lang", "ja");
+  });
+
+  it("일본어 칩은 읽기가 단어와 다를 때만 루비를 단다", () => {
+    setup(jaRoom({ turns: [turn(1)], targetWords: [SUKOSHI, TOTEMO], targetSource: "today" }));
+
+    const [sukoshi, totemo] = within(wordsLine()).getAllByRole("listitem");
+    expect(sukoshi.querySelector("rt")).toHaveTextContent("すこし");
+    expect(totemo.querySelector("rt")).toBeNull();
+  });
+
+  it("영어 칩은 루비 없이 단어에 en을 단다", () => {
+    setup(room({ turns: [turn(1)], targetWords: [target("en-3-001", "decide", "결정하다")], targetSource: "today" }));
+
+    expect(within(wordsLine()).getByText("decide")).toHaveAttribute("lang", "en");
+    expect(wordsLine().querySelector("ruby")).toBeNull();
+  });
+
+  it("첫 턴의 메시지 응답으로 줄이 생기고 다음 응답으로 갱신되며, 다시 읽지 않는다", async () => {
+    apiMock
+      .mockResolvedValueOnce(repliedWith(1, [SUKOSHI, ISSHONI]))
+      .mockResolvedValueOnce(repliedWith(2, [used(SUKOSHI), ISSHONI]));
+    const { user } = setup(jaRoom());
+    expect(screen.queryByRole("list")).toBeNull();
+
+    await typeAndSend(user, "コーヒーをください");
+    expect(screen.getByText("오늘 단어 0/2")).toBeInTheDocument();
+    expect(region()).not.toHaveTextContent("단어를 썼어요");
+
+    await typeAndSend(user, "少しください");
+    expect(screen.getByText("오늘 단어 1/2")).toBeInTheDocument();
+    expect(region()).toHaveTextContent("단어를 썼어요: 少し");
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("다시 읽은 room이 응답받은 턴까지 따라오면 room의 값을 쓴다", async () => {
+    apiMock.mockResolvedValueOnce(repliedWith(1, [SUKOSHI, ISSHONI]));
+    const { user, rerender } = setup(jaRoom());
+    await typeAndSend(user, "コーヒーをください");
+
+    // 응답받은 턴이 아직 없는 room은 응답의 값을 덮지 않는다
+    rerender(jaRoom());
+    expect(screen.getByText("오늘 단어 0/2")).toBeInTheDocument();
+
+    rerender(jaRoom({ turns: [turn(1), turn(2)], targetWords: [used(SUKOSHI), used(ISSHONI)], targetSource: "today" }));
+    expect(screen.getByText("오늘 단어 2/2")).toBeInTheDocument();
+  });
+
+  it("새로 쓴 단어만 알림 영역의 교정 다음·AI 응답 앞에 학습 언어 lang으로 알린다", async () => {
+    const correction = { corrected: "[少|すこ]しと[一緒|いっしょ]に。", explanation_ko: "설명" };
+    apiMock
+      .mockResolvedValueOnce(repliedWith(2, [used(TOTEMO), used(SUKOSHI), used(ISSHONI)], "today", { correction }))
+      .mockResolvedValueOnce(repliedWith(3, [used(TOTEMO), used(SUKOSHI), used(ISSHONI)]));
+    const { user } = setup(
+      jaRoom({ turns: [turn(1)], targetWords: [used(TOTEMO), SUKOSHI, ISSHONI], targetSource: "today" }),
+    );
+    // 화면을 열 때 이미 있던 턴은 알리지 않는다
+    expect(region()).toHaveTextContent(/^$/);
+
+    await typeAndSend(user, "少し一緒に");
+
+    expect(region()).toHaveTextContent("이렇게 말하면 더 자연스러워요 少しと一緒に。 설명 단어를 썼어요: 少し, 一緒に AI 2");
+    expect(within(region()).getByText("少し, 一緒に")).toHaveAttribute("lang", "ja");
+
+    await typeAndSend(user, "はい");
+    expect(region()).toHaveTextContent("AI 3");
+    expect(region()).not.toHaveTextContent("단어를 썼어요");
+  });
+
+  it("종료 피드백에 지금 보이는 목표 단어 상태를 넘긴다", async () => {
+    apiMock.mockResolvedValueOnce(repliedWith(1, [used(SUKOSHI), ISSHONI])).mockResolvedValueOnce(endedReady);
+    const { user } = setup(jaRoom());
+    await typeAndSend(user, "少しください");
+
+    await user.click(endButton());
+
+    expect(screen.getByRole("heading", { name: "오늘 단어 2개 중 1개를 썼어요" })).toBeInTheDocument();
   });
 });

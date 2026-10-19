@@ -1,10 +1,11 @@
 "use client";
 
-import { ChevronLeft, CircleAlert, CircleCheck, Info, Pencil, ThumbsUp } from "lucide-react";
+import { BookOpen, ChevronLeft, Circle, CircleAlert, CircleCheck, Info, Pencil, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Language } from "@/lib/levels";
+import { TARGET_SOURCE_NAMES, type TargetSource, type TargetWord } from "@/lib/targetWords";
 import { VALID_SESSION_TURNS, isValidSession } from "@/lib/today";
 import type { EndResult } from "@/server/db/chat";
 import type { ChatTurnView } from "@/server/db/reads";
@@ -39,9 +40,21 @@ type Props = {
   // 오늘(한국 날짜) 확정된 턴 수. 날짜를 넘겨 이어 한 세션도 홈의 오늘 목표와 같은 기준으로 판정한다
   doneTurnsToday: number;
   result: EndResult | null;
+  // 대화방에 보이던 목표 단어 상태. 목표 단어가 없는 세션은 둘 다 null이다
+  targetWords: TargetWord[] | null;
+  targetSource: TargetSource | null;
 };
 
-export function ChatFeedback({ sessionId, scenarioTitle, language, turns, doneTurnsToday, result }: Props) {
+export function ChatFeedback({
+  sessionId,
+  scenarioTitle,
+  language,
+  turns,
+  doneTurnsToday,
+  result,
+  targetWords,
+  targetSource,
+}: Props) {
   const router = useRouter();
   const [polled, setPolled] = useState<EndResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -108,6 +121,10 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, turns, doneTu
         <p className="font-bold">{VALID_SESSION_TURNS}턴 이상 대화하면 오늘 목표가 채워져요</p>
       </div>
     );
+  const wordsCard =
+    targetWords !== null && targetWords.length > 0 && targetSource !== null ? (
+      <TargetWordsCard words={targetWords} source={targetSource} language={language} />
+    ) : null;
 
   return (
     <div data-focus-mode className="flex flex-col gap-6 pt-4 pb-10 animate-enter">
@@ -147,6 +164,7 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, turns, doneTu
 
       {shown?.feedbackStatus === "ready" && (
         <>
+          {wordsCard}
           <div className={CARD}>
             <div className="flex items-center gap-2">
               <ThumbsUp size={20} aria-hidden="true" className="shrink-0 text-accent" />
@@ -180,6 +198,7 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, turns, doneTu
             <Info size={20} aria-hidden="true" className="shrink-0 text-accent" />
             <p className="text-sm">{shown.feedback.message}</p>
           </div>
+          {wordsCard}
           <Corrections turns={turns} language={language} />
         </>
       )}
@@ -192,6 +211,40 @@ export function ChatFeedback({ sessionId, scenarioTitle, language, turns, doneTu
           홈으로
         </Link>
       </div>
+    </div>
+  );
+}
+
+// 배운 단어 결과(spec/chat.md "세션 종료 피드백"). 저장된 목표 단어와 쓴 단어로 그리고 Claude에 요청하지 않는다
+function TargetWordsCard({ words, source, language }: { words: TargetWord[]; source: TargetSource; language: Language }) {
+  return (
+    <div className={CARD}>
+      <div className="flex items-center gap-2">
+        <BookOpen size={20} aria-hidden="true" className="shrink-0 text-accent" />
+        <h2 id="feedback-target-words" className="font-bold tabular-nums">
+          {TARGET_SOURCE_NAMES[source]} {words.length}개 중 {words.filter((w) => w.used).length}개를 썼어요
+        </h2>
+      </div>
+      <ul aria-labelledby="feedback-target-words" className="divide-y divide-line">
+        {words.map((w) => (
+          <li key={w.id} className="flex items-center gap-3 py-2.5">
+            {w.used ? (
+              <CircleCheck size={20} aria-hidden="true" className="shrink-0 text-accent" />
+            ) : (
+              <Circle size={20} aria-hidden="true" className="shrink-0 text-ink-muted" />
+            )}
+            <span className="sr-only">{w.used ? "썼음" : "아직"}</span>
+            {/* 한자 읽기는 [단어|읽기] 표기로 넘기고, 가타카나 읽기는 Furigana가 단다(단어 카드 앞면과 같다) */}
+            <span lang={language} className="font-bold">
+              <Furigana
+                text={w.reading !== null && w.reading !== w.word ? `[${w.word}|${w.reading}]` : w.word}
+                show={language === "ja"}
+              />
+            </span>
+            <span className="text-sm text-ink-muted">{w.meaningKo}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

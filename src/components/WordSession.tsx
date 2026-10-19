@@ -361,6 +361,12 @@ export function WordSession({ mode, language, level, words, todayCount = 0, rema
             홈으로
           </Link>
         )}
+        {/* 저장되지 않은 단어는 대화의 배운 단어 후보가 되지 않아 저장에 성공했을 때만 잇는다(spec/chat.md "배운 단어 써 보기") */}
+        {mode === "learn" && save.kind === "saved" && (
+          <Link href="/chat" className={`${OUTLINE} sm:flex-1`}>
+            대화하러 가기
+          </Link>
+        )}
         <button type="button" onClick={backToStart} disabled={saving} className={`${OUTLINE} sm:flex-1`}>
           단어 화면으로
         </button>

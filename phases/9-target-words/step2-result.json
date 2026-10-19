@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "ChatRoom.tsx: 목표 단어 = room 값, 메시지 응답 뒤엔 응답 값(room.turns가 그 턴까지 따라오면 room 값). null·빈 배열이면 줄 없음. TargetWordsLine(같은 파일)을 sticky header 제목 줄 아래·endError 위에 둠(ul aria-label=출처 이름, overflow-x-auto). 응답으로 새로 쓴 단어를 TurnAnnouncement 교정 다음·응답 앞에 \"단어를 썼어요: …\"(lang)로 알림. ChatFeedback props +targetWords·targetSource(ChatRoom이 넘김): ready는 Notice 다음, fallback은 고정 Notice 다음에 TargetWordsCard, skipped·202는 없음. WordSession: learn이고 saved일 때만 [대화하러 가기](outline, /chat)를 홈으로·단어 화면으로 사이에 둠.",
+  "spec_diff": "1) 칩 목록 ul에 spec 클래스(flex gap-1.5 overflow-x-auto) 외에 min-w-0을 더했다. 라벨과 같은 flex 줄 안에서 ul이 내용 너비로 늘어나지 않고 가로 스크롤되게 하는 레이아웃 보정이다. 2) 새 턴 알림의 \"단어를 썼어요\"는 이 화면의 메시지 응답으로 확정된 턴만 넣는다(step 지시: 응답 전 아직·응답 뒤 썼음). 다른 탭·이전 방문에서 확정돼 router.refresh()로 들어온 턴은 ChatTurnView에 턴별 쓴 단어가 없어 줄만 갱신하고 알림에는 단어를 넣지 않는다. 3) 단어 결과 카드의 목록에 aria-labelledby(제목)를 달았다(교정 목록과 같은 방식, spec에는 언급 없음)."
+}

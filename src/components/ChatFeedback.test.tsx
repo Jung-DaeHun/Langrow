@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { TargetWord } from "@/lib/targetWords";
 import type { ChatTurnView } from "@/server/db/reads";
 import { api, type ApiResult } from "@/services/apiClient";
 import type { ChatEndResponse } from "@/types/api";
@@ -43,6 +44,8 @@ function renderFeedback(overrides: Partial<Props> = {}) {
     turns: THREE_TURNS,
     doneTurnsToday: 3,
     result: { feedbackStatus: "ready", feedback: { good: "잘했어요", improve: ["관사를 챙겨요"] } },
+    targetWords: null,
+    targetSource: null,
     ...overrides,
   };
   return render(<ChatFeedback {...props} />);
@@ -203,6 +206,84 @@ describe("ChatFeedback skipped", () => {
     expect(screen.queryByText(/오늘 목표/)).toBeNull();
     expect(screen.queryByText(/대화 목표/)).toBeNull();
     expect(screen.getByRole("link", { name: "다른 상황 고르기" })).toBeInTheDocument();
+  });
+});
+
+describe("ChatFeedback 배운 단어", () => {
+  const target = (word: string, meaningKo: string, used: boolean, reading: string | null = null): TargetWord => ({
+    id: `id-${word}`,
+    word,
+    reading,
+    meaningKo,
+    used,
+  });
+  const WORDS = [target("decide", "결정하다", true), target("borrow", "빌리다", false), target("menu", "메뉴", true)];
+  const card = (name: string) => screen.getByRole("list", { name });
+
+  function isBefore(a: HTMLElement, b: HTMLElement) {
+    return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+  }
+
+  it("ready면 목표 Notice 다음·잘한 점 앞에 결과 카드를 두고, 목표 단어 순서의 행마다 썼음/아직을 보여 준다", () => {
+    renderFeedback({ targetWords: WORDS, targetSource: "today" });
+
+    const heading = screen.getByRole("heading", { name: "오늘 단어 3개 중 2개를 썼어요" });
+    expect(isBefore(screen.getByText("오늘 대화 목표를 채웠어요"), heading)).toBe(true);
+    expect(isBefore(heading, screen.getByText("잘한 점"))).toBe(true);
+    const rows = within(card("오늘 단어 3개 중 2개를 썼어요")).getAllByRole("listitem");
+    expect(rows.map((row) => row.textContent)).toEqual(["썼음decide결정하다", "아직borrow빌리다", "썼음menu메뉴"]);
+    expect(within(rows[0]).getByText("decide")).toHaveAttribute("lang", "en");
+    rows.forEach((row) => expect(row.querySelector("svg")).toHaveAttribute("aria-hidden", "true"));
+  });
+
+  it("fallback도 고정 안내 다음·교정 목록 앞에 두고, 출처가 recent면 최근 단어다", () => {
+    renderFeedback({
+      targetWords: WORDS,
+      targetSource: "recent",
+      turns: [turn(1, { corrected: "I'll decide.", explanation_ko: "미래형이에요" })],
+      result: { feedbackStatus: "fallback", feedback: { message: FALLBACK_MESSAGE } },
+    });
+
+    const heading = screen.getByRole("heading", { name: "최근 단어 3개 중 2개를 썼어요" });
+    expect(isBefore(screen.getByText(FALLBACK_MESSAGE), heading)).toBe(true);
+    expect(isBefore(heading, screen.getByRole("list", { name: "교정" }))).toBe(true);
+  });
+
+  it("일본어 단어는 읽기가 단어와 다를 때만 ruby로 단다", () => {
+    renderFeedback({
+      language: "ja",
+      targetWords: [target("少し", "조금", true, "すこし"), target("とても", "아주", false, "とても")],
+      targetSource: "today",
+    });
+
+    const [sukoshi, totemo] = within(card("오늘 단어 2개 중 1개를 썼어요")).getAllByRole("listitem");
+    expect(sukoshi.querySelector("rt")).toHaveTextContent("すこし");
+    expect(sukoshi.querySelector("ruby")?.closest("[lang]")).toHaveAttribute("lang", "ja");
+    expect(totemo.querySelector("rt")).toBeNull();
+  });
+
+  it("목표 단어가 없으면(null·빈 배열) 카드가 없다", () => {
+    const { unmount } = renderFeedback();
+    expect(screen.queryByText(/단어 \d+개 중/)).toBeNull();
+    unmount();
+
+    renderFeedback({ targetWords: [], targetSource: "today" });
+    expect(screen.queryByText(/단어 \d+개 중/)).toBeNull();
+  });
+
+  it("0턴(skipped)과 피드백을 만드는 중(202)에는 카드가 없다", () => {
+    const { unmount } = renderFeedback({
+      turns: [],
+      result: { feedbackStatus: "skipped", feedback: null },
+      targetWords: WORDS,
+      targetSource: "today",
+    });
+    expect(screen.queryByText(/단어 \d+개 중/)).toBeNull();
+    unmount();
+
+    renderFeedback({ result: null, targetWords: WORDS, targetSource: "today" });
+    expect(screen.getByText("피드백을 만들고 있어요")).toBeInTheDocument();
+    expect(screen.queryByText(/단어 \d+개 중/)).toBeNull();
   });
 });
 

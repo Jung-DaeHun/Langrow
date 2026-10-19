@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, ChevronDown, ChevronLeft, ChevronUp, CircleAlert, Info, Languages } from "lucide-react";
+import { ArrowUp, Check, ChevronDown, ChevronLeft, ChevronUp, CircleAlert, Info, Languages } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from "react";
@@ -9,6 +9,7 @@ import type { Breakdown } from "@/lib/breakdown";
 import { stripFurigana } from "@/lib/furigana";
 import type { TrialState } from "@/lib/plan";
 import type { ScenarioLine } from "@/lib/scenarios";
+import { TARGET_SOURCE_NAMES, type TargetSource, type TargetWord } from "@/lib/targetWords";
 import { CHAT_INPUT_MAX, countChars, hasHangul, isValidChatInput } from "@/lib/text";
 import type { EndResult } from "@/server/db/chat";
 import type { ChatRoomData, ChatTurnView } from "@/server/db/reads";
@@ -40,6 +41,7 @@ const ERROR_NOTICE = "flex items-start gap-3 rounded-xl bg-card p-4 ring-1 ring-
 
 type Props = { room: ChatRoomData; scenario: { title: string; opening: ScenarioLine }; trial: TrialState };
 type Block = { kind: "limit" } | { kind: "failure-limit"; message: string };
+type Target = { words: TargetWord[] | null; source: TargetSource | null };
 
 export function ChatRoom({ room, scenario, trial }: Props) {
   const router = useRouter();
@@ -54,6 +56,8 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   const [end, setEnd] = useState<{ result: EndResult | null } | null>(null);
   // 이 화면에서 확정된 턴. router.refresh()로 room.turns가 새로 오면 그쪽에 이미 있는 턴은 room.turns를 쓴다
   const [added, setAdded] = useState<ChatTurnView[]>([]);
+  // 이 화면에서 마지막으로 받은 메시지 응답의 목표 단어 상태와 그 턴에 새로 쓴 단어. room.turns가 그 턴까지 따라오면 room의 값을 쓴다
+  const [replyTarget, setReplyTarget] = useState<(Target & { turnNo: number; newlyUsed: TargetWord[] }) | null>(null);
   // 기한이 지나 더 기다리지 않는 room.pendingTurn. 다시 읽으면 새 객체가 오지만 그때는 서버가 이미 null을 준다
   const [expiredPending, setExpiredPending] = useState<ChatRoomData["pendingTurn"]>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -65,6 +69,11 @@ export function ChatRoom({ room, scenario, trial }: Props) {
   const turns = [...room.turns, ...addedTurns];
   const latest = turns.at(-1);
   const announced = latest !== undefined && latest.turnNo > openedTurnNo ? latest : null;
+  const target: Target =
+    replyTarget !== null && replyTarget.turnNo > lastTurnNo
+      ? replyTarget
+      : { words: room.targetWords, source: room.targetSource };
+  const announcedWords = announced !== null && announced.turnNo === replyTarget?.turnNo ? replyTarget.newlyUsed : [];
   const showFeedback = room.status !== "active" || end !== null;
   // 다른 탭이나 이전 방문에서 보낸 턴이 처리 중이면 완료를 기다린다(spec/journey.md "대화 도중 이탈했다가 돌아옴")
   const otherPending = room.pendingTurn !== expiredPending ? room.pendingTurn : null;
@@ -102,6 +111,8 @@ export function ChatRoom({ room, scenario, trial }: Props) {
         turns={turns}
         doneTurnsToday={room.doneTurnsToday + addedTurns.length}
         result={end?.result ?? room.result}
+        targetWords={target.words}
+        targetSource={target.source}
       />
     );
   }
@@ -116,7 +127,14 @@ export function ChatRoom({ room, scenario, trial }: Props) {
     const result = await api<ChatMessageResponse>("POST", `/api/chat/sessions/${room.id}/messages`, { text });
     setPending(null);
     if (result.ok) {
-      const { turnNo, turnsLeft, reply } = result.data;
+      const { turnNo, turnsLeft, reply, targetWords, targetSource } = result.data;
+      const usedBefore = new Set(target.words?.filter((w) => w.used).map((w) => w.id));
+      setReplyTarget({
+        turnNo,
+        words: targetWords,
+        source: targetSource,
+        newlyUsed: (targetWords ?? []).filter((w) => w.used && !usedBefore.has(w.id)),
+      });
       setAdded((prev) => [
         ...prev,
         {
@@ -212,6 +230,9 @@ export function ChatRoom({ room, scenario, trial }: Props) {
             대화 끝내기
           </button>
         </div>
+        {target.words !== null && target.words.length > 0 && target.source !== null && (
+          <TargetWordsLine words={target.words} source={target.source} language={room.language} />
+        )}
         {endError !== null && (
           <div role="alert" className={`mb-2 ${ERROR_NOTICE}`}>
             <CircleAlert size={20} aria-hidden="true" className="shrink-0 text-danger" />
@@ -306,7 +327,13 @@ export function ChatRoom({ room, scenario, trial }: Props) {
       {/* 목록 전체를 live로 두면 재생 버튼 이름과 음성 목록이 늦게 와서 붙는 버튼까지 읽혀서, 새 턴의 문장만 따로 알린다 */}
       <div aria-live="polite" className="sr-only">
         {announced !== null && (
-          <TurnAnnouncement key={announced.turnNo} turn={announced} language={room.language} level={room.level} />
+          <TurnAnnouncement
+            key={announced.turnNo}
+            turn={announced}
+            usedWords={announcedWords}
+            language={room.language}
+            level={room.level}
+          />
         )}
       </div>
 
@@ -370,8 +397,19 @@ function userTextLang(userText: string, language: Language): string {
   return hasHangul(userText) ? "ko" : language;
 }
 
-// 낭독기용 새 턴 알림. 화면의 교정 카드와 AI 말풍선 문장을 버튼 없이 읽히고, 후리가나 표기는 지운다
-function TurnAnnouncement({ turn, language, level }: { turn: ChatTurnView; language: Language; level: Level }) {
+// 낭독기용 새 턴 알림. 화면의 교정 카드와 AI 말풍선 문장을 버튼 없이 읽히고, 후리가나 표기는 지운다.
+// 이번 턴에 새로 쓴 단어는 교정 다음에 알린다. 외국어 단어 뒤의 조사(을/를)를 고를 수 없어 단어를 문장 끝에 둔다
+function TurnAnnouncement({
+  turn,
+  usedWords,
+  language,
+  level,
+}: {
+  turn: ChatTurnView;
+  usedWords: TargetWord[];
+  language: Language;
+  level: Level;
+}) {
   return (
     <p>
       {turn.correction !== null && (
@@ -380,9 +418,50 @@ function TurnAnnouncement({ turn, language, level }: { turn: ChatTurnView; langu
           {stripFurigana(turn.correction.explanation_ko)}{" "}
         </>
       )}
+      {usedWords.length > 0 && (
+        <>
+          단어를 썼어요: <span lang={language}>{usedWords.map((w) => w.word).join(", ")}</span>{" "}
+        </>
+      )}
       <span lang={language}>{stripFurigana(turn.reply)}</span>
       {opensTranslationByDefault(level) && ` ${turn.replyKo}`}
     </p>
+  );
+}
+
+// 배운 단어 줄(spec/chat.md "배운 단어 써 보기"). 답을 쓰면서 보게 sticky 상단에 두고, 상단이 높아지지 않게
+// 감싸지 않고 가로로 밀어 본다. 칩은 버튼이 아니다
+function TargetWordsLine({ words, source, language }: { words: TargetWord[]; source: TargetSource; language: Language }) {
+  const name = TARGET_SOURCE_NAMES[source];
+  return (
+    <div className="flex items-center gap-2 pb-2">
+      <p className="shrink-0 text-micro font-bold text-ink-muted tabular-nums">
+        {name} {words.filter((w) => w.used).length}/{words.length}
+      </p>
+      <ul aria-label={name} className="flex min-w-0 gap-1.5 overflow-x-auto">
+        {words.map((w) => (
+          <li
+            key={w.id}
+            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 ${w.used ? "bg-mint text-brand" : "bg-zone text-ink"}`}
+          >
+            {w.used && (
+              <>
+                <Check size={14} aria-hidden="true" />
+                <span className="sr-only">썼음</span>
+              </>
+            )}
+            {/* 한자 읽기는 [단어|읽기] 표기로 넘기고, 가타카나 읽기는 Furigana가 단다(단어 카드 앞면과 같다) */}
+            <span lang={language} className="text-sm font-bold">
+              <Furigana
+                text={w.reading !== null && w.reading !== w.word ? `[${w.word}|${w.reading}]` : w.word}
+                show={language === "ja"}
+              />
+            </span>
+            <span className={w.used ? "text-xs" : "text-xs text-ink-muted"}>{w.meaningKo}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
