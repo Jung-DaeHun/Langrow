@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "target-ui",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-20T00:09:59+0900",
+      "summary": "ChatRoom.tsx: 목표 단어 = room 값, 메시지 응답 뒤엔 응답 값(room.turns가 그 턴까지 따라오면 room 값). null·빈 배열이면 줄 없음. TargetWordsLine(같은 파일)을 sticky header 제목 줄 아래·endError 위에 둠(ul aria-label=출처 이름, overflow-x-auto). 응답으로 새로 쓴 단어를 TurnAnnouncement 교정 다음·응답 앞에 \"단어를 썼어요: …\"(lang)로 알림. ChatFeedback props +targetWords·targetSource(ChatRoom이 넘김): ready는 Notice 다음, fallback은 고정 Notice 다음에 TargetWordsCard, skipped·202는 없음. WordSession: learn이고 saved일 때만 [대화하러 가기](outline, /chat)를 홈으로·단어 화면으로 사이에 둠.",
+      "completed_at": "2026-10-20T00:17:57+0900"
     }
   ],
   "created_at": "2026-10-19T23:48:18+0900"
