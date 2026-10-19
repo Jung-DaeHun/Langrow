@@ -55,6 +55,9 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
         단어는 (로컬) generate-words·generate-pronunciation → data/words/*.json의 pron_ko·example_pron_ko 커밋 → seed-words
 문장 뜯어보기: 모든 턴에서 Claude 응답의 reply_breakdown·correction.breakdown → lib/breakdown 검사(실패면 null) → 성공 확정 RPC가 chat_turns에 저장
         첫 마디는 scenarios.ts의 breakdown(AI 초안 + 사람 검수)
+배운 단어: 첫 턴 예약 RPC가 후보(세션 언어로 오늘 배운 단어 → 없으면 7일 안, 오늘 쓴 단어는 뒤로, 최대 20개)
+        → Claude가 target_words(최대 5개)·used_words 번호 → lib/targetWords가 id로 바꿈(맞지 않으면 버림)
+        → 성공 확정 RPC가 목표 단어(첫 턴만)·쓴 단어 저장 후 목표 단어 상태 반환. 그 뒤 턴은 예약 RPC가 목표 단어와 쓴 여부를 주고 used_words만 받는다
 ```
 
 ## 상태 관리
@@ -93,8 +96,8 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 |---|---|
 | `profiles` | id(=auth.users.id), current_language, pro_until, trial_started_at, agreed_at, onboarded_at, last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
-| `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token, operation_expires_at, feedback_status(none/pending/ready/fallback/skipped), feedback, created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction(일본어 입문~중급은 corrected_pron_ko, 뜯어보기가 있으면 breakdown 포함), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
+| `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token, operation_expires_at, feedback_status(none/pending/ready/fallback/skipped), feedback, target_word_ids(배운 단어 목표), target_source(today/recent), created_at, ended_at |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction(일본어 입문~중급은 corrected_pron_ko, 뜯어보기가 있으면 breakdown 포함), used_word_ids(그 턴에 쓴 목표 단어), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
 | `words` | id(`en-1-001`), language, level, rank, word, reading, meaning_ko, example(`{{정답}}`), example_ko, distractors(3개), pron_ko·example_pron_ko(일본어 한글 발음, 영어는 null) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props, created_at (`limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`, `word_explained`) |

@@ -96,7 +96,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | POST | `/api/levels` | `language`만 받는다. 그 언어를 입문(1)으로 처음 설정 + 해당 언어 전환 + 최초 온보딩 완료 시각. 이미 레벨이 있으면 409 |
 | PATCH | `/api/levels/[language]` | 레벨 내리기 |
 | POST | `/api/chat/sessions` | 만료 작업 복구 + 세션 생성 (Claude 호출 없음). 위 레벨 상황은 400, 레벨이 바뀌었으면 409, Free의 Pro 상황은 403 `PRO_REQUIRED` |
-| POST | `/api/chat/sessions/[id]/messages` | 대화 1턴 (예약 RPC → Claude → 확정 RPC) |
+| POST | `/api/chat/sessions/[id]/messages` | 대화 1턴 (예약 RPC → Claude → 확정 RPC). 응답에 세션의 목표 단어 상태(`targetWords`·`targetSource`)를 담는다 |
 | POST | `/api/chat/sessions/[id]/end` | 종료 예약·피드백 확정/대체 결과. 완료 200, 처리 중 202, 턴 처리 중 409 |
 | POST | `/api/words/batch` | language + items. 신규분만 한도 확인하고 원자적으로 저장, 중복은 200 |
 | POST | `/api/words/review` | language + items. 유효한 복습 결과·활동일 저장 |
@@ -124,8 +124,8 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 |---|---|
 | `profiles` | id(=auth.users.id), current_language(nullable), pro_until, trial_started_at, agreed_at, onboarded_at(nullable, 최초 완료 시각), last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
-| `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token(uuid, nullable), operation_expires_at(nullable), feedback_status(none/pending/ready/fallback/skipped), feedback(jsonb), created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), reply_breakdown(jsonb, nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko`, 검사를 통과하면 `breakdown` 포함), created_at — unique(session_id, turn_no) |
+| `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token(uuid, nullable), operation_expires_at(nullable), feedback_status(none/pending/ready/fallback/skipped), feedback(jsonb), target_word_ids(text[], nullable, 배운 단어 목표), target_source(today/recent, nullable), created_at, ended_at |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), reply_breakdown(jsonb, nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko`, 검사를 통과하면 `breakdown` 포함), used_word_ids(text[], nullable, 그 턴에 쓴 목표 단어), created_at — unique(session_id, turn_no) |
 | `words` | id(text, 예: `en-1-001`), language, level, rank, word, reading, meaning_ko, example, example_ko, distractors(text[]), pron_ko(nullable), example_pron_ko(nullable) — unique(language, level, rank) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props(jsonb), created_at |
@@ -153,6 +153,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 - **대화 기록**: 고정 user 턴("대화를 시작합니다") → 첫 마디 → `done` 턴들 → 이번 입력 순서로 보낸다. `pending` 턴은 넣지 않는다.
 - **한글 발음**(`chat.md` "한글 발음"): 일본어 입문~중급 턴만 시스템 프롬프트에 표기 규칙을 넣고 `reply_pron_ko`·`corrected_pron_ko`가 있는 스키마로 받는다. 발음이 비었거나 검사(`lib/pronunciation`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다. 성공 확정 RPC(`finish_chat_turn`)는 `reply_pron_ko`를 받아 `chat_turns`에 저장하고, 교정 발음은 `correction` jsonb 안에 그대로 저장한다. 단어 생성 스크립트(`generate-words`, `generate-pronunciation`)도 같은 표기 규칙 문구를 쓴다.
 - **문장 뜯어보기**(`chat.md` "문장 뜯어보기"): 모든 턴의 스키마에 `reply_breakdown`·`correction.breakdown`을 더한다. 검사(`lib/breakdown`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다(교정은 `breakdown` 키를 뺀다). `finish_chat_turn`은 `p_reply_breakdown jsonb default null`을 받아 `chat_turns.reply_breakdown`에 저장하고, 교정 뜯어보기는 `correction` jsonb 안에 그대로 저장한다. 운영 DB에 마이그레이션을 적용해야 한다.
+- **배운 단어**(`chat.md` "배운 단어 써 보기"): `begin_chat_turn`은 세션의 첫 턴이고 목표 단어가 없을 때 후보 단어(최대 20개, `id`·단어·읽기·뜻)와 출처를, 목표 단어가 있는 세션이면 목표 단어와 쓴 여부를 함께 돌려준다. 후보가 있는 첫 턴은 시스템 프롬프트에 후보 목록과 고르기·유도 지시를 넣고 `target_words`·`used_words`(번호 배열)가 있는 스키마로, 목표 단어가 있는 턴은 목표 단어 목록과 유도 지시를 넣고 `used_words`가 있는 스키마로 받는다. 그 밖의 턴은 지금 스키마 그대로다. 번호는 `lib/targetWords`가 단어 `id`로 바꾸고 맞지 않는 값은 버린다(실패로 보지 않는다). `finish_chat_turn`은 `p_target_word_ids`·`p_target_source`·`p_used_word_ids`(모두 `default null`)를 받아 첫 턴이면 목표 단어를, 매 턴 쓴 단어를 저장하고 목표 단어 상태를 돌려준다. 운영 DB에 마이그레이션을 적용해야 한다.
 - **프롬프트 캐싱은 아직 쓰지 않는다.** Sonnet 5.5의 최소 캐시 길이(약 512토큰)는 넘으므로, 실제 결제를 붙이기 전에 적용하고 실측한다.
 
 ## 에러 코드
