@@ -14,7 +14,7 @@ src/
 │       └── reads.ts      # 페이지 읽기: 쿠키 client(RLS)를 인자로 받는다
 ├── services/             # 외부 I/O: supabase/{browser,server,admin}, claude/{client,prompts,schemas}, env, apiClient
 ├── lib/                  # 순수 규칙 (I/O·환경변수·fetch 없음)
-├── components/           # 화면 단위: OnboardingFlow, ScenarioPicker, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck
+├── components/           # 화면 단위: OnboardingFlow, ScenarioPicker, ChatRoom, ChatFeedback, WordSession, LevelTestRunner, KanaDeck, LandingPreview
 │                         # 공용: Flashcard, BlankQuiz, Furigana, LanguageSheet, AppNav, UsageCard, Dialog, Toast, WaitingDots,
 │                         #       GoogleLoginButton, TrialButton, ProButton, LimitNotice, WordExplanation, LogoutButton, SpeakButtons
 ├── site.config.ts        # 운영자 이름·문의 이메일·약관 시행일 (출시 전에 채운다)
