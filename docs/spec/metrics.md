@@ -4,7 +4,7 @@
 - 이벤트(`events`)는 다른 테이블로 알 수 없는 것만 남긴다: `limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`(운영용), `word_explained`(AI 정답 설명 사용 기록이자 Free 설명 한도의 카운터, `words.md` "AI 정답 설명").
 - `limit_reached`는 서버가 성공한 학습으로 당일 한도를 채웠을 때, 또는 유효한 신규 학습 요청을 한도로 거부할 때 기록한다. UI가 추가 입력을 막아도 한도 도달을 놓치지 않게 한다. `props`에는 `feature(chat/words)`, `plan(free/pro)`, `trial_eligible`을 서버가 넣는다. 체험이 남은 Free 사용자의 첫 한도 도달만 체험 전환율의 출발점이 된다.
   - AI 정답 설명의 한도 도달·거부는 `limit_reached`로 남기지 않는다. 남기면 그것이 첫 도달인 사용자가 `feature`(대화·단어) 어디에도 속하지 않아 체험 전환 지표의 정의가 바뀐다. 설명 사용량은 `word_explained`로 따로 본다.
-  - **해석**: Free 단어 한도(10개)는 오늘 목표와 같으므로 `feature = words`인 도달은 "추가 학습 의도"가 아니라 "오늘 목표 완료"를 뜻한다. 대화 한도(20턴)는 목표(유효한 세션 1개)보다 크므로 `feature = chat`인 도달은 목표 이상의 사용이다. 전환율은 `feature`별로 나눠 보고한다.
+  - **해석**: Free 단어 한도(10개)는 오늘 목표와 같으므로 `feature = words`인 도달은 "추가 학습 의도"가 아니라 "오늘 목표 완료"를 뜻한다. 대화 한도(10턴)는 목표(유효한 세션 1개)보다 크므로 `feature = chat`인 도달은 목표 이상의 사용이다. 전환율은 `feature`별로 나눠 보고한다.
 - 학습한 날은 `user_activity_days(user_id, activity_date)`에 한국 날짜별 한 행으로 보존한다. 학습 성공과 같은 트랜잭션에서 `insert … on conflict do nothing`으로 기록하며, 단순 방문은 기록하지 않는다.
   - 단어 복습·가나·레벨업 테스트만 한 날도 기록된다. `last_study_date`나 덮어쓰는 `updated_at`으로 과거 활동을 복원하지 않는다.
 - 나머지는 원래 테이블에서 계산한다.
