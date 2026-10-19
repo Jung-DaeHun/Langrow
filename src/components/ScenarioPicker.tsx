@@ -38,6 +38,15 @@ export function ScenarioPicker({ language, level, groups, access }: Props) {
   const [expanded, setExpanded] = useState<Level[]>([level]);
   const [modal, setModal] = useState<"locked" | "trial" | null>(null);
 
+  // 레벨·언어를 바꿔 목록을 다시 받으면 새 지금 레벨 묶음만 펼친다.
+  // key로 다시 마운트하지 않는 건 409 뒤 refresh에서 오류 안내를 남기기 위해서다
+  const view = `${language}-${level}`;
+  const [expandedView, setExpandedView] = useState(view);
+  if (expandedView !== view) {
+    setExpandedView(view);
+    setExpanded([level]);
+  }
+
   function toggle(groupLevel: Level) {
     setExpanded((prev) => (prev.includes(groupLevel) ? prev.filter((l) => l !== groupLevel) : [...prev, groupLevel]));
   }

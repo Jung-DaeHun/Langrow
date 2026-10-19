@@ -94,6 +94,28 @@ describe("ScenarioPicker 레벨 묶음", () => {
     expect(screen.queryByRole("button", { name: (name) => name.includes(title("l3-pharmacy")) })).toBeNull();
   });
 
+  it("지금 레벨이 바뀌어 다시 그리면 새 지금 레벨 묶음만 펼친다", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<ScenarioPicker language="en" level={3} groups={scenarioGroups(3, [], [])} access="pro" />);
+    await user.click(header("입문"));
+
+    rerender(<ScenarioPicker language="en" level={2} groups={scenarioGroups(2, [], [])} access="pro" />);
+
+    const headers = screen.getAllByRole("button", { name: /상황 7개/ });
+    expect(headers.map((h) => h.getAttribute("aria-expanded"))).toEqual(["false", "true", "false", "false", "false"]);
+  });
+
+  it("학습 언어가 바뀌어 다시 그리면 지금 레벨 묶음만 펼친 처음 상태로 돌아간다", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<ScenarioPicker language="en" level={3} groups={scenarioGroups(3, [], [])} access="pro" />);
+    await user.click(header("입문"));
+
+    rerender(<ScenarioPicker language="ja" level={3} groups={scenarioGroups(3, [], [])} access="pro" />);
+
+    const headers = screen.getAllByRole("button", { name: /상황 7개/ });
+    expect(headers.map((h) => h.getAttribute("aria-expanded"))).toEqual(["false", "false", "true", "false", "false"]);
+  });
+
   it("위 레벨 묶음 머리에만 잠김 표시가 있다", () => {
     setup();
 
@@ -337,6 +359,20 @@ describe("ScenarioPicker 새 세션", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("레벨이 바뀌었어요.");
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(push).not.toHaveBeenCalled();
+  });
+
+  it("409 뒤 바뀐 레벨로 다시 그려도 오류 안내는 남고 새 지금 레벨 묶음을 펼친다", async () => {
+    apiMock.mockResolvedValue({ ok: false, status: 409, code: "CONFLICT", message: "레벨이 바뀌었어요." });
+    const user = userEvent.setup();
+    const { rerender } = render(<ScenarioPicker language="en" level={3} groups={scenarioGroups(3, [], [])} access="pro" />);
+    await user.click(tile("l3-pharmacy"));
+    await screen.findByRole("alert");
+
+    rerender(<ScenarioPicker language="en" level={2} groups={scenarioGroups(2, [], [])} access="pro" />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent("레벨이 바뀌었어요.");
+    expect(header("초보")).toHaveAttribute("aria-expanded", "true");
+    expect(header("중급")).toHaveAttribute("aria-expanded", "false");
   });
 
   it("PRO_REQUIRED(화면을 연 뒤 체험이 끝남)면 화면을 다시 읽고 준비 중 모달을 띄우며 오류 안내는 없다", async () => {
