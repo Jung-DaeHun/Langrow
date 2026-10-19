@@ -51,7 +51,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
         → Claude 설명(잠금 밖) → 성공은 저장 RPC(설명을 만든 단어 내용이 지금과 같을 때만 word_explanations) 후 응답 / 실패는 실패 RPC(예약 행 삭제, chat_failed)
 음성:   (로컬) generate-audio → Azure Speech(F0) → public/audio/*.mp3 + data/audio-manifest.json 커밋 → 배포된 정적 파일을 브라우저가 재생
         대화 문장은 서버를 거치지 않고 브라우저 speechSynthesis로 읽는다
-한글 발음: 대화는 일본어 입문~중급 턴에서 Claude 응답의 reply_pron_ko·corrected_pron_ko → 성공 확정 RPC가 chat_turns에 저장
+한글 발음: 대화는 일본어 입문~중급 턴에서 Claude 응답의 reply_pron_ko·corrected_pron_ko → 성공 확정 RPC가 chat_turns에 저장, 종료 피드백은 고칠 점마다 example_pron_ko → 완료 RPC가 chat_sessions.feedback에 저장
         단어는 (로컬) generate-words·generate-pronunciation → data/words/*.json의 pron_ko·example_pron_ko 커밋 → seed-words
 문장 뜯어보기: 모든 턴에서 Claude 응답의 reply_breakdown·correction.breakdown → lib/breakdown 검사(실패면 null) → 성공 확정 RPC가 chat_turns에 저장
         첫 마디는 scenarios.ts의 breakdown(AI 초안 + 사람 검수)
