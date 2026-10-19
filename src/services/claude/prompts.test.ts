@@ -393,10 +393,13 @@ describe("buildTurnPrompt 배운 단어", () => {
     expect(system).toContain("최대 5개");
     expect(system).toContain("(오늘 씀)이 없는 단어를 먼저 고른다");
     expect(system).toContain("화제를 바꿔야 쓸 수 있는 단어는 고르지 않는다");
-    expect(system).toContain("맞는 단어가 없으면 고르지 않는다");
+    // "자연스럽게 나올 단어만"이라고만 쓰면 2026-10-20 실측에서 카페 주문에도 하나도 고르지 않았다
+    expect(system).toContain("학습자가 대답에 쓸 수 있는 단어");
+    expect(system).toContain("카페 주문이면 '맛있다·조금·같이'는 고르고 '개·고양이'는 고르지 않는다");
+    expect(system).toContain("맞는 단어가 하나도 없을 때만 빈 배열이다");
     expect(system).toContain("- target_words:");
     expect(system).toContain("- used_words:");
-    expect(system).toContain("target_words에 넣은 번호 중에서만");
+    expect(system).toContain("target_words 안의 번호만");
     expect(system).not.toContain("썼음");
   });
 
@@ -415,15 +418,13 @@ describe("buildTurnPrompt 배운 단어", () => {
   ] as const)("%s은 역할을 지키며 아직 쓰지 않은 단어를 유도하라고 한다", (_, build) => {
     const { system } = build();
     for (const part of [
-      "학습자가 대답에 쓰기 쉬운 질문이나 상황을 만든다",
-      "한 reply에서 한 단어만 노린다",
-      "아직 쓰지 않은 목표 단어를 reply에서 먼저 말하지 않는다",
-      "corrected는 이 제한을 받지 않는다",
+      "아직 쓰지 않은 목표 단어 하나를 학습자가 대답에 쓰기 쉬운 질문이나 상황을 만든다",
+      "그 단어를 reply에서 먼저 말하지 않는다(corrected는 예외)",
       // 목록의 썼음/아직은 앞 턴까지라, 이번 말에서 막 쓴 단어를 AI가 받아 말하기를 피하지 않게 한다
-      "이번 사용자의 말에서 쓴 목표 단어는 목록에 아직이어도 쓴 것으로 보고, reply에서 받아 말해도 된다",
+      "이번 사용자의 말에서 쓴 단어는 쓴 것으로 보고 받아 말해도 된다",
       "이 단어를 써 보세요",
       "화제를 바꾸거나 대화를 억지로 늘리지 않는다",
-      "목표 단어를 모두 썼으면(이번 말에서 쓴 것 포함) 더 유도하지 않는다",
+      "모두 썼으면 더 유도하지 않는다",
     ]) {
       expect(system).toContain(part);
     }
@@ -437,12 +438,11 @@ describe("buildTurnPrompt 배운 단어", () => {
     for (const part of [
       "買う → 買いました",
       "美味しい → おいしい",
-      "한국어로 쓴 것은 넣지 않는다",
-      "앞 턴의 교정 문장을 보고",
-      "문법이 틀려도 그 단어를 썼으면 넣는다",
-      "없으면 빈 배열이다",
-      "목록에 있는 번호만",
-      "같은 번호를 두 번 쓰지 않는다",
+      "한국어로 쓴 것은 빼고",
+      "앞 턴 교정을 보고 직접 쓴 것은 넣는다",
+      "문법이 틀려도 넣는다",
+      "없으면 빈 배열",
+      "번호는 목록에 있는 정수만 숫자로, 중복 없이 쓴다",
     ]) {
       expect(system).toContain(part);
     }
