@@ -47,7 +47,8 @@
     },
     {
       "dir": "9-target-words",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-10-20T00:17:57+0900"
     }
   ]
 }
