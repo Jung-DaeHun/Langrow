@@ -2,8 +2,24 @@
   "project": "Langrow",
   "phase": "9-target-words",
   "steps": [
-    { "step": 0, "name": "target-data", "status": "pending" },
-    { "step": 1, "name": "target-ai", "status": "pending" },
-    { "step": 2, "name": "target-ui", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "target-data",
+      "status": "completed",
+      "started_at": "2026-10-19T23:48:18+0900",
+      "summary": "lib/targetWords: TargetSource·WordCandidate·TargetWord, TARGET_WORDS_MAX, TARGET_SOURCE_NAMES, pickTargetIds(candidateIds, numbers), pickUsedIds(listIds, numbers, targetIds). 마이그레이션 20261019200000_target_words.sql(컬럼 3개, begin_chat_turn·finish_chat_turn 변경). db/chat.ts: beginChatTurn 값 +candidates·candidateSource·targets, finishChatTurn(…, reply, words?: {targetWordIds, targetSource, usedWordIds}) → +targetWords·targetSource. ChatRoomData +targetWords·targetSource. use-case는 아직 안 씀.",
+      "completed_at": "2026-10-20T00:01:09+0900"
+    },
+    {
+      "step": 1,
+      "name": "target-ai",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "target-ui",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-19T23:48:18+0900"
 }
