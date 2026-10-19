@@ -160,7 +160,7 @@
 - **저장**: `chat_sessions.target_word_ids`(text[], 고른 순서)와 `target_source`(`today`/`recent`), `chat_turns.used_word_ids`(text[], 그 턴에 쓴 목표 단어). 세션에서 쓴 단어는 `done` 턴들의 합집합이다. 목표 단어가 없는 세션과 턴은 `null`이다.
   - `finish_chat_turn`은 `p_target_word_ids text[] default null`, `p_target_source text default null`, `p_used_word_ids text[] default null`을 받는다. 세션에 목표 단어가 없고 이 턴이 첫 턴일 때만 목표 단어를 저장한다. 그 사용자의 `user_words`에 있고 세션 언어인 단어만 저장하고(남지 않으면 목표 단어 없음), 쓴 단어는 저장된 목표 단어 안의 것만 저장한다.
   - 성공 응답에 세션의 목표 단어 상태를 돌려준다(아래 "응답").
-- **응답**: 메시지 응답과 대화방 읽기에 `targetWords: [{ id, word, reading, meaningKo, used }] | null`(목표 단어 순서)과 `targetSource`를 담는다. 화면은 메시지 응답으로 줄을 갱신하고 다시 읽지 않는다.
+- **응답**: 메시지 응답과 대화방 읽기에 `targetWords: [{ id, word, reading, meaningKo, used }] | null`(목표 단어 순서)과 `targetSource`를 담는다. 화면은 메시지 응답으로 줄을 바로 갱신하고, 턴 확정 뒤의 다시 읽기(`journey.md` "예외 흐름"의 뒤로 가기)를 기다리지 않는다.
 - **화면**(`ui.md`): 대화방 상단의 단어 줄, 종료 피드백의 결과 카드, 단어 회차 결과의 [대화하러 가기]. 줄과 카드의 이름은 출처가 `today`면 "오늘 단어", `recent`면 "최근 단어"다.
 - **비용**(`usage.md`, 2026-10-20 `count_tokens` 실측): 목표 단어가 있는 턴(4개)은 입력이 약 570토큰, 후보 10개를 주는 첫 턴은 약 910토큰 늘고, 출력은 번호 몇 개다. 한국어 지시문이 토큰을 많이 먹어서, 처음 문구(+894·+1,244)를 줄였다.
 - **확인**: 구현 뒤 실제 대화 몇 개(언어·레벨·출처를 섞어서)로 고른 단어가 상황에 맞는지, 유도가 억지스럽지 않은지, AI가 목표 단어를 먼저 말하지 않는지, 쓴 단어 판단이 맞는지, 늘어난 토큰을 본다. 유료 API 호출이므로 하네스 step 안에서 하지 않고 phase가 끝난 뒤 메인 세션에서 한다.
