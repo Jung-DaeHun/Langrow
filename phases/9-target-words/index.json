@@ -1,0 +1,9 @@
+{
+  "project": "Langrow",
+  "phase": "9-target-words",
+  "steps": [
+    { "step": 0, "name": "target-data", "status": "pending" },
+    { "step": 1, "name": "target-ai", "status": "pending" },
+    { "step": 2, "name": "target-ui", "status": "pending" }
+  ]
+}
