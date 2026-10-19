@@ -21,7 +21,7 @@ describe("UsageCard", () => {
   it("Pro면 Pro 한도를 쓴다", () => {
     render(<UsageCard usage={{ chatTurns: 30, newWords: 0 }} plan="pro" />);
 
-    expect(screen.getByText("AI 대화 턴").parentElement).toHaveTextContent("120 / 150 남음");
+    expect(screen.getByText("AI 대화 턴").parentElement).toHaveTextContent("20 / 50 남음");
     expect(screen.getByText("새 단어").parentElement).toHaveTextContent("30 / 30 남음");
   });
 

@@ -2,7 +2,7 @@ export type Plan = "free" | "pro";
 
 export const PLAN_LIMITS: Record<Plan, { chatTurns: number; newWords: number }> = {
   free: { chatTurns: 20, newWords: 10 },
-  pro: { chatTurns: 150, newWords: 30 },
+  pro: { chatTurns: 50, newWords: 30 },
 };
 
 // AI 정답 설명의 Free 하루 횟수(spec/usage.md). Pro는 세지 않는다. SQL(word_explanations 마이그레이션)과 같아야 한다

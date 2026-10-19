@@ -17,7 +17,7 @@ beforeEach(() => {
   vi.mocked(useRouter).mockReturnValue({ refresh } as unknown as ReturnType<typeof useRouter>);
 });
 
-const PRO_TEXT = "Pro는 하루 대화 150턴, 새 단어 30개까지 할 수 있어요. 결제 정보는 받지 않아요.";
+const PRO_TEXT = "Pro는 하루 대화 50턴, 새 단어 30개까지 할 수 있어요. 결제 정보는 받지 않아요.";
 
 describe("LimitNotice 체험 가능", () => {
   it("대화 한도 제목, Pro 한도 설명, [7일 무료 체험]·[내일 할게요]를 보여 준다", () => {

@@ -398,7 +398,7 @@ inline-flex rounded-full bg-zone p-1 gap-0.5
 | `/settings` | 맨 위 [계정] 뒤로 pill(Pill + ChevronLeft, → `/account`. 셸 상단바는 경로를 모르므로 화면 안에 둔다), 탭바는 계정을 현재 위치로 표시 → 제목 "설정" → 섹션 "음성"(`text-h3`): 선택 타일 2개(`role="radiogroup"`) "여성"(보조 "영어 Ava · 일본어 Nanami", 선택됨 `aria-checked="true"`) / "남성"(비활성 `aria-disabled="true"` `opacity-50`, 보조 "준비 중이에요") → "대화 문장은 기기의 음성으로 읽어요."(`text-sm text-ink-muted`). 지금은 고를 수 있는 음성이 하나라 저장하지 않는 정적 화면(`page.tsx`)이다. 남성 음성을 넣을 때 타일을 켜고 계정에 저장한다(`audio.md` "나중에: 남성 음성") |
 | `/privacy`, `/terms` | [돌아가기] pill + 워드마크 → `max-w-prose-doc` 본문: `text-h1`, 시행일(`text-micro`), 소제목 17px 700, 문단 15px/1.7 |
 
-- 플랜 카드(계정): 모바일 1열, `md` 이상 2열(`gap-4`)이다. Free는 기본 카드, Pro는 보상 카드(`bg-gold-wash text-on-gold`)이며 둘 다 `p-5`, 내부 `gap-2`다. 순서는 첫 줄 플랜 이름(`font-bold`)과 오른쪽 태그 → 한도 한 줄(`text-sm text-ink-muted`: "대화 하루 20턴 · 새 단어 하루 10개 · 상황 레벨마다 3개" / "대화 하루 150턴 · 새 단어 하루 30개 · 상황 레벨마다 7개") → 가격(`text-h1 font-bold`: "무료" / "월 9,900원")이다. 태그는 체험 중이 아니면 Free 카드에 "현재"(기본 태그), 체험 중이면 Pro 카드에 "체험 중"(골드 태그)을 단다.
+- 플랜 카드(계정): 모바일 1열, `md` 이상 2열(`gap-4`)이다. Free는 기본 카드, Pro는 보상 카드(`bg-gold-wash text-on-gold`)이며 둘 다 `p-5`, 내부 `gap-2`다. 순서는 첫 줄 플랜 이름(`font-bold`)과 오른쪽 태그 → 한도 한 줄(`text-sm text-ink-muted`: "대화 하루 20턴 · 새 단어 하루 10개 · 상황 레벨마다 3개" / "대화 하루 50턴 · 새 단어 하루 30개 · 상황 레벨마다 7개") → 가격(`text-h1 font-bold`: "무료" / "월 9,900원")이다. 태그는 체험 중이 아니면 Free 카드에 "현재"(기본 태그), 체험 중이면 Pro 카드에 "체험 중"(골드 태그)을 단다.
 - 플랜 비교표(랜딩): 열은 항목/Free/Pro, 행은 AI 대화 턴·새 단어·복습·레벨업 테스트·가나·가격이다. 숫자 열은 오른쪽 정렬하고 Pro 값은 굵게, 행 사이는 `border-line` 구분선으로 둔다. 머리글은 `text-micro font-bold text-ink-muted`이다.
 
 ### 상황 목록 (`/chat`, 2026-10-18 ADR-019)

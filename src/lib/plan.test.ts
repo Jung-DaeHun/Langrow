@@ -6,10 +6,10 @@ const now = new Date("2026-10-05T03:00:00Z");
 const at = (offsetMs: number) => new Date(now.getTime() + offsetMs);
 
 describe("plan 상수", () => {
-  it("Free는 대화 20·단어 10, Pro는 대화 150·단어 30이다", () => {
+  it("Free는 대화 20·단어 10, Pro는 대화 50·단어 30이다", () => {
     expect(PLAN_LIMITS).toEqual({
       free: { chatTurns: 20, newWords: 10 },
-      pro: { chatTurns: 150, newWords: 30 },
+      pro: { chatTurns: 50, newWords: 30 },
     });
   });
 
