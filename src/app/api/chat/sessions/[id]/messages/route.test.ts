@@ -105,7 +105,7 @@ describe("POST /api/chat/sessions/[id]/messages", () => {
 
     const response = await post({ text: "Hi, I'm Minji.", userId: "99999999-9999-4999-8999-999999999999" });
 
-    expect(await read(response)).toEqual({ status: 200, json: { turnNo: 1, turnsLeft: 19, reply: REPLY } });
+    expect(await read(response)).toEqual({ status: 200, json: { turnNo: 1, turnsLeft: 19, reply: REPLY, targetWords: null, targetSource: null } });
     expect(deps.db.beginChatTurn).toHaveBeenCalledWith(USER_ID, SESSION_ID, "Hi, I'm Minji.");
     expect(deps.db.finishChatTurn).toHaveBeenCalledWith(USER_ID, SESSION_ID, expect.any(String), REPLY);
   });

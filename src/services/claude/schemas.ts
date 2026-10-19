@@ -22,6 +22,17 @@ export const pronTurnReplySchema = z.object({
     .nullable(),
 });
 export type PronTurnReply = z.infer<typeof pronTurnReplySchema>;
+// 배운 단어(spec/chat.md "배운 단어 써 보기"). 후보를 고르는 첫 턴(pick)은 target_words·used_words, 목표 단어가 있는 턴(practice)은
+// used_words를 더 받는다. 번호는 1부터 붙인 목록 번호이고, 정수·범위 검사는 lib/targetWords가 한다
+const WORD_FIELDS = {
+  pick: { target_words: z.array(z.number()), used_words: z.array(z.number()) },
+  practice: { used_words: z.array(z.number()) },
+};
+export type WordNumbers = { target_words?: number[]; used_words?: number[] };
+// 단어가 없는 턴(kind 없음)은 받은 스키마 그대로다
+export function withWordFields<T extends z.ZodRawShape>(schema: z.ZodObject<T>, kind: keyof typeof WORD_FIELDS | undefined) {
+  return (kind ? schema.extend(WORD_FIELDS[kind]) : schema) as unknown as z.ZodType<z.infer<z.ZodObject<T>> & WordNumbers>;
+}
 // 저장·API·화면이 쓰는 턴 응답. 한글 발음은 일본어 입문~중급 턴에만 있다(spec/chat.md "한글 발음").
 // 영어·상급 이상 턴과 기능을 넣기 전의 턴은 발음이 없거나 null이다.
 // 문장 뜯어보기는 검사(lib/breakdown)를 통과한 것만 있고, 맞지 않았거나 기능을 넣기 전의 턴은 null·키 없음이다(spec/chat.md "문장 뜯어보기")

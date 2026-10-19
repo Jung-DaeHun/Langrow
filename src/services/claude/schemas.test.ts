@@ -1,6 +1,6 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { describe, expect, it } from "vitest";
-import { explanationSchema, feedbackSchema, pronTurnReplySchema, turnReplySchema } from "./schemas";
+import { explanationSchema, feedbackSchema, pronTurnReplySchema, turnReplySchema, withWordFields } from "./schemas";
 
 describe("turnReplySchema", () => {
   it("교정이 있는 응답을 받는다", () => {
@@ -121,5 +121,44 @@ describe("pronTurnReplySchema", () => {
     expect(pronTurnReplySchema.safeParse(noReplyBreakdown).success).toBe(false);
     const noCorrectedBreakdown = { corrected: "はい。", explanation_ko: "설명", corrected_pron_ko: "하이." };
     expect(pronTurnReplySchema.safeParse({ ...value, correction: noCorrectedBreakdown }).success).toBe(false);
+  });
+});
+
+describe("withWordFields", () => {
+  const base = { reply: "Hi", reply_ko: "안녕하세요", reply_breakdown: [], correction: null };
+  const pron = { ...base, reply_pron_ko: "하이." };
+  const keysOf = (schema: Parameters<typeof zodOutputFormat>[0]) =>
+    Object.keys((zodOutputFormat(schema).schema as { properties: object }).properties).sort();
+
+  it("단어가 없는 턴은 받은 스키마 그대로다", () => {
+    expect(withWordFields(turnReplySchema, undefined)).toBe(turnReplySchema);
+    expect(withWordFields(pronTurnReplySchema, undefined)).toBe(pronTurnReplySchema);
+  });
+
+  it.each([
+    ["turnReplySchema", turnReplySchema, base, ["correction", "reply", "reply_breakdown", "reply_ko"]],
+    ["pronTurnReplySchema", pronTurnReplySchema, pron, ["correction", "reply", "reply_breakdown", "reply_ko", "reply_pron_ko"]],
+  ] as const)("%s: pick은 target_words·used_words, practice는 used_words를 더한다", (_, schema, value, keys) => {
+    expect(keysOf(withWordFields(schema, "pick"))).toEqual([...keys, "target_words", "used_words"].sort());
+    expect(keysOf(withWordFields(schema, "practice"))).toEqual([...keys, "used_words"].sort());
+    expect(withWordFields(schema, "pick").parse({ ...value, target_words: [1, 3], used_words: [] })).toEqual({
+      ...value,
+      target_words: [1, 3],
+      used_words: [],
+    });
+    expect(withWordFields(schema, "practice").parse({ ...value, used_words: [2] })).toEqual({ ...value, used_words: [2] });
+  });
+
+  it("단어 필드가 빠지면 거부한다", () => {
+    expect(withWordFields(turnReplySchema, "pick").safeParse({ ...base, used_words: [] }).success).toBe(false);
+    expect(withWordFields(turnReplySchema, "pick").safeParse({ ...base, target_words: [] }).success).toBe(false);
+    expect(withWordFields(turnReplySchema, "practice").safeParse(base).success).toBe(false);
+  });
+
+  it("정수·범위 제약이 없어서 0·음수·소수·중복 번호도 스키마는 통과한다 (검사는 lib/targetWords가 한다)", () => {
+    const value = { ...base, target_words: [0, -1, 1.5, 9, 9, 1, 2, 3, 4, 5], used_words: [7] };
+    expect(withWordFields(turnReplySchema, "pick").safeParse(value).success).toBe(true);
+    const json = JSON.stringify(zodOutputFormat(withWordFields(pronTurnReplySchema, "pick")).schema);
+    expect(json).not.toMatch(/minimum|maximum|multipleOf|minItems|maxItems|"integer"/);
   });
 });

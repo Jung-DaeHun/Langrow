@@ -86,7 +86,13 @@ function replied(turnNo: number, turnsLeft: number, overrides: Partial<ChatMessa
   return {
     ok: true,
     status: 200,
-    data: { turnNo, turnsLeft, reply: { reply: `AI ${turnNo}`, reply_ko: `AI 번역 ${turnNo}`, correction: null, ...overrides } },
+    data: {
+      turnNo,
+      turnsLeft,
+      reply: { reply: `AI ${turnNo}`, reply_ko: `AI 번역 ${turnNo}`, correction: null, ...overrides },
+      targetWords: null,
+      targetSource: null,
+    },
   } satisfies ApiResult<ChatMessageResponse>;
 }
 

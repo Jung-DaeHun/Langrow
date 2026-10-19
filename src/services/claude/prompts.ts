@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { LANGUAGE_NAMES, LEVEL_INFO, showsPronunciation, type Language, type Level } from "@/lib/levels";
 import type { Scenario } from "@/lib/scenarios";
+import type { TargetWord, WordCandidate } from "@/lib/targetWords";
 import { hasHangul } from "@/lib/text";
 import type { TurnReply } from "./schemas";
 
@@ -10,6 +11,11 @@ export type TurnPromptInput = {
   scenario: Scenario;
   history: readonly { userText: string; reply: string }[]; // done 턴만, turn_no 순서
   userText: string;
+  // 배운 단어(spec/chat.md "배운 단어 써 보기"). pick은 후보가 있는 첫 턴, practice는 목표 단어가 있는 세션의 턴이다.
+  // 없으면 프롬프트가 기능 전과 같다
+  words?:
+    | { kind: "pick"; candidates: readonly WordCandidate[] }
+    | { kind: "practice"; targets: readonly TargetWord[] };
 };
 
 export type FeedbackPromptInput = {
@@ -93,6 +99,49 @@ const BREAKDOWN_RULES: Record<Language, string[]> = {
   ],
 };
 
+// 쓴 단어로 치는 활용형·다른 표기의 예. 예는 그 언어 것만 넣는다
+const USED_WORD_EXAMPLES: Record<Language, string> = {
+  ja: "활용형(買う → 買いました)과 다른 표기(美味しい → おいしい)",
+  en: "활용형(decide → decided)과 다른 표기(color → colour)",
+};
+
+// 배운 단어 유도 지시(spec/chat.md "배운 단어 써 보기" "유도"). 고르는 첫 턴과 목표 단어가 있는 턴이 같이 쓴다
+const PRACTICE_RULES = [
+  "- 역할을 지키면서, 아직 쓰지 않은 목표 단어를 학습자가 대답에 쓰기 쉬운 질문이나 상황을 만든다.",
+  "- 한 reply에서 한 단어만 노린다.",
+  "- 아직 쓰지 않은 목표 단어를 reply에서 먼저 말하지 않는다. 학습자가 따라 하지 않고 떠올려 말하게 하려는 것이다. corrected는 이 제한을 받지 않는다. 교정은 자연스럽고 맞는 문장이 먼저다.",
+  '- 역할을 벗어나 "이 단어를 써 보세요"처럼 말하지 않는다.',
+  "- 사용자의 목표가 먼저다. 단어를 쓰게 하려고 화제를 바꾸거나 대화를 억지로 늘리지 않는다.",
+  "- 목표 단어를 모두 썼으면 더 유도하지 않는다.",
+];
+
+// 단어 목록 한 줄: 번호. 단어(읽기) — 뜻. 읽기는 일본어에서 단어와 다를 때만 붙인다
+function wordLine(language: Language, index: number, word: { word: string; reading: string | null; meaningKo: string }) {
+  const reading = language === "ja" && word.reading && word.reading !== word.word ? `(${word.reading})` : "";
+  return `${index + 1}. ${word.word}${reading} — ${word.meaningKo}`;
+}
+
+function wordSection(language: Language, words: NonNullable<TurnPromptInput["words"]>): string[] {
+  if (words.kind === "pick") {
+    return [
+      "## 배운 단어",
+      "- 아래는 학습자가 최근 배운 단어 목록이다. 형식은 '번호. 단어(읽기) — 뜻'이고, 오늘 다른 대화에서 이미 쓴 단어는 끝에 (오늘 씀)이 붙어 있다.",
+      ...words.candidates.map((word, i) => `${wordLine(language, i, word)}${word.usedToday ? " (오늘 씀)" : ""}`),
+      "- 이 상황과 너의 역할에서 자연스럽게 나올 단어만 최대 5개 골라 목표 단어로 삼는다.",
+      "- 맞는 단어 중에서는 (오늘 씀)이 없는 단어를 먼저 고른다.",
+      "- 화제를 바꿔야 쓸 수 있는 단어는 고르지 않는다. 맞는 단어가 없으면 고르지 않는다.",
+      "- 이번 reply부터 고른 목표 단어를 유도한다.",
+      ...PRACTICE_RULES,
+    ];
+  }
+  return [
+    "## 배운 단어",
+    "- 아래는 이 대화의 목표 단어(학습자가 최근 배운 단어)다. 형식은 '번호. 단어(읽기) — 뜻 — 썼음/아직'이고, 썼음은 학습자가 이 대화에서 이미 쓴 단어다.",
+    ...words.targets.map((word, i) => `${wordLine(language, i, word)} — ${word.used ? "썼음" : "아직"}`),
+    ...PRACTICE_RULES,
+  ];
+}
+
 function levelLabel(level: Level) {
   return `${LEVEL_INFO[level].name}(${level}/5)`;
 }
@@ -141,6 +190,21 @@ export function buildTurnPrompt(input: TurnPromptInput): Prompt {
     "  - 문장부호는 앞 조각에 붙이고 문장부호만으로 조각을 만들지 않는다.",
     ...BREAKDOWN_RULES[language],
   );
+  const { words } = input;
+  if (words) {
+    const pick = words.kind === "pick";
+    if (pick) {
+      lines.push("- target_words: 아래 '배운 단어' 목록에서 고른 목표 단어의 번호 배열. 5개를 넘기지 않고, 고를 단어가 없으면 빈 배열이다.");
+    }
+    lines.push(
+      `- used_words: 이번 사용자의 말에서 학습자가 ${name}로 직접 쓴 목표 단어의 번호 배열.${pick ? " target_words에 넣은 번호 중에서만 넣는다." : ""}`,
+      `  - ${USED_WORD_EXAMPLES[language]}도 쓴 것이다.`,
+      `  - 한국어로 쓴 것은 넣지 않는다. 앞 턴의 교정 문장을 보고 ${name}로 직접 쓴 것은 넣는다.`,
+      "  - 문법이 틀려도 그 단어를 썼으면 넣는다.",
+      "  - 없으면 빈 배열이다.",
+      "- 번호는 숫자로 쓰고 목록에 있는 번호만 쓴다. 0·음수·소수·목록 밖 번호나 문자열·단어 글자는 쓰지 않는다. 같은 번호를 두 번 쓰지 않는다.",
+    );
+  }
   if (showsPronunciation(language, level)) {
     lines.push(
       "- reply_pron_ko: reply의 한글 발음. 아래 '한글 발음' 규칙을 따른다.",
@@ -150,6 +214,7 @@ export function buildTurnPrompt(input: TurnPromptInput): Prompt {
       PRONUNCIATION_RULES,
     );
   }
+  if (words) lines.push("", ...wordSection(language, words));
   lines.push(
     "",
     "## 지킬 것",

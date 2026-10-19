@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findScenario } from "@/lib/scenarios";
+import type { TargetSource, TargetWord, WordCandidate } from "@/lib/targetWords";
 import type { BeginEndResult, EndResult } from "@/server/db/chat";
 import type { DbErrorCode } from "@/server/db/types";
 import type { Feedback, TurnReply } from "@/services/claude/schemas";
@@ -163,12 +164,12 @@ describe("sendChatMessage", () => {
     });
   });
 
-  it("예약 → AI → 성공 확정 순서로 부르고 { turnNo, turnsLeft, reply }를 돌려준다", async () => {
+  it("예약 → AI → 성공 확정 순서로 부르고 { turnNo, turnsLeft, reply, targetWords, targetSource }를 돌려준다", async () => {
     const deps = reservedTurn();
 
     const result = await sendChatMessage(deps, USER_ID, SESSION_ID, "熱はないです。");
 
-    expect(result).toEqual({ ok: true, value: { turnNo: 3, turnsLeft: 17, reply: REPLY } });
+    expect(result).toEqual({ ok: true, value: { turnNo: 3, turnsLeft: 17, reply: REPLY, targetWords: null, targetSource: null } });
     expect(deps.db.finishChatTurn).toHaveBeenCalledWith(USER_ID, SESSION_ID, TOKEN, REPLY);
     const [begin] = deps.db.beginChatTurn.mock.invocationCallOrder;
     const [generate] = deps.ai.generateTurn.mock.invocationCallOrder;
@@ -227,6 +228,98 @@ describe("sendChatMessage", () => {
 
     await expect(sendChatMessage(deps, USER_ID, SESSION_ID, "hi")).rejects.toThrow();
     expect(deps.ai.generateTurn).not.toHaveBeenCalled();
+  });
+});
+
+describe("sendChatMessage 배운 단어", () => {
+  const CANDIDATES: WordCandidate[] = [
+    { id: "ja-1-101", word: "美味しい", reading: "おいしい", meaningKo: "맛있다", usedToday: false },
+    { id: "ja-1-102", word: "一緒に", reading: "いっしょに", meaningKo: "함께", usedToday: true },
+    { id: "ja-1-103", word: "犬", reading: "いぬ", meaningKo: "개", usedToday: false },
+  ];
+  const TARGETS: TargetWord[] = [
+    { id: "ja-1-101", word: "美味しい", reading: "おいしい", meaningKo: "맛있다", used: false },
+    { id: "ja-1-102", word: "一緒に", reading: "いっしょに", meaningKo: "함께", used: true },
+  ];
+
+  function reserved(words: { candidates: WordCandidate[] | null; candidateSource: TargetSource | null; targets: TargetWord[] | null }) {
+    return createFakeDeps({
+      db: {
+        beginChatTurn: async () => ({
+          ok: true,
+          value: { token: TOKEN, turnNo: 1, session: SESSION, history: [], ...words },
+        }),
+      },
+      ai: { generateTurn: async () => ({ ok: true, value: REPLY }) },
+    });
+  }
+
+  it("후보가 있으면 AI에 pick으로 넘긴다", async () => {
+    const deps = reserved({ candidates: CANDIDATES, candidateSource: "today", targets: null });
+
+    await sendChatMessage(deps, USER_ID, SESSION_ID, "ケーキをください。");
+
+    expect(deps.ai.generateTurn).toHaveBeenCalledWith(
+      expect.objectContaining({ words: { kind: "pick", candidates: CANDIDATES } }),
+    );
+  });
+
+  it("고른 단어·쓴 단어 id를 출처와 함께 확정 RPC에 넘기고, 확정 RPC가 돌려준 목표 단어 상태를 응답에 담는다", async () => {
+    const deps = reserved({ candidates: CANDIDATES, candidateSource: "today", targets: null });
+    const words = { targetWordIds: ["ja-1-101", "ja-1-102"], usedWordIds: ["ja-1-102"] };
+    deps.ai.generateTurn.mockResolvedValue({ ok: true, value: { ...REPLY, words } });
+    deps.db.finishChatTurn.mockResolvedValue({ ok: true, value: { turnsLeft: 19, targetWords: TARGETS, targetSource: "today" } });
+
+    const result = await sendChatMessage(deps, USER_ID, SESSION_ID, "ケーキも一緒にください。");
+
+    expect(deps.db.finishChatTurn).toHaveBeenCalledWith(USER_ID, SESSION_ID, TOKEN, REPLY, {
+      targetWordIds: ["ja-1-101", "ja-1-102"],
+      targetSource: "today",
+      usedWordIds: ["ja-1-102"],
+    });
+    expect(result).toEqual({
+      ok: true,
+      value: { turnNo: 1, turnsLeft: 19, reply: REPLY, targetWords: TARGETS, targetSource: "today" },
+    });
+    expect(result.ok && result.value.reply).not.toHaveProperty("words");
+  });
+
+  it("AI가 하나도 고르지 않아도 빈 배열과 출처를 넘긴다", async () => {
+    const deps = reserved({ candidates: CANDIDATES, candidateSource: "recent", targets: null });
+    deps.ai.generateTurn.mockResolvedValue({ ok: true, value: { ...REPLY, words: { targetWordIds: [], usedWordIds: [] } } });
+
+    const result = await sendChatMessage(deps, USER_ID, SESSION_ID, "ケーキをください。");
+
+    expect(deps.db.finishChatTurn).toHaveBeenCalledWith(USER_ID, SESSION_ID, TOKEN, REPLY, {
+      targetWordIds: [],
+      targetSource: "recent",
+      usedWordIds: [],
+    });
+    expect(result).toEqual({ ok: true, value: { turnNo: 1, turnsLeft: 19, reply: REPLY, targetWords: null, targetSource: null } });
+  });
+
+  it("목표 단어가 있는 턴은 AI에 practice로 넘기고 확정 RPC에는 쓴 단어 id만 넘긴다", async () => {
+    const deps = reserved({ candidates: null, candidateSource: null, targets: TARGETS });
+    deps.ai.generateTurn.mockResolvedValue({ ok: true, value: { ...REPLY, words: { usedWordIds: ["ja-1-101"] } } });
+
+    await sendChatMessage(deps, USER_ID, SESSION_ID, "とても美味しいです。");
+
+    expect(deps.ai.generateTurn).toHaveBeenCalledWith(expect.objectContaining({ words: { kind: "practice", targets: TARGETS } }));
+    expect(deps.db.finishChatTurn).toHaveBeenCalledWith(USER_ID, SESSION_ID, TOKEN, REPLY, { usedWordIds: ["ja-1-101"] });
+  });
+
+  it.each<[string, { candidates: WordCandidate[] | null; candidateSource: TargetSource | null; targets: TargetWord[] | null }]>([
+    ["후보가 빈 배열", { candidates: [], candidateSource: null, targets: null }],
+    ["목표 단어가 빈 배열", { candidates: null, candidateSource: null, targets: [] }],
+    ["둘 다 null", { candidates: null, candidateSource: null, targets: null }],
+  ])("%s이면 AI에 단어를 넘기지 않고 확정 RPC에도 넘기지 않는다", async (_, words) => {
+    const deps = reserved(words);
+
+    await sendChatMessage(deps, USER_ID, SESSION_ID, "hi");
+
+    expect(deps.ai.generateTurn.mock.calls[0][0].words).toBeUndefined();
+    expect(deps.db.finishChatTurn.mock.calls[0]).toEqual([USER_ID, SESSION_ID, TOKEN, REPLY]);
+    expect(deps.db.finishChatTurn.mock.calls[0]).toHaveLength(4);
   });
 });
 

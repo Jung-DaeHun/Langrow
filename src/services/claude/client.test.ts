@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { scenariosForLevel } from "@/lib/scenarios";
+import type { TargetWord, WordCandidate } from "@/lib/targetWords";
 import { createAi, type AiClient } from "./client";
 import {
   buildExplanationPrompt,
@@ -412,5 +413,129 @@ describe("API 오류 로그", () => {
 
     expect(await ai.generateTurn(turnInput)).toEqual({ ok: false, reason: "timeout" });
     expect(log).not.toHaveBeenCalled();
+  });
+});
+
+describe("generateTurn 배운 단어", () => {
+  const word = (id: string, text: string) => ({ id, word: text, reading: null, meaningKo: "뜻" });
+  const candidates: WordCandidate[] = ["latte", "hot", "small", "large", "please", "cake", "dog"].map((text, i) => ({
+    ...word(`en-1-10${i + 1}`, text),
+    usedToday: false,
+  }));
+  const targets: TargetWord[] = [
+    { ...word("en-1-102", "hot"), used: true },
+    { ...word("en-1-104", "large"), used: false },
+    { ...word("en-1-106", "cake"), used: false },
+  ];
+  const pickInput: TurnPromptInput = { ...turnInput, words: { kind: "pick", candidates } };
+  const practiceInput: TurnPromptInput = { ...turnInput, words: { kind: "practice", targets } };
+  const propertiesOf = (request: Record<string, unknown>) =>
+    Object.keys((request.output_config as { format: { schema: { properties: object } } }).format.schema.properties).sort();
+  const TURN_KEYS = ["correction", "reply", "reply_breakdown", "reply_ko"];
+
+  it("단어가 없는 턴은 단어 필드 없이 요청하고 결과에 words가 없다", async () => {
+    const { ai, requests } = setup(done(reply));
+    const result = await ai.generateTurn(turnInput);
+    expect(propertiesOf(requests[0])).toEqual(TURN_KEYS);
+    expect(result.ok && result.value).not.toHaveProperty("words");
+  });
+
+  it("후보를 고르는 턴은 target_words·used_words를 요청하고, 번호를 후보 id로 바꿔 reply와 따로 돌려준다", async () => {
+    const { ai, requests } = setup(done({ ...reply, target_words: [3, 4, 1], used_words: [1] }));
+    expect(await ai.generateTurn(pickInput)).toEqual({
+      ok: true,
+      value: { ...reply, words: { targetWordIds: ["en-1-103", "en-1-104", "en-1-101"], usedWordIds: ["en-1-101"] } },
+    });
+    expect(propertiesOf(requests[0])).toEqual([...TURN_KEYS, "target_words", "used_words"].sort());
+    expect(requests[0].system).toBe(buildTurnPrompt(pickInput).system);
+  });
+
+  it("목표 단어가 있는 턴은 used_words만 요청하고, 번호를 목표 단어 id로 바꾼다", async () => {
+    const { ai, requests } = setup(done({ ...reply, used_words: [2, 3] }));
+    const result = await ai.generateTurn(practiceInput);
+    expect(result).toEqual({ ok: true, value: { ...reply, words: { usedWordIds: ["en-1-104", "en-1-106"] } } });
+    expect(result.ok && result.value.words).not.toHaveProperty("targetWordIds");
+    expect(propertiesOf(requests[0])).toEqual([...TURN_KEYS, "used_words"].sort());
+    expect(requests[0].system).toBe(buildTurnPrompt(practiceInput).system);
+  });
+
+  it("범위 밖·소수·중복 번호와 고르지 않은 쓴 번호는 버리고 턴은 성공한다 (다시 부르지 않는다)", async () => {
+    const { ai, requests } = setup(done({ ...reply, target_words: [0, 2, 2, 8, 1.5, -1], used_words: [2, 5, 9, 2] }));
+    expect(await ai.generateTurn(pickInput)).toEqual({
+      ok: true,
+      value: { ...reply, words: { targetWordIds: ["en-1-102"], usedWordIds: ["en-1-102"] } },
+    });
+    expect(requests).toHaveLength(1);
+  });
+
+  it("6개 이상 고르면 앞의 5개만 남기고, 잘린 단어의 쓴 번호도 버린다", async () => {
+    const { ai, requests } = setup(done({ ...reply, target_words: [1, 2, 3, 4, 5, 6, 7], used_words: [6, 1] }));
+    expect(await ai.generateTurn(pickInput)).toEqual({
+      ok: true,
+      value: {
+        ...reply,
+        words: { targetWordIds: ["en-1-101", "en-1-102", "en-1-103", "en-1-104", "en-1-105"], usedWordIds: ["en-1-101"] },
+      },
+    });
+    expect(requests).toHaveLength(1);
+  });
+
+  it("목표 단어 밖의 쓴 번호는 버리고 턴은 성공한다", async () => {
+    const { ai, requests } = setup(done({ ...reply, used_words: [0, 4, 1, 1] }));
+    expect(await ai.generateTurn(practiceInput)).toEqual({ ok: true, value: { ...reply, words: { usedWordIds: ["en-1-102"] } } });
+    expect(requests).toHaveLength(1);
+  });
+
+  it("아무것도 고르지 않으면 빈 배열이다", async () => {
+    const { ai } = setup(done({ ...reply, target_words: [], used_words: [] }));
+    expect(await ai.generateTurn(pickInput)).toEqual({ ok: true, value: { ...reply, words: { targetWordIds: [], usedWordIds: [] } } });
+  });
+
+  it("번호가 숫자가 아니면 스키마에 맞지 않아 다시 부른다", async () => {
+    const bad = done({ ...reply, target_words: ["latte"], used_words: [] });
+    const { ai, requests } = setup(bad, done({ ...reply, target_words: [1], used_words: [] }));
+    expect(await ai.generateTurn(pickInput)).toEqual({
+      ok: true,
+      value: { ...reply, words: { targetWordIds: ["en-1-101"], usedWordIds: [] } },
+    });
+    expect(requests).toHaveLength(2);
+  });
+
+  it("일본어 발음 턴도 발음 필드와 함께 단어 필드를 요청하고 둘 다 처리한다", async () => {
+    const jaCandidates: WordCandidate[] = [
+      { id: "ja-1-101", word: "美味しい", reading: "おいしい", meaningKo: "맛있다", usedToday: false },
+      { id: "ja-1-102", word: "一緒に", reading: "いっしょに", meaningKo: "함께", usedToday: false },
+    ];
+    const jaInput: TurnPromptInput = {
+      language: "ja",
+      level: 1,
+      scenario,
+      history: [],
+      userText: "ケーキも一緒にください",
+      words: { kind: "pick", candidates: jaCandidates },
+    };
+    const jaReply = {
+      reply: "はい、どうぞ。",
+      reply_ko: "네, 여기요.",
+      reply_pron_ko: " 하이, 도-조. ",
+      reply_breakdown: [
+        { text: "はい、", meaning_ko: "네," },
+        { text: "どうぞ。", meaning_ko: "여기요." },
+      ],
+      correction: null,
+    };
+    const { ai, requests } = setup(done({ ...jaReply, target_words: [1, 2], used_words: [2] }));
+    expect(await ai.generateTurn(jaInput)).toEqual({
+      ok: true,
+      value: { ...jaReply, reply_pron_ko: "하이, 도-조.", words: { targetWordIds: ["ja-1-101", "ja-1-102"], usedWordIds: ["ja-1-102"] } },
+    });
+    expect(propertiesOf(requests[0])).toEqual([...TURN_KEYS, "reply_pron_ko", "target_words", "used_words"].sort());
+  });
+
+  it("단어 턴은 로그를 남기지 않는다", async () => {
+    const spies = [vi.spyOn(console, "log"), vi.spyOn(console, "warn"), vi.spyOn(console, "error")];
+    const { ai } = setup(done({ ...reply, target_words: [9, 1], used_words: [3] }));
+    expect((await ai.generateTurn(pickInput)).ok).toBe(true);
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
   });
 });

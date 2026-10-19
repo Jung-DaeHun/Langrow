@@ -1,6 +1,7 @@
 import "server-only";
 import type { Language, Level } from "@/lib/levels";
 import { findScenario, isProScenario, isScenarioLocked, type Scenario } from "@/lib/scenarios";
+import type { TurnPromptInput } from "@/services/claude/prompts";
 import type { ChatEndResponse, ChatMessageResponse, ChatSessionCreated } from "@/types/api";
 import type { Deps } from "./deps";
 import type { Outcome } from "./http";
@@ -41,13 +42,20 @@ export async function sendChatMessage(
   if (!reserved.ok) return reserved;
 
   // 요청이 아니라 세션에 저장된 언어·레벨·상황으로 이어서 대화한다
-  const { token, turnNo, session, history } = reserved.value;
+  const { token, turnNo, session, history, candidates, candidateSource, targets } = reserved.value;
+  // 배운 단어: 후보가 있는 첫 턴은 AI가 목표 단어를 고르고, 목표 단어가 있는 턴은 유도한다(spec/chat.md "배운 단어 써 보기")
+  const words: TurnPromptInput["words"] = candidates?.length
+    ? { kind: "pick", candidates }
+    : targets?.length
+      ? { kind: "practice", targets }
+      : undefined;
   const generated = await deps.ai.generateTurn({
     language: session.language,
     level: session.level,
     scenario: sessionScenario(session.scenarioId),
     history,
     userText,
+    words,
   });
 
   if (!generated.ok) {
@@ -55,10 +63,21 @@ export async function sendChatMessage(
     return failed.ok ? { ok: false, code: "AI_UNAVAILABLE" } : failed;
   }
 
-  // 만료되거나 교체된 토큰이면 RPC가 거부한다. 그 AI 응답은 저장하지도 보여 주지도 않는다
-  const finished = await deps.db.finishChatTurn(userId, sessionId, token, generated.value);
+  // 만료되거나 교체된 토큰이면 RPC가 거부한다. 그 AI 응답은 저장하지도 보여 주지도 않는다.
+  // 단어 id는 reply에서 떼어 확정 RPC에만 넘긴다. 고른 목표 단어는 후보의 출처와 함께 넘긴다
+  const { words: wordIds, ...reply } = generated.value;
+  const finished = wordIds
+    ? await deps.db.finishChatTurn(
+        userId,
+        sessionId,
+        token,
+        reply,
+        words?.kind === "pick" ? { ...wordIds, targetSource: candidateSource ?? undefined } : wordIds,
+      )
+    : await deps.db.finishChatTurn(userId, sessionId, token, reply);
   if (!finished.ok) return finished;
-  return { ok: true, value: { turnNo, turnsLeft: finished.value.turnsLeft, reply: generated.value } };
+  const { turnsLeft, targetWords, targetSource } = finished.value;
+  return { ok: true, value: { turnNo, turnsLeft, reply, targetWords, targetSource } };
 }
 
 export async function endChatSession(deps: Deps, userId: string, sessionId: string): Promise<Outcome<ChatEndResponse>> {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LANGUAGE_NAMES, LANGUAGES, LEVELS, type Language, type Level } from "@/lib/levels";
 import { scenariosForLevel } from "@/lib/scenarios";
+import type { TargetWord, WordCandidate } from "@/lib/targetWords";
 import {
   PRONUNCIATION_RULES,
   buildExplanationPrompt,
@@ -356,5 +357,114 @@ describe("PRONUNCIATION_RULES", () => {
     ]) {
       expect(PRONUNCIATION_RULES).toContain(part);
     }
+  });
+});
+
+describe("buildTurnPrompt 배운 단어", () => {
+  const candidates: WordCandidate[] = [
+    { id: "ja-1-101", word: "美味しい", reading: "おいしい", meaningKo: "맛있다", usedToday: false },
+    { id: "ja-1-102", word: "とても", reading: "とても", meaningKo: "아주", usedToday: true },
+    { id: "ja-1-103", word: "少し", reading: null, meaningKo: "조금", usedToday: false },
+  ];
+  const targets: TargetWord[] = [
+    { id: "ja-1-101", word: "美味しい", reading: "おいしい", meaningKo: "맛있다", used: true },
+    { id: "ja-1-102", word: "とても", reading: "とても", meaningKo: "아주", used: false },
+  ];
+  const pick = (overrides: Partial<TurnPromptInput> = {}) =>
+    buildTurnPrompt(turnInput("ja", 1, { words: { kind: "pick", candidates }, ...overrides }));
+  const practice = (overrides: Partial<TurnPromptInput> = {}) =>
+    buildTurnPrompt(turnInput("ja", 1, { words: { kind: "practice", targets }, ...overrides }));
+
+  it("단어가 없으면 배운 단어 절도 target_words·used_words 지시도 없다", () => {
+    for (const language of LANGUAGES) {
+      for (const level of LEVELS) {
+        const { system } = buildTurnPrompt(turnInput(language, level));
+        expect(system).not.toContain("배운 단어");
+        expect(system).not.toContain("target_words");
+        expect(system).not.toContain("used_words");
+      }
+    }
+  });
+
+  it("후보를 고르는 턴: 1부터 번호를 붙인 후보 목록과 고르기 지시, target_words·used_words를 요청한다", () => {
+    const { system } = pick();
+    expect(system).toContain("## 배운 단어");
+    expect(system).toContain("1. 美味しい(おいしい) — 맛있다\n2. とても — 아주 (오늘 씀)\n3. 少し — 조금");
+    expect(system).toContain("최대 5개");
+    expect(system).toContain("(오늘 씀)이 없는 단어를 먼저 고른다");
+    expect(system).toContain("화제를 바꿔야 쓸 수 있는 단어는 고르지 않는다");
+    expect(system).toContain("맞는 단어가 없으면 고르지 않는다");
+    expect(system).toContain("- target_words:");
+    expect(system).toContain("- used_words:");
+    expect(system).toContain("target_words에 넣은 번호 중에서만");
+    expect(system).not.toContain("썼음");
+  });
+
+  it("목표 단어가 있는 턴: 썼음/아직을 붙인 목표 단어 목록과 used_words만 요청한다", () => {
+    const { system } = practice();
+    expect(system).toContain("## 배운 단어");
+    expect(system).toContain("1. 美味しい(おいしい) — 맛있다 — 썼음\n2. とても — 아주 — 아직");
+    expect(system).toContain("- used_words:");
+    expect(system).not.toContain("target_words");
+    expect(system).not.toContain("(오늘 씀)");
+  });
+
+  it.each([
+    ["고르는 턴", pick],
+    ["목표 단어가 있는 턴", practice],
+  ] as const)("%s은 역할을 지키며 아직 쓰지 않은 단어를 유도하라고 한다", (_, build) => {
+    const { system } = build();
+    for (const part of [
+      "학습자가 대답에 쓰기 쉬운 질문이나 상황을 만든다",
+      "한 reply에서 한 단어만 노린다",
+      "아직 쓰지 않은 목표 단어를 reply에서 먼저 말하지 않는다",
+      "corrected는 이 제한을 받지 않는다",
+      "이 단어를 써 보세요",
+      "화제를 바꾸거나 대화를 억지로 늘리지 않는다",
+      "목표 단어를 모두 썼으면 더 유도하지 않는다",
+    ]) {
+      expect(system).toContain(part);
+    }
+  });
+
+  it.each([
+    ["고르는 턴", pick],
+    ["목표 단어가 있는 턴", practice],
+  ] as const)("%s은 쓴 단어 판단 기준과 검사가 버리는 번호를 쓰지 말라고 한다", (_, build) => {
+    const { system } = build();
+    for (const part of [
+      "買う → 買いました",
+      "美味しい → おいしい",
+      "한국어로 쓴 것은 넣지 않는다",
+      "앞 턴의 교정 문장을 보고",
+      "문법이 틀려도 그 단어를 썼으면 넣는다",
+      "없으면 빈 배열이다",
+      "목록에 있는 번호만",
+      "같은 번호를 두 번 쓰지 않는다",
+    ]) {
+      expect(system).toContain(part);
+    }
+  });
+
+  it("영어는 읽기를 붙이지 않고 활용형 예도 영어 것을 쓴다", () => {
+    const en: WordCandidate[] = [{ id: "en-2-001", word: "decide", reading: "decide", meaningKo: "결정하다", usedToday: false }];
+    const { system } = buildTurnPrompt(turnInput("en", 2, { words: { kind: "pick", candidates: en } }));
+    expect(system).toContain("1. decide — 결정하다");
+    expect(system).toContain("decide → decided");
+    expect(system).not.toContain("買う");
+  });
+
+  it("단어 목록은 대화 기록에 넣지 않는다", () => {
+    const history = [{ userText: "コーヒーをください。", reply: "ホットですか？" }];
+    const plain = buildTurnPrompt(turnInput("ja", 1, { history })).messages;
+    expect(pick({ history }).messages).toEqual(plain);
+    expect(practice({ history }).messages).toEqual(plain);
+  });
+
+  it.each([1, 4] as const)("일본어 레벨 %i: 발음 유무와 상관없이 단어 지시가 붙는다", (level) => {
+    const { system } = buildTurnPrompt(turnInput("ja", level, { words: { kind: "practice", targets } }));
+    expect(system).toContain("## 배운 단어");
+    expect(system).toContain("- used_words:");
+    expect(system.includes(PRONUNCIATION_RULES)).toBe(level === 1);
   });
 });

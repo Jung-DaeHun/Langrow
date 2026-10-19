@@ -5,6 +5,7 @@ import type { z } from "zod";
 import { alignBreakdown, type Breakdown } from "@/lib/breakdown";
 import { showsPronunciation } from "@/lib/levels";
 import { cleanPron } from "@/lib/pronunciation";
+import { pickTargetIds, pickUsedIds } from "@/lib/targetWords";
 import { getClaudeEnv } from "@/services/env";
 import {
   buildExplanationPrompt,
@@ -19,10 +20,12 @@ import {
   feedbackSchema,
   pronTurnReplySchema,
   turnReplySchema,
+  withWordFields,
   type Explanation,
   type Feedback,
   type PronTurnReply,
   type TurnReply,
+  type WordNumbers,
 } from "./schemas";
 
 // Sonnet 5.5는 adaptive thinking이 기본이고 thinking도 max_tokens에 들어간다. 응답(약 500토큰 이하)에 여유를 둔다
@@ -35,8 +38,12 @@ const IMPROVE_MAX = 3;
 // config: env가 없거나 비어 있음(배포 설정 오류). API를 부르지 않는다
 export type AiFailureReason = "timeout" | "api_error" | "refusal" | "max_tokens" | "invalid_output" | "config";
 export type AiResult<T> = { ok: true; value: T } | { ok: false; reason: AiFailureReason };
+// 배운 단어가 있는 턴(input.words)이면 AI가 준 번호를 단어 id로 바꿔 words로 붙인다. 고르는 첫 턴만 targetWordIds가 있다.
+// 저장·API의 reply에는 넣지 않는다(use-case가 떼어 낸다)
+export type TurnWordIds = { targetWordIds?: string[]; usedWordIds: string[] };
+export type GeneratedTurn = TurnReply & { words?: TurnWordIds };
 export type Ai = {
-  generateTurn(input: TurnPromptInput): Promise<AiResult<TurnReply>>;
+  generateTurn(input: TurnPromptInput): Promise<AiResult<GeneratedTurn>>;
   generateFeedback(input: FeedbackPromptInput): Promise<AiResult<Feedback>>;
   generateExplanation(input: ExplanationPromptInput): Promise<AiResult<Explanation>>;
 };
@@ -136,8 +143,12 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
     generateTurn: (input) =>
       withRetry(() =>
         showsPronunciation(input.language, input.level)
-          ? attempt(pronTurnReplySchema, () => buildTurnPrompt(input), (value) => acceptTurn(input, cleanTurnPron(value)))
-          : attempt(turnReplySchema, () => buildTurnPrompt(input), (value) => acceptTurn(input, value)),
+          ? attempt(withWordFields(pronTurnReplySchema, input.words?.kind), () => buildTurnPrompt(input), (value) =>
+              acceptTurn(input, cleanTurnPron(value)),
+            )
+          : attempt(withWordFields(turnReplySchema, input.words?.kind), () => buildTurnPrompt(input), (value) =>
+              acceptTurn(input, value),
+            ),
       ),
     generateFeedback: (input) =>
       withRetry(() =>
@@ -156,7 +167,7 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
 }
 
 // 발음이 비었거나 검사에 맞지 않으면 턴은 성공으로 두고 그 발음만 null로 숨긴다 (spec/chat.md "한글 발음")
-function cleanTurnPron(value: PronTurnReply) {
+function cleanTurnPron<T extends PronTurnReply>(value: T) {
   return {
     ...value,
     reply_pron_ko: cleanPron(value.reply_pron_ko),
@@ -175,7 +186,8 @@ type AiTurnReply = Omit<TurnReply, "reply_breakdown" | "correction"> & {
 
 // reply가 공백뿐이면 null(invalid_output). 뜯어보기가 검사에 맞지 않으면 턴은 성공으로 두고 그 뜯어보기만 숨긴다:
 // reply_breakdown은 null, 교정은 breakdown 키를 뺀다 (spec/chat.md "문장 뜯어보기")
-function acceptTurn({ language, level }: TurnPromptInput, value: AiTurnReply): TurnReply | null {
+function acceptTurn({ language, level, words }: TurnPromptInput, output: AiTurnReply & WordNumbers): GeneratedTurn | null {
+  const { target_words, used_words, ...value } = output;
   if (!value.reply.trim()) return null;
   // 통과율을 운영 로그로 보기 위해 남긴다. 문장·조각 내용은 남기지 않는다
   const align = (target: "reply" | "corrected", sentence: string, pieces: Breakdown) => {
@@ -190,7 +202,19 @@ function acceptTurn({ language, level }: TurnPromptInput, value: AiTurnReply): T
     const aligned = align("corrected", rest.corrected, breakdown);
     correction = aligned ? { ...rest, breakdown: aligned } : rest;
   }
-  return { ...value, reply_breakdown: replyBreakdown, correction };
+  const turn = { ...value, reply_breakdown: replyBreakdown, correction };
+  return words ? { ...turn, words: wordIds(words, target_words ?? [], used_words ?? []) } : turn;
+}
+
+// 번호를 단어 id로 바꾼다. 맞지 않는 번호는 버리고 턴은 성공으로 둔다 (spec/chat.md "배운 단어 써 보기" "검사")
+function wordIds(words: NonNullable<TurnPromptInput["words"]>, targetNumbers: number[], usedNumbers: number[]): TurnWordIds {
+  if (words.kind === "pick") {
+    const ids = words.candidates.map((word) => word.id);
+    const targetWordIds = pickTargetIds(ids, targetNumbers);
+    return { targetWordIds, usedWordIds: pickUsedIds(ids, usedNumbers, targetWordIds) };
+  }
+  const ids = words.targets.map((word) => word.id);
+  return { usedWordIds: pickUsedIds(ids, usedNumbers, ids) };
 }
 
 // JSON이 아니거나 스키마에 맞지 않으면 null
