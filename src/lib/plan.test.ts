@@ -13,8 +13,8 @@ describe("plan 상수", () => {
     });
   });
 
-  it("Pro 표시 가격은 9,900원, 체험은 7일이다", () => {
-    expect(PRO_PRICE_KRW).toBe(9900);
+  it("Pro 표시 가격은 14,900원, 체험은 7일이다", () => {
+    expect(PRO_PRICE_KRW).toBe(14900);
     expect(TRIAL_DAYS).toBe(7);
   });
 });

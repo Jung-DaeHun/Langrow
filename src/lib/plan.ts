@@ -8,7 +8,7 @@ export const PLAN_LIMITS: Record<Plan, { chatTurns: number; newWords: number }> 
 // AI 정답 설명의 Free 하루 횟수(spec/usage.md). Pro는 세지 않는다. SQL(word_explanations 마이그레이션)과 같아야 한다
 export const FREE_DAILY_EXPLANATIONS = 10;
 
-export const PRO_PRICE_KRW = 9900;
+export const PRO_PRICE_KRW = 14900;
 export const TRIAL_DAYS = 7;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
