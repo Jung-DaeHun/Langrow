@@ -1,7 +1,7 @@
 export type Plan = "free" | "pro";
 
 export const PLAN_LIMITS: Record<Plan, { chatTurns: number; newWords: number }> = {
-  free: { chatTurns: 20, newWords: 10 },
+  free: { chatTurns: 10, newWords: 10 },
   pro: { chatTurns: 50, newWords: 30 },
 };
 

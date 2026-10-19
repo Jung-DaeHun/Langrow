@@ -9,9 +9,9 @@ describe("UsageCard", () => {
     const chat = screen.getByRole("progressbar", { name: "AI 대화 턴" });
     expect(chat).toHaveAttribute("aria-valuenow", "5");
     expect(chat).toHaveAttribute("aria-valuemin", "0");
-    expect(chat).toHaveAttribute("aria-valuemax", "20");
-    expect((chat.firstElementChild as HTMLElement).style.width).toBe("25%");
-    expect(screen.getByText("AI 대화 턴").parentElement).toHaveTextContent("15 / 20 남음");
+    expect(chat).toHaveAttribute("aria-valuemax", "10");
+    expect((chat.firstElementChild as HTMLElement).style.width).toBe("50%");
+    expect(screen.getByText("AI 대화 턴").parentElement).toHaveTextContent("5 / 10 남음");
 
     const words = screen.getByRole("progressbar", { name: "새 단어" });
     expect(words).toHaveAttribute("aria-valuemax", "10");
@@ -34,16 +34,16 @@ describe("UsageCard", () => {
 
     const chat = screen.getByRole("progressbar", { name: "AI 대화 턴" });
     expect(chat.firstElementChild).toHaveClass("bg-accent");
-    expect(within(screen.getByText("AI 대화 턴").parentElement!).getByText("17")).not.toHaveClass("text-danger");
+    expect(within(screen.getByText("AI 대화 턴").parentElement!).getByText("7")).not.toHaveClass("text-danger");
   });
 
   it("체험이 끝나 한도보다 많이 썼으면 남은 양 0, 바는 가득 채운다", () => {
     render(<UsageCard usage={{ chatTurns: 40, newWords: 0 }} plan="free" />);
 
     const chat = screen.getByRole("progressbar", { name: "AI 대화 턴" });
-    expect(chat).toHaveAttribute("aria-valuenow", "20");
+    expect(chat).toHaveAttribute("aria-valuenow", "10");
     expect((chat.firstElementChild as HTMLElement).style.width).toBe("100%");
-    expect(screen.getByText("AI 대화 턴").parentElement).toHaveTextContent("0 / 20 남음");
+    expect(screen.getByText("AI 대화 턴").parentElement).toHaveTextContent("0 / 10 남음");
   });
 
   it("compact면 p-4, 아니면 p-5다", () => {
