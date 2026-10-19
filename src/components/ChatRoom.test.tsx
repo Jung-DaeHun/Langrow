@@ -1049,6 +1049,8 @@ describe("ChatRoom 배운 단어", () => {
     // 키보드가 열린 화면에서 상단이 높아지지 않게 감싸지 않고 가로로 밀어 본다
     expect(list).toHaveClass("overflow-x-auto");
     expect(list).not.toHaveClass("flex-wrap");
+    // 칩 안의 sr-only(절대 위치)가 목록에 잘리게 기준점을 둔다. 없으면 390px에서 페이지가 435px로 넓어졌다(2026-10-20)
+    expect(list).toHaveClass("relative");
   });
 
   it("출처가 recent면 최근 단어다", () => {

@@ -430,7 +430,8 @@ function TurnAnnouncement({
 }
 
 // 배운 단어 줄(spec/chat.md "배운 단어 써 보기"). 답을 쓰면서 보게 sticky 상단에 두고, 상단이 높아지지 않게
-// 감싸지 않고 가로로 밀어 본다. 칩은 버튼이 아니다
+// 감싸지 않고 가로로 밀어 본다. 칩은 버튼이 아니다. 목록의 relative는 칩 안 sr-only(절대 위치)가 목록에 잘리게 하는
+// 기준점이다. 없으면 그 글자가 스크롤 영역을 벗어나 페이지가 가로로 넓어진다
 function TargetWordsLine({ words, source, language }: { words: TargetWord[]; source: TargetSource; language: Language }) {
   const name = TARGET_SOURCE_NAMES[source];
   return (
@@ -438,7 +439,7 @@ function TargetWordsLine({ words, source, language }: { words: TargetWord[]; sou
       <p className="shrink-0 text-micro font-bold text-ink-muted tabular-nums">
         {name} {words.filter((w) => w.used).length}/{words.length}
       </p>
-      <ul aria-label={name} className="flex min-w-0 gap-1.5 overflow-x-auto">
+      <ul aria-label={name} className="relative flex min-w-0 gap-1.5 overflow-x-auto">
         {words.map((w) => (
           <li
             key={w.id}
