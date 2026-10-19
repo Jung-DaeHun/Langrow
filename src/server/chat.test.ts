@@ -31,8 +31,19 @@ const FALLBACK: EndResult = {
 function reservedTurn() {
   return createFakeDeps({
     db: {
-      beginChatTurn: async () => ({ ok: true, value: { token: TOKEN, turnNo: 3, session: SESSION, history: HISTORY } }),
-      finishChatTurn: async () => ({ ok: true, value: { turnsLeft: 17 } }),
+      beginChatTurn: async () => ({
+        ok: true,
+        value: {
+          token: TOKEN,
+          turnNo: 3,
+          session: SESSION,
+          history: HISTORY,
+          candidates: null,
+          candidateSource: null,
+          targets: null,
+        },
+      }),
+      finishChatTurn: async () => ({ ok: true, value: { turnsLeft: 17, targetWords: null, targetSource: null } }),
     },
     ai: { generateTurn: async () => ({ ok: true, value: REPLY }) },
   });
@@ -203,7 +214,15 @@ describe("sendChatMessage", () => {
     const deps = reservedTurn();
     deps.db.beginChatTurn.mockResolvedValue({
       ok: true,
-      value: { token: TOKEN, turnNo: 1, session: { ...SESSION, scenarioId: "l3-removed" }, history: [] },
+      value: {
+        token: TOKEN,
+        turnNo: 1,
+        session: { ...SESSION, scenarioId: "l3-removed" },
+        history: [],
+        candidates: null,
+        candidateSource: null,
+        targets: null,
+      },
     });
 
     await expect(sendChatMessage(deps, USER_ID, SESSION_ID, "hi")).rejects.toThrow();

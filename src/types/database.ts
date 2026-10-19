@@ -25,26 +25,26 @@ export type Database = {
           Tables: {
             "chat_sessions": {
                   Row: {
-                    "created_at": string,"ended_at": string | null,"feedback": Json | null,"feedback_status": string,"id": string,"language": string,"level": number,"operation_expires_at": string | null,"operation_token": string | null,"scenario_id": string,"status": string,"user_id": string
+                    "created_at": string,"ended_at": string | null,"feedback": Json | null,"feedback_status": string,"id": string,"language": string,"level": number,"operation_expires_at": string | null,"operation_token": string | null,"scenario_id": string,"status": string,"target_source": string | null,"target_word_ids": (string)[] | null,"user_id": string
                   }
                   Insert: {
-                    "created_at"?: string,"ended_at"?: string | null,"feedback"?: Json | null,"feedback_status"?: string,"id"?: string,"language": string,"level": number,"operation_expires_at"?: string | null,"operation_token"?: string | null,"scenario_id": string,"status"?: string,"user_id": string
+                    "created_at"?: string,"ended_at"?: string | null,"feedback"?: Json | null,"feedback_status"?: string,"id"?: string,"language": string,"level": number,"operation_expires_at"?: string | null,"operation_token"?: string | null,"scenario_id": string,"status"?: string,"target_source"?: string | null,"target_word_ids"?: (string)[] | null,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"ended_at"?: string | null,"feedback"?: Json | null,"feedback_status"?: string,"id"?: string,"language"?: string,"level"?: number,"operation_expires_at"?: string | null,"operation_token"?: string | null,"scenario_id"?: string,"status"?: string,"user_id"?: string
+                    "created_at"?: string,"ended_at"?: string | null,"feedback"?: Json | null,"feedback_status"?: string,"id"?: string,"language"?: string,"level"?: number,"operation_expires_at"?: string | null,"operation_token"?: string | null,"scenario_id"?: string,"status"?: string,"target_source"?: string | null,"target_word_ids"?: (string)[] | null,"user_id"?: string
                   }
                   Relationships: [
                     
                   ]
                 },"chat_turns": {
                   Row: {
-                    "correction": Json | null,"created_at": string,"id": string,"reply": string | null,"reply_breakdown": Json | null,"reply_ko": string | null,"reply_pron_ko": string | null,"session_id": string,"status": string,"turn_no": number,"user_id": string,"user_text": string
+                    "correction": Json | null,"created_at": string,"id": string,"reply": string | null,"reply_breakdown": Json | null,"reply_ko": string | null,"reply_pron_ko": string | null,"session_id": string,"status": string,"turn_no": number,"used_word_ids": (string)[] | null,"user_id": string,"user_text": string
                   }
                   Insert: {
-                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id": string,"status"?: string,"turn_no": number,"user_id": string,"user_text": string
+                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id": string,"status"?: string,"turn_no": number,"used_word_ids"?: (string)[] | null,"user_id": string,"user_text": string
                   }
                   Update: {
-                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id"?: string,"status"?: string,"turn_no"?: number,"user_id"?: string,"user_text"?: string
+                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id"?: string,"status"?: string,"turn_no"?: number,"used_word_ids"?: (string)[] | null,"user_id"?: string,"user_text"?: string
                   }
                   Relationships: [
                     {
@@ -179,6 +179,9 @@ isOneToOne: false
 "chat_failure_limit_reached":
 { Args: { "p_user_id": string }; Returns: boolean
                            },
+"chat_target_words":
+{ Args: { "p_session_id": string,"p_user_id": string }; Returns: Json
+                           },
 "chat_turn_limit":
 { Args: { "p_user_id": string }; Returns: number
                            },
@@ -207,7 +210,7 @@ isOneToOne: false
 { Args: { "p_event_id": number,"p_reason": string,"p_user_id": string }; Returns: Json
                            },
 "finish_chat_turn":
-{ Args: { "p_correction": Json,"p_reply": string,"p_reply_breakdown"?: Json,"p_reply_ko": string,"p_reply_pron_ko"?: string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+{ Args: { "p_correction": Json,"p_reply": string,"p_reply_breakdown"?: Json,"p_reply_ko": string,"p_reply_pron_ko"?: string,"p_session_id": string,"p_target_source"?: string,"p_target_word_ids"?: (string)[],"p_token": string,"p_used_word_ids"?: (string)[],"p_user_id": string }; Returns: Json
                            },
 "finish_end":
 { Args: { "p_feedback": Json,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json

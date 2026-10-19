@@ -464,6 +464,59 @@ describe("readChatRoom", () => {
       ],
       doneTurnsToday: 2,
       pendingTurn: { userText: "still waiting", msLeft: room?.pendingTurn?.msLeft },
+      targetWords: null,
+      targetSource: null,
+    });
+  });
+
+  it("목표 단어를 고른 순서·출처와 함께 돌려주고, 쓴 여부는 done 턴의 합집합이다 (처리 중인 턴은 세지 않는다)", async () => {
+    const user = await createReadyUser("en", 1);
+    await insertUserWords(user.id, [EN1[0].id, EN1[1].id, EN1[2].id]);
+    const session = await newSession(user.id);
+    const first = valueOf(await beginChatTurn(user.id, session, "hi"));
+    valueOf(
+      await finishChatTurn(user.id, session, first.token, PLAIN, {
+        targetWordIds: [EN1[2].id, EN1[0].id, EN1[1].id],
+        targetSource: "today",
+        usedWordIds: [EN1[0].id],
+      }),
+    );
+    const second = valueOf(await beginChatTurn(user.id, session, "hi"));
+    valueOf(await finishChatTurn(user.id, session, second.token, PLAIN, { usedWordIds: [EN1[1].id] }));
+    await pendingTurn(user.id, session);
+    must(
+      await getAdminSupabase()
+        .from("chat_turns")
+        .update({ used_word_ids: [EN1[2].id] })
+        .eq("session_id", session)
+        .eq("status", "pending"),
+    );
+
+    const room = await readChatRoom(await signedInClient(user), user.id, session, new Date());
+    const target = (word: WordRow, used: boolean) => ({
+      id: word.id,
+      word: word.word,
+      reading: word.reading,
+      meaningKo: word.meaning_ko,
+      used,
+    });
+    expect({ targetWords: room?.targetWords, targetSource: room?.targetSource }).toEqual({
+      targetWords: [target(EN1[2], false), target(EN1[0], true), target(EN1[1], true)],
+      targetSource: "today",
+    });
+  });
+
+  it("최근 단어 출처와 일본어 읽기를 돌려준다", async () => {
+    const user = await createReadyUser("ja", 1);
+    await insertUserWords(user.id, [JA1.id], { at: new Date(Date.now() - 3 * 24 * 60 * 60_000) });
+    const session = await newSession(user.id, "ja");
+    const { token } = valueOf(await beginChatTurn(user.id, session, "こんにちは"));
+    valueOf(await finishChatTurn(user.id, session, token, PLAIN, { targetWordIds: [JA1.id], targetSource: "recent" }));
+
+    const room = await readChatRoom(await signedInClient(user), user.id, session, new Date());
+    expect({ targetWords: room?.targetWords, targetSource: room?.targetSource }).toEqual({
+      targetWords: [{ id: JA1.id, word: JA1.word, reading: JA1.reading, meaningKo: JA1.meaning_ko, used: false }],
+      targetSource: "recent",
     });
   });
 

@@ -100,7 +100,7 @@ describe("POST /api/chat/sessions/[id]/messages", () => {
   });
 
   it("로그인 사용자 ID·경로 id·body text로 턴을 처리하고, body의 userId는 쓰지 않는다", async () => {
-    deps.db.finishChatTurn.mockResolvedValue({ ok: true, value: { turnsLeft: 19 } });
+    deps.db.finishChatTurn.mockResolvedValue({ ok: true, value: { turnsLeft: 19, targetWords: null, targetSource: null } });
     deps.ai.generateTurn.mockResolvedValue({ ok: true, value: REPLY });
 
     const response = await post({ text: "Hi, I'm Minji.", userId: "99999999-9999-4999-8999-999999999999" });

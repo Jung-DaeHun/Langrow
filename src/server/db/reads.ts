@@ -5,6 +5,7 @@ import type { Breakdown } from "@/lib/breakdown";
 import type { Language, Level } from "@/lib/levels";
 import type { ReadinessState } from "@/lib/readiness";
 import type { StreakState } from "@/lib/streak";
+import type { TargetSource, TargetWord } from "@/lib/targetWords";
 import { addDays, kstDate, kstDayStart } from "@/lib/usage";
 import type { TurnReply } from "@/services/claude/schemas";
 import type { Database } from "@/types/database";
@@ -66,6 +67,9 @@ export type ChatRoomData = {
   doneTurnsToday: number;
   // 다른 탭이나 이전 방문에서 보낸 턴이 아직 처리 중이면 그 문장과 기한까지 남은 ms. 기한이 지났으면 null(다음 전송 때 RPC가 복구한다)
   pendingTurn: { userText: string; msLeft: number } | null;
+  // 배운 단어 목표(고른 순서)와 출처. 목표 단어가 없는 세션은 둘 다 null이다
+  targetWords: TargetWord[] | null;
+  targetSource: TargetSource | null;
 };
 
 const WORD_COLUMNS =
@@ -265,6 +269,17 @@ export async function readEndedScenarioIds(sb: Sb, userId: string, language: Lan
   return [...new Set(data.map((row) => row.scenario_id))];
 }
 
+// 목표 단어 id 순서대로 단어 내용을 붙인다. words는 공용 카탈로그라 user_id 조건이 없다
+async function readTargetWords(sb: Sb, ids: string[], usedIds: Set<string>): Promise<TargetWord[]> {
+  const { data, error } = await sb.from("words").select("id, word, reading, meaning_ko").in("id", ids);
+  if (error) throw readError("words", error);
+  const byId = new Map(data.map((row) => [row.id, row]));
+  return ids.flatMap((id) => {
+    const row = byId.get(id);
+    return row ? [{ id, word: row.word, reading: row.reading, meaningKo: row.meaning_ko, used: usedIds.has(id) }] : [];
+  });
+}
+
 // 남의 세션·없는 세션은 null. uuid가 아니면 Postgres 캐스트 오류(500)가 나지 않게 쿼리하지 않는다
 export async function readChatRoom(
   sb: Sb,
@@ -276,7 +291,7 @@ export async function readChatRoom(
   const { data, error } = await sb
     .from("chat_sessions")
     .select(
-      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, chat_turns(turn_no, status, user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction, created_at)",
+      "id, language, level, scenario_id, status, feedback_status, feedback, operation_expires_at, target_word_ids, target_source, chat_turns(turn_no, status, user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction, used_word_ids, created_at)",
     )
     .eq("id", sessionId)
     .eq("user_id", userId)
@@ -291,6 +306,10 @@ export async function readChatRoom(
   const pending = data.chat_turns.find((turn) => turn.status === "pending");
   const msLeft = data.operation_expires_at === null ? 0 : new Date(data.operation_expires_at).getTime() - now.getTime();
   const { from, to } = todayRange(now);
+  // 세션에서 쓴 단어는 done 턴들의 합집합이다 (처리 중인 턴은 세지 않는다)
+  const usedIds = new Set(done.flatMap((turn) => turn.used_word_ids ?? []));
+  const targetWords =
+    data.target_word_ids === null ? null : await readTargetWords(sb, data.target_word_ids, usedIds);
   return {
     id: data.id,
     language: data.language as Language,
@@ -313,5 +332,7 @@ export async function readChatRoom(
       return at >= from && at < to;
     }).length,
     pendingTurn: pending !== undefined && msLeft > 0 ? { userText: pending.user_text, msLeft } : null,
+    targetWords,
+    targetSource: data.target_source as TargetSource | null,
   };
 }

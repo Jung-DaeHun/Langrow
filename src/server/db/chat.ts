@@ -1,5 +1,6 @@
 import "server-only";
 import type { Language, Level } from "@/lib/levels";
+import type { TargetSource, TargetWord, WordCandidate } from "@/lib/targetWords";
 import type { AiFailureReason } from "@/services/claude/client";
 import type { Feedback, TurnReply } from "@/services/claude/schemas";
 import { callRpc, type RpcValue } from "./rpc";
@@ -24,9 +25,23 @@ export type BeginEndResult =
 
 type HistoryRow = { user_text: string; reply: string };
 type EndTurnRow = HistoryRow & { correction: TurnReply["correction"] };
+type WordRow = { id: string; word: string; reading: string | null; meaning_ko: string };
+type CandidateRow = WordRow & { used_today: boolean };
+type TargetRow = WordRow & { used: boolean };
 
 function sessionInfo(value: RpcValue): ChatSessionInfo {
   return { language: value.language as Language, level: value.level as Level, scenarioId: value.scenario_id as string };
+}
+
+function targetWords(rows: unknown): TargetWord[] | null {
+  if (rows === null) return null;
+  return (rows as TargetRow[]).map((row) => ({
+    id: row.id,
+    word: row.word,
+    reading: row.reading,
+    meaningKo: row.meaning_ko,
+    used: row.used,
+  }));
 }
 
 function endResult(value: RpcValue): EndResult {
@@ -61,6 +76,10 @@ export async function beginChatTurn(
     turnNo: number;
     session: ChatSessionInfo;
     history: { userText: string; reply: string }[];
+    // 배운 단어(spec/chat.md "배운 단어 써 보기"). 후보는 첫 턴이고 목표 단어가 없을 때만 배열이다(빈 배열 가능)
+    candidates: WordCandidate[] | null;
+    candidateSource: TargetSource | null;
+    targets: TargetWord[] | null;
   }>
 > {
   const result = await callRpc("begin_chat_turn", {
@@ -77,17 +96,30 @@ export async function beginChatTurn(
       turnNo: value.turn_no as number,
       session: sessionInfo(value),
       history: (value.history as HistoryRow[]).map((row) => ({ userText: row.user_text, reply: row.reply })),
+      candidates:
+        value.candidates === null
+          ? null
+          : (value.candidates as CandidateRow[]).map((row) => ({
+              id: row.id,
+              word: row.word,
+              reading: row.reading,
+              meaningKo: row.meaning_ko,
+              usedToday: row.used_today,
+            })),
+      candidateSource: value.candidate_source as TargetSource | null,
+      targets: targetWords(value.targets),
     },
   };
 }
 
-// NOT_FOUND, CONFLICT(토큰 불일치·만료)
+// NOT_FOUND, CONFLICT(토큰 불일치·만료). 목표 단어는 세션의 첫 턴에서만 저장되고, 맞지 않는 id는 RPC가 버린다
 export async function finishChatTurn(
   userId: string,
   sessionId: string,
   token: string,
   reply: TurnReply,
-): Promise<DbResult<{ turnsLeft: number }>> {
+  words?: { targetWordIds?: string[]; targetSource?: TargetSource; usedWordIds?: string[] },
+): Promise<DbResult<{ turnsLeft: number; targetWords: TargetWord[] | null; targetSource: TargetSource | null }>> {
   const result = await callRpc("finish_chat_turn", {
     p_user_id: userId,
     p_session_id: sessionId,
@@ -98,8 +130,20 @@ export async function finishChatTurn(
     // 발음이 없으면 인자를 빼서 기본값 null로 저장한다 (undefined 키는 요청 JSON에서 빠진다)
     p_reply_pron_ko: reply.reply_pron_ko ?? undefined,
     p_reply_breakdown: reply.reply_breakdown ?? undefined,
+    // 배운 단어도 값이 없으면 인자를 빼서 기본값 null로 둔다
+    p_target_word_ids: words?.targetWordIds,
+    p_target_source: words?.targetSource,
+    p_used_word_ids: words?.usedWordIds,
   });
-  return result.ok ? { ok: true, value: { turnsLeft: result.value.turns_left as number } } : result;
+  if (!result.ok) return result;
+  return {
+    ok: true,
+    value: {
+      turnsLeft: result.value.turns_left as number,
+      targetWords: targetWords(result.value.target_words),
+      targetSource: result.value.target_source as TargetSource | null,
+    },
+  };
 }
 
 // NOT_FOUND, CONFLICT(토큰 불일치·만료)

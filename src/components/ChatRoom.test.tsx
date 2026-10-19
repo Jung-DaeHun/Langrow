@@ -63,6 +63,8 @@ function room(overrides: Partial<ChatRoomData> = {}): ChatRoomData {
     turns: [],
     doneTurnsToday: 0,
     pendingTurn: null,
+    targetWords: null,
+    targetSource: null,
     ...overrides,
   };
 }

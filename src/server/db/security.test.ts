@@ -270,6 +270,7 @@ describe("함수 실행 권한", () => {
       ["kst_today_start", {}],
       ["current_plan", { p_user_id: user.id }],
       ["chat_turn_limit", { p_user_id: user.id }],
+      ["chat_target_words", { p_user_id: user.id, p_session_id: idle }],
       ["chat_failure_limit_reached", { p_user_id: user.id }],
       ["record_limit_reached", { p_user_id: user.id, p_feature: "chat" }],
       [

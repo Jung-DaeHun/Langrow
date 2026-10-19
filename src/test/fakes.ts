@@ -21,8 +21,11 @@ function defaultDb(): Db {
     startTrial: async () => ({ ok: true, value: { proUntil: new Date("2026-10-13T00:00:00Z") } }),
     getReadiness: async () => ({ agreedAt: new Date("2026-10-01T00:00:00Z"), currentLanguage: "en", levels: { en: 1 } }),
     createChatSession: async () => ({ ok: true, value: { sessionId: "00000000-0000-4000-8000-000000000001" } }),
-    beginChatTurn: async () => ({ ok: true, value: { token: TOKEN, turnNo: 1, session: SESSION, history: [] } }),
-    finishChatTurn: async () => ({ ok: true, value: { turnsLeft: 19 } }),
+    beginChatTurn: async () => ({
+      ok: true,
+      value: { token: TOKEN, turnNo: 1, session: SESSION, history: [], candidates: null, candidateSource: null, targets: null },
+    }),
+    finishChatTurn: async () => ({ ok: true, value: { turnsLeft: 19, targetWords: null, targetSource: null } }),
     failChatTurn: async () => ({ ok: true, value: null }),
     beginEnd: async () => ({
       ok: true,

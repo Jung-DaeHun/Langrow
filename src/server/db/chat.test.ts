@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { PLAN_LIMITS } from "@/lib/plan";
+import type { TargetWord, WordCandidate } from "@/lib/targetWords";
 import { kstDate, kstDayStart } from "@/lib/usage";
 import type { Feedback, TurnReply } from "@/services/claude/schemas";
 import { getAdminSupabase } from "@/services/supabase/admin";
@@ -45,8 +46,41 @@ const NOT_FOUND = { ok: false, code: "NOT_FOUND" };
 const CONFLICT = { ok: false, code: "CONFLICT" };
 
 type TurnInsert = Database["public"]["Tables"]["chat_turns"]["Insert"];
+type WordRow = Database["public"]["Tables"]["words"]["Row"];
+
+// 배운 단어 테스트 단어. seed와 겹치지 않게 rank 9301+를 쓴다 (security 9001~, learning 9101~, reads 9201~)
+function testWord(language: "en" | "ja", level: number, rank: number): WordRow {
+  return {
+    id: `${language}-${level}-${rank}`,
+    language,
+    level,
+    rank,
+    word: `word${rank}`,
+    reading: language === "ja" ? `よみ${rank}` : null,
+    meaning_ko: `뜻${rank}`,
+    example: `This is {{word${rank}}}.`,
+    example_ko: `예문${rank}`,
+    distractors: ["alpha", "beta", "gamma"],
+    pron_ko: null,
+    example_pron_ko: null,
+  };
+}
+
+// 후보 20개 제한을 보려고 20개보다 많이 둔다
+const EN = Array.from({ length: 22 }, (_, i) => testWord("en", 1, 9301 + i));
+const EN2 = testWord("en", 2, 9301);
+const JA = testWord("ja", 1, 9301);
+const TEST_WORDS = [...EN, EN2, JA];
+
+beforeAll(async () => {
+  must(await getAdminSupabase().from("words").upsert(TEST_WORDS));
+});
 
 afterEach(deleteTestUsers);
+
+afterAll(async () => {
+  must(await getAdminSupabase().from("words").delete().in("id", TEST_WORDS.map((word) => word.id)));
+});
 
 function must<T>(result: { data: T; error: unknown }): NonNullable<T> {
   if (result.error) throw result.error;
@@ -247,7 +281,15 @@ describe("대화 1턴", () => {
     const sessionId = await newSession(user.id);
 
     const first = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
-    expect(first).toEqual({ token: expect.any(String), turnNo: 1, session: SESSION, history: [] });
+    expect(first).toEqual({
+      token: expect.any(String),
+      turnNo: 1,
+      session: SESSION,
+      history: [],
+      candidates: [],
+      candidateSource: null,
+      targets: null,
+    });
     const reservedRow = await sessionRow(sessionId);
     expect(reservedRow.operation_token).toBe(first.token);
     expectExpiresInOperationWindow(reservedRow.operation_expires_at);
@@ -257,7 +299,7 @@ describe("대화 1턴", () => {
 
     await expect(finishChatTurn(user.id, sessionId, first.token, REPLY)).resolves.toEqual({
       ok: true,
-      value: { turnsLeft: SESSION_MAX_TURNS - 1 },
+      value: { turnsLeft: SESSION_MAX_TURNS - 1, targetWords: null, targetSource: null },
     });
     expect(await sessionRow(sessionId)).toMatchObject({
       status: "active",
@@ -278,7 +320,7 @@ describe("대화 1턴", () => {
     expect(second.history).toEqual([{ userText: "Can I have latte?", reply: REPLY.reply }]);
     await expect(finishChatTurn(user.id, sessionId, second.token, PLAIN_REPLY)).resolves.toEqual({
       ok: true,
-      value: { turnsLeft: SESSION_MAX_TURNS - 2 },
+      value: { turnsLeft: SESSION_MAX_TURNS - 2, targetWords: null, targetSource: null },
     });
     expect((await turnsOf(sessionId))[1].correction).toBeNull();
 
@@ -368,7 +410,7 @@ describe("대화 1턴", () => {
     const second = valueOf(await beginChatTurn(user.id, sessionId, "No, thanks."));
     await expect(finishChatTurn(user.id, sessionId, second.token, PLAIN_REPLY)).resolves.toEqual({
       ok: true,
-      value: { turnsLeft: SESSION_MAX_TURNS - 2 },
+      value: { turnsLeft: SESSION_MAX_TURNS - 2, targetWords: null, targetSource: null },
     });
 
     expect(await turnsOf(sessionId)).toMatchObject([
@@ -741,5 +783,341 @@ describe("남의 세션", () => {
     await expect(beginChatTurn(me.id, randomUUID(), "hi")).resolves.toEqual(NOT_FOUND);
 
     expect({ owner: await snapshotOf(owner.id), me: await snapshotOf(me.id) }).toEqual(before);
+  });
+});
+
+describe("배운 단어", () => {
+  const SECOND = 1000;
+  const DAY = 24 * 60 * 60 * SECOND;
+  const shift = (at: Date, ms: number) => new Date(at.getTime() + ms);
+
+  // 한국 날짜 경계는 DB 시각(kst_today_start)으로 정한다
+  async function dbTodayStart(): Promise<Date> {
+    return new Date(must(await getAdminSupabase().rpc("kst_today_start")));
+  }
+
+  // 이 사용자가 그 시각에 처음 본 단어로 넣는다
+  async function learnWords(userId: string, words: [WordRow, Date][]): Promise<void> {
+    const rows = words.map(([word, at]) => ({
+      user_id: userId,
+      word_id: word.id,
+      status: "known",
+      first_seen_at: at.toISOString(),
+      updated_at: at.toISOString(),
+    }));
+    must(await getAdminSupabase().from("user_words").insert(rows));
+  }
+
+  function candidate(word: WordRow, usedToday = false): WordCandidate {
+    return { id: word.id, word: word.word, reading: word.reading, meaningKo: word.meaning_ko, usedToday };
+  }
+
+  function target(word: WordRow, used = false): TargetWord {
+    return { id: word.id, word: word.word, reading: word.reading, meaningKo: word.meaning_ko, used };
+  }
+
+  function wordsOf(value: { candidates: unknown; candidateSource: unknown; targets: unknown }) {
+    return { candidates: value.candidates, candidateSource: value.candidateSource, targets: value.targets };
+  }
+
+  // 예약 → 확정 (배운 단어 인자와 함께)
+  async function wordTurn(userId: string, sessionId: string, words?: Parameters<typeof finishChatTurn>[4]) {
+    const { token } = valueOf(await beginChatTurn(userId, sessionId, "hi"));
+    return valueOf(await finishChatTurn(userId, sessionId, token, PLAIN_REPLY, words));
+  }
+
+  describe("예약 RPC의 후보", () => {
+    it("첫 턴에만 세션 언어로 오늘 배운 이 사용자의 단어를 최근 것부터 준다 (레벨·상태 무관, 출처 today)", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      const other = await createReadyUser();
+      await learnWords(user.id, [
+        [EN[0], shift(start, SECOND)],
+        [EN[1], shift(start, 3 * SECOND)],
+        [EN[2], shift(start, 3 * SECOND)], // 같은 시각이면 id 순
+        [EN2, shift(start, 2 * SECOND)], // 다른 레벨
+        [JA, shift(start, 4 * SECOND)], // 다른 언어
+        [EN[3], shift(start, -SECOND)], // 어제
+      ]);
+      must(await getAdminSupabase().from("user_words").update({ status: "review" }).eq("user_id", user.id).eq("word_id", EN2.id));
+      await learnWords(other.id, [[EN[4], shift(start, 5 * SECOND)]]);
+      const sessionId = await newSession(user.id);
+
+      const first = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+      expect(wordsOf(first)).toEqual({
+        candidates: [candidate(EN[1]), candidate(EN[2]), candidate(EN2), candidate(EN[0])],
+        candidateSource: "today",
+        targets: null,
+      });
+
+      // 목표 단어 없이 첫 턴이 끝난 세션: 두 번째 턴부터는 후보가 없다
+      valueOf(await finishChatTurn(user.id, sessionId, first.token, PLAIN_REPLY));
+      expect(wordsOf(valueOf(await beginChatTurn(user.id, sessionId, "hi")))).toEqual({
+        candidates: null,
+        candidateSource: null,
+        targets: null,
+      });
+    });
+
+    it("오늘 배운 단어가 없으면 한국 날짜로 6일 전까지의 단어를 준다 (7일 전은 빼고, 출처 recent)", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [
+        [EN[0], shift(start, -SECOND)], // 어제 마지막
+        [EN[1], shift(start, -6 * DAY)], // 6일 전 0시
+        [EN[2], shift(start, -6 * DAY - SECOND)], // 7일 전 마지막
+        [JA, shift(start, SECOND)], // 오늘이지만 다른 언어
+      ]);
+
+      const first = valueOf(await beginChatTurn(user.id, await newSession(user.id), "hi"));
+      expect(wordsOf(first)).toEqual({
+        candidates: [candidate(EN[0]), candidate(EN[1])],
+        candidateSource: "recent",
+        targets: null,
+      });
+    });
+
+    it("7일 안에 배운 세션 언어 단어가 없으면 빈 후보이고 출처는 null이다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [
+        [EN[0], shift(start, -6 * DAY - SECOND)],
+        [JA, shift(start, SECOND)],
+      ]);
+
+      const first = valueOf(await beginChatTurn(user.id, await newSession(user.id), "hi"));
+      expect(wordsOf(first)).toEqual({ candidates: [], candidateSource: null, targets: null });
+    });
+
+    it("오늘 대화에서 쓴 단어(다른 세션 포함)는 뒤로 가고 usedToday가 참이다 (어제 쓴 것은 세지 않는다)", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [
+        [EN[0], shift(start, SECOND)],
+        [EN[1], shift(start, 2 * SECOND)],
+        [EN[2], shift(start, 3 * SECOND)],
+      ]);
+      // 다른 세션에서 오늘 EN[2]를 썼다
+      await wordTurn(user.id, await newSession(user.id), {
+        targetWordIds: [EN[2].id, EN[1].id],
+        targetSource: "today",
+        usedWordIds: [EN[2].id],
+      });
+      // 어제 EN[1]을 쓴 턴
+      const [yesterdaySession] = await insertDoneTurns(user.id, 1, shift(start, -SECOND).toISOString());
+      must(
+        await getAdminSupabase()
+          .from("chat_turns")
+          .update({ used_word_ids: [EN[1].id] })
+          .eq("session_id", yesterdaySession),
+      );
+
+      const first = valueOf(await beginChatTurn(user.id, await newSession(user.id), "hi"));
+      expect(wordsOf(first)).toEqual({
+        candidates: [candidate(EN[1]), candidate(EN[0]), candidate(EN[2], true)],
+        candidateSource: "today",
+        targets: null,
+      });
+    });
+
+    it("후보는 앞에서 20개까지다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(
+        user.id,
+        EN.map((word, i): [WordRow, Date] => [word, shift(start, (i + 1) * SECOND)]),
+      );
+
+      const first = valueOf(await beginChatTurn(user.id, await newSession(user.id), "hi"));
+      expect(first.candidates).toEqual(
+        [...EN]
+          .reverse()
+          .slice(0, 20)
+          .map((word) => candidate(word)),
+      );
+    });
+
+    it("목표 단어가 있는 세션은 후보 대신 목표 단어를 고른 순서와 이 세션에서 쓴 여부로 준다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [
+        [EN[0], shift(start, SECOND)],
+        [EN[1], shift(start, 2 * SECOND)],
+        [EN[2], shift(start, 3 * SECOND)],
+      ]);
+      const sessionId = await newSession(user.id);
+      await wordTurn(user.id, sessionId, {
+        targetWordIds: [EN[2].id, EN[0].id],
+        targetSource: "today",
+        usedWordIds: [EN[0].id],
+      });
+      // 다른 세션에서 쓴 것은 이 세션의 used가 아니다
+      await wordTurn(user.id, await newSession(user.id), {
+        targetWordIds: [EN[2].id],
+        targetSource: "today",
+        usedWordIds: [EN[2].id],
+      });
+
+      const second = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+      expect(wordsOf(second)).toEqual({
+        candidates: null,
+        candidateSource: null,
+        targets: [target(EN[2]), target(EN[0], true)],
+      });
+    });
+
+    it("턴이 없어도 목표 단어가 있는 세션이면 첫 턴에 후보를 주지 않는다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [[EN[0], shift(start, SECOND)]]);
+      const sessionId = await newSession(user.id);
+      must(
+        await getAdminSupabase()
+          .from("chat_sessions")
+          .update({ target_word_ids: [EN[0].id], target_source: "recent" })
+          .eq("id", sessionId),
+      );
+
+      const first = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+      expect(wordsOf(first)).toEqual({ candidates: null, candidateSource: null, targets: [target(EN[0])] });
+    });
+
+    it("첫 턴이 실패하거나 기한이 지나면 다음 첫 턴 예약에서 후보를 다시 준다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [[EN[0], shift(start, SECOND)]]);
+      const sessionId = await newSession(user.id);
+      const expected = { candidates: [candidate(EN[0])], candidateSource: "today", targets: null };
+
+      const failed = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+      expect(wordsOf(failed)).toEqual(expected);
+      valueOf(await failChatTurn(user.id, sessionId, failed.token, "timeout"));
+
+      const expired = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+      expect(wordsOf(expired)).toEqual(expected);
+      await expire(sessionId);
+
+      const again = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+      expect(again.turnNo).toBe(1);
+      expect(wordsOf(again)).toEqual(expected);
+    });
+  });
+
+  describe("확정 RPC의 목표 단어와 쓴 단어", () => {
+    it("첫 턴에 받은 순서대로 목표 단어를 저장하고, 그 뒤에는 바꾸지 않으며, 쓴 단어는 목표 단어 안의 것만 저장한다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(
+        user.id,
+        EN.slice(0, 4).map((word, i): [WordRow, Date] => [word, shift(start, (i + 1) * SECOND)]),
+      );
+      const sessionId = await newSession(user.id);
+      const targetIds = [EN[2].id, EN[0].id, EN[1].id];
+
+      const first = await wordTurn(user.id, sessionId, {
+        targetWordIds: [EN[2].id, EN[0].id, EN[2].id, EN[1].id],
+        targetSource: "today",
+        usedWordIds: [EN[0].id, EN[3].id, EN[0].id],
+      });
+      expect(first).toEqual({
+        turnsLeft: SESSION_MAX_TURNS - 1,
+        targetWords: [target(EN[2]), target(EN[0], true), target(EN[1])],
+        targetSource: "today",
+      });
+      expect(await sessionRow(sessionId)).toMatchObject({ target_word_ids: targetIds, target_source: "today" });
+
+      // 그 뒤 턴: 새 목표 단어를 줘도 바꾸지 않고, 쓴 여부는 이번 턴까지 합친다
+      const second = await wordTurn(user.id, sessionId, {
+        targetWordIds: [EN[3].id],
+        targetSource: "recent",
+        usedWordIds: [EN[3].id, EN[1].id],
+      });
+      expect(second).toEqual({
+        turnsLeft: SESSION_MAX_TURNS - 2,
+        targetWords: [target(EN[2]), target(EN[0], true), target(EN[1], true)],
+        targetSource: "today",
+      });
+      // 쓴 단어가 없는 턴은 빈 배열이다
+      const third = await wordTurn(user.id, sessionId);
+      expect(third.targetWords).toEqual(second.targetWords);
+
+      expect(await sessionRow(sessionId)).toMatchObject({ target_word_ids: targetIds, target_source: "today" });
+      expect((await turnsOf(sessionId)).map((turn) => turn.used_word_ids)).toEqual([[EN[0].id], [EN[1].id], []]);
+    });
+
+    it("이 사용자의 user_words에 없거나 세션 언어가 아닌 단어는 버리고 앞에서 5개까지 저장한다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      const other = await createReadyUser();
+      await learnWords(user.id, [
+        ...EN.slice(0, 6).map((word, i): [WordRow, Date] => [word, shift(start, (i + 1) * SECOND)]),
+        [JA, shift(start, SECOND)],
+      ]);
+      await learnWords(other.id, [[EN[6], shift(start, SECOND)]]);
+      const sessionId = await newSession(user.id);
+
+      const first = await wordTurn(user.id, sessionId, {
+        targetWordIds: [JA.id, EN[6].id, EN[0].id, "en-1-missing", ...EN.slice(1, 6).map((word) => word.id)],
+        targetSource: "today",
+      });
+      expect(first.targetWords).toEqual(EN.slice(0, 5).map((word) => target(word)));
+      expect((await sessionRow(sessionId)).target_word_ids).toEqual(EN.slice(0, 5).map((word) => word.id));
+      expect((await turnsOf(sessionId))[0].used_word_ids).toEqual([]);
+    });
+
+    it("남는 단어가 없거나 출처가 없으면 목표 단어를 저장하지 않고, 그 세션은 뒤 턴에도 저장하지 않는다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      const other = await createReadyUser();
+      await learnWords(user.id, [
+        [EN[0], shift(start, SECOND)],
+        [JA, shift(start, SECOND)],
+      ]);
+      await learnWords(other.id, [[EN[1], shift(start, SECOND)]]);
+      const none = { turnsLeft: SESSION_MAX_TURNS - 1, targetWords: null, targetSource: null };
+
+      const filtered = await newSession(user.id);
+      await expect(
+        wordTurn(user.id, filtered, { targetWordIds: [JA.id, EN[1].id], targetSource: "today", usedWordIds: [JA.id] }),
+      ).resolves.toEqual(none);
+      const noSource = await newSession(user.id);
+      await expect(wordTurn(user.id, noSource, { targetWordIds: [EN[0].id], usedWordIds: [EN[0].id] })).resolves.toEqual(
+        none,
+      );
+      const empty = await newSession(user.id);
+      await expect(wordTurn(user.id, empty, { targetWordIds: [], targetSource: "today" })).resolves.toEqual(none);
+      await expect(
+        wordTurn(user.id, empty, { targetWordIds: [EN[0].id], targetSource: "today", usedWordIds: [EN[0].id] }),
+      ).resolves.toEqual({ ...none, turnsLeft: SESSION_MAX_TURNS - 2 });
+
+      for (const sessionId of [filtered, noSource, empty]) {
+        expect(await sessionRow(sessionId)).toMatchObject({ target_word_ids: null, target_source: null });
+        expect((await turnsOf(sessionId)).every((turn) => turn.used_word_ids === null)).toBe(true);
+      }
+    });
+
+    // 지금 운영 코드는 새 인자 없이 부른다. 마이그레이션을 먼저 적용해도 깨지지 않아야 한다
+    it("새 인자를 빼고 부르면 기존처럼 확정하고 목표 단어는 없다", async () => {
+      const start = await dbTodayStart();
+      const user = await createReadyUser();
+      await learnWords(user.id, [[EN[0], shift(start, SECOND)]]);
+      const sessionId = await newSession(user.id);
+      const { token } = valueOf(await beginChatTurn(user.id, sessionId, "hi"));
+
+      const result = await callRpc("finish_chat_turn", {
+        p_user_id: user.id,
+        p_session_id: sessionId,
+        p_token: token,
+        p_reply: PLAIN_REPLY.reply,
+        p_reply_ko: PLAIN_REPLY.reply_ko,
+        p_correction: null,
+      });
+      expect(result).toEqual({
+        ok: true,
+        value: { turns_left: SESSION_MAX_TURNS - 1, target_words: null, target_source: null },
+      });
+      expect(await sessionRow(sessionId)).toMatchObject({ target_word_ids: null, target_source: null });
+      expect(await turnsOf(sessionId)).toMatchObject([{ status: "done", used_word_ids: null }]);
+    });
   });
 });
