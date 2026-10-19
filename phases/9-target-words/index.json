@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "target-ai",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-20T00:01:10+0900",
+      "summary": "prompts: TurnPromptInput.words?={kind:'pick',candidates}|{kind:'practice',targets}, 있으면 target_words·used_words 지시와 '## 배운 단어' 절(없으면 기존 그대로). schemas: withWordFields(schema, kind). client: 결과 GeneratedTurn = TurnReply & {words?: {targetWordIds?, usedWordIds}}. server/chat.ts: 후보→pick, 목표→practice, words를 떼어 finishChatTurn에 넘김(pick만 targetSource), 응답 {turnNo,turnsLeft,reply,targetWords,targetSource}. api.ts ChatMessageResponse에 targetWords·targetSource. ChatRoom.test는 fixture만 맞춤.",
+      "completed_at": "2026-10-20T00:09:59+0900"
     },
     {
       "step": 2,
