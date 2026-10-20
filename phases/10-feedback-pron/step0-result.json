@@ -1,0 +1,4 @@
+{
+  "status": "completed",
+  "summary": "schemas.ts: feedbackSchema 항목 {point, example}, pronFeedbackSchema(+example_pron_ko), 타입 FeedbackItem·Feedback(새 형식)·StoredFeedback(옛 문자열 섞임). prompts.ts: point/example 지시, 일본어 1~3만 example_pron_ko와 PRONUNCIATION_RULES. client.ts generateFeedback: cleanPron(틀리면 그 항목만 null) → 빈 point 버림 → 3개 자름 → 공백 example은 \"\". EndResult ready는 StoredFeedback. ChatFeedback: 문자열은 한 줄, 객체는 point → example(lang) → pron(aria-hidden), 빈 example이면 둘 다 없음. refresh는 step 1."
+}
