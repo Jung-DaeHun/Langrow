@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "landing-page",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-20T21:31:39+0900",
+      "summary": "src/app/page.tsx만 다시 짰다(Server Component). 순서: 내비 → 히어로(크림, LandingPreview에 l1-cafe title과 en/ja opening의 text·ko·pronKo만) → ①(bg-card) → ②(bg-house, en breakdown 타일·ja Furigana+pronKo 예시) → ③(크림, 홈 그림 카드+항목 2개) → 비교표(bg-card, 6행) → 푸터. l1-cafe는 모듈 위에서 찾고 없으면 throw. 항목은 Feature 배열 + 파일 안 FeatureItem(band면 mint·white/70). 문구 숫자는 spec 목록의 lib 상수 11개로 채움. FEATURES·AI_BUBBLE·TRANSLATION·가나 밴드·BookOpen import 삭제.",
+      "completed_at": "2026-10-20T21:38:13+0900"
     }
   ],
   "created_at": "2026-10-20T21:25:52+0900"

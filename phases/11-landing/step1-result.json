@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "src/app/page.tsx만 다시 짰다(Server Component). 순서: 내비 → 히어로(크림, LandingPreview에 l1-cafe title과 en/ja opening의 text·ko·pronKo만) → ①(bg-card) → ②(bg-house, en breakdown 타일·ja Furigana+pronKo 예시) → ③(크림, 홈 그림 카드+항목 2개) → 비교표(bg-card, 6행) → 푸터. l1-cafe는 모듈 위에서 찾고 없으면 throw. 항목은 Feature 배열 + 파일 안 FeatureItem(band면 mint·white/70). 문구 숫자는 spec 목록의 lib 상수 11개로 채움. FEATURES·AI_BUBBLE·TRANSLATION·가나 밴드·BookOpen import 삭제.",
+  "spec_diff": "1) ① MessagesSquare 설명의 인용은 spec의 곧은 따옴표 대신 홈 이어서 대화하기 타일과 같은 굽은 따옴표(“이렇게 말하면 돼요”)로 썼다. 2) ② 일본어 읽기 도우미 예시에서 문장과 한글 발음 사이에 대화방 말풍선처럼 mt-1을 두었다(spec에 간격 없음). 3) ③ 홈 그림 카드 안 간격(라벨+제목 줄 gap-2, 그 묶음과 할 일 줄 gap-4, 할 일 줄 사이 gap-2)은 spec에 없어 레이아웃 규칙에서 골랐고, 연속일 칩은 (app)/layout.tsx를 복사해 tabular-nums가 붙어 있다. 4) 320px 가로 스크롤은 브라우저로 확인하지 않았다(하네스 규칙상 phase 뒤 메인 세션에서 확인). LandingPreview에서 고칠 문제는 찾지 못했다."
+}
