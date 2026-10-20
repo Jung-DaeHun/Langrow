@@ -258,7 +258,8 @@ export default async function Landing({ searchParams }: PageProps<"/">) {
           <div className="mx-auto flex max-w-public flex-col gap-6">
             <h2 className={H2}>Free로 시작하고, 더 하고 싶으면 Pro</h2>
             <div className="overflow-x-auto rounded-xl bg-card shadow-card">
-              <table className="w-full text-left">
+              {/* 전역 overflow-wrap: anywhere는 칸 최소 너비를 글자 하나로 줄여 320px에서 "14,90 / 0원"처럼 끊는다 */}
+              <table className="w-full text-left wrap-break-word">
                 <thead>
                   <tr className="border-b border-line text-micro font-bold text-ink-muted">
                     <th scope="col" className="px-4 py-3">
