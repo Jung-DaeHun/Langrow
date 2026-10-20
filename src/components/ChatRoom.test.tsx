@@ -624,6 +624,83 @@ describe("ChatRoom 상태 동기화", () => {
   });
 });
 
+// 브라우저 뒤로 가기는 처음 받은 room을 다시 쓴다(spec/journey.md "예외 흐름"). 턴이나 끝난 결과를 받으면 다시 읽어 그 room을 바꾼다
+describe("ChatRoom 뒤로 가기 대비 다시 읽기", () => {
+  const word = (id: string, text: string, meaningKo: string, used: boolean): TargetWord => ({
+    id,
+    word: text,
+    reading: null,
+    meaningKo,
+    used,
+  });
+
+  it("뒤로 가기로 돌아온 처음 화면(턴 0)에서 끝내면 다시 읽고, 다시 읽은 room의 턴 수와 단어 결과로 피드백을 그린다", async () => {
+    apiMock.mockResolvedValue(endedReady);
+    const { user, rerender } = setup(room());
+
+    await user.click(endButton());
+
+    // 다시 읽기를 기다리지 않고 저장된 결과를 바로 그린다
+    expect(screen.getByText("잘 주문했어요")).toBeInTheDocument();
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    rerender(
+      room({
+        status: "ended",
+        turns: [turn(1), turn(2), turn(3)],
+        doneTurnsToday: 3,
+        targetWords: [word("en-3-001", "decide", "결정하다", true), word("en-3-002", "borrow", "빌리다", false)],
+        targetSource: "today",
+        result: { feedbackStatus: "ready", feedback: { good: "잘 주문했어요", improve: [] } },
+      }),
+    );
+
+    expect(screen.getByText("카페에서 주문하기 · 3턴")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "오늘 단어 2개 중 1개를 썼어요" })).toBeInTheDocument();
+  });
+
+  it("메시지 응답이 성공할 때마다 한 번씩 다시 읽고, 실패 응답에는 다시 읽지 않는다", async () => {
+    apiMock
+      .mockResolvedValueOnce(replied(1, 19))
+      .mockResolvedValueOnce(failure(503, "AI_UNAVAILABLE", UNAVAILABLE))
+      .mockResolvedValueOnce(replied(2, 18));
+    const { user } = setup();
+
+    await typeAndSend(user, "first");
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    await typeAndSend(user, "second");
+    expect(screen.getByRole("alert")).toHaveTextContent(UNAVAILABLE);
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "다시 보내기" }));
+    expect(screen.getByText("AI 2", ON_SCREEN)).toBeInTheDocument();
+    expect(refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it("마지막 턴(turnsLeft 0)에도 다시 읽고, 이어 부른 /end가 끝난 결과를 주면 한 번 더 읽는다", async () => {
+    const pendingEnd = deferred<ApiResult<ChatEndResponse>>();
+    apiMock.mockResolvedValueOnce(replied(20, 0)).mockReturnValueOnce(pendingEnd.promise);
+    const { user } = setup(room({ turns: Array.from({ length: 19 }, (_, i) => turn(i + 1)) }));
+
+    await typeAndSend(user, "bye");
+    expect(refresh).toHaveBeenCalledTimes(1);
+
+    await act(async () => pendingEnd.resolve(endedReady));
+    expect(refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it("/end 202면 다시 읽지 않는다 (피드백 화면이 기다리다 끝난 결과를 받을 때 읽는다)", async () => {
+    apiMock.mockResolvedValue({ ok: true, status: 202, data: { status: "ending", retryAfterSeconds: 2 } });
+    const { user } = setup(room({ turns: [turn(1)] }));
+
+    await user.click(endButton());
+
+    expect(screen.getByText("피드백을 만들고 있어요")).toBeInTheDocument();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+});
+
 describe("ChatRoom 스크롤", () => {
   it("새 메시지가 오면 맨 아래로 스크롤한다", async () => {
     apiMock.mockResolvedValue(replied(1, 19));
@@ -1088,7 +1165,7 @@ describe("ChatRoom 배운 단어", () => {
     expect(wordsLine().querySelector("ruby")).toBeNull();
   });
 
-  it("첫 턴의 메시지 응답으로 줄이 생기고 다음 응답으로 갱신되며, 다시 읽지 않는다", async () => {
+  it("첫 턴의 메시지 응답으로 줄이 생기고 다음 응답으로 갱신되며, 다시 읽은 room을 기다리지 않는다", async () => {
     apiMock
       .mockResolvedValueOnce(repliedWith(1, [SUKOSHI, ISSHONI]))
       .mockResolvedValueOnce(repliedWith(2, [used(SUKOSHI), ISSHONI]));
@@ -1102,7 +1179,8 @@ describe("ChatRoom 배운 단어", () => {
     await typeAndSend(user, "少しください");
     expect(screen.getByText("오늘 단어 1/2")).toBeInTheDocument();
     expect(region()).toHaveTextContent("단어를 썼어요: 少し");
-    expect(refresh).not.toHaveBeenCalled();
+    // 턴마다 다시 읽기를 부르지만(뒤로 가기 대비), 줄은 다시 읽은 room(rerender) 없이 응답만으로 갱신됐다
+    expect(refresh).toHaveBeenCalledTimes(2);
   });
 
   it("다시 읽은 room이 응답받은 턴까지 따라오면 room의 값을 쓴다", async () => {

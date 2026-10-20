@@ -147,6 +147,8 @@ export function ChatRoom({ room, scenario, trial }: Props) {
           correction: reply.correction,
         },
       ]);
+      // 뒤로 가기는 처음 받은 room을 다시 쓰므로 확정된 턴을 페이지 데이터에 반영한다. 화면은 다시 읽기를 기다리지 않는다
+      router.refresh();
       if (turnsLeft === 0) {
         setFull(true);
         void endSession();
@@ -204,7 +206,8 @@ export function ChatRoom({ room, scenario, trial }: Props) {
       setEndError(result.message);
       return;
     }
-    // 202면 ChatFeedback이 다시 확인한다
+    // 202면 ChatFeedback이 다시 확인하고, 끝난 결과를 받을 때 다시 읽는다
+    if (result.data.status === "ended") router.refresh();
     setEnd({ result: result.data.status === "ended" ? result.data : null });
   }
 

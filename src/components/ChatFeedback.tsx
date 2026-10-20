@@ -77,8 +77,11 @@ export function ChatFeedback({
       if (stopped) return;
       if (!res.ok && res.code === "NOT_FOUND") router.push("/home");
       else if (!res.ok) setError(res.message);
-      else if (res.data.status === "ended") setPolled(res.data);
-      else wait(res.data.retryAfterSeconds);
+      else if (res.data.status === "ended") {
+        setPolled(res.data);
+        // 뒤로 가기로 돌아와도 끝난 대화가 보이게 페이지 데이터를 다시 읽는다(spec/journey.md "예외 흐름")
+        router.refresh();
+      } else wait(res.data.retryAfterSeconds);
     }
 
     // 숨겨져 있으면 예약하지 않는다. 다시 보이면 onVisibility가 바로 확인한다

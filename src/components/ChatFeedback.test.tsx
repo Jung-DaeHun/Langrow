@@ -14,12 +14,14 @@ vi.mock("next/navigation", () => ({ useRouter: vi.fn() }));
 
 const apiMock = vi.mocked(api);
 const push = vi.fn();
+const refresh = vi.fn();
 let visibility: DocumentVisibilityState = "visible";
 
 beforeEach(() => {
   apiMock.mockReset();
   push.mockReset();
-  vi.mocked(useRouter).mockReturnValue({ push } as unknown as ReturnType<typeof useRouter>);
+  refresh.mockReset();
+  vi.mocked(useRouter).mockReturnValue({ push, refresh } as unknown as ReturnType<typeof useRouter>);
   visibility = "visible";
   Object.defineProperty(document, "visibilityState", { configurable: true, get: () => visibility });
 });
@@ -395,6 +397,19 @@ describe("ChatFeedback 처리 중", () => {
 
     await advance(10_000);
     expect(apiMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("기다리다 끝난 결과를 받으면 화면 데이터를 다시 읽는다 (뒤로 가기로 돌아와도 끝난 대화가 보이게)", async () => {
+    vi.useFakeTimers();
+    apiMock.mockResolvedValueOnce(ending).mockResolvedValueOnce(ended);
+    renderFeedback({ result: null });
+
+    await advance(2000);
+    expect(refresh).not.toHaveBeenCalled();
+
+    await advance(3000);
+    expect(screen.getByText("자연스러웠어요")).toBeInTheDocument();
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 
   it("다시 확인한 /end가 404면 홈으로 이동한다", async () => {
