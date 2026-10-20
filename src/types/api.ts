@@ -1,3 +1,4 @@
+import type { Breakdown } from "@/lib/breakdown";
 import type { ErrorCode } from "@/lib/errors";
 import type { Level } from "@/lib/levels";
 import type { TargetSource, TargetWord } from "@/lib/targetWords";
@@ -24,6 +25,9 @@ export type ChatMessageResponse = {
 export type ChatEndResponse =
   | ({ status: "ended" } & EndResult)
   | { status: "ending"; retryAfterSeconds: number };
+
+// POST /api/chat/sessions/[id]/breakdown. 검사를 통과해 원래 문장을 조각 경계에서 자른 조각이다
+export type ChatBreakdownResponse = { breakdown: Breakdown };
 
 // 동의(POST /api/me/consent), 언어 전환(PUT /api/me/language), 첫 레벨(POST /api/levels),
 // 이벤트(POST /api/events)는 성공하면 {}다

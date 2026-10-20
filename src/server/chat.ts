@@ -1,8 +1,9 @@
 import "server-only";
+import type { BreakdownTarget } from "@/lib/breakdown";
 import type { Language, Level } from "@/lib/levels";
 import { findScenario, isProScenario, isScenarioLocked, type Scenario } from "@/lib/scenarios";
 import type { TurnPromptInput } from "@/services/claude/prompts";
-import type { ChatEndResponse, ChatMessageResponse, ChatSessionCreated } from "@/types/api";
+import type { ChatBreakdownResponse, ChatEndResponse, ChatMessageResponse, ChatSessionCreated } from "@/types/api";
 import type { Deps } from "./deps";
 import type { Outcome } from "./http";
 
@@ -104,4 +105,48 @@ export async function endChatSession(deps: Deps, userId: string, sessionId: stri
     : await deps.db.failEnd(userId, sessionId, token, generated.reason);
   if (!ended.ok) return ended;
   return { ok: true, value: { status: "ended", ...ended.value } };
+}
+
+export const BREAKDOWN_UNAVAILABLE_MESSAGE = "뜯어보기를 만들지 못했어요. 다시 눌러 주세요.";
+// 실패 횟수는 대화와 같이 세지만, 공용 문구("대화를 잠시 쉬어요" 등)는 뜯어보기 자리에 맞지 않아 바꾼다
+export const BREAKDOWN_FAILURE_LIMIT_MESSAGE = "오늘은 응답 오류가 많아 문장 뜯어보기를 잠시 쉬어요. 내일 다시 시도해 주세요.";
+export const BREAKDOWN_IN_PROGRESS_MESSAGE = "뜯어보기를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요.";
+
+// 문장 뜯어보기를 처음 열 때 만들기(spec/chat.md "처음 열 때 만들기"). 문장·언어·레벨은 body가 아니라 시작 RPC가 DB의 턴에서 준다.
+// 저장본·실패 10회·만드는 중은 시작 RPC가 계정을 잠근 뒤 판정한다. 활동일·사용량·이벤트는 바꾸지 않는다
+export async function openChatBreakdown(
+  deps: Deps,
+  userId: string,
+  sessionId: string,
+  input: { turn_no: number; target: BreakdownTarget },
+): Promise<Outcome<ChatBreakdownResponse>> {
+  const { turn_no: turnNo, target } = input;
+  const begun = await deps.db.beginTurnBreakdown(userId, sessionId, turnNo, target);
+  if (!begun.ok) {
+    if (begun.code === "AI_FAILURE_LIMIT") return { ...begun, message: BREAKDOWN_FAILURE_LIMIT_MESSAGE };
+    if (begun.code === "CONFLICT") return { ...begun, message: BREAKDOWN_IN_PROGRESS_MESSAGE };
+    return begun;
+  }
+  if (begun.value.state === "stored") return { ok: true, value: { breakdown: begun.value.breakdown } };
+
+  // until은 이 작업의 "만드는 중" 표시다. 바꾸지 않고 실패·저장 RPC에 넘겨야 그 표시를 지운다
+  const { sentence, language, level, until } = begun.value;
+  const generated = await deps.ai.generateBreakdown({ language, level, target, sentence });
+  if (!generated.ok) {
+    const failed = await deps.db.failTurnBreakdown(userId, sessionId, turnNo, target, until, generated.reason);
+    return failed.ok ? { ok: false, code: "AI_UNAVAILABLE", message: BREAKDOWN_UNAVAILABLE_MESSAGE } : failed;
+  }
+
+  // 저장은 다음에 열 때를 위한 것이라 실패해도 만든 값을 돌려준다. 로그에 문장·조각 내용을 남기지 않는다
+  const { breakdown } = generated.value;
+  const logSaveFailed = (detail: { code: string } | { error: string }) =>
+    console.error(JSON.stringify({ breakdown: "save_failed", sessionId, turnNo, target, ...detail }));
+  try {
+    const saved = await deps.db.saveTurnBreakdown(userId, sessionId, turnNo, target, until, breakdown);
+    if (saved.ok) return { ok: true, value: saved.value };
+    logSaveFailed({ code: saved.code });
+  } catch (error) {
+    logSaveFailed({ error: error instanceof Error ? error.message : String(error) });
+  }
+  return { ok: true, value: { breakdown } };
 }

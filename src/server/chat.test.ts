@@ -1,11 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { Breakdown } from "@/lib/breakdown";
 import { findScenario } from "@/lib/scenarios";
 import type { TargetSource, TargetWord, WordCandidate } from "@/lib/targetWords";
 import type { BeginEndResult, EndResult } from "@/server/db/chat";
 import type { DbErrorCode } from "@/server/db/types";
 import type { Feedback, TurnReply } from "@/services/claude/schemas";
 import { createFakeDeps } from "@/test/fakes";
-import { endChatSession, sendChatMessage, startChatSession } from "./chat";
+import {
+  BREAKDOWN_FAILURE_LIMIT_MESSAGE,
+  BREAKDOWN_IN_PROGRESS_MESSAGE,
+  BREAKDOWN_UNAVAILABLE_MESSAGE,
+  endChatSession,
+  openChatBreakdown,
+  sendChatMessage,
+  startChatSession,
+} from "./chat";
+import type { Db } from "./deps";
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 const SESSION_ID = "22222222-2222-4222-8222-222222222222";
@@ -449,5 +459,135 @@ describe("endChatSession", () => {
 
     await expect(endChatSession(deps, USER_ID, SESSION_ID)).rejects.toThrow();
     expect(deps.ai.generateFeedback).not.toHaveBeenCalled();
+  });
+});
+
+describe("openChatBreakdown", () => {
+  // 기본 가짜(en 1, "Nice to meet you!")와 다른 값이라, AI 입력이 요청이 아니라 시작 RPC 결과에서 오는지 구분된다
+  const INPUT = { turn_no: 3, target: "corrected" } as const;
+  const SENTENCE = "[熱|ねつ]はありません。";
+  const UNTIL = "2026-10-20T03:01:30.123456+00:00";
+  const GENERATED: Breakdown = [
+    { text: "[熱|ねつ]は", meaning_ko: "열은" },
+    { text: "ありません。", meaning_ko: "없어요" },
+  ];
+  const STORED: Breakdown = [{ text: "[熱|ねつ]はありません。", meaning_ko: "열은 없어요" }];
+
+  function started() {
+    return createFakeDeps({
+      db: {
+        beginTurnBreakdown: async () => ({
+          ok: true,
+          value: { state: "started", sentence: SENTENCE, language: "ja", level: 3, until: UNTIL },
+        }),
+      },
+      ai: { generateBreakdown: async () => ({ ok: true, value: { breakdown: GENERATED } }) },
+    });
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("저장본이면 그대로 돌려주고 AI·저장·실패 RPC를 부르지 않는다", async () => {
+    const deps = createFakeDeps({
+      db: { beginTurnBreakdown: async () => ({ ok: true, value: { state: "stored", breakdown: STORED } }) },
+    });
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: true, value: { breakdown: STORED } });
+    expect(deps.db.beginTurnBreakdown).toHaveBeenCalledWith(USER_ID, SESSION_ID, 3, "corrected");
+    expect(deps.ai.generateBreakdown).not.toHaveBeenCalled();
+    expect(deps.db.saveTurnBreakdown).not.toHaveBeenCalled();
+    expect(deps.db.failTurnBreakdown).not.toHaveBeenCalled();
+  });
+
+  it("저장본이 없으면 시작 RPC의 문장·언어·레벨과 대상으로 AI를 부르고, 같은 기한 값으로 저장한 뒤 저장 RPC가 돌려준 값을 응답한다", async () => {
+    const deps = started();
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: true, value: { breakdown: GENERATED } });
+    expect(deps.ai.generateBreakdown).toHaveBeenCalledWith({ language: "ja", level: 3, target: "corrected", sentence: SENTENCE });
+    expect(deps.db.saveTurnBreakdown).toHaveBeenCalledWith(USER_ID, SESSION_ID, 3, "corrected", UNTIL, GENERATED);
+    expect(deps.db.failTurnBreakdown).not.toHaveBeenCalled();
+    const order = [deps.db.beginTurnBreakdown, deps.ai.generateBreakdown, deps.db.saveTurnBreakdown].map(
+      (fn) => fn.mock.invocationCallOrder[0],
+    );
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("저장 RPC가 먼저 저장된 값을 돌려주면 그 값을 응답한다", async () => {
+    const deps = started();
+    deps.db.saveTurnBreakdown.mockResolvedValue({ ok: true, value: { breakdown: STORED } });
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: true, value: { breakdown: STORED } });
+  });
+
+  // next build가 테스트 파일도 타입 검사하므로 케이스 타입을 명시한다
+  it.each<[string, Db["saveTurnBreakdown"]]>([
+    ["거부돼도(NOT_FOUND)", async () => ({ ok: false, code: "NOT_FOUND" })],
+    [
+      "throw해도",
+      async () => {
+        throw new Error("RPC save_turn_breakdown 실패: 08006 connection");
+      },
+    ],
+  ])("저장이 %s 만든 값을 돌려주고, 문장·조각 내용 없이 로그만 남긴다", async (_, saveTurnBreakdown) => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const deps = started();
+    deps.db.saveTurnBreakdown.mockImplementation(saveTurnBreakdown);
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: true, value: { breakdown: GENERATED } });
+    expect(error).toHaveBeenCalledOnce();
+    const line = JSON.parse(String(error.mock.calls[0][0]));
+    expect(line).toMatchObject({ breakdown: "save_failed", sessionId: SESSION_ID, turnNo: 3, target: "corrected" });
+    expect(line.code ?? line.error).toBeTruthy();
+    const text = String(error.mock.calls[0][0]);
+    expect(text).not.toContain("熱");
+    expect(text).not.toContain("없어요");
+  });
+
+  it.each<DbErrorCode>(["NOT_FOUND", "CONSENT_REQUIRED", "ONBOARDING_REQUIRED", "INVALID_INPUT"])(
+    "시작 RPC가 %s로 거부하면 그대로 돌려주고 AI를 부르지 않는다",
+    async (code) => {
+      const deps = createFakeDeps({ db: { beginTurnBreakdown: async () => ({ ok: false, code }) } });
+
+      expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: false, code });
+      expect(deps.ai.generateBreakdown).not.toHaveBeenCalled();
+      expect(deps.db.saveTurnBreakdown).not.toHaveBeenCalled();
+      expect(deps.db.failTurnBreakdown).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each<[DbErrorCode, string]>([
+    ["AI_FAILURE_LIMIT", BREAKDOWN_FAILURE_LIMIT_MESSAGE],
+    ["CONFLICT", BREAKDOWN_IN_PROGRESS_MESSAGE],
+  ])("시작 RPC가 %s로 거부하면 뜯어보기용 문구로 돌려주고 AI를 부르지 않는다", async (code, message) => {
+    const deps = createFakeDeps({ db: { beginTurnBreakdown: async () => ({ ok: false, code }) } });
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: false, code, message });
+    expect(deps.ai.generateBreakdown).not.toHaveBeenCalled();
+  });
+
+  it("AI가 실패하면 같은 기한 값과 실패 사유로 실패 RPC를 부른 뒤 503 문구를 돌려주고 저장하지 않는다", async () => {
+    const deps = started();
+    deps.ai.generateBreakdown.mockResolvedValue({ ok: false, reason: "invalid_output" });
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({
+      ok: false,
+      code: "AI_UNAVAILABLE",
+      message: BREAKDOWN_UNAVAILABLE_MESSAGE,
+    });
+    expect(deps.db.failTurnBreakdown).toHaveBeenCalledWith(USER_ID, SESSION_ID, 3, "corrected", UNTIL, "invalid_output");
+    expect(deps.db.failTurnBreakdown.mock.invocationCallOrder[0]).toBeGreaterThan(
+      deps.ai.generateBreakdown.mock.invocationCallOrder[0],
+    );
+    expect(deps.db.saveTurnBreakdown).not.toHaveBeenCalled();
+  });
+
+  it("실패 RPC가 거부하면 그 결과를 돌려준다", async () => {
+    const deps = started();
+    deps.ai.generateBreakdown.mockResolvedValue({ ok: false, reason: "timeout" });
+    deps.db.failTurnBreakdown.mockResolvedValue({ ok: false, code: "NOT_FOUND" });
+
+    expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: false, code: "NOT_FOUND" });
   });
 });
