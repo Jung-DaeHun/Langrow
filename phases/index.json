@@ -59,6 +59,10 @@
       "dir": "11-landing",
       "status": "completed",
       "completed_at": "2026-10-20T21:38:14+0900"
+    },
+    {
+      "dir": "12-breakdown-on-open",
+      "status": "pending"
     }
   ]
 }
