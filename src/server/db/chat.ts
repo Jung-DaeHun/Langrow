@@ -24,11 +24,11 @@ export type BeginEndResult =
       session: ChatSessionInfo;
       turns: { userText: string; reply: string; correction: TurnReply["correction"] }[];
     };
-// stored: 저장본(AI를 부르지 않는다) / started: 문장(후리가나 표기 그대로)·세션 언어·레벨과 "만드는 중" 기한.
+// stored: 저장본(AI를 부르지 않는다) / started: 문장(후리가나 표기 그대로)·세션 언어·레벨·상황 id와 "만드는 중" 기한.
 // until은 그대로 failTurnBreakdown·saveTurnBreakdown에 넘긴다 (spec/chat.md "처음 열 때 만들기")
 export type BeginBreakdownResult =
   | { state: "stored"; breakdown: Breakdown }
-  | { state: "started"; sentence: string; language: Language; level: Level; until: string };
+  | { state: "started"; sentence: string; language: Language; level: Level; scenarioId: string; until: string };
 
 type HistoryRow = { user_text: string; reply: string };
 type EndTurnRow = HistoryRow & { correction: TurnReply["correction"] };
@@ -254,6 +254,7 @@ export async function beginTurnBreakdown(
           sentence: value.sentence as string,
           language: value.language as Language,
           level: value.level as Level,
+          scenarioId: value.scenario_id as string,
           until: value.until as string,
         },
       };

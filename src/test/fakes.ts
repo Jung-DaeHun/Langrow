@@ -50,7 +50,14 @@ function defaultDb(): Db {
     // 저장본이 없어 AI를 부르는 경로
     beginTurnBreakdown: async () => ({
       ok: true,
-      value: { state: "started", sentence: "Nice to meet you!", language: "en", level: 1, until: "2026-10-20T00:01:30.000000+00:00" },
+      value: {
+        state: "started",
+        sentence: "Nice to meet you!",
+        language: "en",
+        level: 1,
+        scenarioId: "l1-greeting",
+        until: "2026-10-20T00:01:30.000000+00:00",
+      },
     }),
     failTurnBreakdown: async () => ({ ok: true, value: null }),
     saveTurnBreakdown: async (_userId, _sessionId, _turnNo, _target, _until, breakdown) => ({

@@ -478,7 +478,7 @@ describe("openChatBreakdown", () => {
       db: {
         beginTurnBreakdown: async () => ({
           ok: true,
-          value: { state: "started", sentence: SENTENCE, language: "ja", level: 3, until: UNTIL },
+          value: { state: "started", sentence: SENTENCE, language: "ja", level: 3, scenarioId: "l3-pharmacy", until: UNTIL },
         }),
       },
       ai: { generateBreakdown: async () => ({ ok: true, value: { breakdown: GENERATED } }) },
@@ -501,17 +501,35 @@ describe("openChatBreakdown", () => {
     expect(deps.db.failTurnBreakdown).not.toHaveBeenCalled();
   });
 
-  it("저장본이 없으면 시작 RPC의 문장·언어·레벨과 대상으로 AI를 부르고, 같은 기한 값으로 저장한 뒤 저장 RPC가 돌려준 값을 응답한다", async () => {
+  it("저장본이 없으면 시작 RPC의 문장·언어·레벨·상황 이름과 대상으로 AI를 부르고, 같은 기한 값으로 저장한 뒤 저장 RPC가 돌려준 값을 응답한다", async () => {
     const deps = started();
 
     expect(await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).toEqual({ ok: true, value: { breakdown: GENERATED } });
-    expect(deps.ai.generateBreakdown).toHaveBeenCalledWith({ language: "ja", level: 3, target: "corrected", sentence: SENTENCE });
+    expect(deps.ai.generateBreakdown).toHaveBeenCalledWith({
+      language: "ja",
+      level: 3,
+      target: "corrected",
+      situation: findScenario("l3-pharmacy")?.title,
+      sentence: SENTENCE,
+    });
+    expect(findScenario("l3-pharmacy")?.title).toBeTruthy();
     expect(deps.db.saveTurnBreakdown).toHaveBeenCalledWith(USER_ID, SESSION_ID, 3, "corrected", UNTIL, GENERATED);
     expect(deps.db.failTurnBreakdown).not.toHaveBeenCalled();
     const order = [deps.db.beginTurnBreakdown, deps.ai.generateBreakdown, deps.db.saveTurnBreakdown].map(
       (fn) => fn.mock.invocationCallOrder[0],
     );
     expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("상황 id를 찾지 못하면 상황 이름 없이 AI를 부른다", async () => {
+    const deps = started();
+    deps.db.beginTurnBreakdown.mockResolvedValueOnce({
+      ok: true,
+      value: { state: "started", sentence: SENTENCE, language: "ja", level: 3, scenarioId: "removed-scenario", until: UNTIL },
+    });
+
+    expect((await openChatBreakdown(deps, USER_ID, SESSION_ID, INPUT)).ok).toBe(true);
+    expect(deps.ai.generateBreakdown).toHaveBeenCalledWith({ language: "ja", level: 3, target: "corrected", situation: undefined, sentence: SENTENCE });
   });
 
   it("저장 RPC가 먼저 저장된 값을 돌려주면 그 값을 응답한다", async () => {

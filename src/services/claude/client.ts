@@ -46,7 +46,8 @@ export type AiResult<T> = { ok: true; value: T } | { ok: false; reason: AiFailur
 export type TurnWordIds = { targetWordIds?: string[]; usedWordIds: string[] };
 export type GeneratedTurn = TurnReply & { words?: TurnWordIds };
 // 문장 하나의 뜯어보기(spec/chat.md "처음 열 때 만들기"). target·level은 검사 실패 로그에만 쓰고 프롬프트에는 넣지 않는다
-export type BreakdownInput = { language: Language; level: Level; target: BreakdownTarget; sentence: string };
+// situation은 세션 상황의 이름이다. 뜻을 상황에 맞게 정하려고 넣는다(없으면 상황 줄 없이 부른다)
+export type BreakdownInput = { language: Language; level: Level; target: BreakdownTarget; situation?: string; sentence: string };
 export type Ai = {
   generateTurn(input: TurnPromptInput): Promise<AiResult<GeneratedTurn>>;
   generateFeedback(input: FeedbackPromptInput): Promise<AiResult<Feedback>>;
@@ -92,12 +93,14 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
   }
 
   // throw하지 않고 언제나 AiResult를 돌려준다. 프롬프트·응답 내용은 로그로 남기지 않는다.
-  // cache: 자동 캐싱(5분)을 건다. 다음 요청이 같은 앞부분을 다시 보낼 때만 이득이라 대화 턴만 쓴다(ADR-026)
+  // cache: 캐시(5분)를 건다. 다음 요청이 같은 앞부분을 다시 보낼 때만 이득이다.
+  // request는 요청 단위 자동 캐싱으로 대화 턴이 쓴다(ADR-026). system은 시스템 블록에만 표시를 달아,
+  // 마지막 블록이 호출마다 다른 문장 뜯어보기가 언어마다 같은 시스템 프롬프트를 다시 읽게 한다(ADR-027)
   async function attempt<S, T>(
     schema: z.ZodType<S>,
     buildPrompt: () => Prompt,
     accept: (value: S) => T | null,
-    cache = false,
+    cache: "none" | "request" | "system" = "none",
   ): Promise<AiResult<T>> {
     let config: { client: AiClient; model: string };
     try {
@@ -116,10 +119,10 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
       const message = await config.client.messages.create({
         model: config.model,
         max_tokens: MAX_TOKENS,
-        system,
+        system: cache === "system" ? [{ type: "text", text: system, cache_control: { type: "ephemeral" } }] : system,
         messages,
         output_config: { format, effort: EFFORT },
-        ...(cache ? { cache_control: { type: "ephemeral" } as const } : {}),
+        ...(cache === "request" ? { cache_control: { type: "ephemeral" } as const } : {}),
       });
       if (message.stop_reason === "refusal") return { ok: false, reason: "refusal" };
       if (message.stop_reason === "max_tokens") return { ok: false, reason: "max_tokens" };
@@ -156,13 +159,13 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
               withWordFields(pronTurnReplySchema, input.words?.kind),
               () => buildTurnPrompt(input),
               (value) => acceptTurn(input, cleanTurnPron(value)),
-              true,
+              "request",
             )
           : attempt(
               withWordFields(turnReplySchema, input.words?.kind),
               () => buildTurnPrompt(input),
               (value) => acceptTurn(input, value),
-              true,
+              "request",
             ),
       ),
     generateFeedback: (input) =>
@@ -179,14 +182,19 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
           value.explanation.trim() ? value : null,
         ),
       ),
-    generateBreakdown: ({ language, level, target, sentence }) =>
+    generateBreakdown: ({ language, level, target, situation, sentence }) =>
       withRetry(() =>
-        attempt(breakdownReplySchema, () => buildBreakdownPrompt({ language, sentence }), (value) => {
-          const breakdown = alignBreakdown(sentence, value.breakdown);
-          // 통과율을 운영 로그로 보기 위해 남긴다. 문장·조각 내용은 남기지 않는다
-          if (!breakdown) console.warn(JSON.stringify({ ai: "breakdown_invalid", target, language, level }));
-          return breakdown && { breakdown };
-        }),
+        attempt(
+          breakdownReplySchema,
+          () => buildBreakdownPrompt({ language, situation, sentence }),
+          (value) => {
+            const breakdown = alignBreakdown(sentence, value.breakdown);
+            // 통과율을 운영 로그로 보기 위해 남긴다. 문장·조각 내용은 남기지 않는다
+            if (!breakdown) console.warn(JSON.stringify({ ai: "breakdown_invalid", target, language, level }));
+            return breakdown && { breakdown };
+          },
+          "system",
+        ),
       ),
   };
 }

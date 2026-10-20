@@ -1214,7 +1214,7 @@ describe("문장 뜯어보기 처음 열 때 만들기", () => {
       await expect(beginTurnBreakdown(user.id, sessionId, 1, "corrected")).resolves.toEqual(corrected);
     });
 
-    it("저장본이 없으면 문장(표기 그대로)·세션 언어·레벨·기한 값을 돌려주고 기한을 저장한다", async () => {
+    it("저장본이 없으면 문장(표기 그대로)·세션 언어·레벨·상황 id·기한 값을 돌려주고 기한을 저장한다", async () => {
       const user = await createReadyUser("ja", 2);
       const { sessionId } = valueOf(
         await createChatSession(user.id, { language: "ja", level: 2, scenarioId: "l2-restaurant" }, false),
@@ -1237,6 +1237,7 @@ describe("문장 뜯어보기 처음 열 때 만들기", () => {
         sentence: "[猫|ねこ]が[好|す]きですか。",
         language: "ja",
         level: 2,
+        scenarioId: "l2-restaurant",
         until: expect.any(String),
       });
       expectExpiresInOperationWindow(reply.until);

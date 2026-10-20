@@ -130,8 +130,10 @@ export async function openChatBreakdown(
   if (begun.value.state === "stored") return { ok: true, value: { breakdown: begun.value.breakdown } };
 
   // until은 이 작업의 "만드는 중" 표시다. 바꾸지 않고 실패·저장 RPC에 넘겨야 그 표시를 지운다
-  const { sentence, language, level, until } = begun.value;
-  const generated = await deps.ai.generateBreakdown({ language, level, target, sentence });
+  const { sentence, language, level, scenarioId, until } = begun.value;
+  // 상황 이름은 뜻을 상황에 맞게 정하려고 넣는다. 상황을 찾지 못하면 상황 줄 없이 부른다
+  const situation = findScenario(scenarioId)?.title;
+  const generated = await deps.ai.generateBreakdown({ language, level, target, situation, sentence });
   if (!generated.ok) {
     const failed = await deps.db.failTurnBreakdown(userId, sessionId, turnNo, target, until, generated.reason);
     return failed.ok ? { ok: false, code: "AI_UNAVAILABLE", message: BREAKDOWN_UNAVAILABLE_MESSAGE } : failed;

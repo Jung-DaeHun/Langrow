@@ -396,14 +396,19 @@ describe("generateBreakdown", () => {
     });
   });
 
-  it("대화 턴과 같은 model·max_tokens 4096·effort low로, { breakdown } 형식과 뜯어보기 프롬프트만 넣고 캐시를 걸지 않는다", async () => {
+  it("대화 턴과 같은 model·max_tokens 4096·effort low로, { breakdown } 형식과 뜯어보기 프롬프트를 넣고 시스템 블록에만 캐시를 건다", async () => {
     const { ai, requests } = setup(done({ breakdown: jaPieces }));
-    await ai.generateBreakdown(jaInput);
+    await ai.generateBreakdown({ ...jaInput, situation: "카페에서 음료 주문하기" });
     const request = requests[0];
-    const prompt = buildBreakdownPrompt({ language: "ja", sentence: jaInput.sentence });
-    // 문장마다 한 번 부르고 시스템 프롬프트가 짧아 캐시를 걸지 않는다
+    const prompt = buildBreakdownPrompt({ language: "ja", situation: "카페에서 음료 주문하기", sentence: jaInput.sentence });
+    // 문장(마지막 블록)이 호출마다 달라 요청 단위 자동 캐싱은 읽히지 않는다. 언어마다 같은 시스템 블록만 캐시한다
     expect(Object.keys(request).sort()).toEqual(["max_tokens", "messages", "model", "output_config", "system"]);
-    expect(request).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
+    expect(request).toMatchObject({
+      model: MODEL,
+      max_tokens: 4096,
+      system: [{ type: "text", text: prompt.system, cache_control: { type: "ephemeral" } }],
+      messages: prompt.messages,
+    });
     const { format, effort } = request.output_config as { format: { type: string; schema: { properties: object } }; effort: string };
     expect(effort).toBe("low");
     expect(format.type).toBe("json_schema");
