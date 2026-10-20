@@ -3,9 +3,9 @@
 import { ArrowUp, Check, ChevronDown, ChevronLeft, ChevronUp, CircleAlert, Info, Languages } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { opensTranslationByDefault, showsPronunciation, type Language, type Level } from "@/lib/levels";
-import type { Breakdown } from "@/lib/breakdown";
+import type { Breakdown, BreakdownTarget } from "@/lib/breakdown";
 import { stripFurigana } from "@/lib/furigana";
 import type { TrialState } from "@/lib/plan";
 import type { ScenarioLine } from "@/lib/scenarios";
@@ -14,7 +14,7 @@ import { CHAT_INPUT_MAX, countChars, hasHangul, isValidChatInput } from "@/lib/t
 import type { EndResult } from "@/server/db/chat";
 import type { ChatRoomData, ChatTurnView } from "@/server/db/reads";
 import { api } from "@/services/apiClient";
-import type { ChatEndResponse, ChatMessageResponse } from "@/types/api";
+import type { ChatBreakdownResponse, ChatEndResponse, ChatMessageResponse } from "@/types/api";
 import { ChatFeedback } from "./ChatFeedback";
 import { Furigana } from "./Furigana";
 import { LimitNotice } from "./LimitNotice";
@@ -276,7 +276,11 @@ export function ChatRoom({ room, scenario, trial }: Props) {
                   </p>
                 )}
                 <SpeakButtons source={{ kind: "speech", text: t.correction.corrected, language: room.language }} variant="compact" />
-                <CorrectionBreakdown pieces={t.correction.breakdown} language={room.language} />
+                <CorrectionBreakdown
+                  pieces={t.correction.breakdown}
+                  language={room.language}
+                  source={{ sessionId: room.id, turnNo: t.turnNo, target: "corrected" }}
+                />
                 <p className="text-sm">
                   <Furigana text={t.correction.explanation_ko} show={furigana} />
                 </p>
@@ -286,6 +290,7 @@ export function ChatRoom({ room, scenario, trial }: Props) {
               line={{ text: t.reply, ko: t.replyKo, pronKo: t.replyPronKo, breakdown: t.replyBreakdown }}
               language={room.language}
               level={room.level}
+              source={{ sessionId: room.id, turnNo: t.turnNo, target: "reply" }}
             />
           </Fragment>
         ))}
@@ -476,15 +481,16 @@ function AiBubble({
   line,
   language,
   level,
+  source,
 }: {
   line: { text: string; ko: string; pronKo?: string | null; breakdown?: Breakdown | null };
   language: Language;
   level: Level;
+  source?: BreakdownSource; // 턴 말풍선만 넘긴다. 첫 마디는 API를 부르지 않는다
 }) {
   const [open, setOpen] = useState(false);
-  const [breakdownOpen, setBreakdownOpen] = useState(false);
+  const breakdown = useBreakdown(line.breakdown, source);
   const alwaysOpen = opensTranslationByDefault(level);
-  const pieces = line.breakdown?.length ? line.breakdown : null;
   const body = (
     <span lang={language} className="block whitespace-pre-wrap wrap-anywhere">
       <Furigana text={line.text} show={language === "ja"} />
@@ -520,13 +526,13 @@ function AiBubble({
             {open && translation}
           </button>
         )}
-        {pieces !== null && breakdownOpen && (
+        {breakdown.open && (
           <div className="mt-2 border-t border-line pt-2">
-            <BreakdownTiles pieces={pieces} language={language} tile="bg-page" />
+            <BreakdownSlot breakdown={breakdown} language={language} tile="bg-page" />
           </div>
         )}
       </div>
-      {(!alwaysOpen || pieces !== null) && (
+      {(!alwaysOpen || breakdown.shown) && (
         <div className="flex gap-3">
           {!alwaysOpen && (
             <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={META_BUTTON}>
@@ -534,7 +540,7 @@ function AiBubble({
               번역
             </button>
           )}
-          {pieces !== null && <BreakdownToggle open={breakdownOpen} onToggle={() => setBreakdownOpen((v) => !v)} />}
+          {breakdown.shown && <BreakdownToggle breakdown={breakdown} />}
         </div>
       )}
       <SpeakButtons source={{ kind: "speech", text: line.text, language }} variant="compact" />
@@ -542,27 +548,130 @@ function AiBubble({
   );
 }
 
-// 교정 카드의 뜯어보기. 토글 바로 아래에 타일을 펼친다. 값이 없으면(기능 전 턴, 검사 실패) 그리지 않는다
-function CorrectionBreakdown({ pieces, language }: { pieces?: Breakdown; language: Language }) {
-  const [open, setOpen] = useState(false);
-  if (!pieces?.length) return null;
+// 교정 카드의 뜯어보기. 토글 바로 아래에 타일을 펼친다
+function CorrectionBreakdown({
+  pieces,
+  language,
+  source,
+}: {
+  pieces?: Breakdown;
+  language: Language;
+  source: BreakdownSource;
+}) {
+  const breakdown = useBreakdown(pieces, source);
   return (
     <div className="flex flex-col items-start gap-1">
-      <BreakdownToggle open={open} onToggle={() => setOpen((v) => !v)} />
-      {open && <BreakdownTiles pieces={pieces} language={language} tile="bg-card/70" />}
+      <BreakdownToggle breakdown={breakdown} />
+      {breakdown.open && <BreakdownSlot breakdown={breakdown} language={language} tile="bg-card/70" />}
     </div>
   );
 }
 
-// 문장 뜯어보기(spec/chat.md "문장 뜯어보기"). 처음에는 닫혀 있고 열림 상태는 저장하지 않는다
-function BreakdownToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
-  const Icon = open ? ChevronUp : ChevronDown;
+type BreakdownSource = { sessionId: string; turnNo: number; target: BreakdownTarget };
+type Requested =
+  | { kind: "idle" }
+  | { kind: "waiting" }
+  | { kind: "done"; pieces: Breakdown }
+  | { kind: "error"; message: string }
+  | { kind: "failure-limit"; message: string };
+
+// 문장 뜯어보기(spec/chat.md "문장 뜯어보기"). 처음에는 닫혀 있고 열림 상태는 저장하지 않는다.
+// 저장본이 없는 턴의 문장은 처음 열 때 만든다("처음 열 때 만들기"). 받은 값은 화면 상태에만 두고, 다시 읽은 턴에 저장본이 오면 그것을 쓴다.
+// 첫 마디는 source가 없어 scenarios.ts의 값만 쓰고, 값이 없으면 토글을 두지 않는다.
+// 실패해도 대화 입력을 막거나 대화방을 다시 읽지 않는다(404여도 홈으로 가지 않는다)
+function useBreakdown(initial: Breakdown | null | undefined, source?: BreakdownSource) {
+  const [open, setOpen] = useState(false);
+  const [requested, setRequested] = useState<Requested>({ kind: "idle" });
+  const stored = initial?.length ? initial : null;
+  const pieces = stored ?? (requested.kind === "done" ? requested.pieces : null);
+
+  async function request() {
+    if (source === undefined) return;
+    setRequested({ kind: "waiting" });
+    const { sessionId, turnNo, target } = source;
+    const result = await api<ChatBreakdownResponse>("POST", `/api/chat/sessions/${sessionId}/breakdown`, {
+      turn_no: turnNo,
+      target,
+    });
+    if (result.ok) setRequested({ kind: "done", pieces: result.data.breakdown });
+    else if (result.code === "AI_FAILURE_LIMIT") setRequested({ kind: "failure-limit", message: result.message });
+    else setRequested({ kind: "error", message: result.message });
+  }
+
+  function toggle() {
+    if (open) {
+      setOpen(false);
+      // 오류·안내는 지우고 다시 열면 다시 부른다
+      if (requested.kind !== "done") setRequested({ kind: "idle" });
+      return;
+    }
+    setOpen(true);
+    if (pieces === null) void request();
+  }
+
+  return {
+    shown: pieces !== null || source !== undefined,
+    open,
+    toggle,
+    retry: () => void request(),
+    pieces,
+    requested,
+    // 처음 열 때 받는 문장은 대기·타일·오류가 읽히도록 타일 자리를 aria-live 영역으로 둔다
+    live: stored === null,
+  };
+}
+
+type BreakdownState = ReturnType<typeof useBreakdown>;
+
+function BreakdownToggle({ breakdown }: { breakdown: BreakdownState }) {
+  const Icon = breakdown.open ? ChevronUp : ChevronDown;
   return (
-    <button type="button" aria-expanded={open} onClick={onToggle} className={META_BUTTON}>
+    <button
+      type="button"
+      aria-expanded={breakdown.open}
+      onClick={breakdown.toggle}
+      disabled={breakdown.pieces === null && breakdown.requested.kind === "waiting"}
+      className={META_BUTTON}
+    >
       문장 뜯어보기
       <Icon size={14} aria-hidden="true" />
     </button>
   );
+}
+
+// 열린 토글의 타일 자리. 기다리는 동안 점 3개, 실패면 AI 정답 설명과 같은 오류 Notice와 [다시 시도], 실패 10회면 정보 Notice만 둔다
+function BreakdownSlot({ breakdown, language, tile }: { breakdown: BreakdownState; language: Language; tile: string }) {
+  const { pieces, requested } = breakdown;
+  let content: ReactNode;
+  if (pieces !== null) {
+    content = <BreakdownTiles pieces={pieces} language={language} tile={tile} />;
+  } else if (requested.kind === "failure-limit") {
+    content = (
+      <div className="flex items-start gap-3 rounded-xl bg-card p-4 shadow-card">
+        <Info size={20} aria-hidden="true" className="shrink-0 text-accent" />
+        <p className="text-sm">{requested.message}</p>
+      </div>
+    );
+  } else if (requested.kind === "error") {
+    content = (
+      <div role="alert" className={ERROR_NOTICE}>
+        <CircleAlert size={20} aria-hidden="true" className="shrink-0 text-danger" />
+        <div className="flex flex-col items-start gap-2">
+          <p className="text-sm">{requested.message}</p>
+          <button type="button" onClick={breakdown.retry} className={PILL}>
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="flex h-9 items-center">
+        <WaitingDots label="뜯어보기를 만드는 중" />
+      </div>
+    );
+  }
+  return breakdown.live ? <div aria-live="polite">{content}</div> : content;
 }
 
 // 조각 타일을 문장 순서대로 잇는다. 위는 조각(학습 언어), 아래는 뜻이고 한글 발음은 넣지 않는다

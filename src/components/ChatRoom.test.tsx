@@ -7,7 +7,7 @@ import type { TrialState } from "@/lib/plan";
 import type { TargetSource, TargetWord } from "@/lib/targetWords";
 import type { ChatRoomData, ChatTurnView } from "@/server/db/reads";
 import { api, type ApiResult } from "@/services/apiClient";
-import type { ChatEndResponse, ChatMessageResponse } from "@/types/api";
+import type { ChatBreakdownResponse, ChatEndResponse, ChatMessageResponse } from "@/types/api";
 import { ChatRoom } from "./ChatRoom";
 
 vi.mock("@/services/apiClient", () => ({ api: vi.fn() }));
@@ -209,7 +209,8 @@ describe("ChatRoom 표시", () => {
 
     expect(screen.getByText(SCENARIO.opening.ko)).toBeInTheDocument();
     expect(screen.getByText("번역 1")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { expanded: false })).toBeNull();
+    // 접히는 버튼은 턴 말풍선의 뜯어보기 토글뿐이다(번역 토글 없음)
+    expect(screen.getAllByRole("button", { expanded: false }).map((b) => b.textContent)).toEqual(["문장 뜯어보기"]);
   });
 
   it("레벨 3은 말풍선 문장을 눌러 번역을 펼친다", async () => {
@@ -1050,18 +1051,196 @@ describe("ChatRoom 문장 뜯어보기", () => {
     expect(isBefore(screen.getByText("오늘은"), screen.getByText("덥네요"))).toBe(true);
   });
 
-  it("값이 없으면(null·빈 배열·키 없음) 토글을 두지 않는다", () => {
-    setup(
-      room({
-        level: 3,
-        turns: [
-          turn(1, { replyBreakdown: null, correction: { corrected: "Fixed.", explanation_ko: "설명" } }),
-          turn(2, { replyBreakdown: [], correction: { corrected: "Fixed again.", explanation_ko: "설명 2", breakdown: [] } }),
-        ],
-      }),
-    );
-
+  it("첫 마디는 값이 없으면 토글을 두지 않고, 값이 있어도 API를 부르지 않는다", async () => {
+    const { unmount } = render(<ChatRoom room={room({ level: 1 })} scenario={SCENARIO} trial={{ kind: "available" }} />);
     expect(screen.queryByRole("button", { name: "문장 뜯어보기" })).toBeNull();
+    unmount();
+
+    const { user } = setup(room({ level: 1 }), { kind: "available" }, WITH_OPENING);
+    await user.click(toggles()[0]);
+    expect(screen.getByText("인사")).toBeInTheDocument();
+    expect(apiMock).not.toHaveBeenCalled();
+  });
+
+  it("저장된 값이 있으면 열고 닫아도 API를 부르지 않는다", async () => {
+    const { user } = setup(room({ level: 1, turns: [pieceTurn] }));
+
+    for (const toggle of toggles()) {
+      await user.click(toggle);
+      await user.click(toggle);
+      await user.click(toggle);
+    }
+    expect(screen.getByText("주세요")).toBeInTheDocument();
+    expect(screen.getByText("물론이죠")).toBeInTheDocument();
+    expect(apiMock).not.toHaveBeenCalled();
+  });
+
+  describe("저장본이 없는 문장은 처음 열 때 만든다", () => {
+    const BREAKDOWN_PATH = "/api/chat/sessions/s-1/breakdown";
+    const UNAVAILABLE_BREAKDOWN = "뜯어보기를 만들지 못했어요. 다시 눌러 주세요.";
+    const FAILURE_LIMIT = "오늘은 응답 오류가 많아 문장 뜯어보기를 잠시 쉬어요. 내일 다시 시도해 주세요.";
+    const bare = (turnNo: number) => turn(turnNo, { correction: { corrected: CORRECTION.corrected, explanation_ko: CORRECTION.explanation_ko } });
+    const fetched = (pieces = REPLY_PIECES) =>
+      ({ ok: true, status: 200, data: { breakdown: pieces } }) satisfies ApiResult<ChatBreakdownResponse>;
+    const waiting = () => screen.queryByText("뜯어보기를 만드는 중");
+    const retryButton = () => screen.queryByRole("button", { name: "다시 시도" });
+
+    function expectInputOpen() {
+      expect(textbox()).toBeEnabled();
+      expect(refresh).not.toHaveBeenCalled();
+      expect(push).not.toHaveBeenCalled();
+    }
+
+    it("턴 말풍선·교정 카드는 값이 없어도(null·빈 배열·키 없음) 토글을 두고 처음에는 닫혀 있다", () => {
+      setup(
+        room({
+          level: 1,
+          turns: [
+            turn(1, { replyBreakdown: null, correction: { corrected: "Fixed.", explanation_ko: "설명" } }),
+            turn(2, { replyBreakdown: [], correction: { corrected: "Fixed again.", explanation_ko: "설명 2", breakdown: [] } }),
+            turn(3),
+          ],
+        }),
+      );
+
+      // 교정 2개 + 말풍선 3개. 첫 마디는 값이 없어 토글이 없다
+      expect(toggles()).toHaveLength(5);
+      for (const toggle of toggles()) expect(toggle).toHaveAttribute("aria-expanded", "false");
+      expect(apiMock).not.toHaveBeenCalled();
+    });
+
+    it("처음 누르면 그 턴의 turn_no·reply로 API를 부르고, 기다리는 동안 점 3개와 disabled 토글을 둔 뒤 받으면 펼친다", async () => {
+      const d = deferred<ApiResult<ChatBreakdownResponse>>();
+      apiMock.mockReturnValueOnce(d.promise);
+      const { user } = setup(room({ level: 1, turns: [turn(1), turn(2, { reply: "Sure, one latte." })] }));
+
+      await user.click(toggles()[1]);
+
+      expect(apiMock).toHaveBeenCalledWith("POST", BREAKDOWN_PATH, { turn_no: 2, target: "reply" });
+      expect(toggles()[1]).toHaveAttribute("aria-expanded", "true");
+      expect(toggles()[1]).toBeDisabled();
+      expect(toggles()[0]).toBeEnabled();
+      expect(waiting()?.closest("[aria-live]")).toHaveAttribute("aria-live", "polite");
+      // 점은 말풍선 안 번역 아래, 타일 자리에 둔다
+      expect(isBefore(screen.getByText("번역 2"), waiting() as HTMLElement)).toBe(true);
+      expectInputOpen();
+
+      await act(async () => d.resolve(fetched()));
+
+      expect(waiting()).toBeNull();
+      expect(toggles()[1]).toBeEnabled();
+      expect(toggles()[1]).toHaveAttribute("aria-expanded", "true");
+      expect(isBefore(screen.getByText("번역 2"), screen.getByText("물론이죠"))).toBe(true);
+      expect(screen.getByText("라떼 하나")).toBeInTheDocument();
+    });
+
+    it("교정 카드는 target corrected로 부르고 토글 바로 아래·설명 위에 펼친다", async () => {
+      apiMock.mockResolvedValueOnce(fetched(CORRECTION.breakdown));
+      const { user } = setup(room({ level: 1, turns: [bare(3)] }));
+
+      await user.click(toggles()[0]);
+
+      expect(apiMock).toHaveBeenCalledWith("POST", BREAKDOWN_PATH, { turn_no: 3, target: "corrected" });
+      const meaning = screen.getByText("주세요");
+      expect(isBefore(toggles()[0], meaning)).toBe(true);
+      expect(isBefore(meaning, screen.getByText(CORRECTION.explanation_ko))).toBe(true);
+    });
+
+    it("받은 뒤 닫았다 다시 열면 API를 다시 부르지 않는다", async () => {
+      apiMock.mockResolvedValueOnce(fetched());
+      const { user } = setup(room({ level: 1, turns: [turn(1)] }));
+
+      await user.click(toggles()[0]);
+      expect(screen.getByText("물론이죠")).toBeInTheDocument();
+      await user.click(toggles()[0]);
+      expect(screen.queryByText("물론이죠")).toBeNull();
+      await user.click(toggles()[0]);
+
+      expect(screen.getByText("물론이죠")).toBeInTheDocument();
+      expect(apiMock).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ["503", failure(503, "AI_UNAVAILABLE", UNAVAILABLE_BREAKDOWN)],
+      ["만드는 중 409", failure(409, "CONFLICT", "뜯어보기를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요.")],
+      ["404", failure(404, "NOT_FOUND", "찾을 수 없어요.")],
+      ["네트워크", failure(null, "NETWORK", "연결이 끊겼어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.")],
+      ["500", failure(500, "INTERNAL", "잠시 문제가 생겼어요.")],
+    ])("%s 실패면 타일 자리에 서버 문구와 [다시 시도]를 두고, 누르면 다시 부른다", async (_, result) => {
+      apiMock.mockResolvedValueOnce(result).mockResolvedValueOnce(fetched());
+      const { user } = setup(room({ level: 1, turns: [turn(1)] }));
+
+      await user.click(toggles()[0]);
+
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveTextContent(result.ok ? "" : result.message);
+      expect(isBefore(screen.getByText("번역 1"), alert)).toBe(true);
+      expect(toggles()[0]).toBeEnabled();
+      expectInputOpen();
+
+      await user.click(retryButton() as HTMLElement);
+
+      expect(apiMock).toHaveBeenCalledTimes(2);
+      expect(apiMock).toHaveBeenLastCalledWith("POST", BREAKDOWN_PATH, { turn_no: 1, target: "reply" });
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(screen.getByText("물론이죠")).toBeInTheDocument();
+      expectInputOpen();
+    });
+
+    it("실패한 뒤 토글을 닫으면 오류를 지우고, 다시 열면 다시 부른다", async () => {
+      apiMock
+        .mockResolvedValueOnce(failure(409, "CONFLICT", "뜯어보기를 만드는 중이에요. 잠시 뒤 다시 눌러 주세요."))
+        .mockResolvedValueOnce(fetched());
+      const { user } = setup(room({ level: 1, turns: [turn(1)] }));
+
+      await user.click(toggles()[0]);
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+
+      await user.click(toggles()[0]);
+      expect(toggles()[0]).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(retryButton()).toBeNull();
+
+      await user.click(toggles()[0]);
+      expect(apiMock).toHaveBeenCalledTimes(2);
+      expect(screen.getByText("물론이죠")).toBeInTheDocument();
+    });
+
+    it("AI_FAILURE_LIMIT이면 서버 문구만 보여 주고 버튼이 없으며, 대화 입력은 막지 않는다", async () => {
+      apiMock.mockResolvedValueOnce(failure(429, "AI_FAILURE_LIMIT", FAILURE_LIMIT));
+      const { user } = setup(room({ level: 1, turns: [turn(1)] }));
+
+      await user.click(toggles()[0]);
+
+      expect(screen.getByText(FAILURE_LIMIT)).toBeInTheDocument();
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(retryButton()).toBeNull();
+      expectInputOpen();
+      await user.type(textbox(), "hello");
+      expect(sendButton()).toBeEnabled();
+    });
+
+    it("기다리는 중에 메시지를 보내고 대화방을 다시 읽어도 진행 중인 상태와 받은 값을 잃지 않는다", async () => {
+      const d = deferred<ApiResult<ChatBreakdownResponse>>();
+      apiMock.mockImplementation((_method, path) =>
+        path === BREAKDOWN_PATH ? d.promise : Promise.resolve(replied(2, 18)),
+      );
+      const { user, rerender } = setup(room({ level: 1, turns: [turn(1)] }));
+
+      await user.click(toggles()[0]);
+      await typeAndSend(user, "one latte");
+      expect(screen.getByText("AI 2", ON_SCREEN)).toBeInTheDocument();
+      rerender(room({ level: 1, turns: [turn(1), turn(2, { reply: "AI 2" })] }));
+
+      expect(toggles()[0]).toBeDisabled();
+      expect(waiting()).toBeInTheDocument();
+      await act(async () => d.resolve(fetched()));
+      expect(screen.getByText("물론이죠")).toBeInTheDocument();
+
+      rerender(room({ level: 1, turns: [turn(1), turn(2, { reply: "AI 2" })] }));
+      expect(screen.getByText("물론이죠")).toBeInTheDocument();
+      expect(apiMock.mock.calls.filter(([, path]) => path === BREAKDOWN_PATH)).toHaveLength(1);
+    });
   });
 
   it("교정 카드는 고친 문장 아래에서 열고 설명 위에 타일을 펼친다", async () => {
