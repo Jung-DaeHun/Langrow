@@ -258,13 +258,15 @@ export async function readOpenSessions(sb: Sb, userId: string, language: Languag
   }));
 }
 
+// 피드백을 받고 끝낸 세션만 센다. 0턴으로 끝낸 세션(skipped)은 "완료"가 아니다
 export async function readEndedScenarioIds(sb: Sb, userId: string, language: Language): Promise<string[]> {
   const { data, error } = await sb
     .from("chat_sessions")
     .select("scenario_id")
     .eq("user_id", userId)
     .eq("language", language)
-    .eq("status", "ended");
+    .eq("status", "ended")
+    .neq("feedback_status", "skipped");
   if (error) throw readError("chat_sessions", error);
   return [...new Set(data.map((row) => row.scenario_id))];
 }
