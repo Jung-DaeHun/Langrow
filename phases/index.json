@@ -52,7 +52,8 @@
     },
     {
       "dir": "10-feedback-pron",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-10-20T18:11:05+0900"
     }
   ]
 }
