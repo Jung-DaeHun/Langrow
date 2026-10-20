@@ -1,8 +1,10 @@
 import { act, render, screen, within } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Language } from "@/lib/levels";
 import type { TargetWord } from "@/lib/targetWords";
 import type { ChatTurnView } from "@/server/db/reads";
+import type { StoredFeedback } from "@/services/claude/schemas";
 import { api, type ApiResult } from "@/services/apiClient";
 import type { ChatEndResponse } from "@/types/api";
 import { ChatFeedback } from "./ChatFeedback";
@@ -43,7 +45,10 @@ function renderFeedback(overrides: Partial<Props> = {}) {
     language: "en",
     turns: THREE_TURNS,
     doneTurnsToday: 3,
-    result: { feedbackStatus: "ready", feedback: { good: "잘했어요", improve: ["관사를 챙겨요"] } },
+    result: {
+      feedbackStatus: "ready",
+      feedback: { good: "잘했어요", improve: [{ point: "관사를 챙겨요", example: "I'd like a latte." }] },
+    },
     targetWords: null,
     targetSource: null,
     ...overrides,
@@ -114,12 +119,18 @@ describe("ChatFeedback ready", () => {
   });
 
   it("고칠 점은 최대 3개만 보여 준다", () => {
+    const item = (point: string) => ({ point, example: `${point} example.` });
     renderFeedback({
-      result: { feedbackStatus: "ready", feedback: { good: "좋아요", improve: ["하나", "둘", "셋", "넷"] } },
+      result: {
+        feedbackStatus: "ready",
+        feedback: { good: "좋아요", improve: [item("하나"), item("둘"), item("셋"), item("넷")] },
+      },
     });
 
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
     expect(screen.getByText("셋")).toBeInTheDocument();
     expect(screen.queryByText("넷")).toBeNull();
+    expect(screen.queryByText("넷 example.")).toBeNull();
   });
 
   it("일본어 피드백의 표기를 ruby로 그린다", () => {
@@ -127,12 +138,15 @@ describe("ChatFeedback ready", () => {
       language: "ja",
       result: {
         feedbackStatus: "ready",
-        feedback: { good: "[注文|ちゅうもん]을 잘 했어요", improve: ["[水|みず]をください가 더 자연스러워요"] },
+        feedback: {
+          good: "[注文|ちゅうもん]을 잘 했어요",
+          improve: [{ point: "'[水|みず]'에는 を를 붙여요", example: "[水|みず]をください。" }],
+        },
       },
     });
 
     const rubies = [...container.querySelectorAll("ruby")];
-    expect(rubies.map((r) => r.querySelector("rt")?.textContent)).toEqual(["ちゅうもん", "みず"]);
+    expect(rubies.map((r) => r.querySelector("rt")?.textContent)).toEqual(["ちゅうもん", "みず", "みず"]);
     expect(container.textContent).not.toMatch(/[[\]|]/);
   });
 
@@ -151,6 +165,65 @@ describe("ChatFeedback ready", () => {
     });
 
     expect(container.querySelector("ruby")).toBeNull();
+  });
+});
+
+describe("ChatFeedback 고칠 점 항목", () => {
+  const JA_ITEM = { point: "'[水|みず]'에는 を를 붙여요.", example: "[水|みず]をください。", example_pron_ko: "미즈오 쿠다사이." };
+
+  function renderImprove(improve: StoredFeedback["improve"], language: Language = "ja") {
+    renderFeedback({ language, result: { feedbackStatus: "ready", feedback: { good: "좋아요", improve } } });
+    return screen.getAllByRole("listitem");
+  }
+
+  it("설명 → 예문 → 한글 발음 순서로 그리고, 예문은 학습 언어 lang에 ruby, 발음은 낭독기에서 숨긴다", () => {
+    const [item] = renderImprove([JA_ITEM]);
+    const [point, example, pron] = [...item.children];
+
+    expect(item.children).toHaveLength(3);
+    expect(point).toHaveTextContent("에는 を를 붙여요.");
+    expect(point).not.toHaveAttribute("lang");
+    expect(example).toHaveAttribute("lang", "ja");
+    expect(example).toHaveClass("mt-1", "font-bold", "text-brand");
+    expect(example.querySelector("rt")).toHaveTextContent("みず");
+    expect(pron).toHaveTextContent("미즈오 쿠다사이.");
+    expect(pron).toHaveAttribute("aria-hidden", "true");
+    expect(pron).toHaveClass("text-sm", "text-brand");
+  });
+
+  it("영어 예문은 lang en이고 ruby가 없으며, 발음 키가 없으면 발음 줄이 없다", () => {
+    const [item] = renderImprove([{ point: "I'd like가 더 공손해요.", example: "I'd like a latte." }], "en");
+
+    expect(item.children).toHaveLength(2);
+    expect(screen.getByText("I'd like a latte.")).toHaveAttribute("lang", "en");
+    expect(item.querySelector("ruby")).toBeNull();
+    expect(item.querySelector("[aria-hidden]")).toBeNull();
+  });
+
+  it("발음이 null이면 발음 줄이 없다", () => {
+    const [item] = renderImprove([{ ...JA_ITEM, example_pron_ko: null }]);
+
+    expect(item.children).toHaveLength(2);
+    expect(item.querySelector("[aria-hidden]")).toBeNull();
+  });
+
+  it.each(["", "  "])("예문이 %j이면 예문 줄도 발음 줄도 없이 설명만 그린다", (example) => {
+    const [item] = renderImprove([{ ...JA_ITEM, example }]);
+
+    expect(item.children).toHaveLength(1);
+    expect(item.querySelector("[lang]")).toBeNull();
+    expect(screen.queryByText("미즈오 쿠다사이.")).toBeNull();
+  });
+
+  it("옛 형식의 문자열 항목은 한 줄로 그리고, 새 형식과 섞여도 각자 그린다", () => {
+    const items = renderImprove(["[水|みず]をください가 더 자연스러워요", JA_ITEM]);
+
+    expect(items).toHaveLength(2);
+    expect(items[0].querySelector("p")).toBeNull();
+    expect(items[0].querySelector("[lang]")).toBeNull();
+    expect(items[0].querySelector("rt")).toHaveTextContent("みず");
+    expect(items[0]).toHaveTextContent("をください가 더 자연스러워요");
+    expect(items[1].children).toHaveLength(3);
   });
 });
 

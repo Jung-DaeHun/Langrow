@@ -221,14 +221,40 @@ describe("buildFeedbackPrompt", () => {
     expect(system).toContain("레벨을 올리거나 내리라는 제안은 하지 않는다");
   });
 
-  it.each(LEVELS)("일본어 레벨 %i: 일본어를 인용할 때 모든 한자에 읽기 표기를 달라고 한다", (level) => {
+  it.each(LANGUAGES)("%s: 고칠 점은 point와 example로 나누고, point는 비우거나 예문을 되풀이하지 말고 example은 학습 언어 한 문장으로 쓰라고 한다", (language) => {
+    const name = LANGUAGE_NAMES[language];
+    const { system } = buildFeedbackPrompt({ ...input, language });
+    expect(system).toContain("고칠 점이 없으면 빈 배열로 둔다");
+    expect(system).toContain("- point: 무엇을 어떻게 고치면 좋은지 짧게 설명한다. 사용자가 한 말을 인용해도 된다. 비워 두지 않고, example의 문장을 되풀이하지 않는다.");
+    expect(system).toContain(`- example: 더 나은 ${name} 표현 한 문장. ${name}로만 쓰고 한국어 설명을 섞지 않는다.`);
+    expect(system).toContain(`good과 point는 한국어 해요체로 짧고 부드럽게 쓰고, example만 ${name}로 쓴다`);
+  });
+
+  it.each(LEVELS)("일본어 레벨 %i: good·point의 일본어 인용과 example의 모든 한자에 읽기 표기를 달라고 한다", (level) => {
     const { system } = buildFeedbackPrompt({ ...input, language: "ja", level, scenario: scenariosForLevel(level)[0] });
-    expect(system).toContain("일본어를 인용할 때는 모든 한자에 [漢字|かんじ] 형식으로 읽기를 단다");
-    expect(system).toContain("읽기 표기는 한자에만 단다");
+    expect(system).toContain("good·point의 일본어 인용과 example의 모든 한자에 [漢字|かんじ] 형식으로 읽기를 단다");
+    expect(system).toContain("읽기 표기는 한자에만 단다(가나·한글에는 달지 않는다)");
   });
 
   it("영어에는 읽기 표기 지시가 없다", () => {
     expect(buildFeedbackPrompt(input).system).not.toContain("[漢字|かんじ]");
+  });
+
+  it.each([1, 2, 3] as const)("일본어 레벨 %i: 예문의 한글 발음 example_pron_ko와 표기 규칙을 요청한다", (level) => {
+    const { system } = buildFeedbackPrompt({ ...input, language: "ja", level, scenario: scenariosForLevel(level)[0] });
+    expect(system).toContain("- example_pron_ko: example의 한글 발음. 아래 '한글 발음' 규칙을 따르고 비워 두지 않는다.");
+    expect(system).toContain(`## 한글 발음\n${PRONUNCIATION_RULES}`);
+  });
+
+  it.each([
+    ["ja", 4],
+    ["ja", 5],
+    ...LEVELS.map((level) => ["en", level] as const),
+  ] as const)("%s 레벨 %i: 한글 발음 지시와 표기 규칙이 없다", (language, level) => {
+    const { system } = buildFeedbackPrompt({ ...input, language, level, scenario: scenariosForLevel(level)[0] });
+    expect(system).not.toContain("example_pron_ko");
+    expect(system).not.toContain("한글 발음");
+    expect(system).not.toContain(PRONUNCIATION_RULES);
   });
 
   it("일본어 상급의 첫 마디도 표기를 그대로 넣는다", () => {

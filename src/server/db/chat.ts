@@ -2,15 +2,16 @@ import "server-only";
 import type { Language, Level } from "@/lib/levels";
 import type { TargetSource, TargetWord, WordCandidate } from "@/lib/targetWords";
 import type { AiFailureReason } from "@/services/claude/client";
-import type { Feedback, TurnReply } from "@/services/claude/schemas";
+import type { Feedback, StoredFeedback, TurnReply } from "@/services/claude/schemas";
 import { callRpc, type RpcValue } from "./rpc";
 import type { DbResult } from "./types";
 
 // 대화 RPC (chat 마이그레이션). 예약 → (잠금 밖에서) Claude → 확정/실패 순서는 2-api use-case가 지킨다
 
 export type ChatSessionInfo = { language: Language; level: Level; scenarioId: string };
+// 저장된 피드백은 옛 형식(고칠 점이 문자열)일 수 있다. 저장은 새 형식(Feedback)만 한다
 export type EndResult =
-  | { feedbackStatus: "ready"; feedback: Feedback }
+  | { feedbackStatus: "ready"; feedback: StoredFeedback }
   | { feedbackStatus: "fallback"; feedback: { message: string } }
   | { feedbackStatus: "skipped"; feedback: null };
 export type BeginEndResult =

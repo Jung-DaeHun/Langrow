@@ -183,7 +183,29 @@ export function ChatFeedback({
               <ul className="divide-y divide-line">
                 {shown.feedback.improve.slice(0, IMPROVE_MAX).map((item, i) => (
                   <li key={i} className="py-2 first:pt-0 last:pb-0">
-                    <Furigana text={item} show={furigana} />
+                    {/* 옛 형식의 문자열 항목은 설명과 예문이 섞인 한 줄이다(spec/chat.md "피드백 형식" "옛 형식") */}
+                    {typeof item === "string" ? (
+                      <Furigana text={item} show={furigana} />
+                    ) : (
+                      <>
+                        <p>
+                          <Furigana text={item.point} show={furigana} />
+                        </p>
+                        {item.example.trim() !== "" && (
+                          <>
+                            <p lang={language} className="mt-1 font-bold text-brand">
+                              <Furigana text={item.example} show={furigana} />
+                            </p>
+                            {/* 만들 때 일본어 입문~중급만 요청했다. 피드백에는 번역 토글이 없어 중급도 항상 보인다 */}
+                            {item.example_pron_ko && (
+                              <p aria-hidden="true" className="text-sm text-brand">
+                                {item.example_pron_ko}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>

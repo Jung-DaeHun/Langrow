@@ -18,6 +18,7 @@ import {
 import {
   explanationSchema,
   feedbackSchema,
+  pronFeedbackSchema,
   pronTurnReplySchema,
   turnReplySchema,
   withWordFields,
@@ -152,10 +153,11 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
       ),
     generateFeedback: (input) =>
       withRetry(() =>
-        attempt(feedbackSchema, () => buildFeedbackPrompt(input), (value) => ({
-          ...value,
-          improve: value.improve.slice(0, IMPROVE_MAX),
-        })),
+        showsPronunciation(input.language, input.level)
+          ? attempt(pronFeedbackSchema, () => buildFeedbackPrompt(input), (value) =>
+              acceptFeedback(cleanFeedbackPron(value)),
+            )
+          : attempt(feedbackSchema, () => buildFeedbackPrompt(input), acceptFeedback),
       ),
     generateExplanation: (input) =>
       withRetry(() =>
@@ -175,6 +177,23 @@ function cleanTurnPron<T extends PronTurnReply>(value: T) {
       ...value.correction,
       corrected_pron_ko: cleanPron(value.correction.corrected_pron_ko),
     },
+  };
+}
+
+// 예문 발음도 턴과 같다. 맞지 않는 발음만 null로 숨기고 피드백은 성공이다 (spec/chat.md "피드백 형식" "검사")
+function cleanFeedbackPron(value: z.infer<typeof pronFeedbackSchema>): Feedback {
+  return { ...value, improve: value.improve.map((item) => ({ ...item, example_pron_ko: cleanPron(item.example_pron_ko) })) };
+}
+
+// point가 공백뿐인 항목을 버린 뒤 앞에서 3개까지 남긴다(빈 항목 때문에 맞는 항목이 잘리지 않게).
+// 공백뿐인 example은 빈 문자열로 둔다
+function acceptFeedback(value: Feedback): Feedback {
+  return {
+    ...value,
+    improve: value.improve
+      .filter((item) => item.point.trim())
+      .slice(0, IMPROVE_MAX)
+      .map((item) => (item.example.trim() ? item : { ...item, example: "" })),
   };
 }
 

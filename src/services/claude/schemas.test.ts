@@ -1,6 +1,13 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { describe, expect, it } from "vitest";
-import { explanationSchema, feedbackSchema, pronTurnReplySchema, turnReplySchema, withWordFields } from "./schemas";
+import {
+  explanationSchema,
+  feedbackSchema,
+  pronFeedbackSchema,
+  pronTurnReplySchema,
+  turnReplySchema,
+  withWordFields,
+} from "./schemas";
 
 describe("turnReplySchema", () => {
   it("교정이 있는 응답을 받는다", () => {
@@ -46,17 +53,41 @@ describe("turnReplySchema", () => {
 });
 
 describe("feedbackSchema", () => {
-  it("good과 improve 목록을 받는다", () => {
-    const value = { good: "주문을 끝까지 해냈어요.", improve: ["I want → I'd like"] };
+  const item = (point: string) => ({ point, example: "I'd like a latte." });
+
+  it("good과 { point, example } 목록을 받는다", () => {
+    const value = { good: "주문을 끝까지 해냈어요.", improve: [item("I want 대신 I'd like를 쓰면 더 공손해요.")] };
     expect(feedbackSchema.parse(value)).toEqual(value);
   });
 
   it("개수 제약이 없어서 improve 4개도 스키마는 통과한다 (자르기는 client가 한다)", () => {
-    expect(feedbackSchema.safeParse({ good: "좋아요", improve: ["a", "b", "c", "d"] }).success).toBe(true);
+    expect(feedbackSchema.safeParse({ good: "좋아요", improve: [item("a"), item("b"), item("c"), item("d")] }).success).toBe(true);
   });
 
-  it("improve가 배열이 아니면 거부한다", () => {
+  it("improve가 배열이 아니거나 항목이 문자열(옛 형식)이면 거부한다", () => {
     expect(feedbackSchema.safeParse({ good: "좋아요", improve: "a" }).success).toBe(false);
+    expect(feedbackSchema.safeParse({ good: "좋아요", improve: ["I want → I'd like"] }).success).toBe(false);
+  });
+
+  it("point나 example이 없으면 거부한다", () => {
+    expect(feedbackSchema.safeParse({ good: "좋아요", improve: [{ point: "설명" }] }).success).toBe(false);
+    expect(feedbackSchema.safeParse({ good: "좋아요", improve: [{ example: "Hi." }] }).success).toBe(false);
+  });
+});
+
+describe("pronFeedbackSchema", () => {
+  const item = { point: "を를 넣어요.", example: "[水|みず]をください。", example_pron_ko: "미즈오 쿠다사이." };
+
+  it("항목마다 example_pron_ko가 있는 피드백을 받는다", () => {
+    const value = { good: "주문을 끝까지 해냈어요.", improve: [item] };
+    expect(pronFeedbackSchema.parse(value)).toEqual(value);
+  });
+
+  it("example_pron_ko가 없거나 항목이 문자열이면 거부한다", () => {
+    expect(pronFeedbackSchema.safeParse({ good: "좋아요", improve: [{ point: item.point, example: item.example }] }).success).toBe(
+      false,
+    );
+    expect(pronFeedbackSchema.safeParse({ good: "좋아요", improve: ["を를 넣어요."] }).success).toBe(false);
   });
 });
 
@@ -65,6 +96,7 @@ describe("구조화 출력 형식", () => {
     ["turnReplySchema", turnReplySchema],
     ["pronTurnReplySchema", pronTurnReplySchema],
     ["feedbackSchema", feedbackSchema],
+    ["pronFeedbackSchema", pronFeedbackSchema],
   ])("%s를 설치된 SDK의 zodOutputFormat으로 바꿀 수 있고 길이·개수 제약이 없다", (_, schema) => {
     const format = zodOutputFormat(schema);
     expect(format.type).toBe("json_schema");

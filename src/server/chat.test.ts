@@ -23,7 +23,16 @@ const REPLY: TurnReply = {
   reply_ko: "그럼 이 약을 드릴게요.",
   correction: { corrected: "熱はありません。", explanation_ko: "없다고 할 때는 ありません을 써요." },
 };
-const FEEDBACK: Feedback = { good: "증상을 끝까지 설명했어요.", improve: ["から를 붙여 이유를 말해 보세요."] };
+const FEEDBACK: Feedback = {
+  good: "증상을 끝까지 설명했어요.",
+  improve: [
+    {
+      point: "から를 붙여 이유를 말해 보세요.",
+      example: "[熱|ねつ]があるから、[休|やす]みたいです。",
+      example_pron_ko: "네츠가 아루카라, 야스미타이데스.",
+    },
+  ],
+};
 const FALLBACK: EndResult = {
   feedbackStatus: "fallback",
   feedback: { message: "대화 기록은 저장됐어요. 종합 피드백을 만들지 못했으니 대화 아래의 교정을 확인해 주세요." },

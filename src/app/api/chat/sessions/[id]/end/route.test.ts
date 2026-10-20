@@ -11,7 +11,10 @@ vi.mock("@/server/deps", () => ({ getDeps: () => deps }));
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 const SESSION_ID = "22222222-2222-4222-8222-222222222222";
-const FEEDBACK = { good: "자기소개를 끝까지 이어 갔어요.", improve: ["I'm으로 문장을 시작해 보세요."] };
+const FEEDBACK = {
+  good: "자기소개를 끝까지 이어 갔어요.",
+  improve: [{ point: "이름을 말할 때는 I'm으로 문장을 시작해 보세요.", example: "I'm Minji." }],
+};
 
 // body가 없는 API도 JSON Content-Type은 보낸다
 function post(id = SESSION_ID, body?: string) {

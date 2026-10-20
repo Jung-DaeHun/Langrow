@@ -80,7 +80,10 @@ function defaultAi(): Ai {
     }),
     generateFeedback: async () => ({
       ok: true,
-      value: { good: "자기소개를 끝까지 이어 갔어요.", improve: ["I'm으로 문장을 시작해 보세요."] },
+      value: {
+        good: "자기소개를 끝까지 이어 갔어요.",
+        improve: [{ point: "이름을 말할 때는 I'm으로 문장을 시작해 보세요.", example: "I'm Minji." }],
+      },
     }),
     generateExplanation: async () => ({ ok: true, value: { explanation: "과거의 일이라 went를 써요." } }),
   };

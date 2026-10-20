@@ -62,7 +62,16 @@ const reply: TurnReply = {
     ],
   },
 };
-const feedback: Feedback = { good: "주문을 끝까지 해냈어요.", improve: ["I want → I'd like"] };
+const feedback: Feedback = {
+  good: "주문을 끝까지 해냈어요.",
+  improve: [{ point: "I want보다 I'd like가 더 공손해요.", example: "I'd like a latte." }],
+};
+// 구조화 출력 형식에서 고칠 점 항목의 속성 이름
+const improvePropertiesOf = (request: Record<string, unknown>) =>
+  Object.keys(
+    (request.output_config as { format: { schema: { properties: { improve: { items: { properties: object } } } } } }).format.schema
+      .properties.improve.items.properties,
+  ).sort();
 
 const MODEL = "claude-test-model";
 
@@ -165,17 +174,36 @@ describe("generateTurn", () => {
 describe("generateFeedback", () => {
   it("성공하면 피드백을 돌려주고 피드백 프롬프트와 스키마로 요청한다", async () => {
     const { ai, requests } = setup(done(feedback));
-    expect(await ai.generateFeedback(feedbackInput)).toEqual({ ok: true, value: feedback });
+    const result = await ai.generateFeedback(feedbackInput);
+    expect(result).toEqual({ ok: true, value: feedback });
     const prompt = buildFeedbackPrompt(feedbackInput);
     expect(requests[0]).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
     const { format, effort } = requests[0].output_config as { format: { schema: { properties: object } }; effort: string };
     expect(effort).toBe("low");
     expect(Object.keys(format.schema.properties).sort()).toEqual(["good", "improve"]);
+    expect(improvePropertiesOf(requests[0])).toEqual(["example", "point"]);
+    // 발음을 요청하지 않은 피드백의 항목에는 example_pron_ko 키가 없다
+    expect(result.ok && result.value.improve[0]).not.toHaveProperty("example_pron_ko");
   });
 
-  it("improve가 3개를 넘으면 앞의 3개만 남긴다", async () => {
-    const { ai } = setup(done({ good: "좋아요", improve: ["a", "b", "c", "d"] }));
-    expect(await ai.generateFeedback(feedbackInput)).toEqual({ ok: true, value: { good: "좋아요", improve: ["a", "b", "c"] } });
+  const item = (point: string, example = "I'd like a latte.") => ({ point, example });
+
+  it.each([
+    ["3개를 넘으면 앞의 3개만 남긴다", [item("a"), item("b"), item("c"), item("d")], [item("a"), item("b"), item("c")]],
+    ["point가 공백뿐인 항목을 버린 뒤 3개까지 남긴다", [item("a"), item(" \n"), item("c"), item("d")], [item("a"), item("c"), item("d")]],
+    ["point가 빈 항목만 있으면 빈 배열이다", [item("")], []],
+  ])("고칠 점이 %s", async (_, improve, expected) => {
+    const { ai, requests } = setup(done({ good: "좋아요", improve }));
+    expect(await ai.generateFeedback(feedbackInput)).toEqual({ ok: true, value: { good: "좋아요", improve: expected } });
+    expect(requests).toHaveLength(1);
+  });
+
+  it("example이 공백뿐이면 빈 문자열로 두고 피드백은 성공이다", async () => {
+    const { ai } = setup(done({ good: "좋아요", improve: [item("a", "  \n"), item("b")] }));
+    expect(await ai.generateFeedback(feedbackInput)).toEqual({
+      ok: true,
+      value: { good: "좋아요", improve: [item("a", ""), item("b")] },
+    });
   });
 
   it("첫 호출이 실패하면 한 번 더 부르고, 두 번 실패하면 실패를 돌려준다", async () => {
@@ -271,6 +299,65 @@ describe("generateTurn 한글 발음", () => {
     const { ai, requests } = setup(done(reply));
     expect(await ai.generateTurn({ ...jaInput, level: 4, scenario: scenariosForLevel(4)[0] })).toEqual({ ok: true, value: reply });
     expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_breakdown", "reply_ko"]);
+  });
+});
+
+describe("generateFeedback 한글 발음", () => {
+  const jaInput = (level: 1 | 2 | 3 | 4 | 5): FeedbackPromptInput => ({
+    ...feedbackInput,
+    language: "ja",
+    level,
+    scenario: scenariosForLevel(level)[0],
+  });
+  const jaItem = {
+    point: "[水|みず]에는 を를 붙여요.",
+    example: "[水|みず]をください。",
+    example_pron_ko: " 미즈오 쿠다사이. ",
+  };
+
+  it.each([1, 2, 3] as const)("일본어 레벨 %i: 발음 필드가 있는 형식으로 요청하고, 발음은 검사해 정리한 값으로 돌려준다", async (level) => {
+    const { ai, requests } = setup(done({ good: "좋아요", improve: [jaItem] }));
+    expect(await ai.generateFeedback(jaInput(level))).toEqual({
+      ok: true,
+      value: { good: "좋아요", improve: [{ ...jaItem, example_pron_ko: "미즈오 쿠다사이." }] },
+    });
+    expect(improvePropertiesOf(requests[0])).toEqual(["example", "example_pron_ko", "point"]);
+  });
+
+  it("발음이 비었거나 가나가 섞이면 피드백은 성공하고 그 항목의 발음만 null이다 (다시 부르지 않는다)", async () => {
+    const improve = [
+      { ...jaItem, example_pron_ko: "미즈を 쿠다사이." },
+      { ...jaItem, example_pron_ko: "" },
+      { ...jaItem, example_pron_ko: "타쿠상" },
+    ];
+    const { ai, requests } = setup(done({ good: "좋아요", improve }));
+    expect(await ai.generateFeedback(jaInput(1))).toEqual({
+      ok: true,
+      value: {
+        good: "좋아요",
+        improve: [
+          { ...jaItem, example_pron_ko: null },
+          { ...jaItem, example_pron_ko: null },
+          { ...jaItem, example_pron_ko: "타쿠산" },
+        ],
+      },
+    });
+    expect(requests).toHaveLength(1);
+  });
+
+  it("point가 빈 항목은 발음이 있어도 버린다", async () => {
+    const { ai } = setup(done({ good: "좋아요", improve: [{ ...jaItem, point: " " }, jaItem] }));
+    const result = await ai.generateFeedback(jaInput(2));
+    expect(result.ok && result.value.improve).toEqual([{ ...jaItem, example_pron_ko: "미즈오 쿠다사이." }]);
+  });
+
+  it.each([4, 5] as const)("일본어 레벨 %i: 발음 없는 형식으로 요청하고 항목에 example_pron_ko 키가 없다", async (level) => {
+    const { point, example } = jaItem;
+    const { ai, requests } = setup(done({ good: "좋아요", improve: [{ point, example }] }));
+    const result = await ai.generateFeedback(jaInput(level));
+    expect(result).toEqual({ ok: true, value: { good: "좋아요", improve: [{ point, example }] } });
+    expect(result.ok && result.value.improve[0]).not.toHaveProperty("example_pron_ko");
+    expect(improvePropertiesOf(requests[0])).toEqual(["example", "point"]);
   });
 });
 

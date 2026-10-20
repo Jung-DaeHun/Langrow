@@ -41,7 +41,10 @@ const REPLY: TurnReply = {
   correction: { corrected: "Can I get a latte?", explanation_ko: "주문할 때는 Can I get ...?이 자연스러워요." },
 };
 const PLAIN_REPLY: TurnReply = { reply: "Anything else?", reply_ko: "더 필요한 거 있으세요?", correction: null };
-const FEEDBACK: Feedback = { good: "주문을 끝까지 마쳤어요.", improve: ["관사 a를 빠뜨리지 않게 해 보세요."] };
+const FEEDBACK: Feedback = {
+  good: "주문을 끝까지 마쳤어요.",
+  improve: [{ point: "관사 a를 빠뜨리지 않게 해 보세요.", example: "I'd like a latte." }],
+};
 const NOT_FOUND = { ok: false, code: "NOT_FOUND" };
 const CONFLICT = { ok: false, code: "CONFLICT" };
 

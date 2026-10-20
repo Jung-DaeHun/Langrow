@@ -51,9 +51,18 @@ export type TurnReply = {
 
 export const feedbackSchema = z.object({
   good: z.string(),
-  improve: z.array(z.string()),
+  improve: z.array(z.object({ point: z.string(), example: z.string() })),
 });
-export type Feedback = z.infer<typeof feedbackSchema>;
+// 일본어 입문~중급 피드백(spec/chat.md "피드백 형식"). 발음 검사와 정리는 client.ts가 한다
+export const pronFeedbackSchema = z.object({
+  good: z.string(),
+  improve: z.array(z.object({ point: z.string(), example: z.string(), example_pron_ko: z.string() })),
+});
+// 새로 만드는 피드백. example_pron_ko는 일본어 입문~중급만 있고, 검사에 맞지 않으면 null이다. 그 밖에는 키가 없다
+export type FeedbackItem = { point: string; example: string; example_pron_ko?: string | null };
+export type Feedback = { good: string; improve: FeedbackItem[] };
+// 읽은 피드백. 2026-10-20 전에 만든 피드백은 improve가 문자열 배열이다(spec/chat.md "옛 형식")
+export type StoredFeedback = { good: string; improve: (FeedbackItem | string)[] };
 
 // AI 정답 설명. 빈 설명은 client.ts가 invalid_output으로 처리한다
 export const explanationSchema = z.object({ explanation: z.string() });

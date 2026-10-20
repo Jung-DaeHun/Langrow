@@ -54,7 +54,10 @@ const CORRECTED: TurnReply = {
   reply_ko: "라테 한 잔 나갑니다!",
   correction: { corrected: "Can I get a latte?", explanation_ko: "주문할 때는 Can I get ...?이 자연스러워요." },
 };
-const FEEDBACK: Feedback = { good: "주문을 끝까지 마쳤어요.", improve: ["관사 a를 빠뜨리지 않게 해 보세요."] };
+const FEEDBACK: Feedback = {
+  good: "주문을 끝까지 마쳤어요.",
+  improve: [{ point: "관사 a를 빠뜨리지 않게 해 보세요.", example: "I'd like a latte." }],
+};
 
 const EMPTY_ACCOUNT = {
   agreedAt: null,
