@@ -53,7 +53,8 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
         대화 문장은 서버를 거치지 않고 브라우저 speechSynthesis로 읽는다
 한글 발음: 대화는 일본어 입문~중급 턴에서 Claude 응답의 reply_pron_ko·corrected_pron_ko → 성공 확정 RPC가 chat_turns에 저장, 종료 피드백은 고칠 점마다 example_pron_ko → 완료 RPC가 chat_sessions.feedback에 저장
         단어는 (로컬) generate-words·generate-pronunciation → data/words/*.json의 pron_ko·example_pron_ko 커밋 → seed-words
-문장 뜯어보기: 모든 턴에서 Claude 응답의 reply_breakdown·correction.breakdown → lib/breakdown 검사(실패면 null) → 성공 확정 RPC가 chat_turns에 저장
+문장 뜯어보기: 처음 열 때 /breakdown → 시작 RPC(계정·턴 잠금, 저장본이면 바로 응답, 없으면 실패 10회·만드는 중 확인 후 90초 기한 저장)
+        → Claude(잠금 밖, 그 문장만) → lib/breakdown 검사 → 성공은 저장 RPC(값이 없을 때만 chat_turns에, 기한 지움) / 실패는 실패 RPC(기한 지움, chat_failed)
         첫 마디는 scenarios.ts의 breakdown(AI 초안 + 사람 검수)
 배운 단어: 첫 턴 예약 RPC가 후보(세션 언어로 오늘 배운 단어 → 없으면 7일 안, 오늘 쓴 단어는 뒤로, 최대 20개)
         → Claude가 target_words(최대 5개)·used_words 번호 → lib/targetWords가 id로 바꿈(맞지 않으면 버림)
@@ -81,6 +82,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 | POST | `/api/chat/sessions` | 세션 생성 (Claude 호출 없음, 위 레벨 상황은 400, Free의 Pro 상황은 403 `PRO_REQUIRED`) |
 | POST | `/api/chat/sessions/[id]/messages` | 대화 1턴 |
 | POST | `/api/chat/sessions/[id]/end` | 종료. 완료 200, 처리 중 202, 턴 처리 중 409 |
+| POST | `/api/chat/sessions/[id]/breakdown` | 문장 뜯어보기 (처음 열 때 그 문장만 만들어 저장, 저장본 재사용, 같은 문장은 한 번에 하나만 만들고 나머지 409, 따로 한도 없음) |
 | POST | `/api/words/batch` | 회차 저장. 기존 단어는 200, 신규분만 한도 확인 |
 | POST | `/api/words/review` | 복습 결과 저장 |
 | POST | `/api/words/explain` | AI 정답 설명 (Free 하루 10회, Pro 무제한, 단어·보기별 저장본 재사용) |
@@ -97,7 +99,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 | `profiles` | id(=auth.users.id), current_language, pro_until, trial_started_at, agreed_at, onboarded_at, last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
 | `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token, operation_expires_at, feedback_status(none/pending/ready/fallback/skipped), feedback, target_word_ids(배운 단어 목표), target_source(today/recent), created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, reply_breakdown, correction(일본어 입문~중급은 corrected_pron_ko, 뜯어보기가 있으면 breakdown 포함), used_word_ids(그 턴에 쓴 목표 단어), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko, reply_breakdown(처음 열 때 만듦), correction(일본어 입문~중급은 corrected_pron_ko, 뜯어보기를 만들었으면 breakdown 포함), reply_breakdown_until·corrected_breakdown_until(뜯어보기 만드는 중 기한), used_word_ids(그 턴에 쓴 목표 단어), created_at — unique(session_id, turn_no), 세션당 pending 1개(partial unique) |
 | `words` | id(`en-1-001`), language, level, rank, word, reading, meaning_ko, example(`{{정답}}`), example_ko, distractors(3개), pron_ko·example_pron_ko(일본어 한글 발음, 영어는 null) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props, created_at (`limit_reached`, `pro_clicked`, `kana_studied`, `level_test_submitted`, `chat_failed`, `word_explained`) |
@@ -116,7 +118,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 ## Claude 연동
 - `client.messages.create()` + zod 스키마(`output_config.format`)로 구조화 출력을 받는다. `stop_reason`을 먼저 보고 직접 파싱한다(`messages.parse()`는 잘린 응답도 파싱 실패로 throw한다). refusal·`max_tokens` 도달·파싱 실패는 실패로 처리하고, env 설정 오류는 API를 부르지 않고 `config`로 실패한다.
 - SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 호출당 20초, 전체 약 40초, 라우트 `maxDuration = 60`.
-- `max_tokens` 4096(thinking 포함), `output_config.effort`는 `low`. 프롬프트 빌더는 순수 함수(`services/claude/prompts.ts`). 스트리밍은 쓰지 않는다. 대화 턴만 요청 단위 자동 프롬프트 캐싱(5분)을 건다(ADR-026).
+- `max_tokens` 4096(thinking 포함), `output_config.effort`는 `low`. 프롬프트 빌더는 순수 함수(`services/claude/prompts.ts`). 스트리밍은 쓰지 않는다. 대화 턴만 요청 단위 자동 프롬프트 캐싱(5분)을 건다(ADR-026). 문장 뜯어보기는 턴과 따로, 처음 열 때 그 문장만 만든다(ADR-027).
 
 ## 환경
 - 로컬: Supabase CLI(Docker) + `npm run dev`. 운영: Supabase 클라우드(서울) 1개 + Vercel Production(icn1, `main`). Vercel Preview는 끈다(prod DB 오염 방지).

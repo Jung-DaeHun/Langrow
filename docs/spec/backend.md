@@ -52,6 +52,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
   - 단어 회차: 기존 단어 제외 + 신규 개수로 한도 확인 + 신규 삽입 + 활동일/연속일 갱신
   - 복습·가나·레벨업 테스트: 결과/이벤트 저장과 활동일/연속일 갱신을 함께 처리한다.
   - AI 정답 설명: 예약은 설명 한도 확인 + 저장본 조회(없으면 실패 횟수 확인) + `word_explained` 저장, 실패는 그 예약 행 삭제 + `chat_failed` 기록, 저장은 설명을 만든 단어 내용이 지금 단어와 같을 때만 해시를 계산해 `word_explanations`에 넣기다. AI 호출 중에는 잠금을 유지하지 않는다.
+  - 문장 뜯어보기: 시작은 `profiles`·턴 잠금 + 저장본 조회(있으면 끝) + 실패 횟수 확인 + 그 문장의 "만드는 중" 기한 확인(지나지 않았으면 409) 후 기한 저장이다. 실패는 기한이 그 작업의 값일 때만 지우고 지웠을 때만 `chat_failed` 기록, 저장은 값이 아직 없을 때만 넣고 그 작업의 기한을 지운 뒤 저장된 값을 돌려주기다(`chat.md` "처음 열 때 만들기"). AI 호출 중에는 잠금을 유지하지 않는다.
   - 첫 레벨: 동의 확인 후 언어별 PK insert, `current_language` 전환, 최초 `onboarded_at` 설정을 함께 처리한다. 이미 해당 언어의 레벨이 있으면 409이며 다른 언어를 처음 추가하는 것은 허용한다. 레벨은 늘 입문(1)이다. API는 레벨을 받지 않고 라우트가 1을 넘긴다(ADR-019). RPC는 레벨 인자를 그대로 둔다.
   - 대화 세션 생성: 만료 작업 복구 + 준비 상태 + 요청 레벨이 지금 레벨인지 확인 + (Pro 상황이면) 플랜 확인 + 세션 삽입. Pro 상황인지는 use-case가 상황 상수(`lib/scenarios`)로 정해 인자(`p_pro_only boolean default false`)로 넘기고, 플랜은 RPC가 잠금 뒤 DB 시각(`current_plan`)으로 정한다. Free면 `PRO_REQUIRED`를 결과 코드로 돌려준다. 인자에 기본값을 둬서 지금 운영 코드(인자 4개로 부름)와도 맞게 한다. 같은 이름의 4개 인자 함수는 지우고 새로 만든다(둘 다 두면 이름 호출이 모호해진다).
   - 체험 시작은 `trial_started_at is null`, 레벨업은 `level = from_level`, 레벨 내리기는 `level > new` 조건을 유지한다. 모두 해당 계정 잠금 규칙을 따른다.
@@ -77,7 +78,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | 6 | secret 유출 | `.gitignore`에 `.env*`를 둔다 (추가 완료). secret에는 `NEXT_PUBLIC_`을 붙이지 않는다 |
 | 7 | XSS | `dangerouslySetInnerHTML`을 쓰지 않는다. AI 출력은 텍스트로만 그린다 |
 | 8 | 오픈 리디렉트 | `/auth/callback`은 `next` 파라미터를 받지 않는다 |
-| 9 | 입력 남용 | 모든 body를 zod로 검증한다. 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 언어와 이벤트 이름은 enum만 허용한다 |
+| 9 | 입력 남용 | 모든 body를 zod로 검증한다. 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 뜯어보기 턴 번호는 1~20 정수, 언어·이벤트 이름·뜯어보기 대상은 enum만 허용한다 |
 | 10 | 로그의 개인정보 | 로그에는 에러 코드, user id, 경로, 응답 시간만 남긴다. 대화 내용과 이메일은 남기지 않는다. Claude API 오류는 Anthropic이 돌려준 상태·에러 종류·요청 ID·에러 문장(300자까지)도 남긴다(아래 "Claude 연동", ADR-017) |
 | 11 | 계정 삭제 | `user_activity_days`를 포함해 모든 사용자 테이블의 FK를 `auth.users(id) on delete cascade`로 건다 |
 | 12 | 동의·온보딩 우회 | API별 준비 상태를 래퍼와 쓰기 RPC에서 검사한다. 미동의는 403 `CONSENT_REQUIRED`, 학습 준비 미완료는 403 `ONBOARDING_REQUIRED` |
@@ -98,6 +99,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | POST | `/api/chat/sessions` | 만료 작업 복구 + 세션 생성 (Claude 호출 없음). 위 레벨 상황은 400, 레벨이 바뀌었으면 409, Free의 Pro 상황은 403 `PRO_REQUIRED` |
 | POST | `/api/chat/sessions/[id]/messages` | 대화 1턴 (예약 RPC → Claude → 확정 RPC). 응답에 세션의 목표 단어 상태(`targetWords`·`targetSource`)를 담는다 |
 | POST | `/api/chat/sessions/[id]/end` | 종료 예약·피드백 확정/대체 결과. 완료 200, 처리 중 202, 턴 처리 중 409 |
+| POST | `/api/chat/sessions/[id]/breakdown` | turn_no + target(reply/corrected). 문장 뜯어보기 (시작 RPC가 저장본을 주면 끝, 없으면 실패 10회·만드는 중 확인 → Claude → 성공 시 저장 RPC / 실패 시 실패 RPC, `chat.md` "처음 열 때 만들기") |
 | POST | `/api/words/batch` | language + items. 신규분만 한도 확인하고 원자적으로 저장, 중복은 200 |
 | POST | `/api/words/review` | language + items. 유효한 복습 결과·활동일 저장 |
 | POST | `/api/words/explain` | word_id + choice?. AI 정답 설명 (예약 RPC가 저장본을 주면 끝, 없으면 Claude → 성공 시 저장 / 실패 시 예약 반환, `words.md`) |
@@ -125,7 +127,7 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | `profiles` | id(=auth.users.id), current_language(nullable), pro_until, trial_started_at, agreed_at, onboarded_at(nullable, 최초 완료 시각), last_study_date, streak, created_at |
 | `user_levels` | user_id, language, level(1~5) — PK(user_id, language) |
 | `chat_sessions` | id, user_id, language, level, scenario_id, status(active/ending/ended), operation_token(uuid, nullable), operation_expires_at(nullable), feedback_status(none/pending/ready/fallback/skipped), feedback(jsonb), target_word_ids(text[], nullable, 배운 단어 목표), target_source(today/recent, nullable), created_at, ended_at |
-| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), reply_breakdown(jsonb, nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko`, 검사를 통과하면 `breakdown` 포함), used_word_ids(text[], nullable, 그 턴에 쓴 목표 단어), created_at — unique(session_id, turn_no) |
+| `chat_turns` | id, session_id, user_id, turn_no, status(pending/done), user_text, reply, reply_ko, reply_pron_ko(nullable), reply_breakdown(jsonb, nullable), correction(jsonb, 일본어 입문~중급은 `corrected_pron_ko`, 뜯어보기를 만들었으면 `breakdown` 포함), reply_breakdown_until·corrected_breakdown_until(timestamptz, nullable, 뜯어보기를 만드는 중인 기한), used_word_ids(text[], nullable, 그 턴에 쓴 목표 단어), created_at — unique(session_id, turn_no) |
 | `words` | id(text, 예: `en-1-001`), language, level, rank, word, reading, meaning_ko, example, example_ko, distractors(text[]), pron_ko(nullable), example_pron_ko(nullable) — unique(language, level, rank) |
 | `user_words` | user_id, word_id, status(known/review), first_seen_at, updated_at — PK(user_id, word_id) |
 | `events` | id, user_id, name, props(jsonb), created_at |
@@ -147,18 +149,18 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 - **구조화 출력**: SDK의 구조화 출력을 쓴다 (`client.messages.create()` + zod 스키마, `output_config.format`). Sonnet 5.5가 지원한다. deprecated된 `output_format`은 쓰지 않는다. `stop_reason`을 먼저 본 뒤 첫 text 블록을 zod로 파싱한다. `messages.parse()`는 `stop_reason`을 보기 전에 파싱하다 throw해서 실패 사유를 구분하지 못하므로 쓰지 않는다.
 - **실패로 처리하는 경우**(`chat_failed`의 실패 사유): refusal, `max_tokens` 도달, 파싱·스키마 검증 실패(`invalid_output`), 타임아웃, API 오류. env가 없거나 비어 있으면 API를 부르지 않고 재시도 없이 `config`로 실패하며, 키 이름만 에러 로그로 남긴다
 - **API 오류 로그**: 타임아웃이 아닌 API 오류(`api_error`)는 시도마다 `console.error`로 한 줄을 남긴다: `{ ai: "api_error", status, type, requestId, message }`. `status`는 HTTP 상태, `type`은 Anthropic 에러 종류(`invalid_request_error` 등), `requestId`는 Anthropic 요청 ID, `message`는 SDK 에러의 문장을 300자에서 자른 것이다. 연결 오류처럼 응답이 없어 없는 값은 빼고 남긴다. 프롬프트·사용자 입력·AI 응답은 남기지 않는다. 2026-10-17 운영에서 지출 한도 초과(400)로 대화가 실패했는데 `api_error`만 남아 원인을 로그로 알 수 없어 넣었다(ADR-017)
-- **타임아웃과 재시도**: 호출당 타임아웃 20초. SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 메시지·종료·설명 라우트 모두 `maxDuration = 60`이며, 재시도 포함 AI 호출 전체 예산은 최대 약 40초다. 두 호출 모두 같은 작업 토큰을 사용한다. 중복 HTTP 요청이나 DB 확정 재시도 때문에 AI 호출을 새로 시작하지 않는다.
+- **타임아웃과 재시도**: 호출당 타임아웃 20초. SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 메시지·종료·설명·뜯어보기 라우트 모두 `maxDuration = 60`이며, 재시도 포함 AI 호출 전체 예산은 최대 약 40초다. 두 호출 모두 같은 작업 토큰을 사용한다. 중복 HTTP 요청이나 DB 확정 재시도 때문에 AI 호출을 새로 시작하지 않는다.
 - **토큰 상한과 effort**: `max_tokens`는 4096으로 둔다. Sonnet 5.5는 adaptive thinking이 기본이고 thinking 토큰도 `max_tokens`에 들어가므로 응답(약 500토큰 이하)보다 넉넉히 잡는다. `output_config.effort`는 `low`라서 쉬운 턴은 thinking 없이 답한다.
 - **프롬프트**: 빌더는 순수 함수(`services/claude/prompts.ts`)로 단위 테스트하고, 스키마는 `schemas.ts`에 둔다. AI 정답 설명(`words.md`)도 같은 모델·effort·재시도 규칙으로 부르고, 스키마는 `{ explanation }` 하나다. 입력은 DB의 예문(정답을 채운 문장), `example_ko`, 정답, 뜻, 단어 레벨, 고른 보기(없으면 복습)다.
 - **대화 기록**: 고정 user 턴("대화를 시작합니다") → 첫 마디 → `done` 턴들 → 이번 입력 순서로 보낸다. `pending` 턴은 넣지 않는다.
 - **한글 발음**(`chat.md` "한글 발음"): 일본어 입문~중급 턴만 시스템 프롬프트에 표기 규칙을 넣고 `reply_pron_ko`·`corrected_pron_ko`가 있는 스키마로 받는다. 발음이 비었거나 검사(`lib/pronunciation`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다. 성공 확정 RPC(`finish_chat_turn`)는 `reply_pron_ko`를 받아 `chat_turns`에 저장하고, 교정 발음은 `correction` jsonb 안에 그대로 저장한다. 종료 피드백도 일본어 입문~중급이면 표기 규칙을 넣고 고칠 점마다 `example_pron_ko`가 있는 스키마로 받아, 같은 검사로 맞지 않는 발음만 `null`로 바꾼다(`chat.md` "피드백 형식"). 단어 생성 스크립트(`generate-words`, `generate-pronunciation`)도 같은 표기 규칙 문구를 쓴다.
-- **문장 뜯어보기**(`chat.md` "문장 뜯어보기"): 모든 턴의 스키마에 `reply_breakdown`·`correction.breakdown`을 더한다. 검사(`lib/breakdown`)에 맞지 않으면 실패로 보지 않고 그 값만 `null`로 바꾼다(교정은 `breakdown` 키를 뺀다). `finish_chat_turn`은 `p_reply_breakdown jsonb default null`을 받아 `chat_turns.reply_breakdown`에 저장하고, 교정 뜯어보기는 `correction` jsonb 안에 그대로 저장한다. 운영 DB에 마이그레이션을 적용해야 한다.
+- **문장 뜯어보기**(`chat.md` "문장 뜯어보기"): 턴 스키마와 턴 프롬프트에는 넣지 않는다(ADR-027). 사용자가 처음 열 때 `/breakdown`이 대화 턴과 같은 모델·effort·타임아웃·재시도로 부르고, 스키마는 `{ breakdown }` 하나다. 입력은 언어와 문장(후리가나 표기 포함)뿐이다. 검사(`lib/breakdown`)에 맞지 않으면 `invalid_output`이다. 검사를 통과한 조각(원래 문장을 조각 경계에서 자른 것)을 저장 RPC가 `chat_turns.reply_breakdown` 또는 `correction` jsonb의 `breakdown`에 넣는다. `finish_chat_turn`의 `p_reply_breakdown jsonb default null` 인자는 지우지 않고 넘기지만 않는다(옛 코드와 함께 돌아가게). 2026-10-17~10-20에는 모든 턴의 스키마에 뜯어보기를 더하고, 검사에 맞지 않으면 그 값만 `null`로 저장했다(ADR-018). 새 RPC가 생겨 운영 DB에 마이그레이션을 적용해야 한다.
 - **배운 단어**(`chat.md` "배운 단어 써 보기"): `begin_chat_turn`은 세션의 첫 턴이고 목표 단어가 없을 때 후보 단어(최대 20개, `id`·단어·읽기·뜻·오늘 대화에서 쓴 여부)와 출처를, 목표 단어가 있는 세션이면 목표 단어와 쓴 여부를 함께 돌려준다. 후보가 있는 첫 턴은 시스템 프롬프트에 후보 목록과 고르기·유도 지시를 넣고 `target_words`·`used_words`(번호 배열)가 있는 스키마로, 목표 단어가 있는 턴은 목표 단어 목록과 유도 지시를 넣고 `used_words`가 있는 스키마로 받는다. 그 밖의 턴은 지금 스키마 그대로다. 번호는 `lib/targetWords`가 단어 `id`로 바꾸고 맞지 않는 값은 버린다(실패로 보지 않는다). `finish_chat_turn`은 `p_target_word_ids`·`p_target_source`·`p_used_word_ids`(모두 `default null`)를 받아 첫 턴이면 목표 단어를, 매 턴 쓴 단어를 저장하고 목표 단어 상태를 돌려준다. 운영 DB에 마이그레이션을 적용해야 한다.
-- **프롬프트 캐싱**(ADR-026): 대화 턴만 요청 단위 자동 캐싱(`cache_control: { type: "ephemeral" }`, 5분)을 건다. 표시는 마지막 블록(이번 사용자의 말)에 붙고, 다음 턴이 같은 시스템 프롬프트와 앞 대화를 다시 보내면 그 앞부분을 입력가의 1/10로 읽는다. 시스템 프롬프트가 앞 턴과 다른 턴(한국어 입력의 "이번 입력" 안내가 생기거나 없어질 때, 후보를 고르는 첫 턴 다음, 목표 단어의 썼음/아직이 바뀔 때)은 캐시를 못 읽고 쓰기 할증(입력가의 1.25배)을 낸다. 다만 20블록 안의 더 앞 턴과 시스템 프롬프트가 같으면 그 턴까지는 읽는다. 종료 피드백(세션마다 한 번이라 다시 읽을 일이 없다)과 AI 정답 설명(시스템 프롬프트 약 400토큰으로 최소 캐시 길이 512토큰보다 짧다)에는 걸지 않는다. 프롬프트 문구는 캐싱 때문에 바꾸지 않았다(2026-10-20 실측은 `usage.md` "비용 추정").
+- **프롬프트 캐싱**(ADR-026): 대화 턴만 요청 단위 자동 캐싱(`cache_control: { type: "ephemeral" }`, 5분)을 건다. 표시는 마지막 블록(이번 사용자의 말)에 붙고, 다음 턴이 같은 시스템 프롬프트와 앞 대화를 다시 보내면 그 앞부분을 입력가의 1/10로 읽는다. 시스템 프롬프트가 앞 턴과 다른 턴(한국어 입력의 "이번 입력" 안내가 생기거나 없어질 때, 후보를 고르는 첫 턴 다음, 목표 단어의 썼음/아직이 바뀔 때)은 캐시를 못 읽고 쓰기 할증(입력가의 1.25배)을 낸다. 다만 20블록 안의 더 앞 턴과 시스템 프롬프트가 같으면 그 턴까지는 읽는다. 종료 피드백(세션마다 한 번이라 다시 읽을 일이 없다), AI 정답 설명(시스템 프롬프트 약 400토큰으로 최소 캐시 길이 512토큰보다 짧다), 문장 뜯어보기(문장마다 한 번)에는 걸지 않는다. 프롬프트 문구는 캐싱 때문에 바꾸지 않았다(2026-10-20 실측은 `usage.md` "비용 추정").
 
 ## 에러 코드
 
-응답 형식은 `{ code, message }`이고, `message`는 사용자에게 보여 줄 한국어 문구다. AI 정답 설명의 `AI_UNAVAILABLE`·`AI_FAILURE_LIMIT`는 같은 code에 설명용 문구를 쓴다(`words.md` "AI 정답 설명").
+응답 형식은 `{ code, message }`이고, `message`는 사용자에게 보여 줄 한국어 문구다. AI 정답 설명과 문장 뜯어보기의 `AI_UNAVAILABLE`·`AI_FAILURE_LIMIT`는 같은 code에 각자의 문구를 쓴다(`words.md` "AI 정답 설명", `chat.md` "처음 열 때 만들기").
 
 | code | HTTP | 언제 | 클라이언트 동작 |
 |---|---|---|---|
@@ -167,12 +169,12 @@ src/lib/                  순수 규칙 (I/O 없음. 환경변수 읽기와 fetc
 | `ONBOARDING_REQUIRED` | 403 | 필요한 언어·레벨 미설정 | `/onboarding` 언어 단계로 이동 |
 | `PRO_REQUIRED` | 403 | Free 사용자가 Pro 상황으로 새 세션 생성 | 래퍼가 이동시키지 않는다. 상황 목록을 다시 읽고 체험 또는 "정식 출시 준비 중" 안내 |
 | `INVALID_INPUT` | 400 | zod 실패, 지금 레벨보다 위 레벨의 상황, 잘못된 시험 제출 | 문구 표시 |
-| `NOT_FOUND` | 404 | 없거나 남의 리소스 | 홈으로 이동 |
+| `NOT_FOUND` | 404 | 없거나 남의 리소스 | 홈으로 이동 (AI 설명·뜯어보기는 그 자리에 오류와 [다시 시도]) |
 | `LIMIT_REACHED` | 429 | 플랜 한도 초과 | 체험 또는 Pro 안내 |
-| `AI_FAILURE_LIMIT` | 429 | 하루 실패 10회 | 대화 입력·AI 설명 버튼 비활성화 |
-| `AI_UNAVAILABLE` | 503 | 메시지·AI 설명 생성 실패 | 입력 유지, 다시 보내기 (종료 피드백 실패는 대체 결과로 200, 설명은 [다시 시도]) |
+| `AI_FAILURE_LIMIT` | 429 | 하루 실패 10회 | 대화 입력·AI 설명 버튼 비활성화 (뜯어보기는 그 자리에 안내만, 대화 입력은 막지 않음) |
+| `AI_UNAVAILABLE` | 503 | 메시지·AI 설명·뜯어보기 생성 실패 | 입력 유지, 다시 보내기 (종료 피드백 실패는 대체 결과로 200, 설명·뜯어보기는 [다시 시도]) |
 | `SESSION_FULL` | 409 | 20턴 초과 | `/end` 호출 |
-| `CONFLICT` | 409 | 진행 중인 턴, 종료 중/끝난 세션에 전송, 만료·교체된 작업 토큰, 레벨이 이미 있음·바뀜, 체험 사용함 | 입력을 보존하고 상태를 새로 읽음. 전송/종료를 자동 반복하지 않고 필요한 재시도 버튼 표시 |
+| `CONFLICT` | 409 | 진행 중인 턴, 종료 중/끝난 세션에 전송, 만료·교체된 작업 토큰, 레벨이 이미 있음·바뀜, 체험 사용함, 뜯어보기를 만드는 중인 문장 | 입력을 보존하고 상태를 새로 읽음. 전송/종료를 자동 반복하지 않고 필요한 재시도 버튼 표시 (뜯어보기는 상태를 다시 읽지 않고 그 자리에 [다시 시도]) |
 | `INTERNAL` | 500 | 예상하지 못한 예외 (로그 남김) | "잠시 후 다시 시도" |
 
 - 클라이언트는 fetch 래퍼 하나(`services/apiClient`)에서 처리한다. `/end`의 202는 성공한 처리 중 응답으로 구분해 `retryAfterSeconds` 이후 다시 확인한다.
