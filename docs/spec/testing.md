@@ -8,7 +8,7 @@
 - guard는 경로에 `test`가 들어간 파일을 검사하지 않는다. 그래서 레벨업 테스트의 경로는 `/level-up`, `/api/level-up`으로 둔다. `src/test/fakes.ts` 같은 테스트 보조 파일은 이 규칙 덕분에 통과한다.
 - DB 접근 파일의 `server/db/*.test.ts`는 실제 DB 통합 테스트로 작성한다. Vitest 기본 실행에서 이 경로를 제외하고 `test:db`에서 포함한다. Supabase 쿼리 체인을 mock하거나 hook 통과만을 위한 빈 테스트를 만들지 않는다.
 - 정적 UI는 `page.tsx`/`layout.tsx`에 둔다 (hook이 검사하지 않음). 컴포넌트는 꼭 필요한 것만 만든다.
-  - 화면 단위: `OnboardingFlow`, `ScenarioPicker`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`
+  - 화면 단위: `OnboardingFlow`, `ScenarioPicker`, `ChatRoom`, `ChatFeedback`, `WordSession`, `LevelTestRunner`, `KanaDeck`, `LandingPreview`(랜딩 대화 미리보기)
   - 공용: `Flashcard`, `BlankQuiz`, `Furigana`, `LanguageSheet`(상단 언어·레벨 메뉴), `AppNav`, `UsageCard`, `Dialog`, `Toast`, `WaitingDots`, `GoogleLoginButton`, `TrialButton`(체험 시작), `ProButton`(Pro 클릭·준비 중 모달), `LimitNotice`(한도 도달 안내), `WordExplanation`(AI 정답 설명), `LogoutButton`, `SpeakButtons`(음성 재생). 만든 이유는 `ui.md` "공용 React 컴포넌트와 이유"에 있다
   - 입력·API 호출이 있는 부분만 Client Component로 만든다. 페이지의 분기 규칙은 테스트할 수 있게 `lib/`(예: `today`, `readiness`, `onboarding`)에 둔다.
   - 페이지 읽기는 `server/db/reads.ts`에 두고 `test:db`로 실제 RLS와 함께 검증한다. 운영자 정보는 설정 파일 `src/site.config.ts`에 둔다.
@@ -78,6 +78,7 @@
   - 레벨 1~4/5 단어 소진 분기, 오답 0개, 소진 뒤 미완료 10개 목표/잘못된 체험 유도 없음, 레벨·언어 변경 후 일반 화면 복귀
   - 대화 입력은 표시된 남은 횟수가 0이어도 막지 않고 429 응답 뒤에만 막음
   - 설정: `/settings`는 보호 경로(`lib/paths`), 탭바·사이드바는 `/settings`에서 계정을 현재 위치로 표시
+  - 랜딩 미리보기: 처음은 영어 탭(`aria-selected`)이고 props로 받은 첫 마디·번역과 고정 문구를 그림, 영어에는 한글 발음 없음, 일본어 탭을 누르면 첫 마디·교정 문장에 루비가 있고 한글 발음은 `aria-hidden`, 문장마다 `lang`(내 말풍선은 `ko`), 탭 말고는 버튼이 없음(듣기·번역·뜯어보기 없음)
   - 음성: [듣기]는 속도 1, [천천히 듣기]는 0.75로 재생, 다른 버튼을 누르면 앞 소리 멈춤, 버튼이 사라지면 그 소리 멈춤, 재생 실패 문구와 다시 누르면 지움, 우리가 멈춘 음성 중단은 오류 아님, 대화는 학습 언어 음성이 없거나 `speechSynthesis`가 없으면 버튼 없음·`voiceschanged` 뒤 표시, 카드 앞면은 단어·뒷면은 예문 파일, 빈칸은 학습 채점 뒤에만·레벨업 테스트에는 없음, 대화 말풍선(첫 마디 포함)·교정 문장은 표기를 지운 문장
   - 한글 발음: 대화는 일본어 입문·초보면 말풍선(첫 마디 포함)에 항상, 중급이면 펼쳤을 때만, 상급·영어는 없음, 교정 카드의 고친 문장 아래, 값이 `null`이면 줄 없음, `aria-hidden`이고 새 턴 알림 영역에는 없음. 단어 카드는 앞면 `pron_ko`·뒷면 `example_pron_ko`(레벨 4·영어는 없음), 빈칸은 학습 채점 뒤에만·레벨업 테스트에는 없음
   - AI 정답 설명: 학습 빈칸은 정답·오답 모두 채점 뒤 버튼, 레벨업 테스트에는 없음, 복습 카드는 뒤집은 뒤에만 버튼, 대기·성공·503 [다시 시도]·429 안내, 429 뒤 같은 회차의 다음 문제도 안내, 한도 안내에서 체험을 시작하면 버튼 복귀, 다음 문제로 넘어가면 늦은 응답 무시, 복습 카드를 앞면으로 돌려도 요청·설명 유지, 키보드로 누른 뒤 Tab 한 번으로 [다음 문제]
