@@ -3,7 +3,7 @@
 import { ArrowUp, Check, ChevronDown, ChevronLeft, ChevronUp, CircleAlert, Info, Languages } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type ReactNode, type RefObject } from "react";
 import { opensTranslationByDefault, showsPronunciation, type Language, type Level } from "@/lib/levels";
 import type { Breakdown, BreakdownTarget } from "@/lib/breakdown";
 import { stripFurigana } from "@/lib/furigana";
@@ -489,7 +489,8 @@ function AiBubble({
   source?: BreakdownSource; // 턴 말풍선만 넘긴다. 첫 마디는 API를 부르지 않는다
 }) {
   const [open, setOpen] = useState(false);
-  const breakdown = useBreakdown(line.breakdown, source);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const breakdown = useBreakdown(line.breakdown, toggleRef, source);
   const alwaysOpen = opensTranslationByDefault(level);
   const body = (
     <span lang={language} className="block whitespace-pre-wrap wrap-anywhere">
@@ -526,11 +527,13 @@ function AiBubble({
             {open && translation}
           </button>
         )}
-        {breakdown.open && (
-          <div className="mt-2 border-t border-line pt-2">
-            <BreakdownSlot breakdown={breakdown} language={language} tile="bg-page" />
-          </div>
-        )}
+        <BreakdownRegion breakdown={breakdown}>
+          {breakdown.open && (
+            <div className="mt-2 border-t border-line pt-2">
+              <BreakdownSlot breakdown={breakdown} language={language} tile="bg-page" />
+            </div>
+          )}
+        </BreakdownRegion>
       </div>
       {(!alwaysOpen || breakdown.shown) && (
         <div className="flex gap-3">
@@ -540,7 +543,7 @@ function AiBubble({
               번역
             </button>
           )}
-          {breakdown.shown && <BreakdownToggle breakdown={breakdown} />}
+          {breakdown.shown && <BreakdownToggle breakdown={breakdown} buttonRef={toggleRef} />}
         </div>
       )}
       <SpeakButtons source={{ kind: "speech", text: line.text, language }} variant="compact" />
@@ -558,11 +561,19 @@ function CorrectionBreakdown({
   language: Language;
   source: BreakdownSource;
 }) {
-  const breakdown = useBreakdown(pieces, source);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const breakdown = useBreakdown(pieces, toggleRef, source);
+  // 닫혀 있어도 live 영역이 남으므로 gap 대신 펼친 내용에 mt-1을 둬서 닫힌 카드에 빈 간격이 생기지 않게 한다
   return (
-    <div className="flex flex-col items-start gap-1">
-      <BreakdownToggle breakdown={breakdown} />
-      {breakdown.open && <BreakdownSlot breakdown={breakdown} language={language} tile="bg-card/70" />}
+    <div className="flex flex-col items-start">
+      <BreakdownToggle breakdown={breakdown} buttonRef={toggleRef} />
+      <BreakdownRegion breakdown={breakdown}>
+        {breakdown.open && (
+          <div className="mt-1">
+            <BreakdownSlot breakdown={breakdown} language={language} tile="bg-card/70" />
+          </div>
+        )}
+      </BreakdownRegion>
     </div>
   );
 }
@@ -579,11 +590,17 @@ type Requested =
 // 저장본이 없는 턴의 문장은 처음 열 때 만든다("처음 열 때 만들기"). 받은 값은 화면 상태에만 두고, 다시 읽은 턴에 저장본이 오면 그것을 쓴다.
 // 첫 마디는 source가 없어 scenarios.ts의 값만 쓰고, 값이 없으면 토글을 두지 않는다.
 // 실패해도 대화 입력을 막거나 대화방을 다시 읽지 않는다(404여도 홈으로 가지 않는다)
-function useBreakdown(initial: Breakdown | null | undefined, source?: BreakdownSource) {
+// toggleRef는 부르는 컴포넌트가 만든다. 돌려주는 상태에 ref를 넣으면 렌더 중에 ref를 읽는 것으로 본다(react-hooks/refs)
+function useBreakdown(
+  initial: Breakdown | null | undefined,
+  toggleRef: RefObject<HTMLButtonElement | null>,
+  source?: BreakdownSource,
+) {
   const [open, setOpen] = useState(false);
   const [requested, setRequested] = useState<Requested>({ kind: "idle" });
   const stored = initial?.length ? initial : null;
   const pieces = stored ?? (requested.kind === "done" ? requested.pieces : null);
+  const waiting = pieces === null && requested.kind === "waiting";
 
   async function request() {
     if (source === undefined) return;
@@ -599,6 +616,8 @@ function useBreakdown(initial: Breakdown | null | undefined, source?: BreakdownS
   }
 
   function toggle() {
+    // 기다리는 동안은 aria-disabled라 눌러도 아무것도 하지 않는다
+    if (waiting) return;
     if (open) {
       setOpen(false);
       // 오류·안내는 지우고 다시 열면 다시 부른다
@@ -613,24 +632,37 @@ function useBreakdown(initial: Breakdown | null | undefined, source?: BreakdownS
     shown: pieces !== null || source !== undefined,
     open,
     toggle,
-    retry: () => void request(),
+    waiting,
+    // 누른 [다시 시도]가 사라지므로 포커스를 토글로 옮긴 뒤 다시 부른다
+    retry: () => {
+      toggleRef.current?.focus();
+      void request();
+    },
     pieces,
     requested,
     // 처음 열 때 받는 문장은 대기·타일·오류가 읽히도록 타일 자리를 aria-live 영역으로 둔다
-    live: stored === null,
+    live: stored === null && source !== undefined,
   };
 }
 
 type BreakdownState = ReturnType<typeof useBreakdown>;
 
-function BreakdownToggle({ breakdown }: { breakdown: BreakdownState }) {
+// disabled는 키보드 포커스를 잃게 해서 기다리는 동안은 aria-disabled로 둔다
+function BreakdownToggle({
+  breakdown,
+  buttonRef,
+}: {
+  breakdown: BreakdownState;
+  buttonRef: RefObject<HTMLButtonElement | null>;
+}) {
   const Icon = breakdown.open ? ChevronUp : ChevronDown;
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-expanded={breakdown.open}
+      aria-disabled={breakdown.waiting || undefined}
       onClick={breakdown.toggle}
-      disabled={breakdown.pieces === null && breakdown.requested.kind === "waiting"}
       className={META_BUTTON}
     >
       문장 뜯어보기
@@ -671,7 +703,12 @@ function BreakdownSlot({ breakdown, language, tile }: { breakdown: BreakdownStat
       </div>
     );
   }
-  return breakdown.live ? <div aria-live="polite">{content}</div> : content;
+  return content;
+}
+
+// 처음 열 때 받는 문장의 타일 자리. 낭독기가 처음 나온 대기 표시도 읽도록 live 영역을 닫혀 있을 때도 둔다
+function BreakdownRegion({ breakdown, children }: { breakdown: BreakdownState; children: ReactNode }) {
+  return breakdown.live ? <div aria-live="polite">{children}</div> : children;
 }
 
 // 조각 타일을 문장 순서대로 잇는다. 위는 조각(학습 언어), 아래는 뜻이고 한글 발음은 넣지 않는다

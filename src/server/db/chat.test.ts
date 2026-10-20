@@ -416,6 +416,39 @@ describe("대화 1턴", () => {
       { turn_no: 1, status: "done", reply_breakdown: null, correction: REPLY.correction },
     ]);
   });
+
+  // 운영 DB에 마이그레이션을 먼저 적용하는 동안 지금 운영 코드는 뜯어보기를 넘겨 확정한다. 그 경로는 그대로 저장돼야 한다
+  it("finish_chat_turn은 옛 코드처럼 p_reply_breakdown과 correction.breakdown을 넘기면 그대로 저장한다", async () => {
+    const user = await createReadyUser();
+    const sessionId = await newSession(user.id);
+    const replyBreakdown: Breakdown = [
+      { text: "One latte,", meaning_ko: "라테 한 잔" },
+      { text: "coming up!", meaning_ko: "나갑니다" },
+    ];
+    const correction = {
+      ...REPLY.correction,
+      breakdown: [
+        { text: "Can I get", meaning_ko: "주실 수 있나요" },
+        { text: "a latte?", meaning_ko: "라테 한 잔" },
+      ],
+    };
+    const { token } = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
+
+    const result = await callRpc("finish_chat_turn", {
+      p_user_id: user.id,
+      p_session_id: sessionId,
+      p_token: token,
+      p_reply: REPLY.reply,
+      p_reply_ko: REPLY.reply_ko,
+      p_correction: correction,
+      p_reply_breakdown: replyBreakdown,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(await turnsOf(sessionId)).toMatchObject([
+      { turn_no: 1, status: "done", reply_breakdown: replyBreakdown, correction },
+    ]);
+  });
 });
 
 describe("failChatTurn", () => {

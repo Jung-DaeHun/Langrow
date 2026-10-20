@@ -797,7 +797,7 @@ describe("ChatRoom 음성", () => {
     stubVoices([{ lang: "en-US", voiceURI: "en" }]);
     apiMock.mockResolvedValue(replied(2, 18, { correction: { corrected: "Fixed.", explanation_ko: "설명" } }));
     const { user } = setup(room({ turns: [turn(1)] }));
-    const region = () => document.querySelector("[aria-live]");
+    const region = () => document.querySelector(".sr-only[aria-live]");
 
     // 처음 연 화면의 지난 턴은 알리지 않는다
     expect(region()).toHaveTextContent(/^$/);
@@ -815,7 +815,7 @@ describe("ChatRoom 음성", () => {
 
     rerender(room({ language: "ja", level: 1, turns: [turn(1), turn(2, { reply: "[今日|きょう]は[暑|あつ]いですね。", replyKo: "오늘 덥네요." })] }));
 
-    const region = document.querySelector("[aria-live]");
+    const region = document.querySelector(".sr-only[aria-live]");
     expect(region).toHaveTextContent("今日は暑いですね。 오늘 덥네요.");
     expect(within(region as HTMLElement).getByText("今日は暑いですね。")).toHaveAttribute("lang", "ja");
   });
@@ -894,8 +894,8 @@ describe("ChatRoom 한글 발음", () => {
     await typeAndSend(user, "はい");
 
     expect(screen.getByText("하이.", ON_SCREEN)).toHaveAttribute("aria-hidden", "true");
-    expect(document.querySelector("[aria-live]")).toHaveTextContent("はい。");
-    expect(document.querySelector("[aria-live]")).not.toHaveTextContent("하이.");
+    expect(document.querySelector(".sr-only[aria-live]")).toHaveTextContent("はい。");
+    expect(document.querySelector(".sr-only[aria-live]")).not.toHaveTextContent("하이.");
   });
 });
 
@@ -989,7 +989,7 @@ describe("ChatRoom 문장 뜯어보기", () => {
     }
     expect(screen.getByText("물론이죠")).toBeInTheDocument();
     expect(screen.getByText("주세요")).toBeInTheDocument();
-    const region = document.querySelector("[aria-live]");
+    const region = document.querySelector(".sr-only[aria-live]");
     expect(region).toHaveTextContent("Sure, one latte.");
     for (const text of ["물론이죠", "라떼 하나", "주세요", "문장 뜯어보기"]) expect(region).not.toHaveTextContent(text);
   });
@@ -1109,26 +1109,38 @@ describe("ChatRoom 문장 뜯어보기", () => {
       expect(apiMock).not.toHaveBeenCalled();
     });
 
-    it("처음 누르면 그 턴의 turn_no·reply로 API를 부르고, 기다리는 동안 점 3개와 disabled 토글을 둔 뒤 받으면 펼친다", async () => {
+    it("처음 누르면 그 턴의 turn_no·reply로 API를 부르고, 기다리는 동안 점 3개와 누를 수 없는 토글(포커스 유지)을 둔 뒤 받으면 펼친다", async () => {
       const d = deferred<ApiResult<ChatBreakdownResponse>>();
       apiMock.mockReturnValueOnce(d.promise);
       const { user } = setup(room({ level: 1, turns: [turn(1), turn(2, { reply: "Sure, one latte." })] }));
+      // 낭독기가 대기 표시를 읽도록 live 영역은 열기 전부터 있다
+      const regionsBefore = Array.from(document.querySelectorAll('[aria-live="polite"]'));
 
       await user.click(toggles()[1]);
 
       expect(apiMock).toHaveBeenCalledWith("POST", BREAKDOWN_PATH, { turn_no: 2, target: "reply" });
       expect(toggles()[1]).toHaveAttribute("aria-expanded", "true");
-      expect(toggles()[1]).toBeDisabled();
-      expect(toggles()[0]).toBeEnabled();
-      expect(waiting()?.closest("[aria-live]")).toHaveAttribute("aria-live", "polite");
+      // disabled는 키보드 포커스를 잃게 해서 aria-disabled로 막는다
+      expect(toggles()[1]).toHaveAttribute("aria-disabled", "true");
+      expect(toggles()[1]).not.toBeDisabled();
+      expect(toggles()[1]).toHaveFocus();
+      expect(toggles()[0]).not.toHaveAttribute("aria-disabled");
+      const region = waiting()?.closest("[aria-live]");
+      expect(region).toHaveAttribute("aria-live", "polite");
+      expect(regionsBefore).toContain(region);
       // 점은 말풍선 안 번역 아래, 타일 자리에 둔다
       expect(isBefore(screen.getByText("번역 2"), waiting() as HTMLElement)).toBe(true);
       expectInputOpen();
 
+      // 기다리는 동안 다시 눌러도 닫히지 않고 다시 부르지 않는다
+      await user.click(toggles()[1]);
+      expect(toggles()[1]).toHaveAttribute("aria-expanded", "true");
+      expect(apiMock).toHaveBeenCalledTimes(1);
+
       await act(async () => d.resolve(fetched()));
 
       expect(waiting()).toBeNull();
-      expect(toggles()[1]).toBeEnabled();
+      expect(toggles()[1]).not.toHaveAttribute("aria-disabled");
       expect(toggles()[1]).toHaveAttribute("aria-expanded", "true");
       expect(isBefore(screen.getByText("번역 2"), screen.getByText("물론이죠"))).toBe(true);
       expect(screen.getByText("라떼 하나")).toBeInTheDocument();
@@ -1180,6 +1192,8 @@ describe("ChatRoom 문장 뜯어보기", () => {
 
       await user.click(retryButton() as HTMLElement);
 
+      // 누른 [다시 시도]가 사라지므로 포커스는 토글로 옮긴다
+      expect(toggles()[0]).toHaveFocus();
       expect(apiMock).toHaveBeenCalledTimes(2);
       expect(apiMock).toHaveBeenLastCalledWith("POST", BREAKDOWN_PATH, { turn_no: 1, target: "reply" });
       expect(screen.queryByRole("alert")).toBeNull();
@@ -1232,7 +1246,7 @@ describe("ChatRoom 문장 뜯어보기", () => {
       expect(screen.getByText("AI 2", ON_SCREEN)).toBeInTheDocument();
       rerender(room({ level: 1, turns: [turn(1), turn(2, { reply: "AI 2" })] }));
 
-      expect(toggles()[0]).toBeDisabled();
+      expect(toggles()[0]).toHaveAttribute("aria-disabled", "true");
       expect(waiting()).toBeInTheDocument();
       await act(async () => d.resolve(fetched()));
       expect(screen.getByText("물론이죠")).toBeInTheDocument();
@@ -1270,7 +1284,7 @@ describe("ChatRoom 배운 단어", () => {
   const used = (w: TargetWord): TargetWord => ({ ...w, used: true });
   const jaRoom = (overrides: Partial<ChatRoomData> = {}) => room({ language: "ja", level: 1, ...overrides });
   const wordsLine = (name = "오늘 단어") => screen.getByRole("list", { name });
-  const region = () => document.querySelector("[aria-live]") as HTMLElement;
+  const region = () => document.querySelector(".sr-only[aria-live]") as HTMLElement;
 
   function repliedWith(
     turnNo: number,
