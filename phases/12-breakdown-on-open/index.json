@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "breakdown-ai",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-20T23:43:49+0900",
+      "summary": "턴 스키마(turnReplySchema·pronTurnReplySchema)·buildTurnPrompt·acceptTurn에서 뜯어보기 제거. finishChatTurn은 p_reply_breakdown을 넘기지 않음(TurnReply 타입의 선택 필드는 유지). prompts.ts buildBreakdownPrompt({language,sentence}): system은 언어별 지시(BREAKDOWN_RULES 옮김, 빈 meaning_ko 금지 추가, ja는 표기=읽기 안내), 문장은 user 메시지 <문장>. schemas.ts breakdownReplySchema={breakdown}. client.ts BreakdownInput{language,level,target,sentence}, ai.generateBreakdown → AiResult<{breakdown}>: 턴과 같은 attempt·withRetry, cache 없음, alignBreakdown 실패면 warn …",
+      "completed_at": "2026-10-20T23:54:58+0900"
     },
     {
       "step": 2,
