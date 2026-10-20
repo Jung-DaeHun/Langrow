@@ -86,11 +86,13 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
     return resolved;
   }
 
-  // throw하지 않고 언제나 AiResult를 돌려준다. 프롬프트·응답 내용은 로그로 남기지 않는다
+  // throw하지 않고 언제나 AiResult를 돌려준다. 프롬프트·응답 내용은 로그로 남기지 않는다.
+  // cache: 자동 캐싱(5분)을 건다. 다음 요청이 같은 앞부분을 다시 보낼 때만 이득이라 대화 턴만 쓴다(ADR-026)
   async function attempt<S, T>(
     schema: z.ZodType<S>,
     buildPrompt: () => Prompt,
     accept: (value: S) => T | null,
+    cache = false,
   ): Promise<AiResult<T>> {
     let config: { client: AiClient; model: string };
     try {
@@ -112,6 +114,7 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
         system,
         messages,
         output_config: { format, effort: EFFORT },
+        ...(cache ? { cache_control: { type: "ephemeral" } as const } : {}),
       });
       if (message.stop_reason === "refusal") return { ok: false, reason: "refusal" };
       if (message.stop_reason === "max_tokens") return { ok: false, reason: "max_tokens" };
@@ -144,11 +147,17 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
     generateTurn: (input) =>
       withRetry(() =>
         showsPronunciation(input.language, input.level)
-          ? attempt(withWordFields(pronTurnReplySchema, input.words?.kind), () => buildTurnPrompt(input), (value) =>
-              acceptTurn(input, cleanTurnPron(value)),
+          ? attempt(
+              withWordFields(pronTurnReplySchema, input.words?.kind),
+              () => buildTurnPrompt(input),
+              (value) => acceptTurn(input, cleanTurnPron(value)),
+              true,
             )
-          : attempt(withWordFields(turnReplySchema, input.words?.kind), () => buildTurnPrompt(input), (value) =>
-              acceptTurn(input, value),
+          : attempt(
+              withWordFields(turnReplySchema, input.words?.kind),
+              () => buildTurnPrompt(input),
+              (value) => acceptTurn(input, value),
+              true,
             ),
       ),
     generateFeedback: (input) =>

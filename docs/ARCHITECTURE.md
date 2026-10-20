@@ -116,7 +116,7 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 ## Claude 연동
 - `client.messages.create()` + zod 스키마(`output_config.format`)로 구조화 출력을 받는다. `stop_reason`을 먼저 보고 직접 파싱한다(`messages.parse()`는 잘린 응답도 파싱 실패로 throw한다). refusal·`max_tokens` 도달·파싱 실패는 실패로 처리하고, env 설정 오류는 API를 부르지 않고 `config`로 실패한다.
 - SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 호출당 20초, 전체 약 40초, 라우트 `maxDuration = 60`.
-- `max_tokens` 4096(thinking 포함), `output_config.effort`는 `low`. 프롬프트 빌더는 순수 함수(`services/claude/prompts.ts`). 스트리밍·프롬프트 캐싱은 쓰지 않는다.
+- `max_tokens` 4096(thinking 포함), `output_config.effort`는 `low`. 프롬프트 빌더는 순수 함수(`services/claude/prompts.ts`). 스트리밍은 쓰지 않는다. 대화 턴만 요청 단위 자동 프롬프트 캐싱(5분)을 건다(ADR-026).
 
 ## 환경
 - 로컬: Supabase CLI(Docker) + `npm run dev`. 운영: Supabase 클라우드(서울) 1개 + Vercel Production(icn1, `main`). Vercel Preview는 끈다(prod DB 오염 방지).

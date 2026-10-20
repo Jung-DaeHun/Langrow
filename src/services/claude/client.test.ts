@@ -99,13 +99,15 @@ describe("generateTurn", () => {
     expect(requests).toHaveLength(1);
   });
 
-  it("요청에 주입한 model, max_tokens 4096, effort low, 구조화 출력 형식, 대화 프롬프트만 넣는다", async () => {
+  it("요청에 주입한 model, max_tokens 4096, effort low, 구조화 출력 형식, 대화 프롬프트, 자동 캐싱만 넣는다", async () => {
     const { ai, requests } = setup(done(reply));
     await ai.generateTurn(turnInput);
     const request = requests[0];
     const prompt = buildTurnPrompt(turnInput);
-    expect(Object.keys(request).sort()).toEqual(["max_tokens", "messages", "model", "output_config", "system"]);
+    expect(Object.keys(request).sort()).toEqual(["cache_control", "max_tokens", "messages", "model", "output_config", "system"]);
     expect(request).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
+    // 5분 TTL(기본값) 자동 캐싱: 마지막 블록(이번 사용자의 말)에 표시가 붙어 다음 턴이 여기까지를 캐시로 읽는다
+    expect(request.cache_control).toEqual({ type: "ephemeral" });
     const { format, effort } = request.output_config as { format: { type: string; schema: { properties: object } }; effort: string };
     expect(effort).toBe("low");
     expect(format.type).toBe("json_schema");
@@ -182,6 +184,8 @@ describe("generateFeedback", () => {
     expect(effort).toBe("low");
     expect(Object.keys(format.schema.properties).sort()).toEqual(["good", "improve"]);
     expect(improvePropertiesOf(requests[0])).toEqual(["example", "point"]);
+    // 세션마다 한 번이라 다시 읽을 일이 없어 캐시를 쓰면 쓰기 할증(1.25배)만 낸다
+    expect(requests[0]).not.toHaveProperty("cache_control");
     // 발음을 요청하지 않은 피드백의 항목에는 example_pron_ko 키가 없다
     expect(result.ok && result.value.improve[0]).not.toHaveProperty("example_pron_ko");
   });
@@ -237,6 +241,8 @@ describe("generateExplanation", () => {
     const { format, effort } = requests[0].output_config as { format: { schema: { properties: object } }; effort: string };
     expect(effort).toBe("low");
     expect(Object.keys(format.schema.properties)).toEqual(["explanation"]);
+    // 시스템 프롬프트가 캐시 최소 길이(512토큰)보다 짧다
+    expect(requests[0]).not.toHaveProperty("cache_control");
   });
 
   it("설명이 공백뿐이면 다시 부르고, 두 번 다 그러면 invalid_output이다", async () => {
