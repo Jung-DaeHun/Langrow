@@ -6,6 +6,7 @@ import type { Language, Level } from "@/lib/levels";
 import type { ReadinessState } from "@/lib/readiness";
 import type { StreakState } from "@/lib/streak";
 import type { TargetSource, TargetWord } from "@/lib/targetWords";
+import { isValidSession } from "@/lib/today";
 import { addDays, kstDate, kstDayStart } from "@/lib/usage";
 import type { TurnReply } from "@/services/claude/schemas";
 import type { Database } from "@/types/database";
@@ -258,17 +259,17 @@ export async function readOpenSessions(sb: Sb, userId: string, language: Languag
   }));
 }
 
-// 피드백을 받고 끝낸 세션만 센다. 0턴으로 끝낸 세션(skipped)은 "완료"가 아니다
+// 유효한 세션(done 턴 3개 이상)으로 끝낸 세션만 센다. 0~2턴으로 끝낸 세션은 "완료"가 아니다
 export async function readEndedScenarioIds(sb: Sb, userId: string, language: Language): Promise<string[]> {
   const { data, error } = await sb
     .from("chat_sessions")
-    .select("scenario_id")
+    .select("scenario_id, chat_turns(turn_no)")
     .eq("user_id", userId)
     .eq("language", language)
     .eq("status", "ended")
-    .neq("feedback_status", "skipped");
+    .eq("chat_turns.status", "done");
   if (error) throw readError("chat_sessions", error);
-  return [...new Set(data.map((row) => row.scenario_id))];
+  return [...new Set(data.filter((row) => isValidSession(row.chat_turns.length)).map((row) => row.scenario_id))];
 }
 
 // 목표 단어 id 순서대로 단어 내용을 붙인다. words는 공용 카탈로그라 user_id 조건이 없다

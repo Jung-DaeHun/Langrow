@@ -413,28 +413,30 @@ describe("readOpenSessions", () => {
 });
 
 describe("readEndedScenarioIds", () => {
-  // 1턴 하고 피드백까지 받아 끝낸다
-  async function endWithFeedback(userId: string, sessionId: string): Promise<void> {
-    await doneTurn(userId, sessionId);
+  // turns턴 하고 피드백까지 받아 끝낸다
+  async function endAfterTurns(userId: string, sessionId: string, turns: number): Promise<void> {
+    for (let i = 0; i < turns; i++) await doneTurn(userId, sessionId);
     valueOf(await finishEnd(userId, sessionId, await startEnd(userId, sessionId), FEEDBACK));
   }
 
-  it("그 언어에서 피드백을 받고 끝낸 세션이 있는 상황 id를 중복 없이 돌려준다", async () => {
+  it("그 언어에서 3턴 이상 하고 끝낸 세션이 있는 상황 id를 중복 없이 돌려준다", async () => {
     const user = await createReadyUser("en", 1);
     valueOf(await setFirstLevel(user.id, "ja", 1));
-    await endWithFeedback(user.id, await newSession(user.id, "en", "l1-cafe"));
-    await endWithFeedback(user.id, await newSession(user.id, "en", "l1-cafe"));
-    await endWithFeedback(user.id, await newSession(user.id, "en", "l1-greeting"));
+    valueOf(await startTrial(user.id)); // Free 하루 대화 한도(10턴)보다 많이 쓴다
+    await endAfterTurns(user.id, await newSession(user.id, "en", "l1-cafe"), 3);
+    await endAfterTurns(user.id, await newSession(user.id, "en", "l1-cafe"), 3);
+    await endAfterTurns(user.id, await newSession(user.id, "en", "l1-greeting"), 3);
     await newSession(user.id, "en", "l1-checkout");
-    await endWithFeedback(user.id, await newSession(user.id, "ja", "l1-directions"));
+    await endAfterTurns(user.id, await newSession(user.id, "ja", "l1-directions"), 3);
 
     const ids = await readEndedScenarioIds(await signedInClient(user), user.id, "en");
     expect([...ids].sort()).toEqual(["l1-cafe", "l1-greeting"]);
   });
 
-  it("0턴으로 끝낸 세션(skipped)은 세지 않는다", async () => {
+  it("0턴(skipped)이나 1~2턴으로 끝낸 세션은 세지 않는다", async () => {
     const user = await createReadyUser("en", 1);
     await endSkipped(user.id, await newSession(user.id, "en", "l1-directions"));
+    await endAfterTurns(user.id, await newSession(user.id, "en", "l1-greeting"), 2);
 
     expect(await readEndedScenarioIds(await signedInClient(user), user.id, "en")).toEqual([]);
   });
