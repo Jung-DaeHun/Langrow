@@ -2,7 +2,19 @@
   "project": "Langrow",
   "phase": "11-landing",
   "steps": [
-    { "step": 0, "name": "landing-preview", "status": "pending" },
-    { "step": 1, "name": "landing-page", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "landing-preview",
+      "status": "completed",
+      "started_at": "2026-10-20T21:25:52+0900",
+      "summary": "src/components/LandingPreview.tsx(+test) 추가. \"use client\", LandingPreview({ title: string; openings: Record<Language, Pick<ScenarioLine, \"text\"|\"ko\"|\"pronKo\">> }). step 1의 page.tsx가 l1-cafe의 title과 roles.en/ja.opening의 text·ko·pronKo만 골라 넘긴다. 고정 문구는 파일 안 LINES 상수에 ui.md 표 그대로. 상태는 탭 하나(처음 en), tablist aria-label \"언어\", tabpanel은 useId 탭 id를 aria-labelledby. 클래스는 ChatRoom·KanaDeck에서 복사. 테스트 6개: 처음 영어·문구 순서, 영어 발음·루비 없음, 일본어 루비·발음 aria-hidden, 탭별 lang 순서, 탭 외 버튼 없음.",
+      "completed_at": "2026-10-20T21:31:39+0900"
+    },
+    {
+      "step": 1,
+      "name": "landing-page",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-20T21:25:52+0900"
 }
