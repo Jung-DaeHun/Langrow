@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "ChatRoom.tsx: useBreakdown(initial, source?{sessionId,turnNo,target}) 상태를 AiBubble·CorrectionBreakdown이 같이 씀. 턴 말풍선(reply)·교정 카드(corrected)는 저장본 없어도 토글, 첫 마디는 source 없음(API 안 부름, 값 없으면 토글 없음). 처음 열면 POST /breakdown {turn_no,target}, 대기 중 WaitingDots·토글 disabled. 저장본이 있으면 그것, 없으면 받은 값. AI_FAILURE_LIMIT은 정보 Notice만, 그 밖 실패는 role=alert 오류 Notice+[다시 시도]. 닫으면 오류·안내 지우고 다시 열면 재요청. 저장본이 없던 문장의 타일 자리는 aria-live=polite(받은 타일도 읽힘). ChatRoom.test.tsx: 테스트 추가, 레벨 1·2 번역 테스트는 접힌 버튼이 뜯어보기 토글뿐인지 보게 좁힘.",
+  "spec_diff": "구현은 step 지시·spec과 같다. 문서 참고 2건: (1) ui.md '교정' 행이 아직 '[문장 뜯어보기]와 펼친 타일(… 값이 있을 때)'이라 같은 표 '문장 뜯어보기' 행('저장본이 없는 문장에도 토글을 둔다')과 어긋난다. 구현은 '문장 뜯어보기' 행을 따라 교정이 있으면 토글을 둔다. '값이 있을 때'를 지워야 한다. (2) spec에 없는 선택: 저장본이 없던 문장은 대기뿐 아니라 받은 타일과 오류도 같은 aria-live 영역에 둬서 받으면 읽힌다(저장본 문장은 지금처럼 live 영역이 없다). 포커스는 옮기지 않는다. 그래서 기다리는 동안 disabled가 된 토글에서 포커스가 빠질 수 있다. 화면 확인 때 키보드로 살펴본다."
+}
