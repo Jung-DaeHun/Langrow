@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import type { Breakdown } from "@/lib/breakdown";
 import { PLAN_LIMITS } from "@/lib/plan";
 import type { TargetWord, WordCandidate } from "@/lib/targetWords";
 import { kstDate, kstDayStart } from "@/lib/usage";
@@ -7,15 +8,19 @@ import type { Feedback, TurnReply } from "@/services/claude/schemas";
 import { getAdminSupabase } from "@/services/supabase/admin";
 import { createReadyUser, createTestUser, deleteTestUsers } from "@/test/db";
 import type { Database } from "@/types/database";
-import { ensureProfile, startTrial } from "./account";
+import { ensureProfile, setFirstLevel, startTrial } from "./account";
 import {
   beginChatTurn,
   beginEnd,
+  beginTurnBreakdown,
   createChatSession,
   failChatTurn,
   failEnd,
+  failTurnBreakdown,
   finishChatTurn,
   finishEnd,
+  saveTurnBreakdown,
+  type BeginBreakdownResult,
   type BeginEndResult,
 } from "./chat";
 import { callRpc } from "./rpc";
@@ -49,6 +54,7 @@ const NOT_FOUND = { ok: false, code: "NOT_FOUND" };
 const CONFLICT = { ok: false, code: "CONFLICT" };
 
 type TurnInsert = Database["public"]["Tables"]["chat_turns"]["Insert"];
+type TurnUpdate = Database["public"]["Tables"]["chat_turns"]["Update"];
 type WordRow = Database["public"]["Tables"]["words"]["Row"];
 
 // 배운 단어 테스트 단어. seed와 겹치지 않게 rank 9301+를 쓴다 (security 9001~, learning 9101~, reads 9201~)
@@ -1122,5 +1128,351 @@ describe("배운 단어", () => {
       expect(await sessionRow(sessionId)).toMatchObject({ target_word_ids: null, target_source: null });
       expect(await turnsOf(sessionId)).toMatchObject([{ status: "done", used_word_ids: null }]);
     });
+  });
+});
+
+// spec/chat.md "처음 열 때 만들기" (ADR-027)
+describe("문장 뜯어보기 처음 열 때 만들기", () => {
+  const REPLY_BREAKDOWN: Breakdown = [
+    { text: "One latte,", meaning_ko: "라테 한 잔" },
+    { text: "coming up!", meaning_ko: "나갑니다" },
+  ];
+  const CORRECTED_BREAKDOWN: Breakdown = [
+    { text: "Can I get", meaning_ko: "주시겠어요" },
+    { text: "a latte?", meaning_ko: "라테 한 잔" },
+  ];
+  const OTHER_BREAKDOWN: Breakdown = [{ text: "One latte, coming up!", meaning_ko: "라테 한 잔 나갑니다" }];
+  const NO_UNTIL = { reply_breakdown_until: null, corrected_breakdown_until: null };
+
+  const past = () => new Date(Date.now() - 60 * 60_000).toISOString();
+  const timeOf = (at: string | null) => (at === null ? null : new Date(at).getTime());
+
+  // 새 세션에 뜯어보기 없이 확정한 턴 하나 (REPLY는 교정이 있다)
+  async function plainDoneTurn(userId: string, reply: TurnReply = REPLY): Promise<string> {
+    const sessionId = await newSession(userId);
+    const { token } = valueOf(await beginChatTurn(userId, sessionId, "Can I have latte?"));
+    valueOf(await finishChatTurn(userId, sessionId, token, reply));
+    return sessionId;
+  }
+
+  function started(result: DbResult<BeginBreakdownResult>) {
+    const value = valueOf(result);
+    if (value.state !== "started") throw new Error(`시작이 아님: ${value.state}`);
+    return value;
+  }
+
+  async function firstTurn(sessionId: string) {
+    return must(await getAdminSupabase().from("chat_turns").select("*").eq("session_id", sessionId).eq("turn_no", 1).single());
+  }
+
+  // 기한 열과 저장본을 admin으로 바꾼다 (만료·만드는 중·옛 null 값 재현)
+  async function updateTurns(sessionId: string, values: TurnUpdate): Promise<void> {
+    must(await getAdminSupabase().from("chat_turns").update(values).eq("session_id", sessionId));
+  }
+
+  describe("시작 RPC", () => {
+    it("저장본이 있으면 돌려준다. 오늘 실패 10회이거나 만드는 중이어도 돌려준다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await newSession(user.id);
+      const { token } = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
+      valueOf(
+        await finishChatTurn(user.id, sessionId, token, {
+          ...REPLY,
+          reply_breakdown: REPLY_BREAKDOWN,
+          correction: { ...REPLY.correction!, breakdown: CORRECTED_BREAKDOWN },
+        }),
+      );
+      const reply = { ok: true, value: { state: "stored", breakdown: REPLY_BREAKDOWN } };
+      const corrected = { ok: true, value: { state: "stored", breakdown: CORRECTED_BREAKDOWN } };
+
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "reply")).resolves.toEqual(reply);
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "corrected")).resolves.toEqual(corrected);
+      expect(await firstTurn(sessionId)).toMatchObject(NO_UNTIL);
+
+      const future = new Date(Date.now() + 60_000).toISOString();
+      await updateTurns(sessionId, { reply_breakdown_until: future, corrected_breakdown_until: future });
+      await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT);
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "reply")).resolves.toEqual(reply);
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "corrected")).resolves.toEqual(corrected);
+    });
+
+    it("저장본이 없으면 문장(표기 그대로)·세션 언어·레벨·기한 값을 돌려주고 기한을 저장한다", async () => {
+      const user = await createReadyUser("ja", 2);
+      const { sessionId } = valueOf(
+        await createChatSession(user.id, { language: "ja", level: 2, scenarioId: "l2-restaurant" }, false),
+      );
+      const correction = { corrected: "[猫|ねこ]が[好|す]きです。", explanation_ko: "です를 붙여요." };
+      const { token } = valueOf(await beginChatTurn(user.id, sessionId, "ねこすき"));
+      valueOf(
+        await finishChatTurn(user.id, sessionId, token, {
+          reply: "[猫|ねこ]が[好|す]きですか。",
+          reply_ko: "고양이를 좋아하세요?",
+          correction,
+        }),
+      );
+      // 턴마다 만들던 때 검사에 맞지 않은 교정 뜯어보기는 jsonb null이다. 저장본이 아니다
+      await updateTurns(sessionId, { correction: { ...correction, breakdown: null } });
+
+      const reply = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      expect(reply).toEqual({
+        state: "started",
+        sentence: "[猫|ねこ]が[好|す]きですか。",
+        language: "ja",
+        level: 2,
+        until: expect.any(String),
+      });
+      expectExpiresInOperationWindow(reply.until);
+      const corrected = started(await beginTurnBreakdown(user.id, sessionId, 1, "corrected"));
+      expect(corrected).toEqual({ ...reply, sentence: correction.corrected, until: expect.any(String) });
+      expectExpiresInOperationWindow(corrected.until);
+
+      const row = await firstTurn(sessionId);
+      expect(timeOf(row.reply_breakdown_until)).toBe(timeOf(reply.until));
+      expect(timeOf(row.corrected_breakdown_until)).toBe(timeOf(corrected.until));
+    });
+
+    it("남의 세션, 없는 세션·턴, pending 턴, 교정 없는 corrected는 NOT_FOUND이고 기한을 저장하지 않는다", async () => {
+      const me = await createReadyUser();
+      const owner = await createReadyUser();
+      const ownerSession = await plainDoneTurn(owner.id);
+      const plainSession = await plainDoneTurn(me.id, PLAIN_REPLY);
+      const pendingSession = await newSession(me.id);
+      valueOf(await beginChatTurn(me.id, pendingSession, "hi"));
+
+      await expect(beginTurnBreakdown(me.id, ownerSession, 1, "reply")).resolves.toEqual(NOT_FOUND);
+      await expect(beginTurnBreakdown(me.id, randomUUID(), 1, "reply")).resolves.toEqual(NOT_FOUND);
+      await expect(beginTurnBreakdown(me.id, plainSession, 2, "reply")).resolves.toEqual(NOT_FOUND);
+      await expect(beginTurnBreakdown(me.id, pendingSession, 1, "reply")).resolves.toEqual(NOT_FOUND);
+      await expect(beginTurnBreakdown(me.id, plainSession, 1, "corrected")).resolves.toEqual(NOT_FOUND);
+
+      for (const sessionId of [ownerSession, plainSession, pendingSession]) {
+        expect(await firstTurn(sessionId)).toMatchObject(NO_UNTIL);
+      }
+    });
+
+    it("저장본이 없고 오늘 chat_failed가 10개면 AI_FAILURE_LIMIT이고 기한을 저장하지 않는다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT);
+
+      const limited = { ok: false, code: "AI_FAILURE_LIMIT" };
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "reply")).resolves.toEqual(limited);
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "corrected")).resolves.toEqual(limited);
+      expect(await firstTurn(sessionId)).toMatchObject(NO_UNTIL);
+    });
+
+    it("ended 세션의 턴도 시작된다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      const end = reserved(await beginEnd(user.id, sessionId));
+      valueOf(await finishEnd(user.id, sessionId, end.token, FEEDBACK));
+      expect(await sessionRow(sessionId)).toMatchObject({ status: "ended" });
+
+      started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+    });
+
+    it("미동의는 CONSENT_REQUIRED, 세션 언어의 레벨이 없으면 ONBOARDING_REQUIRED이고 기한을 저장하지 않는다", async () => {
+      const admin = getAdminSupabase();
+      const unconsented = await createReadyUser();
+      const unconsentedSession = await plainDoneTurn(unconsented.id);
+      must(await admin.from("profiles").update({ agreed_at: null }).eq("id", unconsented.id));
+      await expect(beginTurnBreakdown(unconsented.id, unconsentedSession, 1, "reply")).resolves.toEqual({
+        ok: false,
+        code: "CONSENT_REQUIRED",
+      });
+
+      // 지금 언어(ja)의 레벨은 있고, 세션 언어(en)의 레벨만 없다
+      const user = await createReadyUser("en", 1);
+      const sessionId = await plainDoneTurn(user.id);
+      valueOf(await setFirstLevel(user.id, "ja", 1));
+      must(await admin.from("user_levels").delete().eq("user_id", user.id).eq("language", "en"));
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "reply")).resolves.toEqual({
+        ok: false,
+        code: "ONBOARDING_REQUIRED",
+      });
+
+      expect(await firstTurn(unconsentedSession)).toMatchObject(NO_UNTIL);
+      expect(await firstTurn(sessionId)).toMatchObject(NO_UNTIL);
+    });
+
+    it("같은 문장을 동시에 시작하면 하나만 started이고 다른 하나는 CONFLICT다. 말풍선과 교정 문장은 서로 막지 않는다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+
+      const results = await Promise.all([
+        beginTurnBreakdown(user.id, sessionId, 1, "reply"),
+        beginTurnBreakdown(user.id, sessionId, 1, "reply"),
+      ]);
+      expect(results.map((result) => (result.ok ? result.value.state : result.code)).sort()).toEqual([
+        "CONFLICT",
+        "started",
+      ]);
+
+      started(await beginTurnBreakdown(user.id, sessionId, 1, "corrected"));
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "corrected")).resolves.toEqual(CONFLICT);
+    });
+
+    it("기한이 지나면 다시 시작되고 새 기한 값을 저장한다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "reply")).resolves.toEqual(CONFLICT);
+
+      await updateTurns(sessionId, { reply_breakdown_until: past() });
+      const again = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      expectExpiresInOperationWindow(again.until);
+      expect(timeOf((await firstTurn(sessionId)).reply_breakdown_until)).toBe(timeOf(again.until));
+    });
+  });
+
+  describe("저장 RPC", () => {
+    it("값이 없을 때만 저장하고 저장된 값을 돌려준다. 두 번 불러도 처음 값이다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      const { until } = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      const saved = { ok: true, value: { breakdown: REPLY_BREAKDOWN } };
+
+      await expect(saveTurnBreakdown(user.id, sessionId, 1, "reply", until, REPLY_BREAKDOWN)).resolves.toEqual(saved);
+      await expect(saveTurnBreakdown(user.id, sessionId, 1, "reply", until, OTHER_BREAKDOWN)).resolves.toEqual(saved);
+      expect(await firstTurn(sessionId)).toMatchObject({ reply_breakdown: REPLY_BREAKDOWN, ...NO_UNTIL });
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "reply")).resolves.toEqual({
+        ok: true,
+        value: { state: "stored", breakdown: REPLY_BREAKDOWN },
+      });
+    });
+
+    it("그 작업의 기한만 지운다. 기한이 지나 다른 요청이 가져간 표시는 그대로 두고, 늦게 온 성공도 값이 없으면 저장한다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      const late = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      const corrected = started(await beginTurnBreakdown(user.id, sessionId, 1, "corrected"));
+      await updateTurns(sessionId, { reply_breakdown_until: past() });
+      const current = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      const saved = { ok: true, value: { breakdown: REPLY_BREAKDOWN } };
+
+      await expect(saveTurnBreakdown(user.id, sessionId, 1, "reply", late.until, REPLY_BREAKDOWN)).resolves.toEqual(
+        saved,
+      );
+      let row = await firstTurn(sessionId);
+      expect(row.reply_breakdown).toEqual(REPLY_BREAKDOWN);
+      expect(timeOf(row.reply_breakdown_until)).toBe(timeOf(current.until));
+      expect(timeOf(row.corrected_breakdown_until)).toBe(timeOf(corrected.until));
+
+      // 지금 작업의 저장은 먼저 저장된 값을 돌려주고 자기 기한만 지운다
+      await expect(
+        saveTurnBreakdown(user.id, sessionId, 1, "reply", current.until, OTHER_BREAKDOWN),
+      ).resolves.toEqual(saved);
+      row = await firstTurn(sessionId);
+      expect(row.reply_breakdown).toEqual(REPLY_BREAKDOWN);
+      expect(row.reply_breakdown_until).toBeNull();
+      expect(timeOf(row.corrected_breakdown_until)).toBe(timeOf(corrected.until));
+    });
+
+    it("교정은 correction에 breakdown만 더하고 다른 키는 바꾸지 않는다 (옛 null 값은 없는 것으로 보고 채운다)", async () => {
+      const user = await createReadyUser("ja", 1);
+      const { sessionId } = valueOf(
+        await createChatSession(user.id, { language: "ja", level: 1, scenarioId: "l1-cafe" }, false),
+      );
+      const correction = {
+        corrected: "コーヒーをください。",
+        explanation_ko: "を를 넣어요.",
+        corrected_pron_ko: "코-히-오 쿠다사이.",
+      };
+      const { token } = valueOf(await beginChatTurn(user.id, sessionId, "コーヒーください"));
+      valueOf(await finishChatTurn(user.id, sessionId, token, { reply: "はい。", reply_ko: "네.", correction }));
+      await updateTurns(sessionId, { correction: { ...correction, breakdown: null } });
+      const breakdown: Breakdown = [
+        { text: "コーヒーを", meaning_ko: "커피를" },
+        { text: "ください。", meaning_ko: "주세요" },
+      ];
+
+      const { until } = started(await beginTurnBreakdown(user.id, sessionId, 1, "corrected"));
+      await expect(saveTurnBreakdown(user.id, sessionId, 1, "corrected", until, breakdown)).resolves.toEqual({
+        ok: true,
+        value: { breakdown },
+      });
+      const row = await firstTurn(sessionId);
+      expect(row.correction).toEqual({ ...correction, breakdown });
+      expect(row).toMatchObject({ reply_breakdown: null, ...NO_UNTIL });
+    });
+  });
+
+  describe("실패 RPC", () => {
+    it("기한이 그 값일 때만 지우고 그때만 chat_failed(kind breakdown)를 남긴다. 두 번 불러도 한 번이다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      const { until } = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      const corrected = started(await beginTurnBreakdown(user.id, sessionId, 1, "corrected"));
+      const ok = { ok: true, value: null };
+
+      // 다른 기한 값(예: 기한이 지나 다른 요청이 가져간 표시)은 건드리지 않는다
+      const other = new Date(new Date(until).getTime() - OPERATION_MS).toISOString();
+      await expect(failTurnBreakdown(user.id, sessionId, 1, "reply", other, "timeout")).resolves.toEqual(ok);
+      expect(timeOf((await firstTurn(sessionId)).reply_breakdown_until)).toBe(timeOf(until));
+      expect(await eventsOf(user.id, "chat_failed")).toEqual([]);
+
+      await expect(failTurnBreakdown(user.id, sessionId, 1, "reply", until, "invalid_output")).resolves.toEqual(ok);
+      await expect(failTurnBreakdown(user.id, sessionId, 1, "reply", until, "invalid_output")).resolves.toEqual(ok);
+      const row = await firstTurn(sessionId);
+      expect(row.reply_breakdown_until).toBeNull();
+      expect(timeOf(row.corrected_breakdown_until)).toBe(timeOf(corrected.until));
+      expect(await eventsOf(user.id, "chat_failed")).toEqual([
+        { operation_token: null, kind: "breakdown", reason: "invalid_output" },
+      ]);
+
+      // 지웠으니 다시 시작된다
+      started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+    });
+
+    it("뜯어보기 실패도 대화의 하루 실패 10회에 들어간다", async () => {
+      const user = await createReadyUser();
+      const sessionId = await plainDoneTurn(user.id);
+      await insertFailures(user.id, DAILY_AI_FAILURE_LIMIT - 1);
+      const { until } = started(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+      valueOf(await failTurnBreakdown(user.id, sessionId, 1, "reply", until, "api_error"));
+
+      const limited = { ok: false, code: "AI_FAILURE_LIMIT" };
+      await expect(beginChatTurn(user.id, sessionId, "hi")).resolves.toEqual(limited);
+      await expect(beginTurnBreakdown(user.id, sessionId, 1, "corrected")).resolves.toEqual(limited);
+    });
+  });
+
+  it("남의 턴은 시작·저장·실패 모두 바꾸지 않는다", async () => {
+    const me = await createReadyUser();
+    const owner = await createReadyUser();
+    const sessionId = await plainDoneTurn(owner.id);
+    const { until } = started(await beginTurnBreakdown(owner.id, sessionId, 1, "reply"));
+    const snapshotOf = async (userId: string) => ({
+      turns: await turnsOf(sessionId),
+      events: must(await getAdminSupabase().from("events").select("*").eq("user_id", userId).order("id")),
+    });
+    const before = { owner: await snapshotOf(owner.id), me: await snapshotOf(me.id) };
+
+    await expect(beginTurnBreakdown(me.id, sessionId, 1, "corrected")).resolves.toEqual(NOT_FOUND);
+    await expect(saveTurnBreakdown(me.id, sessionId, 1, "reply", until, REPLY_BREAKDOWN)).resolves.toEqual(NOT_FOUND);
+    await expect(failTurnBreakdown(me.id, sessionId, 1, "reply", until, "timeout")).resolves.toEqual({
+      ok: true,
+      value: null,
+    });
+
+    expect({ owner: await snapshotOf(owner.id), me: await snapshotOf(me.id) }).toEqual(before);
+  });
+
+  it("대상이 reply·corrected가 아니면 세 RPC 모두 INVALID_INPUT이고 아무것도 바꾸지 않는다", async () => {
+    const user = await createReadyUser();
+    const sessionId = await plainDoneTurn(user.id);
+    const { until } = started(await beginTurnBreakdown(user.id, sessionId, 1, "corrected"));
+    const turn = { p_user_id: user.id, p_session_id: sessionId, p_turn_no: 1, p_target: "user" };
+    const before = { turns: await turnsOf(sessionId), events: await eventsOf(user.id, "chat_failed") };
+    const invalid = { ok: false, code: "INVALID_INPUT" };
+
+    await expect(callRpc("begin_turn_breakdown", turn)).resolves.toEqual(invalid);
+    await expect(callRpc("save_turn_breakdown", { ...turn, p_until: until, p_breakdown: REPLY_BREAKDOWN })).resolves.toEqual(
+      invalid,
+    );
+    await expect(callRpc("fail_turn_breakdown", { ...turn, p_until: until, p_reason: "timeout" })).resolves.toEqual(
+      invalid,
+    );
+    expect({ turns: await turnsOf(sessionId), events: await eventsOf(user.id, "chat_failed") }).toEqual(before);
   });
 });

@@ -1,4 +1,5 @@
 import "server-only";
+import type { Breakdown, BreakdownTarget } from "@/lib/breakdown";
 import type { Language, Level } from "@/lib/levels";
 import type { TargetSource, TargetWord, WordCandidate } from "@/lib/targetWords";
 import type { AiFailureReason } from "@/services/claude/client";
@@ -23,6 +24,11 @@ export type BeginEndResult =
       session: ChatSessionInfo;
       turns: { userText: string; reply: string; correction: TurnReply["correction"] }[];
     };
+// stored: 저장본(AI를 부르지 않는다) / started: 문장(후리가나 표기 그대로)·세션 언어·레벨과 "만드는 중" 기한.
+// until은 그대로 failTurnBreakdown·saveTurnBreakdown에 넘긴다 (spec/chat.md "처음 열 때 만들기")
+export type BeginBreakdownResult =
+  | { state: "stored"; breakdown: Breakdown }
+  | { state: "started"; sentence: string; language: Language; level: Level; until: string };
 
 type HistoryRow = { user_text: string; reply: string };
 type EndTurnRow = HistoryRow & { correction: TurnReply["correction"] };
@@ -222,4 +228,73 @@ export async function failEnd(
     p_reason: reason,
   });
   return result.ok ? { ok: true, value: endResult(result.value) } : result;
+}
+
+// NOT_FOUND, CONSENT_REQUIRED, ONBOARDING_REQUIRED, AI_FAILURE_LIMIT, CONFLICT(만드는 중), INVALID_INPUT
+export async function beginTurnBreakdown(
+  userId: string,
+  sessionId: string,
+  turnNo: number,
+  target: BreakdownTarget,
+): Promise<DbResult<BeginBreakdownResult>> {
+  const result = await callRpc("begin_turn_breakdown", {
+    p_user_id: userId,
+    p_session_id: sessionId,
+    p_turn_no: turnNo,
+    p_target: target,
+  });
+  if (!result.ok) return result;
+  const { value } = result;
+  return value.state === "stored"
+    ? { ok: true, value: { state: "stored", breakdown: value.breakdown as Breakdown } }
+    : {
+        ok: true,
+        value: {
+          state: "started",
+          sentence: value.sentence as string,
+          language: value.language as Language,
+          level: value.level as Level,
+          until: value.until as string,
+        },
+      };
+}
+
+// 기한이 until일 때만 지우고 chat_failed(kind breakdown)를 남긴다. 아니면 아무것도 바꾸지 않고 성공한다
+export async function failTurnBreakdown(
+  userId: string,
+  sessionId: string,
+  turnNo: number,
+  target: BreakdownTarget,
+  until: string,
+  reason: AiFailureReason,
+): Promise<DbResult<null>> {
+  const result = await callRpc("fail_turn_breakdown", {
+    p_user_id: userId,
+    p_session_id: sessionId,
+    p_turn_no: turnNo,
+    p_target: target,
+    p_until: until,
+    p_reason: reason,
+  });
+  return result.ok ? { ok: true, value: null } : result;
+}
+
+// 값이 없을 때만 저장하고, 저장된 값(먼저 저장된 것 포함)을 돌려준다. 기한이 until일 때만 지운다. NOT_FOUND
+export async function saveTurnBreakdown(
+  userId: string,
+  sessionId: string,
+  turnNo: number,
+  target: BreakdownTarget,
+  until: string,
+  breakdown: Breakdown,
+): Promise<DbResult<{ breakdown: Breakdown }>> {
+  const result = await callRpc("save_turn_breakdown", {
+    p_user_id: userId,
+    p_session_id: sessionId,
+    p_turn_no: turnNo,
+    p_target: target,
+    p_until: until,
+    p_breakdown: breakdown,
+  });
+  return result.ok ? { ok: true, value: { breakdown: result.value.breakdown as Breakdown } } : result;
 }

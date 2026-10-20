@@ -12,7 +12,7 @@ import {
   signedInClient,
 } from "@/test/db";
 import { agreeTerms, setFirstLevel, switchLanguage } from "./account";
-import { beginChatTurn, beginEnd, createChatSession, finishChatTurn } from "./chat";
+import { beginChatTurn, beginEnd, beginTurnBreakdown, createChatSession, finishChatTurn } from "./chat";
 import { beginWordExplanation, saveWordExplanation } from "./learning";
 import type { DbResult } from "./types";
 
@@ -386,6 +386,56 @@ describe("함수 실행 권한", () => {
     }
     expect(await snapshot([user.id])).toEqual(before);
     expect(await storedOf()).toEqual(storedBefore);
+  });
+
+  it("anon·authenticated는 문장 뜯어보기 함수를 부르지 못하고 상태도 바뀌지 않는다", async () => {
+    const valueOf = <T>(result: DbResult<T>): T => {
+      if (!result.ok) throw new Error(result.code);
+      return result.value;
+    };
+    const user = await createReadyUser("en", 1);
+    const { sessionId } = valueOf(
+      await createChatSession(user.id, { language: "en", level: 1, scenarioId: "l1-cafe" }, false),
+    );
+    const turn = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
+    valueOf(
+      await finishChatTurn(user.id, sessionId, turn.token, {
+        reply: "One latte, coming up!",
+        reply_ko: "라테 한 잔 나갑니다!",
+        correction: { corrected: "Can I get a latte?", explanation_ko: "주문할 때는 Can I get ...?이 자연스러워요." },
+      }),
+    );
+    const started = valueOf(await beginTurnBreakdown(user.id, sessionId, 1, "reply"));
+    if (started.state !== "started") throw new Error(started.state);
+
+    // service_role이면 모두 상태를 바꾸는 호출이다 (교정 문장은 아직 시작하지 않았다)
+    const target = { p_user_id: user.id, p_session_id: sessionId, p_turn_no: 1 };
+    const calls: [string, Record<string, unknown>][] = [
+      ["begin_turn_breakdown", { ...target, p_target: "corrected" }],
+      ["fail_turn_breakdown", { ...target, p_target: "reply", p_until: started.until, p_reason: "timeout" }],
+      [
+        "save_turn_breakdown",
+        {
+          ...target,
+          p_target: "reply",
+          p_until: started.until,
+          p_breakdown: [{ text: "One latte, coming up!", meaning_ko: "라테 한 잔 나갑니다" }],
+        },
+      ],
+    ];
+    const before = await snapshot([user.id]);
+    const clients: [string, SupabaseClient][] = [
+      ["anon", untyped(anonClient())],
+      ["authenticated", untyped(await signedInClient(user))],
+    ];
+
+    for (const [role, client] of clients) {
+      for (const [fn, args] of calls) {
+        const { error } = await client.rpc(fn, args);
+        expectDenied(error, `function ${fn}`, `${role} ${fn}`);
+      }
+    }
+    expect(await snapshot([user.id])).toEqual(before);
   });
 });
 

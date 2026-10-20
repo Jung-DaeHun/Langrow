@@ -38,13 +38,13 @@ export type Database = {
                   ]
                 },"chat_turns": {
                   Row: {
-                    "correction": Json | null,"created_at": string,"id": string,"reply": string | null,"reply_breakdown": Json | null,"reply_ko": string | null,"reply_pron_ko": string | null,"session_id": string,"status": string,"turn_no": number,"used_word_ids": (string)[] | null,"user_id": string,"user_text": string
+                    "corrected_breakdown_until": string | null,"correction": Json | null,"created_at": string,"id": string,"reply": string | null,"reply_breakdown": Json | null,"reply_breakdown_until": string | null,"reply_ko": string | null,"reply_pron_ko": string | null,"session_id": string,"status": string,"turn_no": number,"used_word_ids": (string)[] | null,"user_id": string,"user_text": string
                   }
                   Insert: {
-                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id": string,"status"?: string,"turn_no": number,"used_word_ids"?: (string)[] | null,"user_id": string,"user_text": string
+                    "corrected_breakdown_until"?: string | null,"correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_breakdown_until"?: string | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id": string,"status"?: string,"turn_no": number,"used_word_ids"?: (string)[] | null,"user_id": string,"user_text": string
                   }
                   Update: {
-                    "correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id"?: string,"status"?: string,"turn_no"?: number,"used_word_ids"?: (string)[] | null,"user_id"?: string,"user_text"?: string
+                    "corrected_breakdown_until"?: string | null,"correction"?: Json | null,"created_at"?: string,"id"?: string,"reply"?: string | null,"reply_breakdown"?: Json | null,"reply_breakdown_until"?: string | null,"reply_ko"?: string | null,"reply_pron_ko"?: string | null,"session_id"?: string,"status"?: string,"turn_no"?: number,"used_word_ids"?: (string)[] | null,"user_id"?: string,"user_text"?: string
                   }
                   Relationships: [
                     {
@@ -173,6 +173,9 @@ isOneToOne: false
 "begin_end":
 { Args: { "p_session_id": string,"p_user_id": string }; Returns: Json
                            },
+"begin_turn_breakdown":
+{ Args: { "p_session_id": string,"p_target": string,"p_turn_no": number,"p_user_id": string }; Returns: Json
+                           },
 "begin_word_explanation":
 { Args: { "p_choice": string,"p_user_id": string,"p_word_id": string }; Returns: Json
                            },
@@ -205,6 +208,9 @@ isOneToOne: false
                            },
 "fail_end":
 { Args: { "p_reason": string,"p_session_id": string,"p_token": string,"p_user_id": string }; Returns: Json
+                           },
+"fail_turn_breakdown":
+{ Args: { "p_reason": string,"p_session_id": string,"p_target": string,"p_turn_no": number,"p_until": string,"p_user_id": string }; Returns: Json
                            },
 "fail_word_explanation":
 { Args: { "p_event_id": number,"p_reason": string,"p_user_id": string }; Returns: Json
@@ -244,6 +250,9 @@ isOneToOne: false
                            },
 "save_review":
 { Args: { "p_items": Json,"p_language": string,"p_user_id": string }; Returns: Json
+                           },
+"save_turn_breakdown":
+{ Args: { "p_breakdown": Json,"p_session_id": string,"p_target": string,"p_turn_no": number,"p_until": string,"p_user_id": string }; Returns: Json
                            },
 "save_word_batch":
 { Args: { "p_items": Json,"p_language": string,"p_user_id": string }; Returns: Json

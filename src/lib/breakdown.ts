@@ -3,6 +3,9 @@ import { parseFurigana, stripFurigana } from "./furigana";
 // 문장 뜯어보기(spec/chat.md "문장 뜯어보기"). 조각은 문장 순서대로이고 text는 원래 문장의 부분 문자열이다
 export type BreakdownPiece = { text: string; meaning_ko: string };
 export type Breakdown = BreakdownPiece[];
+// 뜯어보기를 만드는 문장. reply는 AI 말풍선, corrected는 교정 문장이다 (spec/chat.md "처음 열 때 만들기")
+export type BreakdownTarget = "reply" | "corrected";
+export const BREAKDOWN_TARGETS: readonly BreakdownTarget[] = ["reply", "corrected"];
 
 // 비교할 때 빼는 글자: 공백, 문장부호, 기호
 const IGNORED = /[\s\p{P}\p{S}]/gu;

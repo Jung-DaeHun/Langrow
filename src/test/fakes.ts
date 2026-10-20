@@ -47,6 +47,16 @@ function defaultDb(): Db {
         feedback: { message: "대화 기록은 저장됐어요. 종합 피드백을 만들지 못했으니 대화 아래의 교정을 확인해 주세요." },
       },
     }),
+    // 저장본이 없어 AI를 부르는 경로
+    beginTurnBreakdown: async () => ({
+      ok: true,
+      value: { state: "started", sentence: "Nice to meet you!", language: "en", level: 1, until: "2026-10-20T00:01:30.000000+00:00" },
+    }),
+    failTurnBreakdown: async () => ({ ok: true, value: null }),
+    saveTurnBreakdown: async (_userId, _sessionId, _turnNo, _target, _until, breakdown) => ({
+      ok: true,
+      value: { breakdown },
+    }),
     saveWordBatch: async (_userId, _language, items) => ({ ok: true, value: { insertedCount: items.length } }),
     saveReview: async (_userId, _language, items) => ({ ok: true, value: { reviewedCount: items.length } }),
     submitLevelTest: async () => ({ ok: true, value: { passed: true, level: 2 } }),
