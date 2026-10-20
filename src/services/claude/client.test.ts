@@ -2,8 +2,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { scenariosForLevel } from "@/lib/scenarios";
 import type { TargetWord, WordCandidate } from "@/lib/targetWords";
-import { createAi, type AiClient } from "./client";
+import { createAi, type AiClient, type BreakdownInput } from "./client";
 import {
+  buildBreakdownPrompt,
   buildExplanationPrompt,
   buildFeedbackPrompt,
   buildTurnPrompt,
@@ -49,18 +50,7 @@ const feedbackInput: FeedbackPromptInput = {
 const reply: TurnReply = {
   reply: "Sure! What size?",
   reply_ko: "네! 어떤 크기로 드릴까요?",
-  reply_breakdown: [
-    { text: "Sure!", meaning_ko: "그럼요!" },
-    { text: "What size?", meaning_ko: "어떤 크기로요?" },
-  ],
-  correction: {
-    corrected: "I'd like a latte.",
-    explanation_ko: "I'd like가 더 공손해요.",
-    breakdown: [
-      { text: "I'd like", meaning_ko: "주세요" },
-      { text: "a latte.", meaning_ko: "라테 하나" },
-    ],
-  },
+  correction: { corrected: "I'd like a latte.", explanation_ko: "I'd like가 더 공손해요." },
 };
 const feedback: Feedback = {
   good: "주문을 끝까지 해냈어요.",
@@ -111,7 +101,9 @@ describe("generateTurn", () => {
     const { format, effort } = request.output_config as { format: { type: string; schema: { properties: object } }; effort: string };
     expect(effort).toBe("low");
     expect(format.type).toBe("json_schema");
-    expect(Object.keys(format.schema.properties).sort()).toEqual(["correction", "reply", "reply_breakdown", "reply_ko"]);
+    expect(Object.keys(format.schema.properties).sort()).toEqual(["correction", "reply", "reply_ko"]);
+    // 뜯어보기는 처음 열 때 따로 만든다 (ADR-027)
+    expect(JSON.stringify(format.schema)).not.toContain("breakdown");
   });
 
   it("첫 호출이 실패하면 한 번 더 불러 성공을 돌려준다", async () => {
@@ -260,19 +252,7 @@ describe("generateTurn 한글 발음", () => {
     reply: "はい、どうぞ。",
     reply_ko: "네, 여기요.",
     reply_pron_ko: " 하이, 도-조. ",
-    reply_breakdown: [
-      { text: "はい、", meaning_ko: "네," },
-      { text: "どうぞ。", meaning_ko: "여기요." },
-    ],
-    correction: {
-      corrected: "コーヒーをください。",
-      explanation_ko: "を를 넣어요.",
-      corrected_pron_ko: "코-히-오 쿠다사이.",
-      breakdown: [
-        { text: "コーヒーを", meaning_ko: "커피를" },
-        { text: "ください。", meaning_ko: "주세요." },
-      ],
-    },
+    correction: { corrected: "コーヒーをください。", explanation_ko: "を를 넣어요.", corrected_pron_ko: "코-히-오 쿠다사이." },
   };
   const propertiesOf = (request: Record<string, unknown>) =>
     Object.keys((request.output_config as { format: { schema: { properties: object } } }).format.schema.properties).sort();
@@ -280,7 +260,8 @@ describe("generateTurn 한글 발음", () => {
   it("일본어 입문~중급은 발음 필드가 있는 형식으로 요청하고, 발음은 앞뒤 공백을 지워 돌려준다", async () => {
     const { ai, requests } = setup(done(jaReply));
     expect(await ai.generateTurn(jaInput)).toEqual({ ok: true, value: { ...jaReply, reply_pron_ko: "하이, 도-조." } });
-    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_breakdown", "reply_ko", "reply_pron_ko"]);
+    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_ko", "reply_pron_ko"]);
+    expect(JSON.stringify(requests[0].output_config)).not.toContain("breakdown");
   });
 
   it("발음이 비었거나 가나·한자가 섞이면 턴은 성공하고 그 발음만 null이다 (다시 부르지 않는다)", async () => {
@@ -304,7 +285,7 @@ describe("generateTurn 한글 발음", () => {
   it("일본어 상급은 발음 없는 형식으로 요청하고 받은 값을 그대로 돌려준다", async () => {
     const { ai, requests } = setup(done(reply));
     expect(await ai.generateTurn({ ...jaInput, level: 4, scenario: scenariosForLevel(4)[0] })).toEqual({ ok: true, value: reply });
-    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_breakdown", "reply_ko"]);
+    expect(propertiesOf(requests[0])).toEqual(["correction", "reply", "reply_ko"]);
   });
 });
 
@@ -367,98 +348,104 @@ describe("generateFeedback 한글 발음", () => {
   });
 });
 
-describe("generateTurn 문장 뜯어보기", () => {
-  const jaInput: TurnPromptInput = { language: "ja", level: 4, scenario: scenariosForLevel(4)[0], history: [], userText: "家で休みました" };
-  const jaReply = {
-    reply: "[家|いえ]で[休|やす]んでいました。",
-    reply_ko: "집에서 쉬고 있었어요.",
-    reply_breakdown: [
-      { text: "家で", meaning_ko: "집에서" },
-      { text: "休んでいました", meaning_ko: "쉬고 있었어요" },
-    ],
-    correction: {
-      corrected: "[家|いえ]で[休|やす]みました。",
-      explanation_ko: "자연스러워요.",
-      breakdown: [
-        { text: "家で", meaning_ko: "집에서" },
-        { text: "休みました", meaning_ko: "쉬었어요" },
-      ],
-    },
-  };
+describe("generateBreakdown", () => {
+  const jaInput: BreakdownInput = { language: "ja", level: 4, target: "reply", sentence: "[家|いえ]で[休|やす]んでいました。" };
+  const jaPieces = [
+    { text: "家で", meaning_ko: "집에서" },
+    { text: "休んでいました", meaning_ko: "쉬고 있었어요" },
+  ];
+  const badPieces = [
+    { text: "家で", meaning_ko: "집에서" },
+    { text: "休む", meaning_ko: "쉬다" },
+  ];
   const warnings = () => vi.spyOn(console, "warn").mockImplementation(() => {});
 
-  it("통과한 뜯어보기는 원래 문장의 표기가 붙은 조각으로 돌아오고 로그가 없다", async () => {
+  it("통과하면 원래 문장을 조각 경계에서 자른 조각을 돌려주고 로그가 없다", async () => {
     const warn = warnings();
-    const { ai } = setup(done(jaReply));
-    expect(await ai.generateTurn(jaInput)).toEqual({
+    const { ai, requests } = setup(done({ breakdown: jaPieces }));
+    expect(await ai.generateBreakdown(jaInput)).toEqual({
       ok: true,
       value: {
-        ...jaReply,
-        reply_breakdown: [
+        breakdown: [
           { text: "[家|いえ]で", meaning_ko: "집에서" },
           { text: "[休|やす]んでいました。", meaning_ko: "쉬고 있었어요" },
         ],
-        correction: {
-          ...jaReply.correction,
-          breakdown: [
-            { text: "[家|いえ]で", meaning_ko: "집에서" },
-            { text: "[休|やす]みました。", meaning_ko: "쉬었어요" },
-          ],
-        },
       },
     });
+    expect(requests).toHaveLength(1);
     expect(warn).not.toHaveBeenCalled();
   });
 
-  it("reply 뜯어보기가 맞지 않으면 턴은 성공하고 reply_breakdown만 null이며, 내용 없이 warn 한 줄을 남긴다 (다시 부르지 않는다)", async () => {
-    const warn = warnings();
-    const bad = { ...jaReply, reply_breakdown: [{ text: "家で", meaning_ko: "집에서" }, { text: "休む", meaning_ko: "쉬다" }] };
-    const { ai, requests } = setup(done(bad));
-    const result = await ai.generateTurn(jaInput);
-
-    expect(result.ok && result.value.reply_breakdown).toBeNull();
-    expect(result.ok && result.value.correction?.breakdown).toEqual([
-      { text: "[家|いえ]で", meaning_ko: "집에서" },
-      { text: "[休|やす]みました。", meaning_ko: "쉬었어요" },
-    ]);
-    expect(requests).toHaveLength(1);
-    expect(warn).toHaveBeenCalledTimes(1);
-    const line = String(warn.mock.calls[0][0]);
-    expect(JSON.parse(line)).toEqual({ ai: "breakdown_invalid", target: "reply", language: "ja", level: 4 });
-    for (const content of ["家", "休", "집에서", "쉬다"]) expect(line).not.toContain(content);
+  it("영어도 대소문자·문장부호를 원래 문장대로 돌려준다", async () => {
+    const input: BreakdownInput = { language: "en", level: 1, target: "corrected", sentence: "I was resting at home." };
+    const pieces = [
+      { text: "i", meaning_ko: "나는" },
+      { text: "was resting", meaning_ko: "쉬고 있었어요" },
+      { text: "at home", meaning_ko: "집에서" },
+    ];
+    const { ai } = setup(done({ breakdown: pieces }));
+    expect(await ai.generateBreakdown(input)).toEqual({
+      ok: true,
+      value: {
+        breakdown: [
+          { text: "I", meaning_ko: "나는" },
+          { text: "was resting", meaning_ko: "쉬고 있었어요" },
+          { text: "at home.", meaning_ko: "집에서" },
+        ],
+      },
+    });
   });
 
-  it("교정 뜯어보기가 맞지 않으면 턴은 성공하고 breakdown 키가 없으며, target corrected 로그를 남긴다 (다시 부르지 않는다)", async () => {
-    const warn = warnings();
-    const bad = { ...jaReply, correction: { ...jaReply.correction, breakdown: [{ text: "家で", meaning_ko: "집에서" }] } };
-    const { ai, requests } = setup(done(bad));
-    const result = await ai.generateTurn(jaInput);
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.correction).toEqual({ corrected: jaReply.correction.corrected, explanation_ko: jaReply.correction.explanation_ko });
-    expect(result.value.correction).not.toHaveProperty("breakdown");
-    expect(result.value.reply_breakdown).toHaveLength(2);
-    expect(requests).toHaveLength(1);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(String(warn.mock.calls[0][0]))).toEqual({ ai: "breakdown_invalid", target: "corrected", language: "ja", level: 4 });
+  it("대화 턴과 같은 model·max_tokens 4096·effort low로, { breakdown } 형식과 뜯어보기 프롬프트만 넣고 캐시를 걸지 않는다", async () => {
+    const { ai, requests } = setup(done({ breakdown: jaPieces }));
+    await ai.generateBreakdown(jaInput);
+    const request = requests[0];
+    const prompt = buildBreakdownPrompt({ language: "ja", sentence: jaInput.sentence });
+    // 문장마다 한 번 부르고 시스템 프롬프트가 짧아 캐시를 걸지 않는다
+    expect(Object.keys(request).sort()).toEqual(["max_tokens", "messages", "model", "output_config", "system"]);
+    expect(request).toMatchObject({ model: MODEL, max_tokens: 4096, system: prompt.system, messages: prompt.messages });
+    const { format, effort } = request.output_config as { format: { type: string; schema: { properties: object } }; effort: string };
+    expect(effort).toBe("low");
+    expect(format.type).toBe("json_schema");
+    expect(Object.keys(format.schema.properties)).toEqual(["breakdown"]);
   });
 
-  it("일본어 입문 턴도 발음과 함께 뜯어보기를 검사한다", async () => {
+  it("검사에 맞지 않으면 내용 없이 breakdown_invalid 로그를 남기고 한 번 다시 부른 뒤 invalid_output이다", async () => {
     const warn = warnings();
-    const input: TurnPromptInput = { ...jaInput, level: 1, scenario: scenariosForLevel(1)[0] };
-    const pronReply = {
-      ...jaReply,
-      reply_breakdown: [{ text: "家", meaning_ko: "집" }],
-      reply_pron_ko: "이에데 야슨데이마시타.",
-      correction: { ...jaReply.correction, corrected_pron_ko: "이에데 야스미마시타." },
-    };
-    const { ai } = setup(done(pronReply));
-    const result = await ai.generateTurn(input);
+    const bad = done({ breakdown: badPieces });
+    const { ai, requests } = setup(bad, bad);
 
-    expect(result.ok && result.value).toMatchObject({ reply_breakdown: null, reply_pron_ko: "이에데 야슨데이마시타." });
-    expect(result.ok && result.value.correction).toMatchObject({ corrected_pron_ko: "이에데 야스미마시타.", breakdown: [{ text: "[家|いえ]で" }, { text: "[休|やす]みました。" }] });
-    expect(JSON.parse(String(warn.mock.calls[0][0]))).toEqual({ ai: "breakdown_invalid", target: "reply", language: "ja", level: 1 });
+    expect(await ai.generateBreakdown(jaInput)).toEqual({ ok: false, reason: "invalid_output" });
+    expect(requests).toHaveLength(2);
+    expect(warn).toHaveBeenCalledTimes(2);
+    for (const [line] of warn.mock.calls) {
+      expect(JSON.parse(String(line))).toEqual({ ai: "breakdown_invalid", target: "reply", language: "ja", level: 4 });
+      for (const content of ["家", "休", "집에서", "쉬다"]) expect(String(line)).not.toContain(content);
+    }
+  });
+
+  it("다시 불러 통과하면 성공이고 로그는 첫 실패의 한 줄이다", async () => {
+    const warn = warnings();
+    const input: BreakdownInput = { ...jaInput, level: 1, target: "corrected" };
+    const { ai, requests } = setup(done({ breakdown: badPieces }), done({ breakdown: jaPieces }));
+
+    expect((await ai.generateBreakdown(input)).ok).toBe(true);
+    expect(requests).toHaveLength(2);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(String(warn.mock.calls[0][0]))).toEqual({ ai: "breakdown_invalid", target: "corrected", language: "ja", level: 1 });
+  });
+
+  it.each([
+    ["거절 응답은 refusal", text("refusal", "I can't help with that."), "refusal"],
+    ["잘린 JSON은 max_tokens", text("max_tokens", '{"breakdown": [{"text": "家'), "max_tokens"],
+    ["스키마에 맞지 않으면 invalid_output", done({ pieces: jaPieces }), "invalid_output"],
+    ["타임아웃 에러는 timeout", new Anthropic.APIConnectionTimeoutError(), "timeout"],
+    ["HTTP 상태 오류는 api_error", new Anthropic.InternalServerError(529, undefined, "overloaded", new Headers()), "api_error"],
+  ] as const)("%s이고 한 번 다시 부른다", async (_, response, reason) => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { ai, requests } = setup(response, response);
+    expect(await ai.generateBreakdown(jaInput)).toEqual({ ok: false, reason });
+    expect(requests).toHaveLength(2);
   });
 });
 
@@ -524,7 +511,7 @@ describe("generateTurn 배운 단어", () => {
   const practiceInput: TurnPromptInput = { ...turnInput, words: { kind: "practice", targets } };
   const propertiesOf = (request: Record<string, unknown>) =>
     Object.keys((request.output_config as { format: { schema: { properties: object } } }).format.schema.properties).sort();
-  const TURN_KEYS = ["correction", "reply", "reply_breakdown", "reply_ko"];
+  const TURN_KEYS = ["correction", "reply", "reply_ko"];
 
   it("단어가 없는 턴은 단어 필드 없이 요청하고 결과에 words가 없다", async () => {
     const { ai, requests } = setup(done(reply));
@@ -611,10 +598,6 @@ describe("generateTurn 배운 단어", () => {
       reply: "はい、どうぞ。",
       reply_ko: "네, 여기요.",
       reply_pron_ko: " 하이, 도-조. ",
-      reply_breakdown: [
-        { text: "はい、", meaning_ko: "네," },
-        { text: "どうぞ。", meaning_ko: "여기요." },
-      ],
       correction: null,
     };
     const { ai, requests } = setup(done({ ...jaReply, target_words: [1, 2], used_words: [2] }));

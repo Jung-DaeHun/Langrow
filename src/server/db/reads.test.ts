@@ -7,7 +7,15 @@ import { getAdminSupabase } from "@/services/supabase/admin";
 import { createReadyUser, createTestUser, deleteTestUsers, signedInClient } from "@/test/db";
 import type { Database } from "@/types/database";
 import { setFirstLevel, startTrial } from "./account";
-import { beginChatTurn, beginEnd, createChatSession, finishChatTurn, finishEnd } from "./chat";
+import {
+  beginChatTurn,
+  beginEnd,
+  beginTurnBreakdown,
+  createChatSession,
+  finishChatTurn,
+  finishEnd,
+  saveTurnBreakdown,
+} from "./chat";
 import {
   readAccount,
   readBestSessionTurnsToday,
@@ -625,7 +633,16 @@ describe("readChatRoom", () => {
         { text: "a latte?", meaning_ko: "라테 한 잔" },
       ],
     };
-    await doneTurn(user.id, session, { ...CORRECTED, reply_breakdown: replyBreakdown, correction });
+    await doneTurn(user.id, session, CORRECTED);
+    // 처음 열 때 만든 뜯어보기를 저장한다 (ADR-027)
+    for (const [target, breakdown] of [
+      ["reply", replyBreakdown],
+      ["corrected", correction.breakdown],
+    ] as const) {
+      const begun = valueOf(await beginTurnBreakdown(user.id, session, 1, target));
+      if (begun.state !== "started") throw new Error(`시작이 아님: ${begun.state}`);
+      valueOf(await saveTurnBreakdown(user.id, session, 1, target, begun.until, breakdown));
+    }
     // 기능을 넣기 전에 저장된 턴처럼 뜯어보기가 없다
     await doneTurn(user.id, session, CORRECTED);
 

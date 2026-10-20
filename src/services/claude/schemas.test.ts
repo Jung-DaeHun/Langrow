@@ -1,6 +1,7 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { describe, expect, it } from "vitest";
 import {
+  breakdownReplySchema,
   explanationSchema,
   feedbackSchema,
   pronFeedbackSchema,
@@ -9,46 +10,65 @@ import {
   withWordFields,
 } from "./schemas";
 
+const keysOf = (schema: Parameters<typeof zodOutputFormat>[0]) =>
+  Object.keys((zodOutputFormat(schema).schema as { properties: object }).properties).sort();
+
 describe("turnReplySchema", () => {
   it("교정이 있는 응답을 받는다", () => {
     const value = {
       reply: "Sure! Hot or iced?",
       reply_ko: "네! 따뜻한 걸로 드릴까요, 차가운 걸로 드릴까요?",
-      reply_breakdown: [
-        { text: "Sure!", meaning_ko: "그럼요!" },
-        { text: "Hot or iced?", meaning_ko: "따뜻한 걸로요, 차가운 걸로요?" },
-      ],
-      correction: {
-        corrected: "I'd like a latte.",
-        explanation_ko: "주문할 때는 I'd like를 쓰면 더 자연스러워요.",
-        breakdown: [
-          { text: "I'd like", meaning_ko: "주세요" },
-          { text: "a latte.", meaning_ko: "라테 하나" },
-        ],
-      },
+      correction: { corrected: "I'd like a latte.", explanation_ko: "주문할 때는 I'd like를 쓰면 더 자연스러워요." },
     };
     expect(turnReplySchema.parse(value)).toEqual(value);
   });
 
   it("교정이 null인 응답을 받는다", () => {
-    const value = { reply: "Hi", reply_ko: "안녕하세요", reply_breakdown: [], correction: null };
+    const value = { reply: "Hi", reply_ko: "안녕하세요", correction: null };
     expect(turnReplySchema.parse(value).correction).toBeNull();
   });
 
   it("correction 키가 빠지면 거부한다", () => {
-    expect(turnReplySchema.safeParse({ reply: "Hi", reply_ko: "안녕하세요", reply_breakdown: [] }).success).toBe(false);
+    expect(turnReplySchema.safeParse({ reply: "Hi", reply_ko: "안녕하세요" }).success).toBe(false);
   });
 
-  it("reply_breakdown이나 교정의 breakdown이 없으면 거부한다", () => {
-    expect(turnReplySchema.safeParse({ reply: "Hi", reply_ko: "안녕하세요", correction: null }).success).toBe(false);
-    const noBreakdown = { corrected: "Hi.", explanation_ko: "설명" };
-    expect(
-      turnReplySchema.safeParse({ reply: "Hi", reply_ko: "안녕하세요", reply_breakdown: [], correction: noBreakdown }).success,
-    ).toBe(false);
+  it("길이 제약이 없어서 빈 reply도 스키마는 통과한다 (검사는 client가 한다)", () => {
+    expect(turnReplySchema.safeParse({ reply: "", reply_ko: "", correction: null }).success).toBe(true);
+  });
+});
+
+// 뜯어보기는 턴에서 받지 않고 처음 열 때 따로 만든다 (spec/chat.md "처음 열 때 만들기", ADR-027)
+describe.each([
+  ["turnReplySchema", turnReplySchema, ["correction", "reply", "reply_ko"]],
+  ["pronTurnReplySchema", pronTurnReplySchema, ["correction", "reply", "reply_ko", "reply_pron_ko"]],
+] as const)("%s의 필드", (_, schema, keys) => {
+  it("뜯어보기(reply_breakdown, correction.breakdown)가 없다", () => {
+    expect(keysOf(schema)).toEqual(keys);
+    expect(JSON.stringify(zodOutputFormat(schema).schema)).not.toContain("breakdown");
+  });
+});
+
+describe("breakdownReplySchema", () => {
+  it("{ breakdown } 하나만 받는다", () => {
+    const value = {
+      breakdown: [
+        { text: "I", meaning_ko: "나는" },
+        { text: "was resting", meaning_ko: "쉬고 있었어요" },
+      ],
+    };
+    expect(breakdownReplySchema.parse(value)).toEqual(value);
+    expect(keysOf(breakdownReplySchema)).toEqual(["breakdown"]);
   });
 
-  it("길이 제약이 없어서 빈 reply와 빈 뜯어보기도 스키마는 통과한다 (검사는 client가 한다)", () => {
-    expect(turnReplySchema.safeParse({ reply: "", reply_ko: "", reply_breakdown: [], correction: null }).success).toBe(true);
+  it("breakdown이 없거나 조각에 text·meaning_ko가 없으면 거부한다", () => {
+    expect(breakdownReplySchema.safeParse({}).success).toBe(false);
+    expect(breakdownReplySchema.safeParse({ breakdown: [{ text: "I" }] }).success).toBe(false);
+    expect(breakdownReplySchema.safeParse({ breakdown: [{ meaning_ko: "나는" }] }).success).toBe(false);
+  });
+
+  it("개수·길이 제약이 없어서 빈 배열·빈 뜻도 스키마는 통과한다 (검사는 client가 한다)", () => {
+    expect(breakdownReplySchema.safeParse({ breakdown: [] }).success).toBe(true);
+    expect(breakdownReplySchema.safeParse({ breakdown: [{ text: "I", meaning_ko: "" }] }).success).toBe(true);
   });
 });
 
@@ -97,6 +117,7 @@ describe("구조화 출력 형식", () => {
     ["pronTurnReplySchema", pronTurnReplySchema],
     ["feedbackSchema", feedbackSchema],
     ["pronFeedbackSchema", pronFeedbackSchema],
+    ["breakdownReplySchema", breakdownReplySchema],
   ])("%s를 설치된 SDK의 zodOutputFormat으로 바꿀 수 있고 길이·개수 제약이 없다", (_, schema) => {
     const format = zodOutputFormat(schema);
     expect(format.type).toBe("json_schema");
@@ -127,13 +148,11 @@ describe("explanationSchema", () => {
 });
 
 describe("pronTurnReplySchema", () => {
-  const breakdown = [{ text: "はい。", meaning_ko: "네." }];
   const value = {
     reply: "はい。",
     reply_ko: "네.",
     reply_pron_ko: "하이.",
-    reply_breakdown: breakdown,
-    correction: { corrected: "はい。", explanation_ko: "설명", corrected_pron_ko: "하이.", breakdown },
+    correction: { corrected: "はい。", explanation_ko: "설명", corrected_pron_ko: "하이." },
   };
 
   it("발음 필드가 있는 응답과 교정이 없는 응답을 받는다", () => {
@@ -142,25 +161,16 @@ describe("pronTurnReplySchema", () => {
   });
 
   it("reply_pron_ko나 corrected_pron_ko가 없으면 거부한다", () => {
-    const noReplyPron = { reply: value.reply, reply_ko: value.reply_ko, reply_breakdown: breakdown, correction: value.correction };
+    const noReplyPron = { reply: value.reply, reply_ko: value.reply_ko, correction: value.correction };
     expect(pronTurnReplySchema.safeParse(noReplyPron).success).toBe(false);
-    const noCorrectedPron = { corrected: "はい。", explanation_ko: "설명", breakdown };
+    const noCorrectedPron = { corrected: "はい。", explanation_ko: "설명" };
     expect(pronTurnReplySchema.safeParse({ ...value, correction: noCorrectedPron }).success).toBe(false);
-  });
-
-  it("reply_breakdown이나 교정의 breakdown이 없으면 거부한다", () => {
-    const noReplyBreakdown = { reply: value.reply, reply_ko: value.reply_ko, reply_pron_ko: "하이.", correction: value.correction };
-    expect(pronTurnReplySchema.safeParse(noReplyBreakdown).success).toBe(false);
-    const noCorrectedBreakdown = { corrected: "はい。", explanation_ko: "설명", corrected_pron_ko: "하이." };
-    expect(pronTurnReplySchema.safeParse({ ...value, correction: noCorrectedBreakdown }).success).toBe(false);
   });
 });
 
 describe("withWordFields", () => {
-  const base = { reply: "Hi", reply_ko: "안녕하세요", reply_breakdown: [], correction: null };
+  const base = { reply: "Hi", reply_ko: "안녕하세요", correction: null };
   const pron = { ...base, reply_pron_ko: "하이." };
-  const keysOf = (schema: Parameters<typeof zodOutputFormat>[0]) =>
-    Object.keys((zodOutputFormat(schema).schema as { properties: object }).properties).sort();
 
   it("단어가 없는 턴은 받은 스키마 그대로다", () => {
     expect(withWordFields(turnReplySchema, undefined)).toBe(turnReplySchema);
@@ -168,8 +178,8 @@ describe("withWordFields", () => {
   });
 
   it.each([
-    ["turnReplySchema", turnReplySchema, base, ["correction", "reply", "reply_breakdown", "reply_ko"]],
-    ["pronTurnReplySchema", pronTurnReplySchema, pron, ["correction", "reply", "reply_breakdown", "reply_ko", "reply_pron_ko"]],
+    ["turnReplySchema", turnReplySchema, base, ["correction", "reply", "reply_ko"]],
+    ["pronTurnReplySchema", pronTurnReplySchema, pron, ["correction", "reply", "reply_ko", "reply_pron_ko"]],
   ] as const)("%s: pick은 target_words·used_words, practice는 used_words를 더한다", (_, schema, value, keys) => {
     expect(keysOf(withWordFields(schema, "pick"))).toEqual([...keys, "target_words", "used_words"].sort());
     expect(keysOf(withWordFields(schema, "practice"))).toEqual([...keys, "used_words"].sort());

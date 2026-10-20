@@ -96,6 +96,16 @@ function defaultAi(): Ai {
       },
     }),
     generateExplanation: async () => ({ ok: true, value: { explanation: "과거의 일이라 went를 써요." } }),
+    // 기본 db의 beginTurnBreakdown 문장 "Nice to meet you!"의 뜯어보기
+    generateBreakdown: async () => ({
+      ok: true,
+      value: {
+        breakdown: [
+          { text: "Nice", meaning_ko: "반가워요" },
+          { text: "to meet you!", meaning_ko: "만나서" },
+        ],
+      },
+    }),
   };
 }
 

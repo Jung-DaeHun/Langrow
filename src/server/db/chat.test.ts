@@ -396,7 +396,7 @@ describe("대화 1턴", () => {
     ]);
   });
 
-  it("확정은 문장 뜯어보기를 저장한다: reply_breakdown은 컬럼에, 교정 뜯어보기는 correction 안에. 없으면 null이다", async () => {
+  it("확정은 reply_breakdown을 넘기지 않아 null로 둔다 (뜯어보기는 처음 열 때 만든다, ADR-027)", async () => {
     const user = await createReadyUser();
     const sessionId = await newSession(user.id);
     const withBreakdown: TurnReply = {
@@ -405,26 +405,15 @@ describe("대화 1턴", () => {
         { text: "One latte,", meaning_ko: "라테 한 잔" },
         { text: "coming up!", meaning_ko: "나갑니다" },
       ],
-      correction: {
-        ...REPLY.correction!,
-        breakdown: [
-          { text: "Can I get", meaning_ko: "주시겠어요" },
-          { text: "a latte?", meaning_ko: "라테 한 잔" },
-        ],
-      },
     };
     const first = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
-    valueOf(await finishChatTurn(user.id, sessionId, first.token, withBreakdown));
-    // 뜯어보기가 없으면 인자를 빼고 부르고, 기존처럼 확정된다
-    const second = valueOf(await beginChatTurn(user.id, sessionId, "No, thanks."));
-    await expect(finishChatTurn(user.id, sessionId, second.token, PLAIN_REPLY)).resolves.toEqual({
+    await expect(finishChatTurn(user.id, sessionId, first.token, withBreakdown)).resolves.toEqual({
       ok: true,
-      value: { turnsLeft: SESSION_MAX_TURNS - 2, targetWords: null, targetSource: null },
+      value: { turnsLeft: SESSION_MAX_TURNS - 1, targetWords: null, targetSource: null },
     });
 
     expect(await turnsOf(sessionId)).toMatchObject([
-      { turn_no: 1, status: "done", reply_breakdown: withBreakdown.reply_breakdown, correction: withBreakdown.correction },
-      { turn_no: 2, status: "done", reply_breakdown: null, correction: null },
+      { turn_no: 1, status: "done", reply_breakdown: null, correction: REPLY.correction },
     ]);
   });
 });
@@ -1173,15 +1162,11 @@ describe("문장 뜯어보기 처음 열 때 만들기", () => {
   describe("시작 RPC", () => {
     it("저장본이 있으면 돌려준다. 오늘 실패 10회이거나 만드는 중이어도 돌려준다", async () => {
       const user = await createReadyUser();
-      const sessionId = await newSession(user.id);
-      const { token } = valueOf(await beginChatTurn(user.id, sessionId, "Can I have latte?"));
-      valueOf(
-        await finishChatTurn(user.id, sessionId, token, {
-          ...REPLY,
-          reply_breakdown: REPLY_BREAKDOWN,
-          correction: { ...REPLY.correction!, breakdown: CORRECTED_BREAKDOWN },
-        }),
-      );
+      const sessionId = await plainDoneTurn(user.id);
+      await updateTurns(sessionId, {
+        reply_breakdown: REPLY_BREAKDOWN,
+        correction: { ...REPLY.correction!, breakdown: CORRECTED_BREAKDOWN },
+      });
       const reply = { ok: true, value: { state: "stored", breakdown: REPLY_BREAKDOWN } };
       const corrected = { ok: true, value: { state: "stored", breakdown: CORRECTED_BREAKDOWN } };
 

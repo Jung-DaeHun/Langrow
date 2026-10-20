@@ -136,7 +136,7 @@ export async function finishChatTurn(
     p_correction: reply.correction,
     // 발음이 없으면 인자를 빼서 기본값 null로 저장한다 (undefined 키는 요청 JSON에서 빠진다)
     p_reply_pron_ko: reply.reply_pron_ko ?? undefined,
-    p_reply_breakdown: reply.reply_breakdown ?? undefined,
+    // p_reply_breakdown은 넘기지 않는다. 뜯어보기는 처음 열 때 save_turn_breakdown이 저장한다(ADR-027)
     // 배운 단어도 값이 없으면 인자를 빼서 기본값 null로 둔다
     p_target_word_ids: words?.targetWordIds,
     p_target_source: words?.targetSource,

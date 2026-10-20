@@ -2,12 +2,13 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
-import { alignBreakdown, type Breakdown } from "@/lib/breakdown";
-import { showsPronunciation } from "@/lib/levels";
+import { alignBreakdown, type Breakdown, type BreakdownTarget } from "@/lib/breakdown";
+import { showsPronunciation, type Language, type Level } from "@/lib/levels";
 import { cleanPron } from "@/lib/pronunciation";
 import { pickTargetIds, pickUsedIds } from "@/lib/targetWords";
 import { getClaudeEnv } from "@/services/env";
 import {
+  buildBreakdownPrompt,
   buildExplanationPrompt,
   buildFeedbackPrompt,
   buildTurnPrompt,
@@ -16,6 +17,7 @@ import {
   type TurnPromptInput,
 } from "./prompts";
 import {
+  breakdownReplySchema,
   explanationSchema,
   feedbackSchema,
   pronFeedbackSchema,
@@ -43,10 +45,13 @@ export type AiResult<T> = { ok: true; value: T } | { ok: false; reason: AiFailur
 // 저장·API의 reply에는 넣지 않는다(use-case가 떼어 낸다)
 export type TurnWordIds = { targetWordIds?: string[]; usedWordIds: string[] };
 export type GeneratedTurn = TurnReply & { words?: TurnWordIds };
+// 문장 하나의 뜯어보기(spec/chat.md "처음 열 때 만들기"). target·level은 검사 실패 로그에만 쓰고 프롬프트에는 넣지 않는다
+export type BreakdownInput = { language: Language; level: Level; target: BreakdownTarget; sentence: string };
 export type Ai = {
   generateTurn(input: TurnPromptInput): Promise<AiResult<GeneratedTurn>>;
   generateFeedback(input: FeedbackPromptInput): Promise<AiResult<Feedback>>;
   generateExplanation(input: ExplanationPromptInput): Promise<AiResult<Explanation>>;
+  generateBreakdown(input: BreakdownInput): Promise<AiResult<{ breakdown: Breakdown }>>;
 };
 
 // 실제 SDK 클라이언트와 테스트의 가짜가 함께 맞추는 최소 타입
@@ -174,6 +179,15 @@ export function createAi(deps: { client?: AiClient; model?: string } = {}): Ai {
           value.explanation.trim() ? value : null,
         ),
       ),
+    generateBreakdown: ({ language, level, target, sentence }) =>
+      withRetry(() =>
+        attempt(breakdownReplySchema, () => buildBreakdownPrompt({ language, sentence }), (value) => {
+          const breakdown = alignBreakdown(sentence, value.breakdown);
+          // 통과율을 운영 로그로 보기 위해 남긴다. 문장·조각 내용은 남기지 않는다
+          if (!breakdown) console.warn(JSON.stringify({ ai: "breakdown_invalid", target, language, level }));
+          return breakdown && { breakdown };
+        }),
+      ),
   };
 }
 
@@ -206,31 +220,10 @@ function acceptFeedback(value: Feedback): Feedback {
   };
 }
 
-// AI가 준 턴 응답. 뜯어보기는 검사 전의 조각이다
-type AiTurnReply = Omit<TurnReply, "reply_breakdown" | "correction"> & {
-  reply_breakdown: Breakdown;
-  correction: (Omit<NonNullable<TurnReply["correction"]>, "breakdown"> & { breakdown: Breakdown }) | null;
-};
-
-// reply가 공백뿐이면 null(invalid_output). 뜯어보기가 검사에 맞지 않으면 턴은 성공으로 두고 그 뜯어보기만 숨긴다:
-// reply_breakdown은 null, 교정은 breakdown 키를 뺀다 (spec/chat.md "문장 뜯어보기")
-function acceptTurn({ language, level, words }: TurnPromptInput, output: AiTurnReply & WordNumbers): GeneratedTurn | null {
-  const { target_words, used_words, ...value } = output;
-  if (!value.reply.trim()) return null;
-  // 통과율을 운영 로그로 보기 위해 남긴다. 문장·조각 내용은 남기지 않는다
-  const align = (target: "reply" | "corrected", sentence: string, pieces: Breakdown) => {
-    const aligned = alignBreakdown(sentence, pieces);
-    if (!aligned) console.warn(JSON.stringify({ ai: "breakdown_invalid", target, language, level }));
-    return aligned;
-  };
-  const replyBreakdown = align("reply", value.reply, value.reply_breakdown);
-  let correction: TurnReply["correction"] = null;
-  if (value.correction) {
-    const { breakdown, ...rest } = value.correction;
-    const aligned = align("corrected", rest.corrected, breakdown);
-    correction = aligned ? { ...rest, breakdown: aligned } : rest;
-  }
-  const turn = { ...value, reply_breakdown: replyBreakdown, correction };
+// reply가 공백뿐이면 null(invalid_output)
+function acceptTurn({ words }: TurnPromptInput, output: TurnReply & WordNumbers): GeneratedTurn | null {
+  const { target_words, used_words, ...turn } = output;
+  if (!turn.reply.trim()) return null;
   return words ? { ...turn, words: wordIds(words, target_words ?? [], used_words ?? []) } : turn;
 }
 
