@@ -225,9 +225,18 @@ describe("buildFeedbackPrompt", () => {
     const name = LANGUAGE_NAMES[language];
     const { system } = buildFeedbackPrompt({ ...input, language });
     expect(system).toContain("고칠 점이 없으면 빈 배열로 둔다");
-    expect(system).toContain("- point: 무엇을 어떻게 고치면 좋은지 짧게 설명한다. 사용자가 한 말을 인용해도 된다. 비워 두지 않고, example의 문장을 되풀이하지 않는다.");
+    expect(system).toContain("- point: 무엇을 어떻게 고치면 좋은지 한국어로 짧게 설명한다. 사용자가 한 말을 인용해도 된다. 비워 두지 않고, example의 문장을 되풀이하지 않는다.");
     expect(system).toContain(`- example: 더 나은 ${name} 표현 한 문장. ${name}로만 쓰고 한국어 설명을 섞지 않는다.`);
-    expect(system).toContain(`good과 point는 한국어 해요체로 짧고 부드럽게 쓰고, example만 ${name}로 쓴다`);
+  });
+
+  // 2026-10-20 실측: good·point 정의에 "한국어"가 없을 때 일본어 피드백 8개 중 3개가 good·point를 일본어로 썼다
+  it.each(LANGUAGES)("%s: good·point는 한국어로 쓰고 학습 언어는 짧은 인용과 example에만 쓰라고 한다", (language) => {
+    const name = LANGUAGE_NAMES[language];
+    const { system } = buildFeedbackPrompt({ ...input, language });
+    expect(system).toContain("- good: 사용자가 잘한 점을 한국어 1~2문장으로 쓴다.");
+    expect(system).toContain(
+      `- good과 point는 한국어 해요체 문장으로 짧고 부드럽게 쓴다. ${name}는 짧은 인용에만 쓰고 문장 전체를 ${name}로 쓰지 않는다. example만 ${name} 문장으로 쓴다.`,
+    );
   });
 
   it.each(LEVELS)("일본어 레벨 %i: good·point의 일본어 인용과 example의 모든 한자에 읽기 표기를 달라고 한다", (level) => {

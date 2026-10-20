@@ -246,12 +246,12 @@ export function buildFeedbackPrompt(input: FeedbackPromptInput): Prompt {
     "",
     "## 출력",
     "- 사용자 발화와 턴별 교정을 바탕으로 쓴다.",
-    "- good: 사용자가 잘한 점을 1~2문장으로 쓴다.",
+    "- good: 사용자가 잘한 점을 한국어 1~2문장으로 쓴다.",
     "- improve: 고칠 점을 최대 3개 쓴다. 고칠 점이 없으면 빈 배열로 둔다.",
-    "  - point: 무엇을 어떻게 고치면 좋은지 짧게 설명한다. 사용자가 한 말을 인용해도 된다. 비워 두지 않고, example의 문장을 되풀이하지 않는다.",
+    "  - point: 무엇을 어떻게 고치면 좋은지 한국어로 짧게 설명한다. 사용자가 한 말을 인용해도 된다. 비워 두지 않고, example의 문장을 되풀이하지 않는다.",
     `  - example: 더 나은 ${name} 표현 한 문장. ${name}로만 쓰고 한국어 설명을 섞지 않는다.`,
     ...(pronunciation ? ["  - example_pron_ko: example의 한글 발음. 아래 '한글 발음' 규칙을 따르고 비워 두지 않는다."] : []),
-    `- good과 point는 한국어 해요체로 짧고 부드럽게 쓰고, example만 ${name}로 쓴다.`,
+    `- good과 point는 한국어 해요체 문장으로 짧고 부드럽게 쓴다. ${name}는 짧은 인용에만 쓰고 문장 전체를 ${name}로 쓰지 않는다. example만 ${name} 문장으로 쓴다.`,
     ...(language === "ja"
       ? [
           "- good·point의 일본어 인용과 example의 모든 한자에 [漢字|かんじ] 형식으로 읽기를 단다. 읽기 표기는 한자에만 단다(가나·한글에는 달지 않는다).",
