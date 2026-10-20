@@ -382,6 +382,40 @@ class TestCheckoutBranch:
 
 
 # ---------------------------------------------------------------------------
+# _check_local_supabase
+# ---------------------------------------------------------------------------
+
+class TestCheckLocalSupabase:
+    # 2026-10-20 로컬 Supabase가 꺼진 채 시작한 step이 구현을 다 한 뒤 test:db에서 blocked됐다
+    STEP_WITH_DB = "## AC\n\n```bash\nnpm run test:db\n```"
+
+    def test_skips_when_no_pending_step_runs_test_db(self, executor):
+        with patch("subprocess.run") as mock_run:
+            executor._check_local_supabase()
+        mock_run.assert_not_called()
+
+    def test_ignores_completed_steps(self, executor, phase_dir):
+        (phase_dir / "step0.md").write_text(self.STEP_WITH_DB, encoding="utf-8")
+        with patch("subprocess.run") as mock_run:
+            executor._check_local_supabase()
+        mock_run.assert_not_called()
+
+    def test_passes_when_supabase_is_running(self, executor, phase_dir):
+        (phase_dir / "step2.md").write_text(self.STEP_WITH_DB, encoding="utf-8")
+        with patch("subprocess.run", return_value=MagicMock(returncode=0, stdout="", stderr="")) as mock_run:
+            executor._check_local_supabase()
+        assert "supabase status" in mock_run.call_args[0][0]
+
+    def test_exits_when_supabase_is_down(self, executor, phase_dir, capsys):
+        (phase_dir / "step2.md").write_text(self.STEP_WITH_DB, encoding="utf-8")
+        with patch("subprocess.run", return_value=MagicMock(returncode=1, stdout="", stderr="not running")):
+            with pytest.raises(SystemExit) as exc_info:
+                executor._check_local_supabase()
+        assert exc_info.value.code == 1
+        assert "npx supabase start" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
 # _commit_step (mocked)
 # ---------------------------------------------------------------------------
 

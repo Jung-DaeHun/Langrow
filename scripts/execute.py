@@ -94,6 +94,7 @@ class StepExecutor:
         self._print_header()
         try:
             self._check_blockers()
+            self._check_local_supabase()
             self._checkout_branch()
             self._ensure_created_at()
             self._execute_all_steps()
@@ -131,6 +132,22 @@ class StepExecutor:
             return
         print(f"\n  ERROR: {what} 프로세스를 시작하지 못했습니다 (0xC0000142).")
         print(f"  execute.py를 띄운 Claude Code 세션이 닫히면 생깁니다. step 상태는 그대로 두었으니 다시 실행하세요.")
+        sys.exit(1)
+
+    def _check_local_supabase(self):
+        """남은 step이 test:db를 돌리면 로컬 Supabase가 켜져 있는지 먼저 본다.
+        꺼져 있으면 step이 구현을 다 한 뒤 test:db에서 blocked된다(2026-10-20 phase 10 step 0, 약 9분)."""
+        index = self._read_json(self._index_file)
+        step_files = [self._phase_dir / f"step{s['step']}.md" for s in index["steps"] if s["status"] == "pending"]
+        if not any(f.exists() and "test:db" in f.read_text(encoding="utf-8") for f in step_files):
+            return
+        # Windows에서 npx는 shell을 거쳐야 실행된다(src/test/dbGlobalSetup.ts와 같은 확인)
+        r = subprocess.run("npx supabase status", shell=True, cwd=self._root, capture_output=True, encoding="utf-8", errors="replace")
+        self._exit_if_spawn_failed(r.returncode, "npx supabase")
+        if r.returncode == 0:
+            return
+        print(f"  ERROR: 남은 step이 npm run test:db를 돌리는데 로컬 Supabase에 연결하지 못했습니다.")
+        print(f"  Hint: Docker Desktop을 켜고 `npx supabase start`를 실행한 뒤 다시 실행하세요.")
         sys.exit(1)
 
     def _checkout_branch(self):

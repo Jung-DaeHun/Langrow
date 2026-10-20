@@ -148,6 +148,7 @@ python3 scripts/execute.py {task-name} --push  # 실행 후 push
 
 execute.py가 자동으로 처리하는 것:
 
+- 로컬 Supabase 확인 — 남은 step 파일에 `test:db`가 있으면 시작 전에 `npx supabase status`로 보고, 꺼져 있으면 실행하지 않는다(Docker Desktop을 켜고 `npx supabase start`). 이유: 2026-10-20 꺼진 채 시작한 step이 구현을 다 한 뒤 `test:db`에서 blocked됐다(약 9분)
 - `feat-{task-name}` 브랜치 생성/checkout. 브랜치를 바꿔야 하는데 `phases/` 밖에 커밋하지 않은 변경이 있으면 멈춘다. step 커밋이 `git add -A`라서 같은 폴더를 쓰는 다른 세션의 변경이 섞이기 때문이다. phase를 도는 동안에는 같은 폴더에서 다른 세션이 작업하지 않는다(필요하면 git worktree로 나눈다)
 - 문서는 붙이지 않음 — CLAUDE.md는 `claude -p`가 자동으로 읽고, docs는 step 파일이 고른 것만 세션이 읽는다
 - 컨텍스트 누적 — 완료된 step의 summary(500자에서 자름)를 다음 step 프롬프트에 전달
@@ -170,6 +171,7 @@ phase가 끝나면 main에 병합하기 전에 spec 대조 점검을 한다. 영
 AI 프롬프트를 바꾼 phase는 병합 전에 메인 세션이 실제 호출로 확인한다. 유료라 사용자 확인을 먼저 받는다.
 
 - 먼저 `count_tokens`(무료)로 늘어난 입력 토큰을 잰다. 프롬프트 빌더로 바꾸기 전과 후의 프롬프트를 만들어 비교하고, spec·ADR의 비용 추정을 실측으로 고친다. 한국어 지시문은 토큰이 많아 추정이 크게 빗나간다. 이유: 2026-10-20 배운 단어 지시는 추정 +250~600토큰이 실측 +894~1,244였다. 문구를 줄여 +572~907로 낮췄다.
+- 출력 형식(필드)을 바꿨으면 phase 전 프롬프트와 같은 입력으로 나란히 몇 개씩(8개 안팎) 만들어, spec의 출력 규칙(필드 언어·읽기 표기 등)을 스크립트로 세어 비교한다. phase 전 파일은 `git show <phase 전 커밋>:src/services/claude/prompts.ts`로 스크래치패드에 꺼내 쓴다. 필드를 나누거나 이름을 바꾸면 옛 문장에 걸려 있던 제약(예: "한국어로")을 새 필드 정의마다 옮긴다. 이유: 2026-10-20 종료 피드백을 `point`·`example`로 나눈 뒤 `good`·`point` 정의에서 "한국어"가 빠져 8개 중 3개가 일본어로 나왔다(phase 전 0개). 실제 확인 1번에서 우연히 보였고, 나란히 비교해서 회귀임을 확정했다.
 - 그다음 `next start`와 테스트 계정 쿠키로 `/api/**`를 불러 대화 몇 개를 돌린다. 언어·레벨·예외(한국어 입력 등)를 섞는다. 테스트 계정의 레벨·학습 기록을 admin으로 잠시 바꾸면, 바꾸기 전에 그 행들(`user_levels`, `user_words`, `profiles`의 `streak`·`last_study_date`)을 저장해 두고 끝나면 되돌린다. 이유: 턴이 성공하면 학습일·연속일이 바뀐다. 2026-10-20에는 `profiles`를 저장하지 않아 테스트 계정의 연속일을 되돌리지 못했다.
 
 main에 병합한 뒤 push는 운영 배포다(Vercel이 `main`을 자동 배포한다). phase에 마이그레이션이 있으면 push 전에 사용자 확인을 받아 운영 DB에 먼저 적용한다(`npx supabase migration list --linked`로 확인 → `supabase db push`). 마이그레이션은 지금 운영 코드와도 맞게(열 추가, 기본값 있는 인자) 만들어서 먼저 적용해도 깨지지 않게 한다. 이유: 2026-10-18 phase 7-chat-improve의 코드는 새 열 `chat_turns.reply_breakdown`을 읽어서, 마이그레이션 전에 배포했다면 운영의 모든 대화방이 열리지 않았다.
