@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "마이그레이션 20261020100000_breakdown_on_open.sql(*_breakdown_until 열 2개, RPC begin/fail/save_turn_breakdown, 적용됨). db/chat.ts: beginTurnBreakdown(userId,sessionId,turnNo,target) → stored{breakdown}|started{sentence,language,level,until}, 거부 NOT_FOUND·CONSENT·ONBOARDING·AI_FAILURE_LIMIT·CONFLICT·INVALID_INPUT. failTurnBreakdown(…,until,reason) → null. saveTurnBreakdown(…,until,breakdown) → {breakdown}|NOT_FOUND. until은 begin 값 그대로. lib/breakdown: BreakdownTarget. fakes: begin started(en,1), save 받은 값.",
+  "spec_diff": "fail_turn_breakdown·save_turn_breakdown도 target이 reply·corrected가 아니면 INVALID_INPUT을 돌려준다(step은 begin만 명시, fail은 '항상 ok'). 잘못된 target으로 correction에 쓰거나 chat_failed를 남기지 않게 하려는 것이고, 앱은 BreakdownTarget 타입으로만 부른다. 저장본·교정 유무 판정은 SQL null과 jsonb null을 모두 '없음'으로 본다(correction이 jsonb null이어도 교정 없음). anon/authenticated 권한 테스트는 step의 chat.test.ts 대신 기존 함수 권한 테스트가 있는 security.test.ts에 두었다."
+}

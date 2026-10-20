@@ -1,0 +1,30 @@
+{
+  "project": "Langrow",
+  "phase": "12-breakdown-on-open",
+  "steps": [
+    {
+      "step": 0,
+      "name": "breakdown-data",
+      "status": "completed",
+      "started_at": "2026-10-20T23:34:46+0900",
+      "summary": "마이그레이션 20261020100000_breakdown_on_open.sql(*_breakdown_until 열 2개, RPC begin/fail/save_turn_breakdown, 적용됨). db/chat.ts: beginTurnBreakdown(userId,sessionId,turnNo,target) → stored{breakdown}|started{sentence,language,level,until}, 거부 NOT_FOUND·CONSENT·ONBOARDING·AI_FAILURE_LIMIT·CONFLICT·INVALID_INPUT. failTurnBreakdown(…,until,reason) → null. saveTurnBreakdown(…,until,breakdown) → {breakdown}|NOT_FOUND. until은 begin 값 그대로. lib/breakdown: BreakdownTarget. fakes: begin started(en,1), save 받은 값.",
+      "completed_at": "2026-10-20T23:43:49+0900"
+    },
+    {
+      "step": 1,
+      "name": "breakdown-ai",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "breakdown-api",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "breakdown-ui",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-10-20T23:34:46+0900"
+}
