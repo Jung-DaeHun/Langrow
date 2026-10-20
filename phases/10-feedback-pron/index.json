@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "chat-refresh",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-20T18:07:12+0900",
+      "summary": "ChatRoom.tsx: send 성공(턴 확정, turnsLeft 0 포함)마다 added·replyTarget 갱신 뒤 router.refresh() 한 번. endSession은 status ended일 때만 refresh(202는 안 함). 실패 응답은 그대로(409 CONFLICT만 기존 한 번). ChatFeedback.tsx: 202를 기다리다 ended를 받으면 setPolled와 함께 refresh. 화면은 다시 읽기를 기다리지 않고 lastTurnNo 규칙은 그대로. 테스트: ChatRoom '뒤로 가기 대비 다시 읽기' 4개(턴 0 화면 재현→rerender로 3턴·단어 카드, 성공마다/503 제외, 마지막 턴+end로 2번, 202 없음), 기존 '배운 단어' 줄 테스트는 refresh 2번·rerender 없이 응답만으로 갱신으로 고침. ChatFeedback에 refresh mock과 202→ended 테스트 추가. 서버·API 변경 없음.",
+      "completed_at": "2026-10-20T18:11:05+0900"
     }
   ],
   "created_at": "2026-10-20T17:51:17+0900"
