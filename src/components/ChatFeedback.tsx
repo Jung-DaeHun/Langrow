@@ -15,7 +15,7 @@ import { Furigana } from "./Furigana";
 import { WaitingDots } from "./WaitingDots";
 
 // 종료 피드백(집중 모드). result가 null이면 다른 요청이 피드백을 만드는 중(202)이라 화면이 보이는 동안 /end를 다시 확인한다.
-// 확인 실패는 자동으로 반복하지 않는다. 피드백 문장은 후리가나 표기를 요청하지 않지만, 모델이 대화 기록의 표기를 따라 쓸 수 있어서
+// 확인 실패는 자동으로 반복하지 않는다. 일본어 피드백은 인용과 예문의 한자에 읽기 표기를 요청하므로(spec/chat.md "피드백 형식")
 // 대화 말풍선과 같은 규칙으로 그린다(일본어는 ruby, 깨진 표기는 기호를 지움)
 
 // server/chat.ts의 END_RETRY_AFTER_SECONDS와 같은 값이다(server-only라 가져오지 못한다)
