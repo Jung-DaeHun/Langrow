@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "breakdown-api",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-10-20T23:54:58+0900",
+      "summary": "POST /api/chat/sessions/[id]/breakdown(route.ts, ready, maxDuration 60): body {turn_no 1~20 정수, target z.enum(BREAKDOWN_TARGETS)}, uuid 아닌 id는 404, 응답 ChatBreakdownResponse {breakdown}(types/api.ts). server/chat.ts openChatBreakdown: stored면 그대로, started면 AI → 실패 시 failTurnBreakdown(until 그대로) 뒤 503+BREAKDOWN_UNAVAILABLE_MESSAGE, 성공 시 저장 RPC 값(저장 실패면 로그 뒤 만든 값). 시작 RPC 거부는 그대로, AI_FAILURE_LIMIT 429→BREAKDOWN_FAILURE_LIMIT_MESSAGE, CONFLICT 409→BREAKDOWN_IN_PROGRESS_MESSAGE.",
+      "completed_at": "2026-10-21T00:00:26+0900"
     },
     {
       "step": 3,

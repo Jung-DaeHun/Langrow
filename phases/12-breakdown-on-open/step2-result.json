@@ -1,0 +1,5 @@
+{
+  "status": "completed",
+  "summary": "POST /api/chat/sessions/[id]/breakdown(route.ts, ready, maxDuration 60): body {turn_no 1~20 정수, target z.enum(BREAKDOWN_TARGETS)}, uuid 아닌 id는 404, 응답 ChatBreakdownResponse {breakdown}(types/api.ts). server/chat.ts openChatBreakdown: stored면 그대로, started면 AI → 실패 시 failTurnBreakdown(until 그대로) 뒤 503+BREAKDOWN_UNAVAILABLE_MESSAGE, 성공 시 저장 RPC 값(저장 실패면 로그 뒤 만든 값). 시작 RPC 거부는 그대로, AI_FAILURE_LIMIT 429→BREAKDOWN_FAILURE_LIMIT_MESSAGE, CONFLICT 409→BREAKDOWN_IN_PROGRESS_MESSAGE.",
+  "spec_diff": "step 지시는 params가 uuid가 아니면 400이라 했지만, route() 래퍼(src/server/http.ts)가 params 검증 실패를 404 NOT_FOUND로 돌려준다(messages·end 라우트와 같고 기존 테스트도 404). http.ts는 이 step 범위가 아니라 404로 테스트했다. 실패 RPC가 거부하면 503 대신 그 결과를 돌려준다(step 지시와 explainWord 선례. chat.md는 실패 RPC가 거부할 때를 따로 정하지 않았다)."
+}
