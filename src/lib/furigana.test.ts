@@ -81,6 +81,34 @@ describe("parseFurigana", () => {
     });
   });
 
+  // 2026-10-20 종료 피드백 예문에서 나왔다
+  describe("|가 빠진 漢字[かな] 표기는 [ 바로 앞의 한자 묶음에 괄호 안 히라가나를 읽기로 단다", () => {
+    it("앞뒤에 가나가 이어져도 한자 묶음만 본문이다", () => {
+      expect(parseFurigana("お願[ねが]いします")).toEqual([
+        { text: "お" },
+        { text: "願", reading: "ねが" },
+        { text: "いします" },
+      ]);
+    });
+
+    it("온전한 표기 바로 뒤", () => {
+      expect(parseFurigana("[何回|なんかい]飲[の]めば")).toEqual([
+        { text: "何回", reading: "なんかい" },
+        { text: "飲", reading: "の" },
+        { text: "めば" },
+      ]);
+    });
+
+    it("[ 앞이 한자가 아니거나 괄호 안이 히라가나만이 아니면 깨진 표기로 둔다", () => {
+      expect(parseFurigana("お[ねが]い")).toEqual([{ text: "おねがい" }]);
+      expect(parseFurigana("飲[ノ]む")).toEqual([{ text: "飲ノむ" }]);
+    });
+
+    it("stripFurigana도 복구를 따른다", () => {
+      expect(stripFurigana("お願[ねが]いします")).toBe("お願いします");
+    });
+  });
+
   describe("깨진 표기는 [, ], |만 지우고 일반 텍스트로 둔다", () => {
     it("닫히지 않은 [", () => {
       expect(parseFurigana("[漢字|かんじ です")).toEqual([{ text: "漢字かんじ です" }]);

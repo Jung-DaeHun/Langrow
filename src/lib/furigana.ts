@@ -1,7 +1,8 @@
 export type FuriganaSegment = { text: string; reading?: string };
 
-// 온전한 표기 [본문|읽기], 또는 여는 괄호만 빠진 표기 앞말|읽기]. 본문·앞말·읽기는 비어 있지 않고 [, ], |를 포함하지 않는다
-const RUBY = /\[([^[\]|]+)\|([^[\]|]+)\]|([^[\]|]+)\|([^[\]|]+)\]/g;
+// 온전한 표기 [본문|읽기], 여는 괄호만 빠진 표기 앞말|읽기], 또는 |가 빠진 표기 한자[히라가나].
+// 본문·앞말·읽기는 비어 있지 않고 [, ], |를 포함하지 않는다
+const RUBY = /\[([^[\]|]+)\|([^[\]|]+)\]|([^[\]|]+)\|([^[\]|]+)\]|(\p{Script=Han}+)\[([ぁ-ゖ]+)\]/gu;
 // 온전한 표기 밖에 남은 [, ], |는 깨진 표기의 흔적이라 지운다
 const BROKEN_MARKS = /[[\]|]/g;
 // 읽기는 한자에만 단다. 모델이 가나·한글에 단 읽기([コーヒー|こーひー])는 버린다
@@ -26,10 +27,12 @@ export function parseFurigana(input: string): FuriganaSegment[] {
   let last = 0;
   for (const match of input.matchAll(RUBY)) {
     pushText(input.slice(last, match.index));
-    const [, body, reading, before, lostReading] = match;
+    const [, body, reading, before, lostReading, kanjiBody, bareReading] = match;
     if (body !== undefined) {
       if (KANJI.test(body)) segments.push({ text: body, reading });
       else pushText(body);
+    } else if (kanjiBody !== undefined) {
+      segments.push({ text: kanjiBody, reading: bareReading });
     } else if (input[match.index - 1] === "|") {
       // |가 두 개인 [漢字|かん|じ]의 뒷부분이다. 여는 괄호만 빠진 표기가 아니라 깨진 표기로 둔다
       pushText(match[0]);
