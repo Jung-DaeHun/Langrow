@@ -1,7 +1,6 @@
 // 정식 출시 전에 법률 검토를 받는다 (spec/ops.md "출시 최소 요건")
-import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackButton } from "@/components/BackButton";
 import { PLAN_LIMITS, PRO_PRICE_KRW, TRIAL_DAYS } from "@/lib/plan";
 import { SITE } from "@/site.config";
 
@@ -18,13 +17,7 @@ export default function TermsPage() {
     <>
       <header className="sticky top-0 z-10 bg-card shadow-nav">
         <div className="mx-auto flex h-14 max-w-prose-doc items-center gap-3 px-4 md:px-10">
-          <Link
-            href="/"
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line-input bg-card px-3 text-sm font-semibold text-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            <ChevronLeft size={16} aria-hidden="true" />
-            돌아가기
-          </Link>
+          <BackButton />
           <p className="text-h3 font-extrabold tracking-[-0.03em] text-brand">Langrow</p>
         </div>
       </header>
