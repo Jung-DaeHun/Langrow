@@ -9,6 +9,7 @@ type Severity = "critical" | "major" | "minor" | "nit";
 type Finding = { file: string; line: number; severity: Severity; title: string; tldr: string; good: string; fix: string };
 type Review = { findings: Finding[]; strengths?: string[] } | null;
 type Vote = { verdict: "confirmed" | "refuted"; severity: Severity; reason: string } | null;
+type Tidy = { strengths: { text: string; sources: number[] }[]; groups: number[][] } | null;
 type AgentOptions = { label?: string; phase?: string; schema?: object };
 type WorkflowResult = {
   report: string;
@@ -50,11 +51,18 @@ function finding(overrides: Partial<Finding> = {}): Finding {
 
 // reviews: 차원별 리뷰 결과(빠진 차원은 지적 없음, null은 리뷰어 실패)
 // votes: "<차원>:<파일>:<줄>"별 검증자 3명의 표(null은 검증자 실패)
-async function run(args: unknown, reviews: Record<string, Review> = {}, votes: Record<string, Vote[]> = {}) {
+// tidy: 정리 에이전트의 결과(기본 null은 정리 에이전트 실패)
+async function run(
+  args: unknown,
+  reviews: Record<string, Review> = {},
+  votes: Record<string, Vote[]> = {},
+  tidy: Tidy = null,
+) {
   const calls: { prompt: string; options: AgentOptions }[] = [];
   const agent = async (prompt: string, options: AgentOptions = {}) => {
     calls.push({ prompt, options });
     const label = options.label ?? "";
+    if (label === "tidy") return tidy;
     if (label.startsWith("review:")) {
       const review = reviews[label.slice("review:".length)];
       if (review === null) return null;
@@ -293,7 +301,7 @@ describe("review-code-run workflow", () => {
         "대화 턴 저장을 고쳤다.",
         "",
         "잘된 점",
-        "- 발음 검사를 한 곳에 모았다",
+        "- 발음 검사를 한 곳에 모았다 [security]",
         "",
         "Critical · Major",
         "- 🔴 src/server/chat.ts:42 admin 조회에 user_id 없음 [security]",
@@ -363,6 +371,100 @@ describe("review-code-run workflow", () => {
       { "security:src/server/chat.ts:42": [confirm("critical"), null, null] },
     );
     expect(result.report).toContain("- 🔴 src/server/chat.ts:42 확정 1표 (검증 실패) [security]");
+  });
+});
+
+describe("정리 에이전트", () => {
+  const STRENGTH_REVIEWS: Record<string, Review> = {
+    security: { findings: [], strengths: ["새 RPC가 FOR UPDATE를 먼저 잡는다"] },
+    architecture: { findings: [], strengths: ["쓰기 RPC가 profiles를 먼저 잠근다"] },
+  };
+
+  it("잘된 점과 지적이 모두 1개 이하면 부르지 않는다", async () => {
+    const { calls } = await run(
+      ARGS,
+      { security: { findings: [finding()], strengths: ["하나뿐인 잘된 점"] } },
+      { "security:src/server/chat.ts:42": allConfirm("critical") },
+    );
+    expect(calls.some((call) => call.options.label === "tidy")).toBe(false);
+  });
+
+  it("글자가 같은 잘된 점은 정리 에이전트 없이 하나로 합치고 차원 태그를 모은다", async () => {
+    const same = "RPC가 profiles를 먼저 잠근다";
+    const { result, calls } = await run(ARGS, {
+      security: { findings: [], strengths: [same] },
+      architecture: { findings: [], strengths: [same] },
+    });
+    expect(calls.some((call) => call.options.label === "tidy")).toBe(false);
+    expect(result.report).toContain(`잘된 점\n- ${same} [security, architecture]\n\n`);
+  });
+
+  it("잘된 점이 2개 이상이면 Tidy 단계에서 부르고, 합친 잘된 점에 출처 차원 태그를 붙인다", async () => {
+    const { result, calls } = await run(ARGS, STRENGTH_REVIEWS, {}, {
+      strengths: [{ text: "쓰기 RPC가 모두 profiles FOR UPDATE를 먼저 잡는다", sources: [1, 2] }],
+      groups: [],
+    });
+    const tidy = calls.find((call) => call.options.label === "tidy");
+    expect(tidy?.options.phase).toBe("Tidy");
+    expect(tidy?.options.schema).toBeDefined();
+    expect(tidy?.prompt).toContain("S1 [security] 새 RPC가 FOR UPDATE를 먼저 잡는다");
+    expect(tidy?.prompt).toContain("S2 [architecture] 쓰기 RPC가 profiles를 먼저 잠근다");
+    expect(result.report).toContain(
+      "잘된 점\n- 쓰기 RPC가 모두 profiles FOR UPDATE를 먼저 잡는다 [security, architecture]\n\n",
+    );
+  });
+
+  it("정리 에이전트가 실패하면 차원마다 쓴 잘된 점을 그대로 낸다", async () => {
+    const { result } = await run(ARGS, STRENGTH_REVIEWS);
+    expect(result.report).toContain(
+      "잘된 점\n- 새 RPC가 FOR UPDATE를 먼저 잡는다 [security]\n- 쓰기 RPC가 profiles를 먼저 잠근다 [architecture]\n\n",
+    );
+  });
+
+  // 정렬 뒤 번호: F1 = 13줄 critical(architecture), F2 = 12줄 major(security)
+  const NEAR_REVIEWS: Record<string, Review> = {
+    security: { findings: [finding({ line: 12, severity: "major", title: "잠금 없이 profiles를 바꾼다" })] },
+    architecture: { findings: [finding({ line: 13, title: "RPC가 user_id를 안 건다" })] },
+  };
+  const NEAR_VOTES = {
+    "security:src/server/chat.ts:12": allConfirm("major"),
+    "architecture:src/server/chat.ts:13": allConfirm("critical"),
+  };
+
+  it("묶인 지적은 가장 심한 지적 하나로 합치고, 나머지는 합친 지적 줄로 남긴다", async () => {
+    const { result, calls } = await run(ARGS, NEAR_REVIEWS, NEAR_VOTES, { strengths: [], groups: [[2, 1]] });
+    const tidy = calls.find((call) => call.options.label === "tidy");
+    expect(tidy?.prompt).toContain("F1 src/server/chat.ts:13 [critical] RPC가 user_id를 안 건다");
+    expect(tidy?.prompt).toContain("F2 src/server/chat.ts:12 [major] 잠금 없이 profiles를 바꾼다");
+    expect(result.verdict).toBe("Blocked");
+    expect(result.report).toContain("🔴 1 · 🟠 0 · 🟡 0 · ⚪ 0");
+    expect(result.report).toContain(
+      [
+        "src/server/chat.ts:13 [architecture, security]",
+        "[🔴 Critical] RPC가 user_id를 안 건다",
+        "TL;DR: 남의 세션을 읽을 수 있다",
+        "Good: admin 조회는 항상 user_id를 걸고, 없으면 404",
+        "→ Fix: .eq('user_id', userId) 추가",
+        "합친 지적: src/server/chat.ts:12 [🟠] 잠금 없이 profiles를 바꾼다",
+      ].join("\n"),
+    );
+    expect(result.report).not.toContain("[🟠 Major]");
+  });
+
+  it("PR 인라인 코멘트에도 합친 지적 줄을 붙인다", async () => {
+    const hunks = "+++ b/src/server/chat.ts\n@@ -10,5 +10,5 @@";
+    const { result } = await run({ ...ARGS, hunks }, NEAR_REVIEWS, NEAR_VOTES, { strengths: [], groups: [[1, 2]] });
+    expect(result.review?.comments).toHaveLength(1);
+    expect(result.review?.comments[0].body).toContain("합친 지적: src/server/chat.ts:12 [🟠] 잠금 없이 profiles를 바꾼다");
+  });
+
+  it("없는 번호·겹친 번호는 버리고, 2개가 안 남은 묶음은 합치지 않는다", async () => {
+    const { result } = await run(ARGS, NEAR_REVIEWS, NEAR_VOTES, {
+      strengths: [],
+      groups: [[1, 9], [2, 2], [0, 1.5]],
+    });
+    expect(result.report).toContain("🔴 1 · 🟠 1 · 🟡 0 · ⚪ 0");
+    expect(result.report).not.toContain("합친 지적");
   });
 });
 

@@ -5,6 +5,7 @@ export const meta = {
   phases: [
     { title: 'Review', detail: '차원 4개 병렬 리뷰' },
     { title: 'Verify', detail: '지적마다 검증자 3명, 2/3 다수결' },
+    { title: 'Tidy', detail: '잘된 점 합치기, 같은 문제 지적 묶기' },
   ],
 }
 
@@ -93,6 +94,23 @@ const VOTE_SCHEMA = {
     reason: { type: 'string' },
   },
   required: ['verdict', 'severity', 'reason'],
+}
+
+const TIDY_SCHEMA = {
+  type: 'object',
+  properties: {
+    strengths: {
+      type: 'array',
+      maxItems: 3,
+      items: {
+        type: 'object',
+        properties: { text: { type: 'string' }, sources: { type: 'array', items: { type: 'integer' } } },
+        required: ['text', 'sources'],
+      },
+    },
+    groups: { type: 'array', items: { type: 'array', items: { type: 'integer' }, minItems: 2 } },
+  },
+  required: ['strengths', 'groups'],
 }
 
 function rank(severity) {
@@ -217,6 +235,52 @@ function compareFindings(a, b) {
   return rank(a.severity) - rank(b.severity) || byFile || a.line - b.line
 }
 
+// 차원마다 쓴 잘된 점. 글자가 같으면 하나로 합치고 차원 태그를 모은다
+function collectStrengths(results) {
+  const merged = new Map()
+  results.forEach((result, i) => {
+    for (const text of result?.strengths ?? []) {
+      const dimensions = merged.get(text) ?? []
+      if (!dimensions.includes(DIMENSIONS[i].key)) dimensions.push(DIMENSIONS[i].key)
+      merged.set(text, dimensions)
+    }
+  })
+  return [...merged].map(([text, dimensions]) => ({ text, dimensions }))
+}
+
+function tidyPrompt(strengths, findings) {
+  const list = (items, render) => (items.length ? items.map(render).join('\n') : '(없음)')
+  return [
+    '너는 코드 리뷰 결과를 정리한다. 차원 4개의 리뷰어가 따로 써서 같은 내용이 겹친다. 코드는 읽지 않고 아래 글만 보고 판단한다.',
+    `잘된 점:\n${list(strengths, (s, i) => `S${i + 1} [${s.dimensions.join(', ')}] ${s.text}`)}`,
+    `지적:\n${list(findings, (f, i) => `F${i + 1} ${f.file}:${f.line} [${f.severity}] ${f.title} — ${f.tldr}`)}`,
+    'strengths: 같은 코드나 같은 성질을 말하는 잘된 점을 하나로 합쳐 3개 이하로 쓴다. 3개가 넘으면 중요한 것을 남긴다. text는 한국어 한두 문장, sources는 합친 S 번호(숫자만)다.',
+    'groups: 원인이 같아 하나를 고치면 나머지도 풀리는 지적끼리 F 번호(숫자만)로 묶는다. 같은 파일이나 가까운 줄이라는 것만으로 묶지 않는다. 확실하지 않으면 묶지 않는다. 묶을 것이 없으면 빈 배열이다.',
+  ].join('\n\n')
+}
+
+// 합칠 게 없으면 부르지 않는다. 실패하면 null이고 조립은 정리 전 결과를 쓴다
+async function tidy(strengths, findings) {
+  if (strengths.length < 2 && findings.length < 2) return null
+  return agent(tidyPrompt(strengths, findings), { label: 'tidy', phase: 'Tidy', schema: TIDY_SCHEMA }).catch(() => null)
+}
+
+// 묶음마다 가장 심한 지적 하나를 남기고 나머지는 merged로 단다. 없는 번호·앞 묶음에 쓴 번호는 버린다
+function applyGroups(findings, groups) {
+  const used = new Set()
+  const merged = []
+  for (const group of groups) {
+    const members = [...new Set(group)].filter(
+      (n) => Number.isInteger(n) && n >= 1 && n <= findings.length && !used.has(n),
+    )
+    if (members.length < 2) continue
+    members.forEach((n) => used.add(n))
+    const [winner, ...rest] = members.map((n) => findings[n - 1]).sort(compareFindings)
+    merged.push({ ...winner, dimensions: [...new Set([winner, ...rest].flatMap((f) => f.dimensions))], merged: rest })
+  }
+  return [...findings.filter((_, i) => !used.has(i + 1)), ...merged].sort(compareFindings)
+}
+
 // 리뷰가 실패한 차원이 있으면 Approve를 내지 않는다
 function decideVerdict(findings, failed) {
   if (findings.some((f) => f.severity === 'critical')) return 'Blocked'
@@ -248,6 +312,10 @@ function fixLine(fix) {
   return `→ Fix:\n${fence}\n${fix}\n${fence}`
 }
 
+function mergedLines(f) {
+  return (f.merged ?? []).map((m) => `합친 지적: ${m.file}:${m.line} [${ICON[m.severity]}] ${m.title}`)
+}
+
 function renderInline(f) {
   return [
     `${f.file}:${f.line} [${f.dimensions.join(', ')}]`,
@@ -255,12 +323,19 @@ function renderInline(f) {
     `TL;DR: ${f.tldr}`,
     `Good: ${f.good}`,
     fixLine(f.fix),
+    ...mergedLines(f),
   ].join('\n')
 }
 
 // PR 인라인 코멘트. 위치는 코멘트가 달린 줄이 대신하므로 차원 태그를 제목 줄에 붙인다
 function renderComment(f) {
-  return [`${titleLine(f)} [${f.dimensions.join(', ')}]`, `TL;DR: ${f.tldr}`, `Good: ${f.good}`, fixLine(f.fix)].join('\n')
+  return [
+    `${titleLine(f)} [${f.dimensions.join(', ')}]`,
+    `TL;DR: ${f.tldr}`,
+    `Good: ${f.good}`,
+    fixLine(f.fix),
+    ...mergedLines(f),
+  ].join('\n')
 }
 
 // git diff -U0의 "+++ b/<파일>"과 "@@ -a,b +c,d @@" 줄에서 파일별 변경 후 줄 범위를 읽는다.
@@ -314,7 +389,9 @@ function renderSummary({ verdict, findings, failed, refutedCount, walkthrough, s
     walkthrough || '(없음)',
     '',
     '잘된 점',
-    ...(strengths.length ? strengths.map((s) => `- ${s}`) : ['- (없음)']),
+    ...(strengths.length
+      ? strengths.map((s) => `- ${s.text}${s.dimensions.length ? ` [${s.dimensions.join(', ')}]` : ''}`)
+      : ['- (없음)']),
     '',
     'Critical · Major',
     ...(serious.length
@@ -327,15 +404,23 @@ function renderSummary({ verdict, findings, failed, refutedCount, walkthrough, s
   return lines.join('\n')
 }
 
-function assemble(results, input) {
+async function assemble(results, input) {
   const failed = DIMENSIONS.filter((_, i) => !results[i]).map((d) => d.key)
   const judged = results.filter(Boolean).flatMap((r) => r.findings)
   const refutedCount = judged.filter((f) => f.status === 'refuted').length
   const kept = judged
     .filter((f) => f.status !== 'refuted')
     .map((f) => ({ ...f, unverified: f.status === 'unverified' }))
-  const findings = mergeDuplicates(kept).sort(compareFindings)
-  const strengths = [...new Set(results.filter(Boolean).flatMap((r) => r.strengths))]
+  const deduped = mergeDuplicates(kept).sort(compareFindings)
+  const collected = collectStrengths(results)
+  const tidied = await tidy(collected, deduped)
+  const findings = tidied ? applyGroups(deduped, tidied.groups) : deduped
+  const strengths = tidied
+    ? tidied.strengths.map((s) => ({
+        text: s.text,
+        dimensions: [...new Set(s.sources.flatMap((n) => collected[n - 1]?.dimensions ?? []))],
+      }))
+    : collected
   const verdict = decideVerdict(findings, failed)
   const summary = renderSummary({ verdict, findings, failed, refutedCount, walkthrough: input.walkthrough, strengths })
   const inline = findings.length ? findings.map(renderInline).join('\n\n') : '- 없음'

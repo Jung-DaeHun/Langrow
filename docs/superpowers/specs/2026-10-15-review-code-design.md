@@ -21,7 +21,7 @@
 |---|---|
 | `.claude/skills/review-code/SKILL.md` | 오케스트레이터 스킬. `/review-code`로 실행한다. 메인 세션이 범위·PR·가드레일 문서를 모으고 Workflow를 부른 뒤 결과를 게시한다. 비용이 커서 `disable-model-invocation: true`로 Claude가 스스로 부르지 않게 한다. |
 | `.claude/workflows/review-code-run.js` | Workflow 스크립트. 리뷰 → 검증 → 조립. 스킬과 같은 이름이면 둘 다 `/review-code`가 되고 어느 쪽이 실행되는지 문서에 없어서 `-run`을 붙인다. |
-| `scripts/review-code-run.test.ts` | 가짜 `agent`·`parallel`·`pipeline`으로 workflow 스크립트를 돌려 조립 로직(다수결·중앙값·중복·판정·출력·hunks)을 확인하는 Vitest 테스트 |
+| `scripts/review-code-run.test.ts` | 가짜 `agent`·`parallel`·`pipeline`으로 workflow 스크립트를 돌려 조립 로직(다수결·중앙값·중복·정리 적용·판정·출력·hunks)을 확인하는 Vitest 테스트 |
 
 - TDD guard는 이미 `*/.claude/*`, `*/workflows/*`를 예외로 둔다. hook은 바꾸지 않는다.
 - `.claude/agents/` 정의 파일은 만들지 않는다. 리뷰어와 검증자는 workflow 기본 에이전트이고, 읽기 전용은 프롬프트로 지시한다(코드를 고칠 도구 자체는 남는다).
@@ -49,7 +49,8 @@ review-code-run.js
  pipeline(DIMENSIONS, review, verify)    # 차원 하나의 리뷰가 끝나면 다른 차원을 기다리지 않고 바로 검증
    review  차원 프롬프트 + 공통 규칙 → schema FINDINGS
    verify  지적마다 검증자 3명 병렬 → schema VOTE → 2/3 다수결
- 조립 (에이전트 없이 코드로)  중복 합치기 → 판정·집계 → { report, review, verdict }
+ 정리 (에이전트 1개)  잘된 점 합치기, 같은 문제 지적 묶기 → schema TIDY
+ 조립 (코드)  중복 합치기·정리 결과 적용 → 판정·집계 → { report, review, verdict }
 ```
 
 args 없이 `/review-code-run`을 바로 실행하면 에이전트를 띄우지 않고 "/review-code로 실행하세요"를 반환한다.
@@ -98,7 +99,17 @@ user_id 규칙은 CLAUDE.md에서 아키텍처 규칙으로 분류돼 있지만 
 - `confirmed` 2표 이상이면 남기고, `refuted` 2표 이상이면 버린다. 검증자가 실패(null)해서 어느 쪽도 2표가 안 되면 남기고 "(검증 실패)"를 붙인다. 판정에 영향을 줄 수 있는 지적이 조용히 사라지지 않게 하기 위해서다.
 - 최종 심각도는 `confirmed`를 낸 검증자들이 매긴 심각도의 중앙값이다. 짝수면 낮은 쪽을 쓴다. `confirmed`가 하나도 없이 검증 실패로 남은 지적은 리뷰어가 매긴 심각도를 쓴다.
 - 검증 실패로 남은 지적도 판정과 집계에 센다.
-- 에이전트 수는 4 + 3 × 지적 수다(지적 10개면 34개, 동시 실행 최대 min(16, CPU 수 − 2)개).
+- 에이전트 수는 4 + 3 × 지적 수에 정리 에이전트 1개다(지적 10개면 35개, 동시 실행 최대 min(16, CPU 수 − 2)개).
+
+## 정리 (에이전트 1개)
+
+차원마다 따로 쓰다 보니 같은 코드를 칭찬한 잘된 점이 말만 바꿔 여러 번 나오고(2026-10-21 phase 12 리뷰에서 FOR UPDATE 잠금·body 검증이 두 번씩), 가까운 줄의 같은 문제가 지적 2개로 나와 Fix가 서로 달랐다(2026-10-15 시험의 extend_trial 12·13행). 코드로는 글자가 같은 것만 합칠 수 있어서, 검증이 모두 끝난 뒤 에이전트 1개가 글만 보고(코드는 읽지 않는다) 둘을 정리한다.
+
+- 입력: 잘된 점 `S1 [차원] 문장`과 검증에서 남은 지적 `F1 파일:줄 [심각도] 제목 — TL;DR`(같은 파일·줄을 합친 뒤, 정렬 순서).
+- `strengths`: 같은 코드나 성질을 말하는 잘된 점을 합쳐 3개 이하. `sources`(S 번호)의 차원을 태그로 단다.
+- `groups`: 원인이 같아 하나를 고치면 나머지도 풀리는 지적의 F 번호 묶음. 같은 파일이나 가까운 줄이라는 것만으로 묶지 않고, 확실하지 않으면 묶지 않는다.
+- 잘된 점과 지적이 모두 1개 이하면 부르지 않는다. 실패하면 정리 전 결과(글자가 같은 잘된 점만 합친 것)를 쓴다.
+- 줄 범위로 자동으로 합치는 안은 가까운 줄의 다른 문제를 묻을 수 있어 택하지 않았다.
 
 ## 스키마
 
@@ -109,13 +120,18 @@ FINDINGS = {
   strengths: string[]          // 최대 2개
 }
 VOTE = { verdict: "confirmed"|"refuted", severity, reason }
+TIDY = {
+  strengths: [{ text, sources: number[] }],   // 최대 3개
+  groups: number[][]                          // 묶음마다 F 번호 2개 이상
+}
 ```
 
 `good`은 이 코드가 어떻게 동작해야 하는지(규칙·기대 동작)를 적고, `fix`는 그렇게 만드는 코드나 수정 방법이다.
 
 ## 조립 (코드)
 
-- **중복**: 같은 `file`·`line`의 지적은 하나로 합친다. 심각도가 가장 높은 지적의 제목과 본문을 쓰고, 차원 태그를 모은다(예: `[security, architecture]`).
+- **중복**: 같은 `file`·`line`의 지적은 하나로 합친다. 심각도가 가장 높은 지적의 제목과 본문을 쓰고, 차원 태그를 모은다(예: `[security, architecture]`). 글자가 같은 잘된 점도 하나로 합치고 차원 태그를 모은다.
+- **정리 결과 적용**: 묶음마다 가장 심한 지적(정렬 순서의 첫째)의 내용을 쓰고, 차원 태그를 모으고, 나머지는 `합친 지적` 줄로 남긴다. 가장 심한 지적이 남으므로 판정은 합치기 전과 같다. 없는 번호와 앞 묶음에 쓴 번호는 버리고, 2개가 안 남은 묶음은 합치지 않는다.
 - **판정**
   - Critical이 하나라도 있으면 Blocked
   - Major가 있으면 Changes Requested
@@ -142,7 +158,7 @@ Walkthrough
 대화 종료 피드백에 한글 발음 규칙을 넣고, 단어 데이터 표기를 맞췄다.
 
 잘된 점
-- 발음 검사를 cleanPron 하나로 모아 화면·프롬프트가 같은 규칙을 쓴다
+- 발음 검사를 cleanPron 하나로 모아 화면·프롬프트가 같은 규칙을 쓴다 [correctness, consistency]
 
 Critical · Major
 - 🔴 src/server/chat.ts:42 admin 조회에 user_id 없음 [security]
@@ -157,9 +173,10 @@ src/server/chat.ts:42 [security]
 TL;DR: 남의 세션을 읽을 수 있다
 Good: admin 조회는 항상 user_id를 걸고, 없으면 404
 → Fix: `.eq('user_id', userId)` 추가
+합친 지적: src/server/chat.ts:43 [🟠] 세션 조회가 404 대신 500
 ```
 
-인라인 코멘트는 위치 줄 아래 4줄(`[심각도] 제목` / `TL;DR` / `Good` / `→ Fix`)이다. Fix가 여러 줄 코드면 짧은 코드 블록으로 쓴다. Fix 안에 백틱 펜스가 있으면 안쪽 가장 긴 백틱 연속보다 한 칸 긴 펜스(최소 3)로 감싸 뒤의 지적이 코드 블록에 삼켜지지 않게 한다. 검증 실패한 지적은 인라인 제목과 요약의 Critical · Major 목록 모두 제목 뒤에 "(검증 실패)"를 붙인다.
+인라인 코멘트는 위치 줄 아래 4줄(`[심각도] 제목` / `TL;DR` / `Good` / `→ Fix`)이다. 정리에서 묶인 지적이 있으면 그 아래에 `합친 지적: 파일:줄 [심각도 아이콘] 제목`을 하나씩 붙인다(PR 인라인 코멘트도 같다). Fix가 여러 줄 코드면 짧은 코드 블록으로 쓴다. Fix 안에 백틱 펜스가 있으면 안쪽 가장 긴 백틱 연속보다 한 칸 긴 펜스(최소 3)로 감싸 뒤의 지적이 코드 블록에 삼켜지지 않게 한다. 검증 실패한 지적은 인라인 제목과 요약의 Critical · Major 목록 모두 제목 뒤에 "(검증 실패)"를 붙인다.
 
 ## 게시
 
