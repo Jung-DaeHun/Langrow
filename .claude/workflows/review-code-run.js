@@ -265,7 +265,7 @@ async function tidy(strengths, findings) {
   return agent(tidyPrompt(strengths, findings), { label: 'tidy', phase: 'Tidy', schema: TIDY_SCHEMA }).catch(() => null)
 }
 
-// 묶음마다 가장 심한 지적 하나를 남기고 나머지는 merged로 단다. 없는 번호·앞 묶음에 쓴 번호는 버린다
+// 묶음마다 가장 심한 지적(같으면 검증된 지적) 하나를 남기고 나머지는 merged로 단다. 없는 번호·앞 묶음에 쓴 번호는 버린다
 function applyGroups(findings, groups) {
   const used = new Set()
   const merged = []
@@ -275,7 +275,12 @@ function applyGroups(findings, groups) {
     )
     if (members.length < 2) continue
     members.forEach((n) => used.add(n))
-    const [winner, ...rest] = members.map((n) => findings[n - 1]).sort(compareFindings)
+    const [winner, ...rest] = members
+      .map((n) => findings[n - 1])
+      .sort(
+        (a, b) =>
+          rank(a.severity) - rank(b.severity) || Number(a.unverified) - Number(b.unverified) || compareFindings(a, b),
+      )
     merged.push({ ...winner, dimensions: [...new Set([winner, ...rest].flatMap((f) => f.dimensions))], merged: rest })
   }
   return [...findings.filter((_, i) => !used.has(i + 1)), ...merged].sort(compareFindings)
@@ -313,7 +318,7 @@ function fixLine(fix) {
 }
 
 function mergedLines(f) {
-  return (f.merged ?? []).map((m) => `합친 지적: ${m.file}:${m.line} [${ICON[m.severity]}] ${m.title}`)
+  return (f.merged ?? []).map((m) => `합친 지적: ${m.file}:${m.line} [${ICON[m.severity]}] ${m.title}${unverifiedMark(m)}`)
 }
 
 function renderInline(f) {
@@ -376,7 +381,7 @@ function buildReview(findings, summary, hunks) {
 
 function renderSummary({ verdict, findings, failed, refutedCount, walkthrough, strengths }) {
   const count = (severity) => findings.filter((f) => f.severity === severity).length
-  const unverified = findings.filter((f) => f.unverified).length
+  const unverified = findings.flatMap((f) => [f, ...(f.merged ?? [])]).filter((f) => f.unverified).length
   const serious = findings.filter((f) => rank(f.severity) <= rank('major'))
   const lines = [
     `## 리뷰 요약 — ${verdict}`,

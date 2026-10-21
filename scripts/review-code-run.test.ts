@@ -458,6 +458,34 @@ describe("정리 에이전트", () => {
     expect(result.review?.comments[0].body).toContain("합친 지적: src/server/chat.ts:12 [🟠] 잠금 없이 profiles를 바꾼다");
   });
 
+  it("검증 실패한 지적이 묶여 들어가도 합친 지적 줄과 검증 실패 수에 남는다", async () => {
+    const { result } = await run(
+      ARGS,
+      NEAR_REVIEWS,
+      { ...NEAR_VOTES, "security:src/server/chat.ts:12": [confirm("major"), null, null] },
+      { strengths: [], groups: [[1, 2]] },
+    );
+    expect(result.report).toContain("합친 지적: src/server/chat.ts:12 [🟠] 잠금 없이 profiles를 바꾼다 (검증 실패)");
+    expect(result.report).toContain("검증 실패 1개");
+  });
+
+  it("심각도가 같으면 확정된 지적이 대표로 남는다", async () => {
+    const { result } = await run(
+      ARGS,
+      {
+        security: { findings: [finding({ line: 12, title: "검증 실패한 지적" })] },
+        architecture: { findings: [finding({ line: 13, title: "확정된 지적" })] },
+      },
+      {
+        "security:src/server/chat.ts:12": [confirm("critical"), null, null],
+        "architecture:src/server/chat.ts:13": allConfirm("critical"),
+      },
+      { strengths: [], groups: [[1, 2]] },
+    );
+    expect(result.report).toContain("[🔴 Critical] 확정된 지적\n");
+    expect(result.report).toContain("합친 지적: src/server/chat.ts:12 [🔴] 검증 실패한 지적 (검증 실패)");
+  });
+
   it("없는 번호·겹친 번호는 버리고, 2개가 안 남은 묶음은 합치지 않는다", async () => {
     const { result } = await run(ARGS, NEAR_REVIEWS, NEAR_VOTES, {
       strengths: [],
