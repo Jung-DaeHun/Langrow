@@ -113,12 +113,12 @@ public/audio/female/      # words/{id}.mp3, words/{id}-ex.mp3, kana/{코드포�
 - RLS는 모든 public 테이블에 켜고 "자기 행 읽기" 정책만 둔다(`words`는 로그인 사용자 전체 읽기, `word_explanations`는 읽기 정책도 없이 RPC로만 읽기). 쓰기 정책은 두지 않는다.
 - RPC는 `SECURITY INVOKER`로 만들고, `EXECUTE`를 `PUBLIC`·`anon`·`authenticated`에서 회수한 뒤 `service_role`에만 준다(기본 권한도 같게).
 - CSRF는 SameSite=Lax 쿠키 + JSON Content-Type만 허용으로 막는다. 로그에는 에러 코드·user id·경로·응답 시간만 남기고 대화 내용·이메일은 남기지 않는다. Claude API 오류는 상태·에러 종류·요청 ID·에러 문장(300자)도 남긴다(ADR-017).
-- 모든 body는 zod로 검증한다: 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 언어·이벤트 이름은 enum.
+- 모든 body는 zod로 검증한다: 대화 300자, 답안·설명 요청 보기 50자, 테스트 20개, 단어 회차 10개 이하, 뜯어보기 턴 번호는 1~20 정수, 언어·이벤트 이름·뜯어보기 대상은 enum.
 
 ## Claude 연동
 - `client.messages.create()` + zod 스키마(`output_config.format`)로 구조화 출력을 받는다. `stop_reason`을 먼저 보고 직접 파싱한다(`messages.parse()`는 잘린 응답도 파싱 실패로 throw한다). refusal·`max_tokens` 도달·파싱 실패는 실패로 처리하고, env 설정 오류는 API를 부르지 않고 `config`로 실패한다.
 - SDK 자동 재시도는 끄고(`maxRetries: 0`) 직접 1번만 재시도한다. 호출당 20초, 전체 약 40초, 라우트 `maxDuration = 60`.
-- `max_tokens` 4096(thinking 포함), `output_config.effort`는 `low`. 프롬프트 빌더는 순수 함수(`services/claude/prompts.ts`). 스트리밍은 쓰지 않는다. 대화 턴만 요청 단위 자동 프롬프트 캐싱(5분)을 건다(ADR-026). 문장 뜯어보기는 턴과 따로, 처음 열 때 그 문장만 만든다(ADR-027).
+- `max_tokens` 4096(thinking 포함), `output_config.effort`는 `low`. 프롬프트 빌더는 순수 함수(`services/claude/prompts.ts`). 스트리밍은 쓰지 않는다. 대화 턴만 요청 단위 자동 프롬프트 캐싱(5분)을 건다(ADR-026). 문장 뜯어보기는 턴과 따로, 처음 열 때 그 문장만 만들고 언어마다 같은 시스템 블록에만 캐시 표시(5분)를 단다(ADR-027).
 
 ## 환경
 - 로컬: Supabase CLI(Docker) + `npm run dev`. 운영: Supabase 클라우드(서울) 1개 + Vercel Production(icn1, `main`). Vercel Preview는 끈다(prod DB 오염 방지).
